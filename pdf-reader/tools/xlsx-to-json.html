@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Excel → JSON cho PDF Dual Reader</title>
+<style>
+  :root{--paper:#EDE7D6;--paper-raised:#F5F1E4;--ink:#211C15;--ink-soft:#59524A;--line:#D8D0BC;--shuiro:#B7410E;--aizome:#2C4A6E;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,"Segoe UI",sans-serif;padding:20px;max-width:820px;margin:0 auto;}
+  h1{font-size:18px;}
+  .card{background:var(--paper-raised);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px;}
+  h2{font-size:14px;margin:0 0 8px;color:var(--shuiro);}
+  p,li{font-size:13px;line-height:1.7;color:var(--ink-soft);}
+  code{background:#fff;border:1px solid var(--line);border-radius:3px;padding:1px 4px;}
+  input[type=text]{width:100%;font-size:13px;border:1px solid var(--line);border-radius:4px;padding:8px;margin:4px 0 10px;background:#fff;color:var(--ink);}
+  input[type=file]{font-size:13px;}
+  button{font-family:inherit;font-size:13px;border:none;border-radius:4px;padding:9px 14px;cursor:pointer;margin-right:8px;margin-top:6px;}
+  .btn-primary{background:var(--shuiro);color:#fff;}
+  .btn-secondary{background:var(--aizome);color:#fff;}
+  #log{margin-top:12px;max-height:34vh;overflow:auto;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:4px;}
+  .line{padding:5px 8px;border-bottom:1px solid var(--line);}
+  .line:last-child{border-bottom:none;}
+  .ok{color:#2E7D32;} .err{color:var(--shuiro);} .warn{color:#8a6d00;}
+  .dl-list a{display:block;font-size:13px;margin:4px 0;color:var(--aizome);}
+  pre{background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px;font-size:11.5px;overflow:auto;}
+</style>
+</head>
+<body>
+
+<h1>Công cụ chuyển Excel → JSON cho PDF Dual Reader</h1>
+
+<div class="card">
+  <h2>Định dạng file Excel cần chuẩn bị</h2>
+  <ul>
+    <li>Mỗi <b>sách</b> = 1 file <code>.xlsx</code> (ví dụ <code>book1.xlsx</code>).</li>
+    <li>Mỗi <b>chapter</b> = 1 <b>sheet</b>, tên sheet chính là tên chapter dùng trong app (ví dụ <code>chp1</code>, <code>chp2</code>…).</li>
+    <li>Mỗi sheet có dòng tiêu đề (header) và các cột sau (không phân biệt hoa/thường):</li>
+  </ul>
+  <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+    <tr style="background:#fff;">
+      <th style="text-align:left;padding:6px;border:1px solid var(--line);">Cột</th>
+      <th style="text-align:left;padding:6px;border:1px solid var(--line);">Nội dung</th>
+    </tr>
+    <tr><td style="padding:6px;border:1px solid var(--line);"><code>page</code></td>
+      <td style="padding:6px;border:1px solid var(--line);">Số trang (số nguyên), khớp với trang PDF tương ứng.</td></tr>
+    <tr><td style="padding:6px;border:1px solid var(--line);"><code>translation</code></td>
+      <td style="padding:6px;border:1px solid var(--line);">Bản dịch tiếng Việt nguyên trang, theo đúng ngữ cảnh.</td></tr>
+    <tr><td style="padding:6px;border:1px solid var(--line);"><code>grammar</code></td>
+      <td style="padding:6px;border:1px solid var(--line);">Các điểm ngữ pháp trong trang. Mỗi dòng (Alt+Enter trong Excel) là 1 mục,
+        định dạng: <code>cụm từ :: giải thích</code>. Ví dụ:<br>
+        <code>the girl who loved me :: mệnh đề quan hệ bổ nghĩa cho "girl"</code></td></tr>
+    <tr><td style="padding:6px;border:1px solid var(--line);"><code>analysis</code></td>
+      <td style="padding:6px;border:1px solid var(--line);">Từ vựng khó/hiếm/chuyên ngành / slang / idiom / collocation / cụm từ dài đáng chú ý. Mỗi dòng 1 mục,
+        định dạng: <code>loại: cụm từ :: giải thích</code>, loại là 1 trong
+        <code>vocab</code>, <code>idiom</code>, <code>slang</code>, <code>collocation</code>, <code>phrase</code>
+        (<code>vocab</code> dùng cho từ đơn lẻ khó/hiếm/chuyên ngành, không phải cụm từ). Ví dụ:<br>
+        <code>idiom: kick the bucket :: nghĩa là chết (informal)</code><br>
+        <code>vocab: mitigate :: làm giảm nhẹ, giảm bớt mức độ nghiêm trọng</code></td></tr>
+  </table>
+  <p>Trong Excel, để xuống dòng trong 1 ô: bấm <code>Alt+Enter</code> (Windows) rồi gõ dòng tiếp theo.</p>
+</div>
+
+<div class="card">
+  <h2>Bước 1 — Chọn file Excel</h2>
+  <input type="file" id="fileInput" accept=".xlsx,.xls">
+  <p>Tên sách (mặc định lấy theo tên file, ví dụ <code>book1.xlsx</code> → <code>book1</code>):</p>
+  <input type="text" id="bookName" placeholder="book1">
+  <button class="btn-primary" id="btnConvert">Chuyển sang JSON</button>
+</div>
+
+<div class="card">
+  <h2>Bước 2 — Lưu kết quả</h2>
+  <p>
+    Nếu dùng Chrome/Edge trên máy tính: bấm nút dưới đây để chọn 1 thư mục — công cụ sẽ tự tạo
+    thư mục con theo tên sách và ghi từng file <code>chp1.json</code>, <code>chp2.json</code>… vào đó
+    (ví dụ chọn <code>create_data</code> → tạo ra <code>create_data/book1/chp1.json</code>…).
+    Sau đó mở app, bấm nút "⇪ Nhập & đẩy dữ liệu lên GitHub" và chọn đúng thư mục sách này.
+  </p>
+  <button class="btn-secondary" id="btnSaveFolder" disabled>Lưu vào thư mục trên máy…</button>
+  <p>Hoặc nếu trình duyệt không hỗ trợ, tải từng file JSON riêng lẻ:</p>
+  <div class="dl-list" id="dlList"></div>
+</div>
+
+<div class="card">
+  <h2>Nhật ký</h2>
+  <div id="log"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+let convertedFiles = []; // [{name, book, chapter, json, text}]
+
+function log(msg, cls) {
+  const d = document.createElement("div");
+  d.className = "line " + (cls || "");
+  d.textContent = msg;
+  $("#log").appendChild(d);
+  $("#log").scrollTop = $("#log").scrollHeight;
+}
+
+function headerKey(h) {
+  return String(h || "").trim().toLowerCase();
+}
+
+// Parse cell "grammar": mỗi dòng "cụm từ :: giải thích" -> {phrase, explain}
+function parseGrammarCell(text) {
+  if (!text) return [];
+  return String(text).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => {
+    const idx = line.indexOf("::");
+    if (idx === -1) return { phrase: line.trim(), explain: "" };
+    return { phrase: line.slice(0, idx).trim(), explain: line.slice(idx + 2).trim() };
+  });
+}
+
+// Parse cell "analysis": mỗi dòng "loai: cụm từ :: giải thích" -> {type, phrase, explain}
+function parseAnalysisCell(text) {
+  if (!text) return [];
+  return String(text).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => {
+    let type = "phrase", rest = line;
+    const typeMatch = line.match(/^(vocab|idiom|slang|collocation|phrase|grammar)\s*:\s*(.*)$/i);
+    if (typeMatch) { type = typeMatch[1].toLowerCase(); rest = typeMatch[2]; }
+    const idx = rest.indexOf("::");
+    if (idx === -1) return { type, phrase: rest.trim(), explain: "" };
+    return { type, phrase: rest.slice(0, idx).trim(), explain: rest.slice(idx + 2).trim() };
+  });
+}
+
+function sheetToChapterJson(sheet, book, chapter) {
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  const pages = rows.map((row) => {
+    const norm = {};
+    Object.keys(row).forEach((k) => { norm[headerKey(k)] = row[k]; });
+    const pageNum = Number(norm.page);
+    return {
+      page: Number.isFinite(pageNum) ? pageNum : norm.page,
+      translation: String(norm.translation || "").trim(),
+      grammar: parseGrammarCell(norm.grammar),
+      analysis: parseAnalysisCell(norm.analysis),
+    };
+  }).filter((p) => p.page !== "" && p.page !== undefined);
+  pages.sort((a, b) => (Number(a.page) || 0) - (Number(b.page) || 0));
+  return { book, chapter, pages };
+}
+
+$("#fileInput").addEventListener("change", () => {
+  const f = $("#fileInput").files[0];
+  if (f && !$("#bookName").value.trim()) {
+    $("#bookName").value = f.name.replace(/\.(xlsx|xls)$/i, "");
+  }
+});
+
+$("#btnConvert").addEventListener("click", async () => {
+  const file = $("#fileInput").files[0];
+  if (!file) { log("Chưa chọn file Excel.", "err"); return; }
+  const book = ($("#bookName").value.trim() || file.name.replace(/\.(xlsx|xls)$/i, "")).trim();
+  $("#log").innerHTML = "";
+  $("#dlList").innerHTML = "";
+  convertedFiles = [];
+
+  try {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    if (!wb.SheetNames.length) { log("File Excel không có sheet nào.", "err"); return; }
+
+    wb.SheetNames.forEach((sheetName) => {
+      const chapter = sheetName.trim();
+      const chapterJson = sheetToChapterJson(wb.Sheets[sheetName], book, chapter);
+      if (!chapterJson.pages.length) {
+        log(`⚠ Sheet "${sheetName}": không có dòng dữ liệu hợp lệ (thiếu cột "page"?), bỏ qua.`, "warn");
+        return;
+      }
+      const text = JSON.stringify(chapterJson, null, 2);
+      convertedFiles.push({ name: `${chapter}.json`, book, chapter, text });
+      log(`✓ Sheet "${sheetName}" → ${chapter}.json (${chapterJson.pages.length} trang)`, "ok");
+    });
+
+    if (!convertedFiles.length) { log("Không tạo được file JSON nào.", "err"); return; }
+
+    $("#btnSaveFolder").disabled = !("showDirectoryPicker" in window);
+    convertedFiles.forEach((f) => {
+      const blob = new Blob([f.text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = f.name; a.textContent = `Tải ${f.name}`;
+      $("#dlList").appendChild(a);
+    });
+    log(`Xong. Đã tạo ${convertedFiles.length} file JSON cho sách "${book}".`, "ok");
+  } catch (e) {
+    log(`Lỗi đọc/chuyển Excel: ${e.message}`, "err");
+  }
+});
+
+$("#btnSaveFolder").addEventListener("click", async () => {
+  if (!convertedFiles.length) return;
+  try {
+    const rootHandle = await window.showDirectoryPicker();
+    const book = convertedFiles[0].book;
+    const bookHandle = await rootHandle.getDirectoryHandle(book, { create: true });
+    for (const f of convertedFiles) {
+      const fileHandle = await bookHandle.getFileHandle(f.name, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(f.text);
+      await writable.close();
+      log(`✓ Đã lưu ${book}/${f.name} vào thư mục đã chọn`, "ok");
+    }
+    log(`Xong. Mở app "⇪ Nhập & đẩy dữ liệu lên GitHub" và chọn thư mục "${book}" vừa lưu để đẩy lên GitHub.`, "ok");
+  } catch (e) {
+    if (e.name !== "AbortError") log(`Lỗi lưu vào thư mục: ${e.message}`, "err");
+  }
+});
+</script>
+</body>
+</html>

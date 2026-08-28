@@ -1,0 +1,1598 @@
+{
+  "book": "book1",
+  "chapter": "chp1",
+  "pages": [
+    {
+      "page": 1,
+      "translation": "Chương 1: Từ số không đến số một\r\n\r\nMỤC LỤC\r\n1.1 Kế hoạch tổng quan\r\n1.2 Nghệ thuật quản lý độ phức tạp\r\n1.3 Trừu tượng hóa kỹ thuật số\r\n1.4 Hệ thống số\r\n1.5 Cổng logic\r\n1.6 Bên dưới sự trừu tượng hóa kỹ thuật số\r\n1.7 Tranzito CMOS*\r\n1.8 Mức tiêu thụ điện năng*\r\n1.9 Tóm tắt và định hướng tiếp theo\r\nBài tập\r\nCâu hỏi phỏng vấn\r\n\r\n[Sơ đồ các tầng trừu tượng hóa]:\r\n- Phần mềm ứng dụng (Application Software)\r\n- Hệ điều hành (Operating Systems)\r\n- Kiến trúc (Architecture)\r\n- Kiến trúc vi mô (Micro-architecture)\r\n- Logic\r\n- Mạch số (Digital Circuits)\r\n- Mạch tương tự (Analog Circuits)\r\n- Linh kiện (Devices)\r\n- Vật lý (Physics)\r\n\r\n1.1 KẾ HOẠCH TỔNG QUAN\r\nVi xử lý đã cách mạng hóa thế giới của chúng ta trong ba thập kỷ qua. Một chiếc máy tính xách tay ngày nay có năng lực vượt xa một máy tính mainframe to bằng cả phòng họp của ngày xưa. Một chiếc ô tô hạng sang chứa khoảng 100 vi xử lý. Những tiến bộ trong công nghệ vi xử lý đã giúp điện thoại di động và Internet trở thành hiện thực, cải thiện đáng kể ngành y tế và làm thay đổi cách thức chiến tranh được tiến hành. Doanh số ngành bán dẫn toàn cầu đã tăng từ 21 tỷ USD năm 1985 lên 400 tỷ USD vào năm 2020, và vi xử lý chiếm một phân khúc quan trọng trong doanh số này. Chúng tôi tin rằng vi xử lý không chỉ quan trọng về mặt kỹ thuật, kinh tế và xã hội, mà còn là một phát minh kỳ diệu đầy cuốn hút của con người. Khi đọc xong cuốn sách này, bạn sẽ biết cách tự thiết kế và chế tạo một vi xử lý cho riêng mình. Những kỹ năng bạn học được trong suốt quá trình này sẽ chuẩn bị nền tảng để bạn thiết kế nhiều hệ thống số khác.\r\n\r\nChúng tôi giả định rằng bạn đã có hiểu biết cơ bản về điện, một chút kinh nghiệm lập trình trước đó, và sự hứng thú chân thành muốn tìm hiểu những gì diễn ra bên trong cơ cấu hoạt động của một chiếc máy tính. Cuốn sách này tập trung vào thiết kế các hệ thống số, vốn hoạt động dựa trên các bit 0 và 1. Chúng ta bắt đầu với các cổng logic số tiếp nhận tín hiệu đầu vào là 0 và 1, rồi cho ra đầu ra cũng là 0 và 1. Sau đó, chúng ta sẽ khám phá cách kết hợp các cổng logic thành các khối chức năng phức tạp hơn, chẳng hạn như bộ cộng và bộ nhớ. Tiếp theo, chúng ta chuyển hướng sang lập trình bằng hợp ngữ (assembly language), thứ ngôn ngữ tự nhiên của vi xử lý. Cuối cùng, chúng ta ghép các cổng logic lại với nhau để xây dựng một vi xử lý hoàn chỉnh có khả năng chạy các chương trình hợp ngữ này.\r\n\r\nMột ưu điểm lớn của các hệ thống số là các khối cấu tạo nên chúng rất đơn giản: chỉ gồm các số 0 và 1. Chúng không đòi hỏi các phép toán phức tạp hay kiến thức chuyên sâu về vật lý. Thay vào đó, thách thức của nhà thiết kế là kết hợp các khối đơn giản này thành các hệ thống phức tạp. Một vi xử lý có thể là hệ thống đầu tiên bạn chế tạo mà nó quá phức tạp để có thể gói gọn trong...",
+      "grammar": [
+        {
+          "phrase": "far more capability than a room-sized mainframe of yesteryear",
+          "explain": "cấu trúc so sánh hơn nâng cao với \"far\" đứng trước \"more\" để nhấn mạnh sự chênh lệch vượt trội giữa hai đối tượng"
+        },
+        {
+          "phrase": "By the time you finish reading this book, you will know how to design",
+          "explain": "cấu trúc mệnh đề trạng ngữ chỉ thời gian \"By the time + Hiện tại đơn, Tương lai đơn\" diễn tả hành động sẽ hoàn thành trước/khi một hành động khác xảy ra"
+        },
+        {
+          "phrase": "The skills you learn along the way will prepare you to design",
+          "explain": "mệnh đề quan hệ rút gọn (lược bỏ đại từ quan hệ \"that/which\") bổ nghĩa cho danh từ \"The skills\""
+        },
+        {
+          "phrase": "digital systems, which operate on 1's and 0's",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) bổ sung thông tin cho \"digital systems\""
+        },
+        {
+          "phrase": "logic gates that accept 1's and 0's as inputs and produce 1's and 0's as outputs",
+          "explain": "mệnh đề quan hệ xác định dùng \"that\" làm chủ ngữ bổ nghĩa cho \"logic gates\""
+        },
+        {
+          "phrase": "the first system that you build that is too complex to fit in your...",
+          "explain": "mệnh đề quan hệ lồng ghép kết hợp với cấu trúc \"too + adj + to V\" (quá... đến mức không thể...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": "under the hood",
+          "explain": "nghĩa là bên trong cơ cấu hoạt động của một hệ thống hoặc thiết bị (nhất là máy tính, động cơ)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "shift gears",
+          "explain": "chuyển hướng, thay đổi phương pháp, chủ đề hoặc nhịp độ làm việc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "of yesteryear",
+          "explain": "thuộc về ngày xửa ngày xưa, thời xa xưa"
+        },
+        {
+          "type": "phrase",
+          "phrase": "along the way",
+          "explain": "trong suốt quá trình tiến hành hoặc phát triển"
+        },
+        {
+          "type": "collocation",
+          "phrase": "digital system",
+          "explain": "hệ thống kỹ thuật số"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic gate",
+          "explain": "cổng logic"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assembly language",
+          "explain": "hợp ngữ (ngôn ngữ lập trình bậc thấp trực tiếp giao tiếp với phần cứng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "native tongue",
+          "explain": "ngôn ngữ tự nhiên gốc, tiếng mẹ đẻ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "building block",
+          "explain": "thành tố cơ bản, khối cấu trúc cơ bản"
+        },
+        {
+          "type": "collocation",
+          "phrase": "power consumption",
+          "explain": "mức tiêu thụ điện năng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "micro-architecture",
+          "explain": "kiến trúc vi mô (cách triển khai cụ thể của một kiến trúc tập lệnh)"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "translation": "TRANG 2 - CHƯƠNG MỘT: Từ Số Không Đến Số Một\r\n\r\n[tiếp tục đoạn trước]... ngay lập tức. Một trong những chủ đề chính xuyên suốt cuốn sách này là cách quản lý độ phức tạp.\r\n\r\n1.2 NGHỆ THUẬT QUẢN LÝ ĐỘ PHỨC TẠP\r\nMột trong những đặc trưng phân biệt một kỹ sư hay một nhà khoa học máy tính với một người bình thường là phương pháp tiếp cận có hệ thống để quản lý độ phức tạp. Các hệ thống kỹ thuật số hiện đại được xây dựng từ hàng triệu hoặc hàng tỷ bóng bán dẫn (transistor). Không một ai có thể hiểu được các hệ thống này bằng cách viết các phương trình mô tả sự di chuyển của các electron trong từng transistor rồi giải tất cả các phương trình đó cùng một lúc. Bạn sẽ cần phải học cách quản lý độ phức tạp để hiểu cách xây dựng một bộ vi xử lý mà không bị sa lầy vào một \"ma trận\" các chi tiết vụn vặt.\r\n\r\n1.2.1 Tính trừu tượng (Abstraction)\r\nKỹ thuật cốt lõi để quản lý độ phức tạp là sự trừu tượng hóa (abstraction): che giấu các chi tiết khi chúng không quan trọng. Một hệ thống có thể được quan sát từ nhiều mức độ trừu tượng khác nhau. Ví dụ, các chính trị gia Mỹ trừu tượng hóa thế giới thành các thành phố, hạt, bang và quốc gia. Một hạt chứa nhiều thành phố và một bang chứa nhiều hạt. Khi một chính trị gia tranh cử tổng thống, họ chủ yếu quan tâm đến việc toàn bộ bang đó sẽ bỏ phiếu như thế nào thay vì cách từng hạt bỏ phiếu, vì vậy cấp bang là mức độ trừu tượng hữu ích nhất. Mặt khác, Cục Dân số lại đo lường dân số của từng thành phố, vì vậy cơ quan này phải xem xét các chi tiết ở mức độ trừu tượng thấp hơn.\r\n\r\nHình 1.1 minh họa các mức độ trừu tượng cho một hệ thống máy tính điện tử, cùng với các thành phần nền tảng điển hình ở từng cấp độ. Ở mức độ trừu tượng thấp nhất là vật lý, tức sự chuyển động của các electron. Hành vi của các electron được mô tả bằng cơ học lượng tử và các phương trình Maxwell. Hệ thống của chúng ta được cấu tạo từ các thiết bị điện tử như transistor (hoặc bóng đèn chân không ngày trước). Các thiết bị này có các điểm kết nối được định nghĩa rõ ràng gọi là các chân (terminals) và có thể được mô hình hóa bằng mối quan hệ giữa điện áp và dòng điện đo được tại mỗi chân. Bằng cách trừu tượng hóa lên mức thiết bị này, chúng ta có thể bỏ qua các electron riêng lẻ. Mức độ trừu tượng tiếp theo là các mạch tương tự (analog circuits), trong đó các thiết bị được lắp ráp để tạo thành các linh kiện như bộ khuếch đại (amplifiers). Mạch tương tự có đầu vào và đầu ra là một dải điện áp liên tục. Các mạch kỹ thuật số (digital circuits), chẳng hạn như các cổng logic, giới hạn điện áp vào các dải rời rạc, mà chúng ta sẽ dùng để biểu thị các giá trị 0 và 1. Trong thiết kế logic, chúng ta xây dựng các cấu trúc phức tạp hơn, chẳng hạn như bộ cộng hoặc bộ nhớ, từ các mạch kỹ thuật số.\r\n\r\nKiến trúc vi mô (Microarchitecture) liên kết các mức độ trừu tượng logic và kiến trúc. Mức độ trừu tượng kiến trúc mô tả một máy tính dưới góc nhìn của lập trình viên. Ví dụ, kiến trúc Intel x86...\r\n\r\n---\r\n[Sơ đồ Hình 1.1: Các mức trừu tượng của một hệ thống máy tính điện tử]\r\n- Phần mềm ứng dụng (> \"hello world!\") -> Chương trình (Programs)\r\n- Hệ điều hành -> Trình điều khiển thiết bị (Device Drivers)\r\n- Kiến trúc -> Tập lệnh, Thanh ghi (Instructions, Registers)\r\n- Kiến trúc vi mô -> Đường dữ liệu, Bộ điều khiển (Datapaths, Controllers)\r\n- Logic -> Bộ cộng, Bộ nhớ (Adders, Memories)\r\n- Mạch kỹ thuật số -> Cổng AND, Cổng NOT (AND Gates, NOT Gates)\r\n- Mạch tương tự -> Bộ khuếch đại, Bộ lọc (Amplifiers, Filters)\r\n- Thiết bị -> Transistor, Diode (Transistors, Diodes)\r\n- Vật lý -> Electron (Electrons)\r\n\r\nHình 1.1 Các mức trừu tượng cho một hệ thống máy tính điện tử",
+      "grammar": [
+        {
+          "phrase": "One of the characteristics that separates an engineer or computer scientist from a layperson is a systematic approach to managing complexity",
+          "explain": "mệnh đề quan hệ \"that separates...\" bổ nghĩa cho chủ ngữ \"One of the characteristics\""
+        },
+        {
+          "phrase": "equations describing the movement of electrons in each transistor",
+          "explain": "mệnh đề quan hệ rút gọn dạng chủ động (dùng hiện tại phân tử \"describing\") bổ nghĩa cho danh từ \"equations\""
+        },
+        {
+          "phrase": "without getting mired in a morass of detail",
+          "explain": "cấu trúc giới từ \"without + V-ing\" kết hợp cụm động từ thể bị động trạng thái \"get mired in\""
+        },
+        {
+          "phrase": "when a politician is running for president",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian dùng thì hiện tại tiếp diễn biểu thị hành động đang trong quá trình thực hiện/tranh cử"
+        },
+        {
+          "phrase": "discrete ranges, which we will use to indicate 0 and 1",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"which\" bổ nghĩa cho cụm danh từ \"discrete ranges\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "systematic approach",
+          "explain": "phương pháp tiếp cận có hệ thống"
+        },
+        {
+          "type": "idiom",
+          "phrase": "get mired in a morass of detail",
+          "explain": "bị sa lầy vào một đống/ma trận chi tiết phức tạp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "level of abstraction",
+          "explain": "mức độ / cấp độ trừu tượng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as a whole",
+          "explain": "nói chung, toàn thể, tổng thể"
+        },
+        {
+          "type": "phrase",
+          "phrase": "on the other hand",
+          "explain": "mặt khác, trái lại"
+        },
+        {
+          "type": "collocation",
+          "phrase": "building blocks",
+          "explain": "các thành phần nền tảng, khối xây dựng cơ bản"
+        },
+        {
+          "type": "phrase",
+          "phrase": "once upon a time",
+          "explain": "ngày xưa, đã từng có một thời"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous range",
+          "explain": "dải liên tục"
+        },
+        {
+          "type": "collocation",
+          "phrase": "discrete ranges",
+          "explain": "các dải rời rạc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "device drivers",
+          "explain": "trình điều khiển thiết bị"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "translation": "1.2 Nghệ thuật Quản lý độ Phức tạp\r\n\r\n...được sử dụng bởi các vi xử lý trong hầu hết các máy tính cá nhân (PC) được định nghĩa bởi một tập hợp các lệnh và thanh ghi (bộ nhớ tạm thời dùng để lưu trữ các biến) mà lập trình viên được phép sử dụng. Kiến trúc vi mô (microarchitecture) liên quan đến việc kết hợp các phần tử lô-gíc để thực thi các lệnh đã được định nghĩa bởi kiến trúc. Một kiến trúc cụ thể có thể được hiện thực hóa bằng một trong nhiều kiến trúc vi mô khác nhau với các sự đánh đổi khác nhau về giá thành / hiệu năng / công suất tiêu thụ. Ví dụ, Intel Core i7, Intel 80486 và AMD Athlon đều hiện thực hóa kiến trúc x86 nhưng với các kiến trúc vi mô khác nhau.\r\n\r\nBước sang lĩnh vực phần mềm, hệ điều hành chịu trách nhiệm xử lý các chi tiết cấp thấp, chẳng hạn như truy cập ổ cứng hoặc quản lý bộ nhớ. Cuối cùng, phần mềm ứng dụng sẽ sử dụng các tiện ích do hệ điều hành cung cấp để giải quyết bài toán cho người dùng. Nhờ vào sức mạnh của sự trừu tượng hóa, bà của bạn có thể lướt Web mà không cần quan tâm đến sự dao động lượng tử của các electron hay cách tổ chức bộ nhớ trong máy tính của bà.\r\n\r\nCuốn sách này tập trung vào các mức độ trừu tượng hóa từ mạch kỹ thuật số cho đến kiến trúc máy tính. Khi bạn làm việc ở một mức độ trừu tượng, việc biết một chút về các mức độ trừu tượng ngay bên trên và bên dưới mức bạn đang làm việc là rất có ích. Ví dụ, một nhà khoa học máy tính không thể tối ưu hóa mã nguồn một cách toàn diện nếu không hiểu kiến trúc mà chương trình đang được viết cho nó. Một kỹ sư thiết bị không thể đưa ra những đánh đổi hợp lý trong thiết kế transistor nếu không hiểu các mạch điện mà trong đó transistor sẽ được sử dụng. Chúng tôi hy vọng rằng khi đọc xong cuốn sách này, bạn có thể lựa chọn mức độ trừu tượng phù hợp để giải quyết vấn đề của mình và đánh giá được tác động từ các lựa chọn thiết kế của bạn lên các mức độ trừu tượng khác.\r\n\r\n1.2.2 Tính Kỷ luật\r\nKỷ luật (Discipline) là hành động cố ý giới hạn các lựa chọn thiết kế của bạn để bạn có thể làm việc hiệu quả hơn ở một mức độ trừu tượng cao hơn. Việc sử dụng các phụ tùng thay thế tiêu chuẩn là một ứng dụng quen thuộc của tính kỷ luật. Một trong những ví dụ nổi tiếng thời kỳ đầu về phụ tùng thay thế được là trong ngành sản xuất ô tô. Mặc dù chiếc ô tô chạy bằng xăng hiện đại xuất hiện từ chiếc Benz Patent-Motorwagen của Đức năm 1886, những chiếc ô tô thời kỳ đầu đều được chế tạo thủ công bởi những thợ thủ công lành nghề, một quy trình tốn thời gian và tốn kém. Henry Ford đã tạo ra một bước tiến quan trọng vào năm 1908 bằng cách tập trung vào sản xuất hàng loạt với các phụ tùng thay thế tiêu chuẩn và dây chuyền lắp ráp di động.\r\n\r\nKỷ luật về linh kiện thay thế tiêu chuẩn đã cách mạng hóa ngành công nghiệp. Bằng cách giới hạn các linh kiện trong một tập hợp chuẩn hóa với sai số cho phép được xác định rõ ràng, ô tô có thể được lắp ráp và sửa chữa nhanh hơn nhiều với ít kỹ năng hơn. Người thợ đóng xe không còn phải bận tâm đến các mức độ trừu tượng thấp hơn, chẳng hạn như việc gọt sửa một cánh cửa cho vừa với khung cửa không theo tiêu chuẩn.\r\n\r\n[Khung ghi chú góc trên bên phải]\r\nMỗi chương trong cuốn sách này đều bắt đầu bằng một biểu tượng trừu tượng biểu thị trọng tâm của chương bằng màu xanh đậm, cùng các chủ đề phụ được hiển thị bằng các sắc thái xanh nhạt hơn.\r\n\r\n[Khung ghi chú góc dưới bên phải]\r\nFord đã ra mắt dòng xe Model T với một tuyên ngôn táo bạo:\r\n\"Tôi sẽ chế tạo một chiếc xe hơi cho số đông công chúng. Nó sẽ đủ lớn cho gia đình, nhưng đủ nhỏ để một cá nhân có thể vận hành và chăm sóc. Nó sẽ được chế tạo từ những vật liệu tốt nhất, bởi những người thợ giỏi nhất có thể thuê được, theo những thiết kế đơn giản nhất mà kỹ thuật hiện đại có thể tạo ra. Nhưng giá của nó sẽ thấp đến mức không một ai có mức lương tốt lại không thể sở hữu một chiếc—và cùng gia đình tận hưởng niềm hạnh phúc trong những giờ phút giải trí giữa không gian bao la của thiên nhiên.\"\r\n[Cuộc đời và Sự nghiệp của tôi, bởi Samuel Crowther và Henry Ford, 1922]",
+      "grammar": [
+        {
+          "phrase": "these facilities provided by the operating system",
+          "explain": "rút gọn mệnh đề quan hệ dạng quá khứ phân từ (past participle clause) bổ nghĩa cho \"these facilities\""
+        },
+        {
+          "phrase": "the architecture for which the program is being written",
+          "explain": "mệnh đề quan hệ chứa giới từ \"for\" đứng trước đại từ quan hệ \"which\", động từ ở thì hiện tại tiếp diễn thể bị động"
+        },
+        {
+          "phrase": "the circuits in which the transistors will be used",
+          "explain": "mệnh đề quan hệ sử dụng \"in which\" thay cho trạng từ chỉ địa điểm/môi trường"
+        },
+        {
+          "phrase": "by the time you finish reading this book",
+          "explain": "cấu trúc thời gian \"by the time + clause\" kết hợp danh động từ (gerund) sau động từ \"finish\""
+        },
+        {
+          "phrase": "restricting your design choices so that you can work more productively",
+          "explain": "mệnh đề chỉ mục đích sử dụng liên từ \"so that\""
+        },
+        {
+          "phrase": "By limiting the components to a standardized set ..., cars could be assembled and repaired",
+          "explain": "mệnh đề chỉ phương thức sử dụng giới từ \"By + V-ing\" đứng đầu câu"
+        },
+        {
+          "phrase": "no man making a good salary will be unable to own one",
+          "explain": "mệnh đề quan hệ rút gọn dạng hiện tại phân từ (making) kết hợp cấu trúc phủ định kép (no man ... unable) để nhấn mạnh khẳng định"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "trade-offs",
+          "explain": "sự đánh đổi (giữa các tiêu chí kỹ thuật)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "operating system",
+          "explain": "hệ điều hành"
+        },
+        {
+          "type": "collocation",
+          "phrase": "application software",
+          "explain": "phần mềm ứng dụng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "low-level details",
+          "explain": "các chi tiết cấp thấp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "thanks to",
+          "explain": "nhờ vào, nhờ có"
+        },
+        {
+          "type": "phrase",
+          "phrase": "surf the Web",
+          "explain": "lướt mạng, lướt web"
+        },
+        {
+          "type": "collocation",
+          "phrase": "level of abstraction",
+          "explain": "mức độ trừu tượng hóa"
+        },
+        {
+          "type": "collocation",
+          "phrase": "computer architecture",
+          "explain": "kiến trúc máy tính"
+        },
+        {
+          "type": "collocation",
+          "phrase": "interchangeable parts",
+          "explain": "các linh kiện / phụ tùng có thể tháo lắp thay thế cho nhau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "mass production",
+          "explain": "sản xuất hàng loạt"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assembly line",
+          "explain": "dây chuyền lắp ráp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "by the time",
+          "explain": "vào thời điểm, cho tới khi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "handcrafted by skilled tradesmen",
+          "explain": "được chế tạo thủ công bởi thợ thợ lành nghề"
+        },
+        {
+          "type": "phrase",
+          "phrase": "no longer concerned himself with",
+          "explain": "không còn phải bận tâm / lo lắng về"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "translation": "4 CHƯƠNG MỘT Từ 0 đến 1\r\n\r\n[Hình ảnh: Model T Ford. Nguồn ảnh: https://commons.wikimedia.org/wiki/File: TModel_launch_Geelong.jpg.]\r\n\r\nChiếc Model T của Ford đã trở thành mẫu xe được sản xuất nhiều nhất trong thời kỳ đó, với số lượng bán ra vượt quá 15 triệu chiếc. Một ví dụ khác về tính kỷ luật là câu nói nổi tiếng của Ford: “Bất kỳ khách hàng nào cũng có thể có một chiếc xe được sơn bất kỳ màu nào mà họ muốn, miễn là nó có màu đen.”\r\n\r\nTrong bối cảnh của cuốn sách này, kỷ luật kỹ thuật số (digital discipline) sẽ đóng vai trò rất quan trọng. Mạch kỹ thuật số sử dụng các mức điện áp rời rạc, trong khi mạch tương tự (analog) sử dụng các mức điện áp liên tục. Do đó, mạch kỹ thuật số là một tập hợp con của mạch tương tự và theo một nghĩa nào đó, khả năng của chúng bị giới hạn hơn so với lớp mạch tương tự rộng lớn hơn. Tuy nhiên, mạch kỹ thuật số lại dễ thiết kế hơn nhiều. Bằng cách giới hạn bản thân trong phạm vi mạch kỹ thuật số, chúng ta có thể dễ dàng kết hợp các linh kiện thành những hệ thống phức tạp, mà cuối cùng có hiệu năng vượt trội hơn so với các hệ thống được xây dựng từ linh kiện tương tự trong nhiều ứng dụng. Ví dụ, truyền hình kỹ thuật số, đĩa CD và điện thoại di động đang dần thay thế các thiết bị tiền nhiệm dùng công nghệ tương tự.\r\n\r\n1.2.3 Ba nguyên tắc tận cùng bằng \"-y\" (The Three -Y’s)\r\nBên cạnh tính trừu tượng và tính kỷ luật, các nhà thiết kế còn sử dụng ba nguyên tắc tận cùng bằng “-y” để quản lý độ phức tạp: tính phân cấp (hierarchy), tính mô-đun hóa (modularity), và tính quy luật (regularity). Các nguyên tắc này áp dụng cho cả hệ thống phần mềm lẫn phần cứng.\r\n▶ Tính phân cấp (Hierarchy) bao gồm việc chia một hệ thống thành các mô-đun, sau đó tiếp tục chia nhỏ từng mô-đun này cho đến khi các phần trở nên dễ hiểu.\r\n▶ Tính mô-đun hóa (Modularity) quy định rằng các mô-đun phải có chức năng và giao diện được xác định rõ ràng để chúng kết nối với nhau một cách dễ dàng mà không gây ra các tác dụng phụ ngoài dự kiến.\r\n▶ Tính quy luật (Regularity) hướng tới sự đồng nhất giữa các mô-đun. Các mô-đun dùng chung được tái sử dụng nhiều lần, giúp giảm số lượng mô-đun riêng biệt cần phải thiết kế.\r\n\r\nĐể minh họa cho các nguyên tắc “-y” này, chúng ta hãy quay lại với ví dụ về sản xuất ô tô. Ô tô là một trong những vật dụng phức tạp nhất được sử dụng phổ biến vào đầu thế kỷ 20. Áp dụng nguyên tắc phân cấp, chúng ta có thể chia chiếc Model T Ford thành các bộ phận như khung gầm, động cơ và ghế ngồi. Đến lượt mình, động cơ lại bao gồm bốn xi-lanh, bộ chế hòa khí, hệ thống đánh lửa magneto và hệ thống làm mát. Bộ chế hòa khí bao gồm đường dẫn nhiên liệu và không khí, bướm gió và bướm ga, van kim, v.v., như được hiển thị trong Hình 1.2. Đường dẫn nhiên liệu được làm từ một cút nối có ren và một đai ốc nối. Như vậy, hệ thống phức tạp được chia nhỏ theo kiểu đệ quy thành các linh kiện đơn giản có thể thay thế cho nhau và có thể sản xuất hàng loạt.\r\nTính mô-đun hóa dạy chúng ta rằng mỗi linh kiện nên có chức năng và giao diện được xác định rõ ràng. Ví dụ, đai ốc nối có chức năng giữ ống dẫn nhiên liệu vào cút nối đầu vào theo cách sao cho không...",
+      "grammar": [
+        {
+          "phrase": "selling over 15 million units",
+          "explain": "mệnh đề phân từ hiện tại (present participle clause) đóng vai trò bổ nghĩa cho mệnh đề chính phía trước"
+        },
+        {
+          "phrase": "so long as it is black",
+          "explain": "liên từ phụ thuộc chỉ điều kiện \"so long as\" (miễn là), tương đương với \"as long as\""
+        },
+        {
+          "phrase": "those built from analog components in many applications",
+          "explain": "đại từ \"those\" kết hợp với mệnh đề tính từ/phân từ quá khứ rút gọn (\"built from...\") để thay thế cho danh từ số nhiều (\"systems\")"
+        },
+        {
+          "phrase": "subdividing each of these modules until the pieces are easy to understand",
+          "explain": "liên từ chỉ thời gian \"until\" kết hợp tính từ + động từ nguyên mẫu có \"to\" (\"easy to understand\")"
+        },
+        {
+          "phrase": "recursively broken down into simple interchangeable components that can be mass produced",
+          "explain": "câu bị động kết hợp mệnh đề quan hệ (\"that can be mass produced\") bổ nghĩa cho danh từ \"components\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "discrete voltage",
+          "explain": "điện áp rời rạc (khái niệm trong kỹ thuật điện tử kỹ thuật số)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous voltage",
+          "explain": "điện áp liên tục (khái niệm trong kỹ thuật điện tử tương tự)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "side effect",
+          "explain": "tác dụng phụ / tác động ngoài dự kiến (dùng trong lập trình và thiết kế hệ thống)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "mass produced",
+          "explain": "được sản xuất hàng loạt"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in addition to",
+          "explain": "bên cạnh, ngoài ra"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in turn",
+          "explain": "đến lượt mình / lần lượt"
+        },
+        {
+          "type": "phrase",
+          "phrase": "and so forth",
+          "explain": "và vân vân (đồng nghĩa với and so on)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "recursively broken down",
+          "explain": "được chia nhỏ một cách đệ quy (lặp đi lặp lại từ mức tổng thể xuống chi tiết)"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "translation": "**Trang 5**\r\n\r\n**Hình 1.2** Góc nhìn cắt lớp của hệ thống nhiên liệu xe Model T, hiển thị bộ cấp nhiên liệu ở bên trái và bộ chế hòa khí ở bên phải.\r\n\r\n[Tiếp nối trang trước]...rò rỉ nhưng vẫn có thể dễ dàng tháo ra khi cần thay đường ống dẫn. Nó có đường kính và bước ren tiêu chuẩn, được siết chặt đến một lực siết tiêu chuẩn bằng một cờ-lê tiêu chuẩn. Nhà sản xuất ô tô có thể mua đai ốc này từ nhiều nhà cung cấp khác nhau, miễn là chọn đúng kích thước quy định. Tính mô-đun (modularity) quy định rằng không được có hiệu ứng phụ: đai ốc nối không được làm biến dạng khớp nối vuông và tốt nhất nên được đặt ở vị trí có thể siết chặt hoặc tháo ra mà không cần phải tháo các thiết bị khác trong động cơ.\r\n\r\nTính quy luật (regularity) chỉ ra rằng các linh kiện có thể thay thế lẫn nhau là một ý tưởng hay. Nhờ tính quy luật, một bộ chế hòa khí bị rò rỉ có thể được thay thế bằng một linh kiện hoàn toàn giống hệt. Các bộ chế hòa khí có thể được sản xuất một cách hiệu quả trên dây chuyền lắp ráp thay vì phải chế tạo thủ công một cách tỉ mỉ.\r\n\r\nChúng ta sẽ quay lại các nguyên tắc về tính phân cấp (hierarchy), tính mô-đun (modularity) và tính quy luật (regularity) trong suốt cuốn sách này.\r\n\r\n---\r\n\r\n### 1.3 SỰ TRỪU TƯỢNG HÓA KỸ THUẬT SỐ\r\n\r\nHầu hết các đại lượng vật lý đều liên tục. Ví dụ, điện áp trên dây dẫn, tần số dao động hay vị trí của một khối lượng đều là các đại lượng liên tục. Trái lại, các hệ thống kỹ thuật số biểu diễn thông tin bằng các *biến có giá trị rời rạc*—nghĩa là các biến chỉ có một số lượng hữu hạn các giá trị phân biệt.\r\n\r\nMột hệ thống kỹ thuật số sơ khai sử dụng các biến có 10 giá trị rời rạc chính là Động cơ Phân tích (Analytical Engine) của Charles Babbage. Babbage đã làm việc miệt mài từ năm 1834 đến năm 1871 để thiết kế và cố gắng chế tạo chiếc máy tính cơ khí này. Động cơ Phân tích sử dụng các bánh răng có 10 vị trí được dán nhãn từ 0 đến 9, rất giống với đồng hồ đo quãng đường (odometer) cơ khí trên xe hơi. Hình 1.3 cho thấy một mẫu thử nghiệm của Động cơ Phân tích, trong đó mỗi hàng xử lý một chữ số. Babbage đã chọn 25 hàng bánh răng, do đó cỗ máy có độ chính xác lên tới 25 chữ số.\r\n\r\nKhông giống như cỗ máy của Babbage, hầu hết các máy tính điện tử ngày nay sử dụng biểu diễn nhị phân (hai giá trị), trong đó mức điện áp cao biểu thị số “1” và...\r\n\r\n---\r\n**Khung tiểu sử:**\r\n**Charles Babbage, 1791–1871**\r\nTừng học tại Đại học Cambridge và kết hôn với Georgiana Whitmore vào năm 1814. Ông đã sáng chế ra Động cơ Phân tích (Analytical Engine), máy tính cơ khí đầu tiên trên thế giới. Ông cũng sáng chế ra bộ gạt cản trước tàu hỏa (cowcatcher) và mức phí bưu chính đồng giá (universal postage rate). Ông hứng thú với việc mở khóa, nhưng lại cực kỳ ghét nhạc công đường phố.",
+      "grammar": [
+        {
+          "phrase": "can be easily removed when the feed line needs replacement",
+          "explain": "cấu trúc bị động với động từ khuyết thiếu (can be + V3) kết hợp mệnh đề chỉ thời gian (when + S + V)"
+        },
+        {
+          "phrase": "tightened to a standardized torque by a standardized wrench",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân từ (reduced relative clause with past participle) bổ nghĩa cho \"It\""
+        },
+        {
+          "phrase": "where it can be tightened or removed without taking off other equipment",
+          "explain": "mệnh đề trạng ngữ chỉ nơi chốn (adverbial clause of place) kết hợp dạng bị động và danh động từ sau giới từ \"without\""
+        },
+        {
+          "phrase": "instead of being painstakingly handcrafted",
+          "explain": "dạng bị động của danh động từ (passive gerund: being + V3) đứng sau giới từ \"instead of\""
+        },
+        {
+          "phrase": "in which each row processes one digit",
+          "explain": "mệnh đề quan hệ sử dụng giới từ đứng trước đại từ quan hệ (preposition + relative pronoun \"in which\")"
+        },
+        {
+          "phrase": "in which a high voltage indicates a “1”",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"a binary representation\" giải thích cơ chế đại diện giá trị"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "standardized diameter and thread pitch",
+          "explain": "đường kính và bước ren tiêu chuẩn"
+        },
+        {
+          "type": "phrase",
+          "phrase": "side effect",
+          "explain": "tác dụng phụ, hiệu ứng ngoài ý muốn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assembly line",
+          "explain": "dây chuyền lắp ráp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "continuous quantity",
+          "explain": "đại lượng liên tục"
+        },
+        {
+          "type": "phrase",
+          "phrase": "discrete-valued variable",
+          "explain": "biến có giá trị rời rạc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "finite number of distinct values",
+          "explain": "số lượng hữu hạn các giá trị phân biệt"
+        },
+        {
+          "type": "collocation",
+          "phrase": "mechanical computer",
+          "explain": "máy tính cơ khí"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary representation",
+          "explain": "biểu diễn nhị phân"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "translation": "6 | CHƯƠNG MỘT: Từ Không Đến Một\r\n\r\n[Hình 1.3] Máy phân tích (Analytical Engine) của Babbage, đang trong quá trình chế tạo vào thời điểm ông qua đời năm 1871 (hình ảnh do Bảo tàng Khoa học/Thư viện Ảnh Khoa học và Xã hội cung cấp).\r\n\r\n[George Boole, 1815–1864]\r\nSinh ra trong một gia đình thuộc tầng lớp lao động và không có điều kiện đi học chính quy, Boole đã tự học toán và trở thành giảng viên tại Đại học Queen's ở Ireland. Ông đã viết cuốn \"An Investigation of the Laws of Thought\" (Khảo sát về các quy luật tư duy - 1854), giới thiệu các biến nhị phân và ba phép toán lô-gíc cơ bản: AND, OR, và NOT (hình ảnh do Viện Vật lý Hoa Kỳ cung cấp).\r\n\r\n...mức điện áp thấp biểu thị số \"0\", bởi vì việc phân biệt giữa hai mức điện áp dễ hơn nhiều so với mười mức.\r\n\r\nLượng thông tin $D$ trong một biến có giá trị rời rạc với $N$ trạng thái phân biệt được đo bằng đơn vị *bit* theo công thức:\r\n$D = \\log_2 N \\text{ bits}$ (1.1)\r\n\r\nMột biến nhị phân truyền tải $\\log_2 2 = 1\\text{ bit}$ thông tin. Thực vậy, từ *bit* là viết tắt của *binary digit* (chữ số nhị phân). Mỗi bánh răng của Babbage mang $\\log_2 10 = 3{,}322\\text{ bits}$ thông tin vì nó có thể nằm ở một trong $2^{3{,}322} = 10$ vị trí duy nhất. Một tín hiệu liên tục về mặt lý thuyết chứa một lượng thông tin vô hạn vì nó có thể nhận vô số giá trị. Trong thực tế, nhiễu và sai số đo lường giới hạn lượng thông tin chỉ còn từ 10 đến 16 bit đối với hầu hết các tín hiệu liên tục. Nếu việc đo lường phải thực hiện nhanh chóng, hàm lượng thông tin sẽ thấp hơn (ví dụ: 8 bit).\r\n\r\nSách này tập trung vào các mạch kỹ thuật số sử dụng các biến nhị phân: các số 1 và 0. George Boole đã phát triển một hệ thống lô-gíc hoạt động trên các biến nhị phân mà ngày nay được gọi là *lô-gíc Boolean*. Mỗi biến của Boole có thể nhận giá trị ĐÚNG (TRUE) hoặc SAI (FALSE). Các máy tính điện tử thường dùng mức điện áp dương để biểu diễn số \"1\" và mức 0 volt để biểu diễn số \"0\". Trong cuốn sách này, chúng tôi sẽ sử dụng các thuật ngữ \"1\", \"TRUE\" và \"HIGH\" với nghĩa tương đương nhau. Tương tự, chúng tôi sẽ dùng \"0\", \"FALSE\" và \"LOW\" có thể thay thế cho nhau.\r\n\r\nVẻ đẹp của *sự trừu tượng hóa kỹ thuật số* (digital abstraction) nằm ở chỗ các nhà thiết kế kỹ thuật số có thể chỉ cần tập trung vào các số 1 và 0, mà không cần quan tâm liệu các biến Boolean đó được biểu diễn bằng các mức điện áp cụ thể, các bánh răng xoay, hay thậm chí là mức chất lưu thủy lực. Một lập trình viên máy tính có thể làm việc mà không cần biết đến các chi tiết phần cứng cặn kẽ. Mặt khác, việc hiểu rõ chi tiết về phần cứng sẽ giúp lập trình viên tối ưu hóa phần mềm tốt hơn cho máy tính cụ thể đó.",
+      "grammar": [
+        {
+          "phrase": "Born to working-class parents and unable to afford a formal education, Boole taught himself mathematics",
+          "explain": "mệnh đề tính từ/phân từ rút gọn chỉ nguyên nhân, bổ nghĩa cho chủ ngữ \"Boole\""
+        },
+        {
+          "phrase": "under construction at the time of his death in 1871",
+          "explain": "cụm giới từ làm tính từ bổ nghĩa cho \"Babbage's Analytical Engine\""
+        },
+        {
+          "phrase": "a system of logic operating on binary variables that is now known as Boolean logic",
+          "explain": "mệnh đề quan hệ (relative clause) mở đầu bằng \"that\" bổ nghĩa cho cụm danh từ \"a system of logic\""
+        },
+        {
+          "phrase": "without needing to know the intimate details of the computer hardware",
+          "explain": "cấu trúc giới từ \"without\" đi kèm danh động từ (gerund) \"needing\""
+        },
+        {
+          "phrase": "understanding the details of the hardware allows the programmer to optimize the software better",
+          "explain": "danh động từ \"understanding...\" làm chủ ngữ của câu, kết hợp cấu trúc \"allow someone to do something\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "under construction",
+          "explain": "đang trong quá trình chế tạo / xây dựng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "working-class parents",
+          "explain": "cha mẹ thuộc tầng lớp lao động"
+        },
+        {
+          "type": "collocation",
+          "phrase": "formal education",
+          "explain": "giáo dục chính quy / bài bản"
+        },
+        {
+          "type": "phrase",
+          "phrase": "short for",
+          "explain": "là viết tắt của"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary digit",
+          "explain": "chữ số nhị phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "take on an infinite number of values",
+          "explain": "nhận/mang một số lượng giá trị vô hạn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "measurement error",
+          "explain": "sai số đo lường"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous signal",
+          "explain": "tín hiệu liên tục"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Boolean logic",
+          "explain": "lô-gíc Boolean"
+        },
+        {
+          "type": "phrase",
+          "phrase": "use synonymously",
+          "explain": "dùng với nghĩa tương đương / đồng nghĩa"
+        },
+        {
+          "type": "phrase",
+          "phrase": "use interchangeably",
+          "explain": "dùng có thể thay thế cho nhau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "digital abstraction",
+          "explain": "sự trừu tượng hóa kỹ thuật số"
+        },
+        {
+          "type": "collocation",
+          "phrase": "intimate details",
+          "explain": "các chi tiết cặn kẽ / chuyên sâu"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "translation": "**1.4 Các hệ thống số**\r\n\r\nMột bit đơn lẻ không mang nhiều thông tin. Trong phần tiếp theo, chúng ta sẽ xem xét cách sử dụng các nhóm bit để biểu diễn số. Ở các chương sau, chúng ta cũng sẽ dùng các nhóm bit để biểu diễn chữ cái và chương trình.\r\n\r\n**1.4 HỆ THỐNG SỐ**\r\nBạn đã quen làm việc với các số thập phân. Trong các hệ thống kỹ thuật số chỉ gồm các số 1 và 0, hệ nhị phân hoặc hệ thập lục phân thường thuận tiện hơn. Phần này giới thiệu các hệ thống số khác nhau sẽ được sử dụng trong suốt phần còn lại của cuốn sách.\r\n\r\n**1.4.1 Số thập phân**\r\nỞ trường tiểu học, bạn đã học đếm và làm phép tính toán trong hệ thập phân. Giống như việc bạn (có thể) có mười ngón tay, có mười chữ số thập phân: 0, 1, 2, ..., 9. Các chữ số thập phân được ghép lại với nhau để tạo thành các số thập phân dài hơn. Mỗi cột của một số thập phân có trọng số gấp mười lần cột trước đó. Từ phải sang trái, trọng số của các cột lần lượt là 1, 10, 100, 1000, v.v. Các số thập phân được gọi là cơ số 10. Cơ số được ghi bằng chỉ số dưới phía sau chữ số để tránh nhầm lẫn khi làm việc với nhiều cơ số. Ví dụ, Hình 1.4 thể hiện cách số thập phân $9742_{10}$ được viết dưới dạng tổng của từng chữ số nhân với trọng số của cột tương ứng.\r\n\r\nMột số thập phân có $N$ chữ số biểu diễn một trong $10^N$ khả năng: 0, 1, 2, 3, ..., $10^N - 1$. Điều này được gọi là dải giá trị (range) của số đó. Ví dụ, một số thập phân có ba chữ số biểu diễn một trong 1000 khả năng trong dải từ 0 đến 999.\r\n\r\n**1.4.2 Số nhị phân**\r\nCác bit biểu diễn một trong hai giá trị, 0 hoặc 1, và được ghép lại với nhau để tạo thành các số nhị phân. Mỗi cột của một số nhị phân có trọng số gấp đôi cột trước đó, vì vậy các số nhị phân có cơ số 2. Trong hệ nhị phân, trọng số các cột (lại tính từ phải sang trái) là 1, 2, 4, 8, 16, 32, 64, 128,\r\n\r\nHình 1.4 Biểu diễn một số thập phân\r\nCột hàng nghìn | Cột hàng trăm | Cột hàng chục | Cột hàng đơn vị\r\n$9742_{10} = 9 \\times 10^3 + 7 \\times 10^2 + 4 \\times 10^1 + 2 \\times 10^0$\r\nchín nghìn, bảy trăm, bốn chục, hai đơn vị",
+      "grammar": [
+        {
+          "phrase": "how groups of bits can be used to represent numbers",
+          "explain": "mệnh đề danh từ (noun clause) làm tân ngữ cho động từ \"examine\""
+        },
+        {
+          "phrase": "You are accustomed to working with decimal numbers",
+          "explain": "cấu trúc \"be accustomed to + V-ing\" chỉ thói quen/sự quen thuộc với hành động nào đó"
+        },
+        {
+          "phrase": "the various number systems that will be used throughout the rest of the book",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"the various number systems\", kết hợp thể bị động \"will be used\""
+        },
+        {
+          "phrase": "Decimal numbers are referred to as base 10",
+          "explain": "thể bị động (passive voice) của cụm động từ \"refer to... as...\""
+        },
+        {
+          "phrase": "is indicated by a subscript after the number to prevent confusion when working in more than one base",
+          "explain": "bổ ngữ thể bị động kết hợp mệnh đề chỉ mục đích (to prevent) và mệnh đề trạng ngữ rút gọn (when working)"
+        },
+        {
+          "phrase": "shows how the decimal number 9742_10 is written as the sum of each of its digits multiplied by the weight of the corresponding column",
+          "explain": "mệnh đề danh từ làm tân ngữ, bên trong chứa câu bị động \"is written\" và phân từ quá khứ \"multiplied by\" rút gọn mệnh đề quan hệ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "carry information",
+          "explain": "mang/chứa thông tin"
+        },
+        {
+          "type": "collocation",
+          "phrase": "be accustomed to",
+          "explain": "quen thuộc với"
+        },
+        {
+          "type": "collocation",
+          "phrase": "digital systems",
+          "explain": "hệ thống kỹ thuật số"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hexadecimal numbers",
+          "explain": "các số thập lục phân (hệ cơ số 16)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "throughout the rest of the book",
+          "explain": "trong suốt phần còn lại của cuốn sách"
+        },
+        {
+          "type": "collocation",
+          "phrase": "elementary school",
+          "explain": "trường tiểu học"
+        },
+        {
+          "type": "collocation",
+          "phrase": "decimal digits",
+          "explain": "các chữ số thập phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "column weight",
+          "explain": "trọng số của cột"
+        },
+        {
+          "type": "collocation",
+          "phrase": "base 10",
+          "explain": "cơ số 10"
+        },
+        {
+          "type": "phrase",
+          "phrase": "prevent confusion",
+          "explain": "tránh gây nhầm lẫn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "corresponding column",
+          "explain": "cột tương ứng"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "translation": "TRANG 8\r\nCHƯƠNG MỘT: Từ Không đến Một\r\n\r\n256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, và vân vân. Nếu bạn thường xuyên làm việc với các số nhị phân, bạn sẽ tiết kiệm được nhiều thời gian nếu ghi nhớ các lũy thừa của 2 này lên đến 2¹⁶.\r\nMột số nhị phân N-bit biểu diễn một trong 2ᴺ khả năng: 0, 1, 2, 3, ..., 2ᴺ – 1. Bảng 1.1 hiển thị các số nhị phân 1-, 2-, 3- và 4-bit cùng các giá trị thập phân tương ứng của chúng.\r\n\r\nVí dụ 1.1 CHUYỂN ĐỔI TỪ NHỊ PHÂN SANG THẬP PHÂN\r\nChuyển đổi số nhị phân 10110₂ sang hệ thập phân.\r\nLời giải: Hình 1.5 minh họa quá trình chuyển đổi này.\r\n\r\nBảng 1.1 Các số nhị phân và giá trị thập phân tương ứng\r\nSố nhị phân 1-Bit | Số nhị phân 2-Bit | Số nhị phân 3-Bit | Số nhị phân 4-Bit | Giá trị thập phân tương ứng\r\n0 | 00 | 000 | 0000 | 0\r\n1 | 01 | 001 | 0001 | 1\r\n  | 10 | 010 | 0010 | 2\r\n  | 11 | 011 | 0011 | 3\r\n  |    | 100 | 0100 | 4\r\n  |    | 101 | 0101 | 5\r\n  |    | 110 | 0110 | 6\r\n  |    | 111 | 0111 | 7\r\n  |    |     | 1000 | 8\r\n  |    |     | 1001 | 9\r\n  |    |     | 1010 | 10\r\n  |    |     | 1011 | 11\r\n  |    |     | 1100 | 12\r\n  |    |     | 1101 | 13\r\n  |    |     | 1110 | 14\r\n  |    |     | 1111 | 15",
+      "grammar": [
+        {
+          "phrase": "If you work with binary numbers often, you’ll save time if you remember these powers of two up to 2^16",
+          "explain": "mệnh đề điều kiện loại 1 (First Conditional) dùng để diễn tả một điều kiện có thật ở hiện tại hoặc tương lai và kết quả có thể xảy ra"
+        },
+        {
+          "phrase": "shows 1-, 2-, 3-, and 4-bit binary numbers and their decimal equivalents",
+          "explain": "cấu trúc liệt kê tính từ ghép (hyphenated adjectives) kết hợp chung danh từ gốc \"binary numbers\" để tránh lặp từ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "and so on",
+          "explain": "và cứ tiếp tục như vậy / vân vân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "powers of two",
+          "explain": "các lũy thừa của 2"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary numbers",
+          "explain": "số nhị phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "decimal equivalents",
+          "explain": "các giá trị thập phân tương ứng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "save time",
+          "explain": "tiết kiệm thời gian"
+        },
+        {
+          "type": "phrase",
+          "phrase": "binary to decimal conversion",
+          "explain": "sự chuyển đổi từ hệ nhị phân sang hệ thập phân"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "translation": "1.4 Hệ thống số\r\n9\r\n\r\nHình 1.5 Chuyển đổi một số nhị phân sang thập phân\r\n\r\nCột 16 | Cột 8 | Cột 4 | Cột 2 | Cột 1\r\n10110_2 = 1 × 2^4 + 0 × 2^3 + 1 × 2^2 + 1 × 2^1 + 0 × 2^0 = 22_10\r\nmột mười sáu | không tám | một bốn | một hai | không một\r\n\r\nVí dụ 1.2 CHUYỂN ĐỔI TỪ THẬP PHÂN SANG NHỊ PHÂN\r\nChuyển số thập phân 84_10 sang nhị phân.\r\n\r\nLời giải Xác định xem mỗi cột của kết quả nhị phân chứa chữ số 1 hay 0. Chúng ta có thể thực hiện việc này bắt đầu từ cột bên trái hoặc bên phải.\r\n\r\nNếu tính từ bên trái, bắt đầu với lũy thừa lớn nhất của 2 nhỏ hơn hoặc bằng số đó (trong trường hợp này là 64). 84 ≥ 64, do đó có một chữ số 1 ở cột 64, còn lại 84 – 64 = 20. 20 < 32, nên có chữ số 0 ở cột 32. 20 ≥ 16, nên có chữ số 1 ở cột 16, còn lại 20 – 16 = 4. 4 < 8, nên có chữ số 0 ở cột 8. 4 ≥ 4, nên có chữ số 1 ở cột 4, còn lại 4 – 4 = 0. Do đó, phải có các chữ số 0 ở cột 2 và cột 1. Kết hợp tất cả lại, ta được 84_10 = 1010100_2.\r\n\r\nNếu tính từ bên phải, thực hiện chia liên tiếp số đó cho 2. Số dư sẽ nằm ở từng cột tương ứng. 84/2 = 42, do đó số 0 nằm ở cột 1. 42/2 = 21, nên số 0 nằm ở cột 2. 21/2 = 10 dư 1, số dư 1 này nằm ở cột 4. 10/2 = 5, nên số 0 nằm ở cột 8. 5/2 = 2 dư 1, số dư 1 này nằm ở cột 16. 2/2 = 1, nên số 0 nằm ở cột 32. Cuối cùng, 1/2 = 0 dư 1, số dư 1 nằm ở cột 64. Một lần nữa, ta có 84_10 = 1010100_2.\r\n\r\n1.4.3 Số thập lục phân (Hexadecimal)\r\nViệc viết các số nhị phân dài trở nên phiền phức và dễ mắc lỗi. Một nhóm gồm bốn bit biểu diễn 1 trong 2^4 = 16 khả năng. Do đó, đôi khi làm việc ở cơ số 16, gọi là thập lục phân (hexadecimal), sẽ tiện lợi hơn. Các số thập lục phân sử dụng các chữ số từ 0 đến 9 cùng với các chữ cái từ A đến F, như được thể hiện trong Bảng 1.2. Các cột trong cơ số 16 có trọng số là 1, 16, 16^2 (hoặc 256), 16^3 (hoặc 4096), v.v.\r\n\r\nHexadecimal (Thập lục phân), một thuật ngữ được IBM tạo ra vào năm 1963, xuất phát từ tiếng Hy Lạp hexi (sáu) và tiếng Latinh decem (mười). Một thuật ngữ chuẩn xác hơn sẽ dùng từ sexa (sáu) trong tiếng Latinh, nhưng sexadecimal nghe có vẻ quá nhạy cảm.\r\n\r\nVí dụ 1.3 CHUYỂN ĐỔI TỪ THẬP LỤC PHÂN SANG NHỊ PHÂN VÀ THẬP PHÂN\r\nChuyển số thập lục phân 2ED_16 sang nhị phân và thập phân.\r\n\r\nLời giải Việc chuyển đổi giữa thập lục phân và nhị phân rất đơn giản vì mỗi chữ số thập lục phân tương ứng trực tiếp với bốn chữ số nhị phân. 2_16 = 0010_2, E_16 = 1110_2 và D_16 = 1101_2, do đó 2ED_16 = 001011101101_2. Việc chuyển đổi sang thập phân đòi hỏi phép tính được trình bày trong Hình 1.6.",
+      "grammar": [
+        {
+          "phrase": "Determine whether each column of the binary result has a 1 or a 0",
+          "explain": "mệnh đề danh ngữ mở đầu bằng \"whether\" đóng vai trò tân ngữ cho động từ \"Determine\""
+        },
+        {
+          "phrase": "start with the largest power of 2 less than or equal to the number",
+          "explain": "mệnh đề tính từ rút gọn \"less than or equal to\" bổ nghĩa trực tiếp cho danh từ \"largest power of 2\""
+        },
+        {
+          "phrase": "21/2 = 10 with the remainder of 1 going in the 4's column",
+          "explain": "cấu trúc tuyệt đối \"with + N + V-ing\" dùng để mô tả trạng thái/kết quả kèm theo"
+        },
+        {
+          "phrase": "Writing long binary numbers becomes tedious and prone to error",
+          "explain": "danh động từ (gerund phrase) đóng vai trò chủ ngữ của câu"
+        },
+        {
+          "phrase": "Hexadecimal, a term coined by IBM in 1963, derives from...",
+          "explain": "cụm đồng danh từ (appositive) chứa mệnh đề phân từ quá khứ bị động \"coined by IBM in 1963\" để bổ nghĩa cho \"Hexadecimal\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "less than or equal to",
+          "explain": "nhỏ hơn hoặc bằng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "prone to error",
+          "explain": "dễ mắc sai sót / dễ bị lỗi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directly corresponds to",
+          "explain": "tương ứng trực tiếp với"
+        },
+        {
+          "type": "phrase",
+          "phrase": "coined by",
+          "explain": "được sáng tạo/đặt ra bởi (dùng cho từ ngữ, thuật ngữ)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "working from the left",
+          "explain": "tính toán/bắt đầu từ bên trái"
+        },
+        {
+          "type": "phrase",
+          "phrase": "and so on",
+          "explain": "và vân vân / tiếp tục tương tự như vậy"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "translation": "10 | CHƯƠNG MỘT | Từ Không đến Một\r\n\r\nBảng 1.2 Hệ thống số thập lục phân\r\n\r\nChữ số Thập lục phân | Giá trị Thập phân | Giá trị Nhị phân\r\n0 | 0 | 0000\r\n1 | 1 | 0001\r\n2 | 2 | 0010\r\n3 | 3 | 0011\r\n4 | 4 | 0100\r\n5 | 5 | 0101\r\n6 | 6 | 0110\r\n7 | 7 | 0111\r\n8 | 8 | 1000\r\n9 | 9 | 1001\r\nA | 10 | 1010\r\nB | 11 | 1011\r\nC | 12 | 1100\r\nD | 13 | 1101\r\nE | 14 | 1110\r\nF | 15 | 1111\r\n\r\nHình 1.6 Chuyển đổi một số thập lục phân sang số thập phân\r\n\r\nHàng 256 | Hàng 16 | Hàng 1\r\n2ED₁₆ = 2 × 16² + E × 16¹ + D × 16⁰ = 749₁₀\r\n(hai lần 256) (mười bốn lần 16) (mười ba lần 1)\r\n\r\nVí dụ 1.4 CHUYỂN ĐỔI TỪ NHỊ PHÂN SANG THẬP LỤC PHÂN\r\nHãy chuyển đổi số nhị phân 1111010₂ sang dạng thập lục phân.\r\n\r\nLời giải: Một lần nữa, việc chuyển đổi rất đơn giản. Hãy bắt đầu đọc từ bên phải. Bốn bit có trọng số thấp nhất (least significant bits) là 1010₂ = A₁₆. Các bit tiếp theo là 111₂ = 7₁₆. Do đó, 1111010₂ = 7A₁₆.",
+      "grammar": [
+        {
+          "phrase": "Start reading from the right",
+          "explain": "câu mệnh lệnh (imperative sentence) bắt đầu bằng động từ nguyên mẫu \"Start\", kết hợp danh động từ \"reading\" làm tân ngữ"
+        },
+        {
+          "phrase": "The four least significant bits are 1010_2 = A_16",
+          "explain": "cấu trúc so sánh nhất (superlative) với \"least\", bổ nghĩa cho danh từ \"bits\" để chỉ nhóm bit có giá trị/trọng số nhỏ nhất"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "least significant bit",
+          "explain": "bit có trọng số nhỏ nhất (bit ngoài cùng bên phải trong số nhị phân)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hexadecimal number system",
+          "explain": "hệ thống số thập lục phân (hệ cơ số 16)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "binary equivalent",
+          "explain": "giá trị tương đương trong hệ nhị phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "decimal equivalent",
+          "explain": "giá trị tương đương trong hệ thập phân"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "translation": "**Ví dụ 1.5 CHUYỂN ĐỔI TỪ THẬP PHÂN SANG THẬP LỤC PHÂN VÀ NHỊ PHÂN**\r\nChuyển đổi số thập phân $333_{10}$ sang hệ thập lục phân và nhị phân.\r\n\r\n**Lời giải** Tương tự như chuyển đổi từ thập phân sang nhị phân, việc chuyển đổi từ thập phân sang thập lục phân có thể được thực hiện từ trái sang phải hoặc từ phải sang trái.\r\n\r\nThực hiện từ trái sang phải, bắt đầu với lũy thừa lớn nhất của 16 nhỏ hơn hoặc bằng số đó (trong trường hợp này là 256). 256 chia vào 333 được 1 lần, nên có số 1 ở cột 256, còn dư $333 - 256 = 77$. 16 chia vào 77 được 4 lần, nên có số 4 ở cột 16, còn dư $77 - 16 \\times 4 = 13$. $13_{10} = \\text{D}_{16}$, nên có chữ D ở cột 1. Tóm lại, $333_{10} = 14\\text{D}_{16}$. Giờ đây có thể dễ dàng chuyển từ thập lục phân sang nhị phân như trong Ví dụ 1.3: $14\\text{D}_{16} = 101001101_2$.\r\n\r\nThực hiện từ phải sang trái, liên tục chia số đó cho 16. Số dư thu được sẽ đặt vào từng cột tương ứng. $333/16 = 20$, với số dư $13_{10} = \\text{D}_{16}$ nằm ở cột 1. $20/16 = 1$, với số dư 4 nằm ở cột 16. $1/16 = 0$, với số dư 1 nằm ở cột 256. Một lần nữa, kết quả thu được là $14\\text{D}_{16}$.\r\n\r\n---\r\n\r\n**1.4.4 Byte, Nibble và Tất Tần Tật Những Thứ Liên Quan**\r\nMột nhóm gồm 8 bit được gọi là một *byte*. Nó biểu diễn một trong $2^8 = 256$ khả năng có thể xảy ra. Dung lượng của các đối tượng lưu trữ trong bộ nhớ máy tính thường được đo bằng byte thay vì bit.\r\n\r\nMột nhóm gồm 4 bit, hay nửa byte, được gọi là một *nibble*. Nó biểu diễn một trong $2^4 = 16$ khả năng. Một chữ số thập lục phân lưu trữ một nibble và hai chữ số thập lục phân lưu trữ trọn vẹn một byte. Nibble không còn là đơn vị được sử dụng phổ biến nữa, nhưng thuật ngữ này khá thú vị.\r\n\r\nCác vi xử lý xử lý dữ liệu theo các khối gọi là *từ dữ liệu (word)*. Kích thước của một từ dữ liệu phụ thuộc vào kiến trúc của vi xử lý. Khi chương này được viết vào năm 2021, hầu hết các máy tính đều có bộ xử lý 64-bit, nghĩa là chúng hoạt động trên các từ dữ liệu 64-bit. Vào thời điểm đó, các máy tính cũ hơn xử lý các từ 32-bit vẫn còn rất phổ biến. Các vi xử lý đơn giản hơn, đặc biệt là những loại dùng trong các thiết bị như máy nướng bánh mì, sử dụng các từ dữ liệu 8-bit hoặc 16-bit.\r\n\r\nTrong một nhóm bit, bit ở cột 1 được gọi là *bit có trọng số nhỏ nhất (least significant bit - lsb)*, và bit ở đầu đối diện được gọi là *bit có trọng số lớn nhất (most significant bit - msb)*, như minh họa trong Hình 1.7(a) cho một số nhị phân 6-bit. Tương tự, trong một từ dữ liệu, các byte được xác định từ *byte có trọng số nhỏ nhất (LSB)* đến *byte có trọng số lớn nhất (MSB)*, như thể hiện trong Hình 1.7(b) đối với một số 4-byte được viết bằng tám chữ số thập lục phân.\r\n\r\nNhờ sự trùng hợp ngẫu nhiên tiện lợi, $2^{10} = 1024 \\approx 10^3$. Do đó, thuật ngữ *kilo* (tiếng Hy Lạp nghĩa là hàng nghìn) chỉ $2^{10}$. Ví dụ, $2^{10}$ byte là một...\r\n\r\n[Khung ghi chú phụ]\r\nMột *vi xử lý (microprocessor)* là bộ xử lý được tích hợp trên một vi mạch (chip) duy nhất. Cho đến những năm 1970, các bộ xử lý quá phức tạp để có thể nằm gọn trên một chip, vì vậy các bộ xử lý máy tính lớn (mainframe) được chế tạo từ các bo mạch chứa nhiều chip. Intel đã giới thiệu vi xử lý 4-bit đầu tiên, tên là 4004, vào năm 1971. Hiện nay, ngay cả những siêu máy tính phức tạp nhất cũng được xây dựng bằng cách sử dụng các vi xử lý. Chúng tôi sẽ sử dụng các thuật ngữ *vi xử lý* và *bộ xử lý* thay thế cho nhau trong suốt cuốn sách này.",
+      "grammar": [
+        {
+          "phrase": "processors were too complicated to fit on one chip",
+          "explain": "cấu trúc \"too + adj + to V\" diễn tả ý nghĩa quá... đến mức không thể làm gì"
+        },
+        {
+          "phrase": "especially those used in gadgets such as toasters",
+          "explain": "mệnh đề quan hệ rút gọn dùng quá khứ phân tử (past participle clause) bổ nghĩa cho đại từ \"those\""
+        },
+        {
+          "phrase": "when this chapter was written in 2021",
+          "explain": "câu bị động ở thì quá khứ đơn (past simple passive)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": "and all that jazz",
+          "explain": "nghĩa là \"và tất cả những thứ liên quan / tương tự\" (cách nói thân mật)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "least significant bit",
+          "explain": "bit có trọng số nhỏ nhất (LSB)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "most significant bit",
+          "explain": "bit có trọng số lớn nhất (MSB)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "by handy coincidence",
+          "explain": "nhờ một sự trùng hợp ngẫu nhiên tiện lợi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "use interchangeably",
+          "explain": "sử dụng thay thế lẫn nhau"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "translation": "**Hình 1.7** Bit và byte có trọng số lớn nhất và nhỏ nhất\r\n(a) 101100: bit có trọng số lớn nhất (most significant bit) [1] | bit có trọng số nhỏ nhất (least significant bit) [0]\r\n(b) DEAFDAD8: byte có trọng số lớn nhất (most significant byte) [DE] | byte có trọng số nhỏ nhất (least significant byte) [D8]\r\n\r\n*(Hộp ghi chú phía trên bên trái)*\r\nĐể phân biệt giữa các lũy thừa của 10 và các lũy thừa của 2, một quy ước đặt tên riêng cho các lũy thừa của 2 đã được ra đời: $2^{10}$ được gọi là kibibyte (Ki), $2^{20}$ là mebibyte (Mi), $2^{30}$ là gibibyte (Gi), $2^{40}$ là tebibyte (Ti), $2^{50}$ là pebibyte (Pi), $2^{60}$ là exbibyte (Ei), và cứ tiếp tục như vậy. Ví dụ, $2^{30}$ byte là một gibibyte (GiB).\r\n\r\n*(Đoạn văn chính phía trên)*\r\n...kilobyte (1 KB). Tương tự, *mega* (triệu) biểu thị $2^{20} \\approx 10^6$, và *giga* (tỷ) biểu thị $2^{30} \\approx 10^9$. Nếu bạn biết $2^{10} \\approx 1\\text{ nghìn}$, $2^{20} \\approx 1\\text{ triệu}$, $2^{30} \\approx 1\\text{ tỷ}$, và nhớ các lũy thừa của 2 lên đến $2^9$, bạn sẽ dễ dàng tính nhẩm ước lượng bất kỳ lũy thừa nào của 2 trong đầu.\r\n\r\n**Ví dụ 1.6: ƯỚC LƯỢNG LŨY THỪA CỦA HAI**\r\nHãy tìm giá trị xấp xỉ của $2^{24}$ mà không dùng máy tính.\r\n**Giải:** Tách số mũ thành một số bội của 10 và phần còn lại.\r\n$2^{24} = 2^{20} \\times 2^4$. Vì $2^{20} \\approx 1\\text{ triệu}$ và $2^4 = 16$, nên $2^{24} \\approx 16\\text{ triệu}$. Về mặt kỹ thuật, $2^{24} = 16.777.216$, nhưng 16 triệu đã đủ chính xác cho các mục đích thương mại/quảng bá.\r\n\r\n*(Hộp ghi chú phía dưới bên trái)*\r\nBộ nhớ trên chip (on-chip memory) và RAM được đo bằng lũy thừa của 2, nhưng ổ cứng lại được đo bằng lũy thừa của 10. Ví dụ, 32 GB (GiB) RAM thực chất là 34.359.738.368 byte bộ nhớ, trong khi 32 GB trên ổ cứng lại là 32.000.000.000 byte bộ nhớ.\r\n\r\n*(Đoạn văn chính giữa)*\r\n1024 byte được gọi là một *kilobyte* (KB) hoặc *kibibyte* (KiB). 1024 bit được gọi là một *kilobit* (Kb hoặc Kbit) hoặc *kibibit* (Kib hoặc Kibit). Tương tự, các đơn vị MB/MiB, Mb/Mib, GB/GiB, và Gb/Gib được dùng cho hàng triệu và hàng tỷ byte và bit. Dung lượng bộ nhớ thường được đo bằng byte. Tốc độ truyền thông thường được đo bằng các lũy thừa của 10 theo đơn vị bit/giây. Ví dụ, tốc độ tối đa của một modem quay số (dial-up) thường là 56 kbits/giây, tức là 56.000 bits/giây.\r\n\r\n**1.4.5 Phép cộng số nhị phân**\r\nPhép cộng nhị phân rất giống với phép cộng thập phân nhưng dễ hơn, như được thể hiện ở Hình 1.8. Tương tự như trong phép cộng thập phân, nếu tổng của hai số lớn hơn mức có thể chứa trong một chữ số đơn lẻ, chúng ta sẽ *nhớ* 1 sang cột tiếp theo. Hình 1.8 so sánh phép cộng số thập phân và số nhị phân. Ở cột ngoài cùng bên phải của Hình 1.8(a), $7 + 9 = 16$, số này không thể chứa vừa trong một chữ số vì nó lớn hơn 9. Do đó, chúng ta ghi lại chữ số hàng đơn vị là 6, và nhớ chữ số hàng chục là 1 sang cột tiếp theo. Tương tự, trong hệ nhị phân, nếu tổng của hai số lớn hơn 1, chúng ta sẽ nhớ chữ số hàng 2 sang cột tiếp theo. Ví dụ, ở cột ngoài cùng bên phía phải của Hình 1.8(b), tổng...\r\n\r\n**Hình 1.8** Các ví dụ về phép cộng có nhớ: (a) thập phân (b) nhị phân",
+      "grammar": [
+        {
+          "phrase": "If you know 2^10 ≈ 1 thousand, ..., it is easy to estimate any power of two in your head",
+          "explain": "mệnh đề điều kiện kết hợp với cấu trúc chủ ngữ giả \"it is + adj + to-V\""
+        },
+        {
+          "phrase": "Split the exponent into a multiple of ten and the remainder",
+          "explain": "câu mệnh lệnh (imperative clause) bắt đầu bằng động từ nguyên mẫu \"Split\""
+        },
+        {
+          "phrase": "as shown in Figure 1.8",
+          "explain": "mệnh đề rút gọn dạng quá khứ phân tử (past participle clause) mang nghĩa bị động (\"như được thể hiện ở...\")"
+        },
+        {
+          "phrase": "greater than what fits in a single digit",
+          "explain": "mệnh đề danh từ (noun clause) \"what fits in a single digit\" làm tân ngữ cho giới từ so sánh \"than\""
+        },
+        {
+          "phrase": "which cannot fit in a single digit because it is greater than 9",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) giải thích thêm cho kết quả \"16\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "most significant bit",
+          "explain": "bit có trọng số lớn nhất (bit có giá trị cao nhất)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "least significant bit",
+          "explain": "bit có trọng số nhỏ nhất (bit có giá trị thấp nhất)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "naming convention",
+          "explain": "quy ước đặt tên"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in your head",
+          "explain": "tính nhẩm trong đầu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "close enough for marketing purposes",
+          "explain": "đủ chính xác cho các mục đích thương mại/quảng cáo"
+        },
+        {
+          "type": "collocation",
+          "phrase": "on-chip memory",
+          "explain": "bộ nhớ tích hợp trên chip"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary addition",
+          "explain": "phép cộng nhị phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "carry over to the next column",
+          "explain": "nhớ/chuyển (chữ số nhớ) sang cột tiếp theo"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "translation": "TRANG SỐ: 13\r\n\r\n$1 + 1 = 2_{10} = 10_2$ không thể nằm vừa trong một chữ số nhị phân đơn lẻ. Vì vậy, chúng ta ghi lại chữ số hàng đơn vị (0) và nhớ chữ số hàng 2 (1) của kết quả sang cột tiếp theo. Ở cột thứ hai, tổng là $1 + 1 + 1 = 3_{10} = 11_2$. Một lần nữa, chúng ta ghi lại chữ số hàng đơn vị (1) và nhớ chữ số hàng 2 (1) sang cột tiếp theo. Vì lý do hiển nhiên, bit được nhớ sang cột lân cận được gọi là *bit nhớ* (carry bit).\r\n\r\n**Ví dụ 1.7 PHÉP CỘNG NHỊ PHÂN**\r\n\r\nTính $0111_2 + 0101_2$.\r\n\r\n**Lời giải:** Hình 1.9 cho thấy tổng là $1100_2$. Các bit nhớ được thể hiện bằng màu xanh dương. Chúng ta có thể kiểm tra lại kết quả bằng cách thực hiện lại phép tính trong hệ thập phân: $0111_2 = 7_{10}$; $0101_2 = 5_{10}$. Tổng là $12_{10} = 1100_2$.\r\n\r\n---\r\n[Hình 1.9 ở lề]\r\n  111\r\n  0111\r\n+ 0101\r\n------\r\n  1100\r\n**Hình 1.9** Ví dụ phép cộng nhị phân\r\n---\r\n\r\nCác hệ thống kỹ thuật số thường hoạt động trên một số lượng chữ số cố định. Phép cộng được gọi là *tràn* (overflow) nếu kết quả quá lớn không thể vừa với số chữ số hiện có. Ví dụ, một số 4-bit có phạm vi $[0, 15]$. Phép cộng nhị phân 4-bit sẽ bị tràn nếu kết quả vượt quá 15. Bit thứ năm của tổng sẽ bị bỏ đi, tạo ra kết quả không chính xác trong bốn bit còn lại. Hiện tượng tràn có thể được phát hiện bằng cách kiểm tra xem có bit nhớ đi ra (carry out) từ cột có giá trị lớn nhất hay không.\r\n\r\n**Ví dụ 1.8 PHÉP CỘNG CÓ HIỆN TƯỢNG TRÀN**\r\n\r\nTính $1101_2 + 0101_2$. Hiện tượng tràn có xảy ra không?\r\n\r\n**Lời giải:** Hình 1.10 cho thấy tổng là $10010_2$. Kết quả này tràn khỏi phạm vi của một số nhị phân 4-bit. Nếu kết quả bắt buộc phải lưu dưới dạng 4 bit, bit có giá trị lớn nhất sẽ bị bỏ đi, để lại kết quả không chính xác là $0010_2$. Nếu phép tính được thực hiện bằng cách sử dụng các số có từ 5 bit trở lên, kết quả $10010_2$ sẽ là chính xác.\r\n\r\n---\r\n[Hình 1.10 ở lề]\r\n 11 1\r\n  1101\r\n+ 0101\r\n------\r\n 10010\r\n**Hình 1.10** Ví dụ phép cộng nhị phân có hiện tượng tràn\r\n---\r\n\r\n**1.4.6 Số nhị phân có dấu**\r\n\r\nCho đến nay, chúng ta mới chỉ xem xét các số nhị phân *không dấu* (unsigned) biểu diễn các lượng dương. Chúng ta sẽ thường xuyên muốn biểu diễn cả số dương và số âm, điều này đòi hỏi một hệ thống số nhị phân khác. Có một số phương pháp tồn tại để biểu diễn số nhị phân *có dấu* (signed). Hai phương pháp được sử dụng rộng rãi nhất là *dấu/độ lớn* (sign/magnitude) và *bù 2* (two's complement).\r\n\r\n**Số dạng Dấu/Độ lớn**\r\nSố dạng *dấu/độ lớn* rất dễ hiểu một cách trực quan vì chúng phù hợp với thói quen viết số âm của chúng ta: gồm một dấu trừ theo sau bởi độ lớn. Một số dạng dấu/độ lớn $N$-bit sử dụng bit có...",
+      "grammar": [
+        {
+          "phrase": "the bit that is carried over to the neighboring column is called the carry bit",
+          "explain": "kết hợp mệnh đề quan hệ (that is carried over...) bổ nghĩa cho \"the bit\" và cấu trúc bị động (is called)"
+        },
+        {
+          "phrase": "Addition is said to overflow if the result is too big to fit in the available digits",
+          "explain": "bị động tường thuật (is said to V) kết hợp điều kiện loại 1 và cấu trúc chỉ giới hạn \"too... to V\""
+        },
+        {
+          "phrase": "If the computation had been done using numbers with five or more bits, the result 10010_2 would have been correct",
+          "explain": "câu điều kiện loại 3 (giả định trái ngược với thực tế trong quá khứ)"
+        },
+        {
+          "phrase": "requiring a different binary number system",
+          "explain": "mệnh đề phân từ hiện tại (-ing) đóng vai trò bổ nghĩa giải thích cho hệ quả của cả mệnh đề phía trước"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "carry bit",
+          "explain": "bit nhớ (trong phép cộng số học/nhị phân)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "fit in",
+          "explain": "nằm vừa, vừa vặn trong phạm vi nào đó"
+        },
+        {
+          "type": "collocation",
+          "phrase": "fixed number of digits",
+          "explain": "số lượng chữ số cố định"
+        },
+        {
+          "type": "phrase",
+          "phrase": "is said to overflow",
+          "explain": "được gọi là bị tràn (xảy ra hiện tượng tràn số)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "most significant column",
+          "explain": "cột chứa chữ số/bit có giá trị lớn nhất (MSB)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "carry out",
+          "explain": "bit nhớ đi ra khỏi vị trí bit cao nhất"
+        },
+        {
+          "type": "collocation",
+          "phrase": "unsigned binary numbers",
+          "explain": "các số nhị phân không dấu (chỉ biểu diễn số dương)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "signed binary numbers",
+          "explain": "các số nhị phân có dấu (biểu diễn cả số dương và âm)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "sign/magnitude",
+          "explain": "phương pháp biểu diễn số dạng dấu/độ lớn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "two's complement",
+          "explain": "phương pháp biểu diễn số dạng bù 2"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "translation": "**TRANG SỐ: 14**\r\n\r\n[Cột lề trái - Bài học lịch sử]\r\nTên lửa Ariane 5 trị giá 7 tỷ USD, được phóng vào ngày 4 tháng 6 năm 1996, đã chệch hướng 40 giây sau khi rời bệ phóng, bị vỡ vụn và phát nổ. Nguyên nhân thất bại là do máy tính điều khiển tên lửa bị tràn số ngoài phạm vi 16-bit và bị treo. Mã nguồn đã được kiểm thử diện rộng trên tên lửa Ariane 4. Tuy nhiên, Ariane 5 sở hữu động cơ nhanh hơn, tạo ra các giá trị lớn hơn cho máy tính điều khiển, dẫn đến sự cố tràn số.\r\n\r\n[Chú thích ảnh]\r\nHình ảnh do ESA/CNES/ARIANESPACE-Service Optique CS6 cung cấp.\r\n\r\n[Cột lề trái - Khái niệm Bù 1]\r\nKết quả của việc đảo tất cả các bit trong một số được gọi là *bù 1* (one's complement) của số đó. Ví dụ, bù 1 của 0110111 là 1001000. Nó được gọi là bù 1 vì khi bạn cộng hai số này lại với nhau, bạn sẽ thu được toàn bộ chữ số 1. Ví dụ, 0110111 + 1001000 = 1111111.\r\n\r\n---\r\n\r\n[Nội dung chính]\r\n... bit có nghĩa lớn nhất (MSB) làm bit dấu và $N - 1$ bit còn lại làm độ lớn (giá trị tuyệt đối). Bit dấu bằng 0 biểu thị số dương và bit dấu bằng 1 biểu thị số âm.\r\n\r\n**Ví dụ 1.9 SỐ DẠNG DẤU/ĐỘ LỚN**\r\nHãy viết số 5 và $-5$ dưới dạng số dấu/độ lớn 4-bit.\r\n\r\n**Lời giải** Cả hai số đều có độ lớn $5_{10} = 101_2$. Do đó, $5_{10} = 0101_2$ và $-5_{10} = 1101_2$.\r\n\r\nRất tiếc, phép cộng nhị phân thông thường không áp dụng được cho các số dạng dấu/độ lớn. Ví dụ, khi dùng phép cộng thông thường cho $-5_{10} + 5_{10}$ sẽ cho ra $1101_2 + 0101_2 = 10010_2$, một kết quả vô lý.\r\n\r\nMột số dạng dấu/độ lớn $N$-bit nằm trong khoảng $[-2^{N-1} + 1, 2^{N-1} - 1]$. Các số dạng dấu/độ lớn có điểm hơi kỳ lạ là tồn tại cả $+0$ và $-0$. Cả hai đều chỉ số 0. Như bạn có thể đoán, việc có hai biểu diễn khác nhau cho cùng một số có thể gây ra nhiều rắc rối.\r\n\r\n**Số Bù 2 (Two’s Complement)**\r\nSố *bù 2* hoàn toàn giống với số nhị phân không dấu, ngoại trừ việc vị trí bit có nghĩa lớn nhất có trọng số là $-2^{N-1}$ thay vì $2^{N-1}$. Chúng khắc phục được các nhược điểm của dạng dấu/độ lớn: số 0 chỉ có một biểu diễn duy nhất, và phép cộng thông thường hoạt động bình thường.\r\n\r\nTrong biểu diễn bù 2, số 0 được viết dưới dạng toàn số 0: $00...000_2$. Số dương lớn nhất có bit 0 ở vị trí có nghĩa lớn nhất và các bit 1 ở các vị trí còn lại: $01...111_2 = 2^{N-1} - 1$. Số âm nhỏ nhất (âm nhiều nhất) có bit 1 ở vị trí có nghĩa lớn nhất và các bit 0 ở các vị trí còn lại: $10...000_2 = -2^{N-1}$. Và số $-1$ được viết dưới dạng toàn số 1: $11...111_2$.\r\n\r\nLưu ý rằng các số dương có bit 0 ở vị trí có nghĩa lớn nhất và các số âm có bit 1 ở vị trí này, do đó bit có nghĩa lớn nhất có thể được coi là bit dấu. Tuy nhiên, tổng thể giá trị của số được diễn giải khác nhau giữa số bù 2 và số dạng dấu/độ lớn.\r\n\r\nDấu của một số bù 2 được đảo ngược (ví dụ từ $+5$ thành $-5$ hoặc từ $-17$ thành $+17$) bằng cách đảo tất cả các bit trong số đó rồi cộng 1 vào vị trí bit có nghĩa nhỏ nhất (LSB). Quy trình này được gọi là phương pháp *đảo dấu* (reversing the sign). Phương pháp này rất hữu ích trong việc tìm dạng biểu diễn của một số âm hoặc xác định độ lớn của một số âm.\r\n\r\n**Ví dụ 1.10 BIỂU DIỄN BÙ 2 CỦA MỘT SỐ ÂM**\r\nTìm dạng biểu diễn bù 2 4-bit của số $-2_{10}$.",
+      "grammar": [
+        {
+          "phrase": "launched on June 4, 1996, veered off course 40 seconds after launch, broke up, and exploded",
+          "explain": "mệnh đề rút gọn dùng quá khứ phân tử \"launched on...\" phối hợp với chuỗi động từ thì quá khứ đơn miêu tả một loạt sự kiện diễn ra liên tiếp"
+        },
+        {
+          "phrase": "computer controlling the rocket overflowed its 16-bit range and crashed",
+          "explain": "hiện tại phân tử \"controlling\" đóng vai trò là mệnh đề quan hệ rút gọn bổ nghĩa cho \"computer\""
+        },
+        {
+          "phrase": "a faster engine that produced larger values for the control computer, leading to the overflow",
+          "explain": "mệnh đề quan hệ \"that produced...\" kết hợp với mệnh đề phân tử \"-ing\" (leading to...) diễn tả kết quả của sự việc đứng trước"
+        },
+        {
+          "phrase": "It can be troublesome to have two different representations for the same number",
+          "explain": "cấu trúc chủ ngữ giả \"It + be + adj + to V\" dùng để đưa ra nhận định hoặc đánh giá"
+        },
+        {
+          "phrase": "The sign of a two’s complement number is reversed by inverting the bits in the number and then adding 1 to the least significant bit position",
+          "explain": "cấu trúc câu bị động ở thì hiện tại đơn kết hợp với giới từ \"by + V-ing\" chỉ phương thức/cách thức thực hiện hành động"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "veer off course",
+          "explain": "lệch khỏi quỹ đạo, chệch hướng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "most significant bit",
+          "explain": "bit có nghĩa lớn nhất (MSB, bit quan trọng nhất nằm ngoài cùng bên trái)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "least significant bit",
+          "explain": "bit có nghĩa nhỏ nhất (LSB, bit nằm ngoài cùng bên phải)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sign/magnitude representation",
+          "explain": "biểu diễn dạng dấu/độ lớn"
+        },
+        {
+          "type": "phrase",
+          "phrase": "two's complement",
+          "explain": "dạng bù 2 (biểu diễn số bù 2)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "one's complement",
+          "explain": "dạng bù 1 (biểu diễn số bù 1)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "overflow its range",
+          "explain": "bị tràn số / vượt quá phạm vi lưu trữ"
+        },
+        {
+          "type": "phrase",
+          "phrase": "reversing the sign",
+          "explain": "phương pháp đảo dấu"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "translation": "**Lời giải:** Bắt đầu bằng cách biểu diễn độ lớn: $+2_{10} = 0010_2$. Để có $-2_{10}$, ta đảo dấu bằng cách đảo ngược các bit và cộng 1. Đảo $0010_2$ thu được $1101_2$. $1101_2 + 1 = 1110_2$. Do đó, $-2_{10}$ là $1110_2$.\r\n\r\n*Khung phụ (trên):*\r\nQuá trình *đảo dấu* trong lịch sử thường được gọi là \"lấy bù 2\" (taking the two's complement). Tuy nhiên, chúng tôi nhận thấy rằng thuật ngữ này đôi khi khiến mọi người nghĩ rằng họ *luôn luôn* phải \"lấy bù 2\" khi làm việc với các số bù 2, nhưng điều đó không đúng! Quá trình đảo dấu này chỉ đôi khi được sử dụng khi làm việc với các số bù 2 âm.\r\n\r\n**Ví dụ 1.11: GIÁ TRỊ CỦA SỐ BÙ 2 ÂM**\r\nTìm giá trị thập phân của số bù 2 4-bit $0x9$ (tức $1001_2$).\r\n**Lời giải:** $1001_2$ có bit dẫn đầu là 1, nên nó phải là số âm. Để tìm độ lớn của nó, ta đảo dấu bằng cách đảo các bit và cộng 1. Đảo $1001_2 = 0110_2$. $0110_2 + 1 = 0111_2 = 7_{10}$. Do đó, $1001_2 = -7_{10}$.\r\n\r\nCác số bù 2 có ưu điểm vượt trội là phép cộng hoạt động chính xác cho cả số dương và số âm. Hãy nhớ lại rằng khi cộng các số $N$-bit, bit nhớ (carry out) thoát ra khỏi bit thứ $N$ (tức bit kết quả thứ $N + 1$) sẽ bị loại bỏ.\r\n\r\n**Ví dụ 1.12: CỘNG CÁC SỐ BÙ 2**\r\nTính (a) $-2_{10} + 1_{10}$ và (b) $-7_{10} + 7_{10}$ bằng cách sử dụng số bù 2.\r\n**Lời giải:** (a) $-2_{10} + 1_{10} = 1110_2 + 0001_2 = 1111_2 = -1_{10}$. (b) $-7_{10} + 7_{10} = 1001_2 + 0111_2 = 10000_2$. Bit thứ 5 bị loại bỏ, để lại kết quả 4-bit chính xác là $0000_2$.\r\n\r\nPhép trừ được thực hiện bằng cách lấy bù 2 của số thứ hai, sau đó thực hiện phép cộng.\r\n\r\n**Ví dụ 1.13: TRỪ CÁC SỐ BÙ 2**\r\nTính (a) $5_{10} - 3_{10}$ và (b) $3_{10} - 5_{10}$ bằng số bù 2 4-bit.\r\n**Lời giải:** (a) $3_{10} = 0011_2$. Lấy bù 2 của nó để thu được $-3_{10} = 1101_2$. Bây giờ, cộng $5_{10} + (-3_{10}) = 0101_2 + 1101_2 = 0010_2 = 2_{10}$. Lưu ý rằng bit nhớ thoát ra ở vị trí có ý nghĩa lớn nhất sẽ bị loại bỏ vì kết quả được lưu trữ trong 4 bit. (b) Lấy bù 2 của $5_{10}$ để thu được $-5_{10} = 1011_2$. Bây giờ, cộng $3_{10} + (-5_{10}) = 0011_2 + 1011_2 = 1110_2 = -2_{10}$.\r\n\r\n*Khung phụ (dưới):*\r\nSố bù 2 có tên gọi này xuất phát từ thực tế là việc tạo số bù (số âm) của một số được tìm bằng cách lấy $2^N$ trừ đi số đó (gọi theo cơ số của nó: *bù của hai*)—do đó gọi là bù 2. Ví dụ, để tạo số bù 4-bit của 7 (tức -7), ta thực hiện: $2^4 - 7 = 10000 - 0111 = (1111 + 1) - 0111 = (1111 - 0111) + 1 = 1000 + 1 = 1001$. Đây là biểu diễn bù 2 4-bit của -7. Chú ý rằng bước cuối cùng tương tự như phương pháp đảo dấu, tức là đảo các bit của 0111 (thành 1000) và cộng 1.\r\n\r\nSố bù 2 của 0 được tìm bằng cách đảo tất cả các bit (tạo ra $11\\dots111_2$) và cộng 1, tạo ra toàn số 0, sau khi bỏ qua bit nhớ ở vị trí cao nhất. Do đó, số không luôn luôn được biểu diễn bằng toàn bộ bit 0. Khác với hệ thống dấu/độ lớn (sign/magnitude), hệ thống bù 2 không có số -0 riêng biệt. Số 0 được coi là số dương vì bit dấu của nó là 0.",
+      "grammar": [
+        {
+          "phrase": "makes people think that they always have to \"take the two's complement\"",
+          "explain": "cấu trúc sai khiến \"make sb do sth\" kết hợp mệnh đề danh ngữ bổ nghĩa cho \"think\""
+        },
+        {
+          "phrase": "Two's complement numbers have the compelling advantage that addition works properly for both positive and negative numbers",
+          "explain": "mệnh đề đồng vị (appositive clause) bắt đầu bằng \"that\" bổ nghĩa trực tiếp cho danh từ \"advantage\""
+        },
+        {
+          "phrase": "Recall that when adding N-bit numbers, the carry out of the Nth bit is discarded",
+          "explain": "mệnh đề danh ngữ làm tân ngữ cho \"Recall\", chứa mệnh đề trạng ngữ thời gian rút gọn \"when adding...\" và dạng bị động \"is discarded\""
+        },
+        {
+          "phrase": "Subtraction is performed by taking the two's complement of the second number, then adding",
+          "explain": "cấu trúc câu bị động chỉ cách thức thực hiện (is performed by + V-ing)"
+        },
+        {
+          "phrase": "earned their name from the fact that creating the complement of a number is found by subtracting it from 2^N",
+          "explain": "mệnh đề bổ nghĩa cho danh từ \"fact\", sử dụng danh động từ \"creating...\" làm chủ ngữ và dạng bị động \"is found by\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "two's complement",
+          "explain": "thuật ngữ kỹ thuật chỉ số bù 2 trong hệ thống số nhị phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "reverse the sign",
+          "explain": "đảo dấu (chuyển số từ dương sang âm hoặc ngược lại)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "carry out",
+          "explain": "bit nhớ tràn ra ngoài khi thực hiện phép cộng nhị phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "compelling advantage",
+          "explain": "ưu điểm vượt trội, lợi thế rất thuyết phục"
+        },
+        {
+          "type": "phrase",
+          "phrase": "most significant position",
+          "explain": "vị trí bit có ý nghĩa lớn nhất (MSB)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sign/magnitude system",
+          "explain": "hệ thống biểu diễn số nhị phân kiểu dấu/độ lớn"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "translation": "Tương tự như số không dấu (unsigned numbers), các số bù 2 (two’s complement) $N$-bit đại diện cho một trong $2^N$ giá trị có thể có. Tuy nhiên, các giá trị này được chia đều giữa số dương và số âm. Ví dụ, một số không dấu 4-bit biểu diễn 16 giá trị: từ 0 đến 15. Một số bù 2 4-bit cũng biểu diễn 16 giá trị: từ $-8$ đến $7$. Nhìn chung, khoảng giá trị của số bù 2 $N$-bit trải dài trong đoạn $[-2^{N-1}, 2^{N-1} - 1]$. Điều này hoàn toàn hợp lý vì số lượng số âm nhiều hơn số dương 1 đơn vị do không có số $-0$. Số âm nhỏ nhất $10\\dots000_2 = -2^{N-1}$ đôi khi được gọi là \"số kỳ dị\" (weird number). Mã bù 2 của nó được tìm bằng cách đảo tất cả các bit (tạo thành $01\\dots111_2$) rồi cộng thêm 1, kết quả lại tạo ra $10\\dots000_2$, chính là số kỳ dị ban đầu. Vì vậy, số âm này không có số dương tương ứng.\r\n\r\nPhép cộng hai số $N$-bit cùng dấu (cùng dương hoặc cùng âm) có thể gây ra hiện tượng tràn số (overflow) nếu kết quả lớn hơn $2^{N-1} - 1$ hoặc nhỏ hơn $-2^{N-1}$. Việc cộng một số dương với một số âm không bao giờ gây ra hiện tượng tràn số. Khác với số không dấu, một bit nhớ (carry out) đi ra khỏi cột có giá trị lớn nhất (MSB) không thể hiện việc bị tràn số. Thay vào đó, hiện tượng tràn số xảy ra nếu hai số được cộng có cùng bit dấu nhưng kết quả thu được lại có bit dấu ngược lại.\r\n\r\nVí dụ 1.14 CỘNG CÁC SỐ BÙ 2 CÓ HIỆN TƯỢNG TRÀN SỐ\r\nTính $4_{10} + 5_{10}$ bằng cách sử dụng số bù 2 4-bit. Kết quả có bị tràn số không?\r\nLời giải $4_{10} + 5_{10} = 0100_2 + 0101_2 = 1001_2 = -7_{10}$. Kết quả này vượt quá khoảng giá trị của số bù 2 dương 4-bit, dẫn đến kết quả bị sai thành số âm. Nếu phép tính được thực hiện bằng cách sử dụng 5 bit trở lên, kết quả $01001_2 = 9_{10}$ sẽ chính xác.\r\n\r\nKhi một số bù 2 được mở rộng ra nhiều bit hơn, bit dấu phải được sao chép vào các vị trí bit quan trọng nhất (các bit cao hơn). Quá trình này được gọi là mở rộng dấu (sign extension). Ví dụ, các số 3 và $-3$ được viết dưới dạng số bù 2 4-bit lần lượt là 0011 và 1101. Chúng được mở rộng dấu thành 7 bit bằng cách chép bit dấu vào ba bit cao mới để tạo thành 0000011 và 1111101, lần lượt là các dạng biểu diễn 7-bit của 3 và $-3$.\r\n\r\nSo sánh các Hệ thống Số\r\nBa hệ thống số nhị phân được sử dụng phổ biến nhất là số không dấu, số bù 2, và số dấu/lượng (sign/magnitude). Bảng 1.3 so sánh khoảng giá trị của các số $N$-bit trong từng hệ thống này. Số bù 2 rất tiện lợi vì chúng đại diện cho cả số nguyên dương lẫn số nguyên âm và vì phép cộng thông thường hoạt động trên mọi số. Phép trừ được thực hiện bằng cách lấy số đối của số thứ hai (tức là đảo...",
+      "grammar": [
+        {
+          "phrase": "It should make sense that there is one more negative number than positive number because there is no -0.",
+          "explain": "Cấu trúc \"It should make sense that...\" (Chuyện... là hoàn toàn hợp lý) kết hợp dạng so sánh hơn \"one more negative number than positive number\""
+        },
+        {
+          "phrase": "overflow occurs if the two numbers being added have the same sign bit and the result has the opposite sign bit",
+          "explain": "Mệnh đề điều kiện kết hợp danh từ kèm mệnh đề quan hệ rút gọn dạng bị động \"the two numbers being added\" (hai số đang được cộng)"
+        },
+        {
+          "phrase": "If the computation had been done using five or more bits, the result 01001_2 = 9_10 would have been correct.",
+          "explain": "Câu điều kiện loại 3 (Third Conditional) giả định một sự việc không có thật trong quá khứ (\"had been done ... would have been\")"
+        },
+        {
+          "phrase": "When a two’s complement number is extended to more bits, the sign bit must be copied into the most significant bit positions.",
+          "explain": "Mệnh đề trạng ngữ chỉ thời gian dùng thể bị động (\"is extended\") đi kèm câu chính ở dạng bị động với động từ khuyết thiếu (\"must be copied\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "two’s complement",
+          "explain": "hệ thống mã bù 2 trong kỹ thuật số và máy tính"
+        },
+        {
+          "type": "phrase",
+          "phrase": "weird number",
+          "explain": "số kỳ dị (số âm có trị tuyệt đối lớn nhất trong hệ bù 2, không thể biểu diễn dạng dương tương ứng)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sign extension",
+          "explain": "quá trình mở rộng dấu (sao chép bit dấu sang các bit cao hơn để tăng độ dài bit)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "most significant column",
+          "explain": "cột/vị trí bit có giá trị cao nhất (MSB)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "carry out",
+          "explain": "bit nhớ tạo ra từ hàng/cột ngoài cùng bên trái"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sign/magnitude",
+          "explain": "hệ thống biểu diễn số nhị phân dạng \"dấu và độ lớn\""
+        },
+        {
+          "type": "phrase",
+          "phrase": "positive counterpart",
+          "explain": "số dương tương ứng có cùng trị tuyệt đối"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "translation": "1.5 Cổng lô-gíc | 17\r\n\r\nBảng 1.3 Miền giá trị của các số N-bit\r\nHệ thống | Miền giá trị\r\nKhông dấu (Unsigned) | [0, 2^N - 1]\r\nBù 2 (Two's Complement) | [-2^(N-1), 2^(N-1) - 1]\r\nDấu/Độ lớn (Sign/Magnitude) | [-2^(N-1) + 1, 2^(N-1) - 1]\r\n\r\nHình 1.11 Trục số và các mã hóa nhị phân 4-bit\r\n\r\n...dấu), rồi sau đó cộng lại. Trừ khi có quy định khác, hãy mặc định rằng tất cả các số nhị phân có dấu đều sử dụng biểu diễn bù 2.\r\n\r\nHình 1.11 minh họa một trục số cho biết giá trị của các số 4-bit trong từng hệ thống. Các số không dấu trải dài trong khoảng [0, 15] theo thứ tự nhị phân thông thường. Các số bù 2 nằm trong khoảng [-8, 7]. Các số không âm [0, 7] dùng chung mã hóa với các số không dấu. Các số âm [-8, -1] được mã hóa sao cho giá trị nhị phân không dấu lớn hơn sẽ biểu diễn một số gần 0 hơn. Chú ý rằng con số kỳ lạ, 1000, biểu diễn -8 và không có số dương tương ứng. Các số có dấu/độ lớn nằm trong khoảng [-7, 7]. Bit quan trọng nhất (MSB) là bit dấu. Các số dương [1, 7] dùng chung mã hóa với các số không dấu. Các số âm đối xứng nhưng bit dấu được bật lên. Số 0 được biểu diễn bởi cả 0000 và 1000. Do đó, các số dấu/độ lớn N-bit chỉ biểu diễn 2^N - 1 số nguyên vì có hai cách biểu diễn cho số 0. Các số nhị phân không dấu hoặc bù 2 N-bit biểu diễn được 2^N số nguyên.\r\n\r\n1.5 CỔNG LÔ-GÍC\r\nBây giờ khi đã biết cách sử dụng các biến nhị phân để biểu diễn thông tin, chúng ta sẽ khám phá các hệ thống số thực hiện các phép toán trên các biến nhị phân này. Cổng lô-gíc (logic gates) là các mạch số đơn giản nhận một hoặc nhiều đầu vào nhị phân và tạo ra một đầu ra nhị phân. Cổng lô-gíc được vẽ bằng một ký hiệu thể hiện (các) đầu vào và đầu ra. Các đầu vào thường được vẽ...",
+      "grammar": [
+        {
+          "phrase": "Unless stated otherwise, assume that all signed binary numbers use two’s complement representation",
+          "explain": "Mệnh đề rút gọn điều kiện \"Unless stated otherwise\" kết hợp câu mệnh lệnh \"assume that...\""
+        },
+        {
+          "phrase": "The negative numbers [-8, -1] are encoded such that a larger unsigned binary value represents a number closer to 0",
+          "explain": "Cấu trúc \"such that\" (sao cho) dẫn đầu mệnh đề giải thích cách thức/kết quả + thể bị động \"are encoded\""
+        },
+        {
+          "phrase": "Now that we know how to use binary variables to represent information, we explore digital systems",
+          "explain": "Cấu trúc \"Now that...\" (Một khi/Bây giờ vì...) dùng để dẫn dắt mệnh đề chỉ nguyên nhân hoặc bối cảnh hiện tại"
+        },
+        {
+          "phrase": "Logic gates are simple digital circuits that take one or more binary inputs and produce a binary output",
+          "explain": "Mệnh đề quan hệ sử dụng \"that\" làm chủ ngữ bổ nghĩa cho danh từ \"simple digital circuits\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "unless stated otherwise",
+          "explain": "trừ khi có quy định/thông báo khác"
+        },
+        {
+          "type": "collocation",
+          "phrase": "two's complement representation",
+          "explain": "biểu diễn bù 2 (phương pháp mã hóa số âm trong máy tính)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "sign/magnitude",
+          "explain": "dấu/độ lớn (hệ thống biểu diễn số có dấu trong kỹ thuật số)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "span the range",
+          "explain": "nằm trong phạm vi / trải dài trong khoảng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "positive counterpart",
+          "explain": "số dương tương ứng / đối tác dương"
+        },
+        {
+          "type": "collocation",
+          "phrase": "most significant bit",
+          "explain": "bit quan trọng nhất / bit có trọng số lớn nhất (MSB)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "now that",
+          "explain": "bây giờ khi / một khi mà"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary variable",
+          "explain": "biến nhị phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic gate",
+          "explain": "cổng lô-gíc (mạch logic cơ bản)"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "translation": "18 | CHƯƠNG MỘT: Từ Số Không Đến Số Một\r\n\r\n[Hình 1.12: Cổng NOT]\r\nNOT\r\n$Y = \\bar{A}$\r\nA | Y\r\n0 | 1\r\n1 | 0\r\n\r\n[Hình 1.13: Cổng đệm (Buffer)]\r\nBUF\r\n$Y = A$\r\nA | Y\r\n0 | 0\r\n1 | 1\r\n\r\n[Hình 1.14: Cổng AND]\r\nAND\r\n$Y = AB$\r\nA | B | Y\r\n0 | 0 | 0\r\n0 | 1 | 0\r\n1 | 0 | 0\r\n1 | 1 | 1\r\n\r\n[Ghi chú biên]: Theo Larry Wall, cha đẻ của ngôn ngữ lập trình Perl: “Ba đức tính cốt lõi của một lập trình viên là Lười biếng, Nóng tấy (Thiếu kiên nhẫn) và Tự hào (Kiêu ngạo).”\r\n\r\n...ở bên trái (hoặc phía trên) và các đầu ra ở bên phải (hoặc phía dưới). Các nhà thiết kế kỹ thuật số thường dùng các chữ cái ở đầu bảng chữ cái để đặt tên cho đầu vào của cổng và chữ cái $Y$ cho đầu ra. Mối quan hệ giữa đầu vào và đầu ra có thể được mô tả bằng một bảng sự thật (truth table) hoặc một phương trình Boolean. Một *bảng sự thật* liệt kê các đầu vào ở bên trái và đầu ra tương ứng ở bên phải. Bảng này có một hàng cho mỗi sự kết hợp có thể có của các đầu vào. Một *phương trình Boolean* là một biểu thức toán học sử dụng các biến nhị phân.\r\n\r\n### 1.5.1 Cổng NOT\r\nMột *cổng NOT* có một đầu vào, $A$, và một đầu ra, $Y$, như minh họa trong Hình 1.12. Đầu ra của cổng NOT là nghịch đảo của đầu vào. Nếu $A$ là SAI (FALSE), thì $Y$ sẽ là ĐÚNG (TRUE). Nếu $A$ là ĐÚNG, thì $Y$ sẽ là SAI. Mối quan hệ này được tóm tắt bằng bảng sự thật và phương trình Boolean trong hình. Dấu gạch ngang trên chữ $A$ trong phương trình Boolean được phát âm là *NOT*, do đó $Y = \\bar{A}$ được đọc là “$Y$ bằng NOT $A$”. Cổng NOT còn được gọi là *bộ đảo* (inverter).\r\nCác tài liệu khác sử dụng nhiều dạng ký hiệu khác nhau cho NOT, bao gồm $Y = A'$, $Y = \\neg A$, $Y = !A$, hoặc $Y = \\sim A$. Chúng tôi sẽ chỉ dùng duy nhất ký hiệu $Y = \\bar{A}$, nhưng bạn đừng bối rối nếu bắt gặp ký hiệu khác ở những nơi khác.\r\n\r\n### 1.5.2 Bộ đệm (Buffer)\r\nCổng logic một đầu vào còn lại được gọi là *bộ đệm* (buffer) và được thể hiện trong Hình 1.13. Nó chỉ đơn giản là sao chép giá trị đầu vào ra đầu ra.\r\nDưới góc độ logic, bộ đệm không khác gì một dây dẫn, vì vậy có vẻ nó vô dụng. Tuy nhiên, dưới góc độ tương tự (analog), bộ đệm có thể sở hữu các đặc tính mong muốn, chẳng hạn như khả năng cung cấp dòng điện lớn cho động cơ hoặc khả năng truyền nhanh tín hiệu đầu ra tới nhiều cổng logic. Đây là một ví dụ giải thích tại sao chúng ta cần xem xét nhiều mức độ trừu tượng để hiểu đầy đủ về một hệ thống; sự trừu tượng kỹ thuật số đã ẩn đi mục đích thực sự của bộ đệm.\r\nBiểu tượng hình tam giác đại diện cho bộ đệm. Một hình tròn ở đầu ra được gọi là *bong bóng* (bubble) và thể hiện phép đảo, như đã thấy trong biểu tượng cổng NOT ở Hình 1.12.\r\n\r\n### 1.5.3 Cổng AND\r\nCác cổng logic hai đầu vào thì thú vị hơn. Cổng *AND* trong Hình 1.14 tạo ra đầu ra $Y$ là TRUE khi và chỉ khi cả $A$ và $B$ đều là TRUE. Ngược lại, đầu ra sẽ là FALSE. Theo quy ước, các đầu vào được liệt kê theo thứ tự 00, 01, 10, 11, giống như khi bạn đang đếm ở hệ nhị phân. Phương trình Boolean cho cổng AND có thể được viết theo nhiều cách: $Y = A \\bullet B$, $Y = AB$, hoặc $Y = A \\cap B$. Ký hiệu $\\cap$ được đọc là “giao” (intersection) và được các nhà logic học ưa chuộng. Chúng tôi ưu tiên chọn $Y = AB$, đọc là “$Y$ bằng $A$ và $B$”, vì chúng tôi lười biếng.",
+      "grammar": [
+        {
+          "phrase": "This is an example of why we need to consider multiple levels of abstraction to fully understand a system",
+          "explain": "mệnh đề quan hệ dạng câu hỏi ẩn (wh-clause) đóng vai trò tân ngữ cho giới từ \"of\", kết hợp mệnh đề chỉ mục đích (to fully understand)"
+        },
+        {
+          "phrase": "as if you were counting in binary",
+          "explain": "mệnh đề giả định (subjunctive mood) đứng sau \"as if\", dùng \"were\" cho ngôi số ít để diễn tả một hình ảnh so sánh giả định"
+        },
+        {
+          "phrase": "produces a TRUE output, Y, if and only if both A and B are TRUE",
+          "explain": "liên từ điều kiện tương đương hai chiều \"if and only if\" (khi và chỉ khi)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "truth table",
+          "explain": "bảng sự thật / bảng chân lý (bảng liệt kê tất cả trạng thái đầu vào/đầu ra của mạch logic)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Boolean equation",
+          "explain": "phương trình Boolean (biểu thức logic nhị phân)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary variables",
+          "explain": "các biến nhị phân (biến chỉ nhận giá trị 0 hoặc 1)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "from the logical point of view",
+          "explain": "dưới góc độ logic / đứng từ góc nhìn logic"
+        },
+        {
+          "type": "phrase",
+          "phrase": "from the analog point of view",
+          "explain": "dưới góc độ tương tự (điện áp/dòng điện thực tế)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "levels of abstraction",
+          "explain": "các mức độ trừu tượng hóa"
+        },
+        {
+          "type": "phrase",
+          "phrase": "if and only if",
+          "explain": "khi và chỉ khi (điều kiện cần và đủ)"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "translation": "1.5 Các cổng Logic | 19\r\n\r\n1.5.4 Cổng OR\r\nCổng OR thể hiện trong Hình 1.15 tạo ra đầu ra Y là TRUE nếu A hoặc B (hoặc cả hai) là TRUE. Phương trình Boolean cho cổng OR được viết dưới dạng $Y = A + B$ hoặc $Y = A \\cup B$. Ký hiệu $\\cup$ được đọc là \"union\" (hợp) và được các nhà logic học ưa chuộng. Các nhà thiết kế kỹ thuật số thường sử dụng ký hiệu $+$, $Y = A + B$ được đọc là “Y bằng A OR B.”\r\n\r\nHình 1.15 Cổng OR\r\nOR\r\n$Y = A + B$\r\nA  B  Y\r\n0  0  0\r\n0  1  1\r\n1  0  1\r\n1  1  1\r\n\r\n1.5.5 Các cổng hai đầu vào khác\r\nHình 1.16 minh họa các cổng logic hai đầu vào phổ biến khác. Cổng XOR (exclusive OR, đọc là “ex-OR”) cho đầu ra TRUE nếu A hoặc B là TRUE, nhưng không phải cả hai cùng TRUE. Phép toán XOR được ký hiệu bằng $\\oplus$, một dấu cộng nằm trong đường tròn. Bất kỳ cổng logic nào cũng có thể được nối tiếp bởi một bong bóng (dấu chấm tròn) ở đầu ra để đảo ngược hoạt động của nó. Cổng NAND thực hiện phép NOT AND. Đầu ra của nó là TRUE trừ khi cả hai đầu vào đều là TRUE. Cổng NOR thực hiện phép NOT OR. Đầu ra của nó là TRUE nếu cả A và B đều không phải là TRUE. Cổng XOR N đầu vào đôi khi được gọi là cổng kiểm tra tính chẵn lẻ (parity gate) và tạo ra đầu ra TRUE nếu số lượng đầu vào TRUE là số lẻ. Tương tự như các cổng hai đầu vào, các kết hợp đầu vào trong bảng chân lý được liệt kê theo thứ tự đếm.\r\n\r\nXOR\r\n$Y = A \\oplus B$\r\nA  B  Y\r\n0  0  0\r\n0  1  1\r\n1  0  1\r\n1  1  0\r\n\r\nNAND\r\n$Y = \\overline{AB}$\r\nA  B  Y\r\n0  0  1\r\n0  1  1\r\n1  0  1\r\n1  1  0\r\n\r\nNOR\r\n$Y = \\overline{A+B}$\r\nA  B  Y\r\n0  0  1\r\n0  1  0\r\n1  0  0\r\n1  1  0\r\n\r\nHình 1.16 Các cổng logic hai đầu vào khác\r\n\r\n[Khung ghi chú]\r\nMột mẹo vui để nhớ ký hiệu cổng OR là phía đầu vào của nó được uốn cong giống như miệng của Pacman, vì vậy cổng này đang \"đói\" và sẵn sàng \"ăn\" bất kỳ đầu vào TRUE nào mà nó gặp!\r\n\r\nVí dụ 1.15 CỔNG XNOR\r\nHình 1.17 biểu diễn ký hiệu và phương trình Boolean cho cổng XNOR hai đầu vào (đọc là ex-NOR) thực hiện phép đảo của cổng XOR. Hãy hoàn thành bảng chân lý.\r\n\r\nLời giải Hình 1.18 biểu diễn bảng chân lý. Đầu ra của XNOR là TRUE nếu cả hai đầu vào đều là FALSE hoặc cả hai đầu vào đều là TRUE. Cổng XNOR hai đầu vào đôi khi được gọi là cổng so sánh bằng (equality gate) vì đầu ra của nó là TRUE khi các đầu vào bằng nhau.\r\n\r\nHình 1.17 Cổng XNOR\r\nXNOR\r\n$Y = \\overline{A \\oplus B}$\r\nA  B  Y\r\n0  0\r\n0  1\r\n1  0\r\n1  1\r\n\r\n1.5.6 Các cổng nhiều đầu vào\r\nCó nhiều hàm Boolean có từ ba đầu vào trở lên. Phổ biến nhất là AND, OR, XOR, NAND, NOR và XNOR. Một cổng AND N đầu vào...",
+      "grammar": [
+        {
+          "phrase": "produces a TRUE output, Y, if either A or B (or both) are TRUE",
+          "explain": "mệnh đề điều kiện loại 1 với cấu trúc \"either... or...\" diễn tả lựa chọn"
+        },
+        {
+          "phrase": "Any gate can be followed by a bubble to invert its operation",
+          "explain": "thể bị động với động từ khuyết thiếu \"can be + V3\" kết hợp động từ nguyên mẫu chỉ mục đích \"to invert\""
+        },
+        {
+          "phrase": "Its output is TRUE unless both inputs are TRUE",
+          "explain": "mệnh đề điều kiện sử dụng \"unless\" (trừ khi) tương đương \"if... not\""
+        },
+        {
+          "phrase": "produces a TRUE output if an odd number of inputs are TRUE",
+          "explain": "mệnh đề điều kiện loại 1 kết hợp cụm danh từ \"an odd number of + danh từ số nhiều\" đi với động từ số nhiều \"are\""
+        },
+        {
+          "phrase": "As with two-input gates, the input combinations in the truth table are listed in counting order",
+          "explain": "cấu trúc so sánh tương đồng \"As with...\" phối hợp thể bị động ở thì hiện tại đơn \"are listed\""
+        },
+        {
+          "phrase": "a silly way to remember the OR symbol is that its input side is curved like Pacman’s mouth",
+          "explain": "mệnh đề danh ngữ đóng vai trò bổ ngữ cho chủ ngữ (bắt đầu bằng \"that\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "logic gates",
+          "explain": "các cổng logic"
+        },
+        {
+          "type": "collocation",
+          "phrase": "truth table",
+          "explain": "bảng chân lý (bảng giá trị logic)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Boolean equation",
+          "explain": "phương trình Boolean"
+        },
+        {
+          "type": "collocation",
+          "phrase": "counting order",
+          "explain": "thứ tự đếm (00, 01, 10, 11)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "exclusive OR",
+          "explain": "phép OR loại trừ (XOR)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "parity gate",
+          "explain": "cổng kiểm tra tính chẵn lẻ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "equality gate",
+          "explain": "cổng so sánh bằng (cho đầu ra bằng 1 khi các đầu vào giống nhau)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "two-input logic gates",
+          "explain": "các cổng logic hai đầu vào"
+        },
+        {
+          "type": "collocation",
+          "phrase": "multiple-input gates",
+          "explain": "các cổng logic nhiều đầu vào"
+        },
+        {
+          "type": "phrase",
+          "phrase": "performs the inverse of",
+          "explain": "thực hiện phép đảo/nghịch đảo của..."
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "translation": "TRANG SỐ: 20\r\n\r\nCHAPTER ONE: From Zero to One (Từ Không đến Một)\r\n\r\n...cổng tạo ra đầu ra TRUE (ĐÚNG) khi tất cả N đầu vào đều là TRUE. Một cổng OR N đầu vào tạo ra đầu ra TRUE khi có ít nhất một đầu vào là TRUE.\r\n\r\nHình 1.18 Bảng chân lý XNOR\r\n\r\nVí dụ 1.16 CỔNG NOR BA ĐẦU VÀO\r\nHình 1.19 hiển thị ký hiệu và phương trình Boolean cho cổng NOR ba đầu vào. Hãy hoàn thành bảng chân lý.\r\nLời giải: Hình 1.20 hiển thị bảng chân lý. Đầu ra chỉ là TRUE nếu không có đầu vào nào là TRUE.\r\n\r\nHình 1.19 Cổng NOR ba đầu vào\r\n\r\nVí dụ 1.17 CỔNG AND BỐN ĐẦU VÀO\r\nHình 1.21 hiển thị ký hiệu và phương trình Boolean cho cổng AND bốn đầu vào. Hãy tạo bảng chân lý.\r\nLời giải: Hình 1.22 hiển thị bảng chân lý. Đầu ra chỉ là TRUE nếu tất cả các đầu vào đều là TRUE.\r\n\r\nHình 1.20 Bảng chân lý cổng NOR ba đầu vào\r\n\r\nHình 1.21 Cổng AND bốn đầu vào\r\n\r\n1.6 BÊN DƯỚI LỚP TRỪU TƯỢNG HÓA KỸ THUẬT SỐ\r\nMột hệ thống kỹ thuật số sử dụng các biến có giá trị rời rạc. Tuy nhiên, các biến lại được biểu diễn bằng các đại lượng vật lý liên tục, chẳng hạn như điện áp trên một dây dẫn, vị trí của một bánh răng, hoặc mức chất lỏng trong một xi-lanh. Do đó, nhà thiết kế phải lựa chọn một cách thức để liên kết giá trị liên tục với giá trị rời rạc.\r\n\r\nVí dụ, xét việc biểu diễn một tín hiệu nhị phân A bằng điện áp trên dây dẫn. Giả sử 0 volt (V) biểu thị A = 0 và 5V biểu thị A = 1. Bất kỳ hệ thống thực tế nào cũng phải chịu đựng được một mức nhiễu nhất định, do đó 4.97V có lẽ cũng nên được hiểu là A = 1. Nhưng còn 4.3V thì sao? Hay 2.8V? Hoặc 2.500000V?\r\n\r\n1.6.1 Điện áp nguồn\r\nGiả sử mức điện áp thấp nhất trong hệ thống là 0V, còn được gọi là nối đất (ground) hoặc GND. Điện áp cao nhất trong hệ thống đến từ nguồn cấp điện và thường được gọi là V_DD. Trong công nghệ những năm 1970 và 1980, V_DD thường là 5V. Khi các vi mạch tiến tới sử dụng các bóng bán dẫn nhỏ hơn, V_DD đã giảm xuống 3.3V, 2.5V, 1.8V, 1.5V, 1.2V, hoặc thậm chí thấp hơn để tiết kiệm năng lượng và tránh làm quá tải các bóng bán dẫn.\r\n\r\n1.6.2 Mức logic\r\nViệc ánh xạ một biến liên tục thành một biến nhị phân rời rạc được thực hiện bằng cách xác định các mức logic (logic levels), như được thể hiện trong Hình 1.23. Cổng đầu tiên được gọi là bên phát/bên lái (driver) và cổng thứ hai được gọi là bên nhận (receiver). Đầu ra của...",
+      "grammar": [
+        {
+          "phrase": "The output is TRUE only if none of the inputs are TRUE",
+          "explain": "mệnh đề điều kiện sử dụng \"only if\" biểu thị điều kiện cần và duy nhất"
+        },
+        {
+          "phrase": "4.97V probably ought to be interpreted as A = 1 as well",
+          "explain": "cấu trúc bị động với động từ khuyết thiếu \"ought to be + V3/V-ed\" diễn tả một khả năng hoặc lời khuyên hợp lý"
+        },
+        {
+          "phrase": "As chips have progressed to smaller transistors, VDD has dropped to 3.3V",
+          "explain": "mệnh đề phụ thuộc chỉ thời gian/tiến trình dùng \"As\" kết hợp với thì hiện tại hoàn thành ở cả hai mệnh đề diễn tả sự thay đổi diễn ra song song"
+        },
+        {
+          "phrase": "The mapping of a continuous variable onto a discrete binary variable is done by defining logic levels",
+          "explain": "cấu trúc bị động chỉ phương thức hành động \"is done by + V-ing\" (được thực hiện bằng cách làm gì)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "truth table",
+          "explain": "bảng chân lý / bảng giá trị logic"
+        },
+        {
+          "type": "collocation",
+          "phrase": "discrete-valued variables",
+          "explain": "các biến có giá trị rời rạc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous physical quantities",
+          "explain": "các đại lượng vật lý liên tục"
+        },
+        {
+          "type": "collocation",
+          "phrase": "power supply",
+          "explain": "nguồn cấp điện"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic levels",
+          "explain": "các mức logic"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary signal",
+          "explain": "tín hiệu nhị phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "relate continuous value to discrete value",
+          "explain": "liên hệ / ánh xạ giá trị liên tục với giá trị rời rạc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "tolerate some noise",
+          "explain": "chịu đựng / chịu được một lượng nhiễu nhất định"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "translation": "1.6 Bên dưới lớp trừu tượng kỹ thuật số | 21\r\n\r\nmạch lái (driver) được kết nối với đầu vào của mạch nhận (receiver). Mạch lái tạo ra đầu ra mức THẤP (0) trong khoảng từ 0 đến $V_{OL}$ hoặc đầu ra mức CAO (1) trong khoảng từ $V_{OH}$ đến $V_{DD}$. Nếu mạch nhận nhận được đầu vào trong khoảng từ 0 đến $V_{IL}$, nó sẽ coi đầu vào đó là mức THẤP. Nếu mạch nhận nhận được đầu vào trong khoảng từ $V_{IH}$ đến $V_{DD}$, nó sẽ coi đầu vào đó là mức CAO. Nếu vì lý do nào đó như nhiễu hoặc linh kiện bị hỏng, đầu vào của mạch nhận rơi vào *vùng cấm (forbidden zone)* giữa $V_{IL}$ và $V_{IH}$, hành vi của cổng logic sẽ không thể dự đoán được. $V_{OH}$, $V_{OL}$, $V_{IH}$ và $V_{IL}$ được gọi là các mức logic cao và thấp của đầu ra và đầu vào.\r\n\r\n1.6.3 Biên độ nhiễu (Noise Margins)\r\nNếu đầu ra của mạch lái muốn được diễn giải chính xác tại đầu vào của mạch nhận, chúng ta phải chọn $V_{OL} < V_{IL}$ và $V_{OH} > V_{IH}$. Nhờ đó, ngay cả khi đầu ra của mạch lái bị nhiễu tác động, đầu vào của mạch nhận vẫn sẽ phát hiện đúng mức logic. *Biên độ nhiễu (NM)* là lượng nhiễu tối đa có thể cộng vào trường hợp đầu ra xấu nhất sao cho tín hiệu vẫn có thể được hiểu là một đầu vào hợp lệ. Như có thể thấy trong Hình 1.23, biên độ nhiễu mức thấp và mức cao lần lượt là:\r\n\r\n$$NM_L = V_{IL} - V_{OL} \\quad (1.2)$$\r\n$$NM_H = V_{OH} - V_{IH} \\quad (1.3)$$\r\n\r\n[Hình 1.23: Các mức logic và biên độ nhiễu]\r\n- Driver: Mạch lái\r\n- Receiver: Mạch nhận\r\n- Output Characteristics: Đặc tính đầu ra\r\n- Input Characteristics: Đặc tính đầu vào\r\n- Logic High Output Range: Khoảng đầu ra mức logic CAO\r\n- Logic Low Output Range: Khoảng đầu ra mức logic THẤP\r\n- Logic High Input Range: Khoảng đầu vào mức logic CAO\r\n- Logic Low Input Range: Khoảng đầu vào mức logic THẤP\r\n- Forbidden Zone: Vùng cấm\r\n\r\nVí dụ 1.18: TÍNH TOÁN BIÊN ĐỘ NHIỄU\r\nXét mạch đảo ở Hình 1.24. $V_{O1}$ là điện áp đầu ra của bộ đảo I1, và $V_{I2}$ là điện áp đầu vào của bộ đảo I2. Cả hai bộ đảo đều có các đặc tính sau: $V_{DD} = 5\\text{ V}$, $V_{IL} = 1.35\\text{ V}$, $V_{IH} = 3.15\\text{ V}$, $V_{OL} = 0.33\\text{ V}$, và $V_{OH} = 3.84\\text{ V}$. Biên độ nhiễu mức thấp và mức cao của bộ đảo là bao nhiêu? Mạch có thể chịu đựng được 1 V nhiễu giữa $V_{O1}$ và $V_{I2}$ không?\r\n\r\n[Bảng trong Hình 1.22: Bảng chân lý của cổng AND 4 đầu vào]\r\n\r\n[Cột thông tin phụ bên phải]:\r\n$V_{DD}$ đại diện cho điện áp tại cực máng (drain) của transistor bán dẫn oxit-kim loại (MOSFET), vốn được dùng để chế tạo hầu hết các vi mạch hiện đại. Điện áp nguồn cung cấp đôi khi cũng được gọi là $V_{CC}$, đại diện cho điện áp tại cực thu (collector) của transistor lưỡng cực (BJT) dùng để chế tạo chip theo công nghệ cũ hơn. Nối đất đôi khi được gọi là $V_{SS}$ vì đó là điện áp tại cực nguồn (source) của transistor bán dẫn oxit-kim loại. Xem Phần 1.7 để biết thêm thông tin về transistor.",
+      "grammar": [
+        {
+          "phrase": "If the receiver gets an input in the range of 0 to V_IL, it will consider the input to be LOW",
+          "explain": "câu điều kiện loại 1 (first conditional) diễn tả khả năng xảy ra ở hiện tại hoặc tương lai"
+        },
+        {
+          "phrase": "If, for some reason such as noise or faulty components, the receiver's input should fall in the forbidden zone between V_IL and V_IH, the behavior of the gate is unpredictable",
+          "explain": "cấu trúc câu điều kiện sử dụng \"should\" để diễn đạt một giả định ít có khả năng xảy ra hơn"
+        },
+        {
+          "phrase": "If the output of the driver is to be correctly interpreted at the input of the receiver",
+          "explain": "cấu trúc \"be + to V\" trong mệnh đề điều kiện biểu thị mục tiêu hoặc điều kiện bắt buộc phải đạt được"
+        },
+        {
+          "phrase": "such that the signal can still be interpreted as a valid input",
+          "explain": "mệnh đề chỉ mục đích/kết quả với \"such that\" kết hợp thể bị động \"can be interpreted\""
+        },
+        {
+          "phrase": "As can be seen in Figure 1.23",
+          "explain": "cấu trúc bị động vô nhân xưng (impersonal passive) dùng để dẫn chiếu hình ảnh minh họa trong văn phong khoa học"
+        },
+        {
+          "phrase": "Ground is sometimes called V_SS because it is the voltage on the source of a metal-oxide-semiconductor transistor",
+          "explain": "thể bị động (passive voice) kết hợp mệnh đề chỉ nguyên nhân (because) giải thích thuật ngữ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "beneath the digital abstraction",
+          "explain": "bên dưới lớp trừu tượng kỹ thuật số (đi sâu vào bản chất điện tử/vật lý)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic level",
+          "explain": "mức logic (mức điện áp tương ứng 0 hoặc 1)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "forbidden zone",
+          "explain": "vùng cấm (khoảng điện áp không xác định được trạng thái 0 hay 1)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "noise margin",
+          "explain": "biên độ nhiễu / lề nhiễu (khoảng điện áp nhiễu tối đa mạch chịu được)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "worst-case output",
+          "explain": "đầu ra trong trường hợp xấu nhất"
+        },
+        {
+          "type": "phrase",
+          "phrase": "be contaminated by",
+          "explain": "bị nhiễu / bị ảnh hưởng tiêu cực bởi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "truth table",
+          "explain": "bảng chân lý / bảng giá trị chân trị"
+        },
+        {
+          "type": "phrase",
+          "phrase": "stand for",
+          "explain": "viết tắt của / đại diện cho"
+        },
+        {
+          "type": "collocation",
+          "phrase": "metal-oxide-semiconductor transistor",
+          "explain": "transistor bán dẫn oxit-kim loại (MOSFET)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bipolar junction transistor",
+          "explain": "transistor mối nối lưỡng cực (BJT)"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "translation": "[Ghi chú lề]\r\nDC (Direct Current - Dòng một chiều) chỉ trạng thái hoạt động khi điện áp đầu vào được giữ cố định hoặc biến đổi đủ chậm để phần còn lại của hệ thống kịp thích ứng. Cội nguồn lịch sử của thuật ngữ này xuất phát từ dòng điện một chiều, một phương thức truyền tải điện năng qua đường dây với điện áp không đổi. Trái lại, đáp ứng quá độ (transient response) của một mạch là trạng thái hoạt động khi điện áp đầu vào thay đổi nhanh chóng. Mục 2.9 sẽ tìm hiểu kỹ hơn về đáp ứng quá độ.\r\n\r\nHình 1.24 Mạch cổng đảo (Inverter)\r\n\r\nLời giải: Biên độ nhiễu của cổng đảo là: $NM_L = V_{IL} - V_{OL} = (1{,}35\\text{V} - 0{,}33\\text{V}) = 1{,}02\\text{V}$, $NM_H = V_{OH} - V_{IH} = (3{,}84\\text{V} - 3{,}15\\text{V}) = 0{,}69\\text{V}$. Mạch có thể chịu được 1V nhiễu khi đầu ra ở mức THẤP ($NM_L = 1{,}02\\text{V}$), nhưng không thể chịu được khi đầu ra ở mức CAO ($NM_H = 0{,}69\\text{V}$). Ví dụ, giả sử bộ phát I1 xuất ra giá trị mức CAO trong trường hợp xấu nhất, $V_{O1} = V_{OH} = 3{,}84\\text{V}$. Nếu nhiễu làm điện áp sụt giảm 1V trước khi đến đầu vào của bộ nhận, $V_{I2} = (3{,}84\\text{V} - 1\\text{V}) = 2{,}84\\text{V}$. Giá trị này nhỏ hơn mức CAO đầu vào tối thiểu cho phép, $V_{IH} = 3{,}15\\text{V}$, do đó bộ nhận có thể không nhận diện đúng đầu vào mức CAO.\r\n\r\n1.6.4 Đặc tính truyền DC (DC Transfer Characteristics)\r\nĐể hiểu được giới hạn của sự trừu tượng hóa kỹ thuật số (digital abstraction), chúng ta phải đi sâu vào hành vi tương tự (analog) của một cổng logic. Đặc tính truyền DC của cổng logic mô tả điện áp đầu ra theo biến số là điện áp đầu vào khi đầu vào biến đổi đủ chậm để đầu ra kịp đáp ứng. Chúng được gọi là đặc tính truyền vì mô tả mối quan hệ giữa điện áp đầu vào và đầu ra.\r\nMột cổng đảo lý tưởng sẽ có ngưỡng chuyển mạch đột ngột tại $V_{DD}/2$, như hiển thị trong Hình 1.25(a). Với $V(A) < V_{DD}/2$, $V(Y) = V_{DD}$. Với $V(A) > V_{DD}/2$, $V(Y) = 0$. Trong trường hợp đó, $V_{IH} = V_{IL} = V_{DD}/2$. $V_{OH} = V_{DD}$ và $V_{OL} = 0$.\r\nMột cổng đảo thực tế sẽ chuyển đổi dần dần hơn giữa hai cực hạn, như trong Hình 1.25(b). Khi điện áp đầu vào $V(A)$ bằng 0, điện áp đầu ra $V(Y) = V_{DD}$. Khi $V(A) = V_{DD}$, $V(Y) = 0$. Tuy nhiên, quá trình chuyển tiếp giữa các điểm cuối này diễn ra mượt mà và có thể không nằm chính giữa tại $V_{DD}/2$. Điều này đặt ra câu hỏi về cách định nghĩa các mức logic.\r\nMột vị trí hợp lý để chọn các mức logic là nơi độ dốc của đặc tính truyền $dV(Y)/dV(A)$ bằng -1. Hai điểm này được gọi là các điểm khuếch đại đơn vị (unity gain points). Việc chọn các mức logic tại các điểm khuếch đại đơn vị thường tối đa hóa biên độ nhiễu. Nếu $V_{IL}$ giảm, $V_{OH}$ sẽ chỉ tăng một lượng nhỏ. Nhưng nếu $V_{IL}$ tăng, $V_{OH}$ sẽ sụt giảm đột ngột.\r\n\r\n1.6.5 Kỷ luật tĩnh (The Static Discipline)\r\nĐể tránh trường hợp đầu vào rơi vào vùng cấm (forbidden zone), các cổng logic kỹ thuật số được thiết kế tuân theo kỷ luật tĩnh (static discipline). Kỷ luật tĩnh yêu cầu rằng, khi nhận các đầu vào hợp lệ về mặt logic, mọi phần tử trong mạch sẽ tạo ra các đầu ra hợp lệ về mặt logic.\r\nBằng cách tuân thủ kỷ luật tĩnh, các nhà thiết kế mạch kỹ thuật số đánh đổi sự tự do sử dụng các phần tử mạch tương tự tùy ý để đổi lấy...",
+      "grammar": [
+        {
+          "phrase": "when an input voltage is held constant or changes slowly enough for the rest of the system to keep up",
+          "explain": "mệnh đề trạng ngữ thời gian chứa cấu trúc \"enough for [something] to [do something]\" (đủ... để cái gì làm gì)"
+        },
+        {
+          "phrase": "when the input is changed slowly enough that the output can keep up",
+          "explain": "mệnh đề trạng ngữ thời gian chứa cấu trúc \"enough that + clause\" (đủ... đến mức/để cho)"
+        },
+        {
+          "phrase": "If $V_{IL}$ were reduced, $V_{OH}$ would only increase by a small amount",
+          "explain": "câu điều kiện loại 2 (second conditional) dùng giả định trái với thực tế ở hiện tại/tương lai (\"were\" dùng cho mọi ngôi)"
+        },
+        {
+          "phrase": "requires that, given logically valid inputs, every circuit element will produce logically valid outputs",
+          "explain": "mệnh đề Bàng thái cách (subjunctive) sau động từ \"require\" kết hợp cụm phân từ điều kiện \"given + N\" (khi có / xét đến)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "noise margin",
+          "explain": "biên độ nhiễu (mức điện áp dự phòng chống nhiễu)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "worst-case",
+          "explain": "trường hợp xấu nhất / điều kiện bất lợi nhất"
+        },
+        {
+          "type": "phrase",
+          "phrase": "transient response",
+          "explain": "đáp ứng quá độ (phản ứng của mạch khi tín hiệu thay đổi đột ngột)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "delve into",
+          "explain": "đi sâu vào, nghiên cứu kỹ"
+        },
+        {
+          "type": "phrase",
+          "phrase": "transfer characteristics",
+          "explain": "đặc tính truyền (mối quan hệ giữa đầu ra và đầu vào của mạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "unity gain point",
+          "explain": "điểm khuếch đại đơn vị (điểm mà độ dốc bằng -1)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "static discipline",
+          "explain": "kỷ luật tĩnh (quy tắc đảm bảo hoạt động kỹ thuật số chuẩn xác)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "in return for",
+          "explain": "để đổi lấy, nhằm bù lại"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "translation": "1.6 Bên dưới Lớp Trừu tượng Kỹ thuật số\r\n\r\nFigure 1.25 Đặc tuyến chuyển đổi DC và các mức logic\r\n(a) Cổng đảo lý tưởng\r\n(b) Cổng đảo thực tế: Các điểm độ lợi đơn vị (Unity Gain Points), Độ dốc = -1\r\n\r\n... sự đơn giản và tính bền vững của các mạch kỹ thuật số. Chúng nâng cao mức độ trừu tượng từ tương tự (analog) sang kỹ thuật số (digital), giúp tăng hiệu suất thiết kế bằng cách ẩn đi các chi tiết không cần thiết.\r\n\r\nViệc lựa chọn điện áp nguồn cấp $V_{DD}$ và các mức logic là tùy ý, nhưng tất cả các cổng giao tiếp với nhau phải có các mức logic tương thích. Do đó, các cổng được nhóm thành các *họ logic* (logic families) sao cho mọi cổng trong một họ logic đều tuân theo kỷ luật tĩnh khi được sử dụng cùng với các cổng khác trong cùng họ đó. Các cổng logic trong cùng một họ logic có thể ghép nối với nhau dễ dàng như các mảnh ghép Lego ở chỗ chúng sử dụng điện áp nguồn cấp và các mức logic thống nhất.\r\n\r\nBốn họ logic chính chiếm ưu thế từ những năm 1970 đến những năm 1990 là Logic Transistor-Transistor (TTL), Logic Bán dẫn Oxít Kim loại Bổ sung (CMOS, đọc là \"sea-moss\"), Logic TTL Điện áp Thấp (LVTTL) và Logic CMOS Điện áp Thấp (LVCMOS). Các mức logic của chúng được so sánh trong Bảng 1.4. Kể từ đó, các họ logic đã bị phân mảnh với sự bùng nổ của các mức điện áp nguồn cấp thậm chí còn thấp hơn. Phụ lục A.6 sẽ xem xét chi tiết hơn về các họ logic phổ biến.\r\n\r\nBảng 1.4 Các mức logic của họ logic 5 V và 3.3 V\r\nHọ logic | $V_{DD}$ | $V_{IL}$ | $V_{IH}$ | $V_{OL}$ | $V_{OH}$\r\nTTL | 5 (4.75–5.25) | 0.8 | 2.0 | 0.4 | 2.4\r\nCMOS | 5 (4.5–6) | 1.35 | 3.15 | 0.33 | 3.84\r\nLVTTL | 3.3 (3–3.6) | 0.8 | 2.0 | 0.4 | 2.4\r\nLVCMOS | 3.3 (3–3.6) | 0.9 | 1.8 | 0.36 | 2.7",
+      "grammar": [
+        {
+          "phrase": "increasing design productivity by hiding needless detail",
+          "explain": "cấu trúc chỉ phương thức \"by + V-ing\" (bằng cách làm gì đó)"
+        },
+        {
+          "phrase": "all gates that communicate must have compatible logic levels",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho danh từ \"all gates\""
+        },
+        {
+          "phrase": "such that all gates in a logic family obey the static discipline when used with other gates in the family",
+          "explain": "mệnh đề chỉ mục đích/kết quả với \"such that\" kết hợp mệnh đề rút gọn \"when used\" (thay cho \"when they are used\")"
+        },
+        {
+          "phrase": "Logic gates in the same logic family snap together like Legos in that they use consistent power supply voltages and logic levels",
+          "explain": "mệnh đề chỉ khía cạnh/lý do cụ thể với liên từ \"in that\" (ở chỗ, xét về mặt)"
+        },
+        {
+          "phrase": "Four major logic families that predominated from the 1970's through the 1990's are Transistor-Transistor Logic...",
+          "explain": "mệnh đề quan hệ xác định bổ nghĩa cho chủ ngữ \"Four major logic families\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "raise the level of abstraction",
+          "explain": "nâng cao mức độ trừu tượng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "DC transfer characteristics",
+          "explain": "đặc tuyến chuyển đổi một chiều (DC)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "static discipline",
+          "explain": "kỷ luật tĩnh (quy tắc đảm bảo tính tương thích tín hiệu đầu vào/đầu ra trong mạch kỹ thuật số)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "power supply voltage",
+          "explain": "điện áp nguồn cấp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "logic family",
+          "explain": "họ logic (tập hợp các linh kiện logic có cùng thông số điện áp và đặc tính kỹ thuật)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "snap together",
+          "explain": "khớp vào nhau / ghép nối dễ dàng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "unity gain point",
+          "explain": "điểm độ lợi đơn vị (điểm trên đặc tuyến có hệ số khuếch đại bằng 1, độ dốc bằng -1)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "in that",
+          "explain": "ở chỗ, bởi vì (dùng để giải thích hoặc làm rõ một nhận định vừa đưa ra)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "balkanized",
+          "explain": "bị phân mảnh (thuật ngữ mượn từ địa chính trị, chỉ việc chia nhỏ thành nhiều nhóm/tiêu chuẩn riêng lẻ)"
+        }
+      ]
+    }
+  ]
+}

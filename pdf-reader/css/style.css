@@ -1,0 +1,293 @@
+/* ---- Tokens (đồng bộ tông màu với book-reader-pwa) ---- */
+:root {
+  --paper: #EDE7D6;
+  --paper-raised: #F5F1E4;
+  --ink: #211C15;
+  --ink-soft: #59524A;
+  --line: #D8D0BC;
+  --shuiro: #B7410E;
+  --shuiro-soft: #E9CBBB;
+  --aizome: #2C4A6E;
+  --radius: 4px;
+  --font-ui: -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overscroll-behavior: none; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+button { font-family: inherit; cursor: pointer; }
+
+/* ---- Thanh kéo ẩn/hiện dùng chung (topbar + toolbar từng pane) ---- */
+.bar-handle {
+  display: block; width: 100%; flex-shrink: 0;
+  border: none; background: transparent; color: var(--ink-soft);
+  font-size: 11px; line-height: 1; padding: 4px 0 3px;
+}
+.bar-handle:active { background: var(--line); }
+
+/* ---- Topbar ---- */
+.topbar {
+  display: flex; flex-direction: column;
+  background: var(--paper-raised); border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.topbar .bar-handle { padding-top: max(4px, env(safe-area-inset-top)); }
+.topbar-content {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 12px 10px;
+}
+.topbar.collapsed .topbar-content { display: none; }
+.topbar-title { font-weight: 600; font-size: 15px; }
+.topbar-actions { display: flex; gap: 6px; }
+.icon-btn {
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--ink); font-size: 15px;
+}
+.icon-btn:active { background: var(--line); }
+.icon-btn-wide { width: auto; padding: 0 10px; font-size: 12px; white-space: nowrap; }
+#btnGithubStatus[data-connected="true"] { color: var(--shuiro); border-color: var(--shuiro-soft); background: var(--shuiro-soft); }
+
+/* ---- Split layout ---- */
+.split { flex: 1; display: flex; min-height: 0; }
+.split.layout-horizontal { flex-direction: row; }
+.split.layout-vertical { flex-direction: column; }
+
+.pane {
+  flex: 1 1 50%; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; position: relative;
+}
+
+/* ---- Thanh kéo đổi kích thước giữa 2 cột (PDF <-> JSON) ---- */
+.pane-resizer {
+  flex: 0 0 12px; position: relative; background: var(--paper-raised);
+  touch-action: none; z-index: 5;
+}
+.split.layout-horizontal .pane-resizer { cursor: col-resize; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.split.layout-vertical .pane-resizer { cursor: row-resize; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.pane-resizer::after {
+  content: ""; position: absolute; background: var(--ink-soft); border-radius: 2px; opacity: .6;
+}
+.split.layout-horizontal .pane-resizer::after { top: 50%; left: 50%; width: 3px; height: 30px; transform: translate(-50%, -50%); }
+.split.layout-vertical .pane-resizer::after { top: 50%; left: 50%; width: 30px; height: 3px; transform: translate(-50%, -50%); }
+.pane-resizer:active { background: var(--shuiro-soft); }
+
+/* ---- Thanh công cụ từng pane (chứa nút mở file + điều hướng trang) ---- */
+.pane-toolbar {
+  display: flex; flex-direction: column;
+  background: var(--paper-raised); border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.pane-toolbar-content {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 6px 8px; font-size: 12px;
+}
+.pane-toolbar.collapsed .pane-toolbar-content { display: none; }
+.file-open-btn {
+  border: 1px dashed var(--line); border-radius: var(--radius);
+  padding: 5px 8px; color: var(--ink-soft); font-size: 12px;
+  max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pane-nav { display: flex; align-items: center; gap: 4px; }
+.nav-btn.small {
+  padding: 5px 9px; font-size: 13px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: transparent; color: var(--ink);
+}
+.nav-btn.small:active { background: var(--line); }
+.pane-nav .page-indicator { font-size: 11px; color: var(--ink-soft); min-width: 44px; text-align: center; }
+
+.pane-scroll {
+  flex: 1; overflow: auto; background: #3a362f; display: flex; justify-content: center;
+  -webkit-overflow-scrolling: touch; position: relative;
+  /* Cho phép cuộn dọc mặc định của trình duyệt, còn vuốt ngang & pinch zoom
+     do JS tự xử lý (xem app.js: bindSwipeNav / bindPinchZoom) */
+  touch-action: pan-y;
+}
+.page-wrap {
+  position: relative; margin: 12px auto; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.35);
+  line-height: 0;
+}
+.page-wrap canvas { display: block; }
+
+.pane-empty {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--ink-soft); font-size: 13px; text-align: center; padding: 20px; background: var(--paper);
+}
+.pane-empty.hidden { display: none; }
+
+/* pdf.js text layer — trong suốt, chỉ để chọn text */
+.textLayer {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  overflow: hidden; line-height: 1; opacity: 1;
+}
+.textLayer span, .textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+}
+.textLayer ::selection { background: rgba(44,74,110,.35); }
+.textLayer mark.hl { background: var(--hl-color, #F7E27A); opacity: .55; color: transparent; border-radius: 2px; }
+.textLayer span.ul { text-decoration: underline; text-decoration-color: var(--ul-color, #C1440E); text-decoration-thickness: 3px; color: transparent; }
+.textLayer span.added { text-decoration: underline dashed; text-decoration-color: var(--aizome); text-decoration-thickness: 2px; color: transparent; }
+
+/* Lớp hiển thị highlight/gạch chân ĐÃ LƯU (đọc lại từ IndexedDB/GitHub khi mở file) */
+.highlightLayer {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  overflow: hidden; pointer-events: none;
+}
+.highlightLayer .persist-hl {
+  position: absolute; border-radius: 2px; opacity: .55; pointer-events: auto; cursor: pointer;
+}
+.highlightLayer .persist-ul {
+  position: absolute; border-bottom-style: solid; pointer-events: auto; cursor: pointer;
+}
+
+/* ---- Highlight/underline/add toolbar (hiện DƯỚI đoạn được chọn) ---- */
+.hl-toolbar {
+  position: fixed; z-index: 60; display: flex; align-items: center; gap: 6px;
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px 8px; box-shadow: 0 4px 14px rgba(0,0,0,.25); flex-wrap: wrap; max-width: 92vw;
+}
+.hl-toolbar.hidden { display: none; }
+.hl-act-btn {
+  border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
+  color: var(--ink); font-size: 12px; padding: 6px 8px; white-space: nowrap;
+}
+.hl-act-btn.add { background: var(--aizome); color: #fff; border-color: var(--aizome); }
+.hl-swatches { display: flex; gap: 4px; }
+.swatch { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); }
+
+/* ---- Add panel (kéo thả tự do) ---- */
+.add-panel {
+  position: fixed; z-index: 70; width: min(340px, 90vw);
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.add-panel.hidden { display: none; }
+.add-panel-handle {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-bottom: 1px solid var(--line); cursor: grab; touch-action: none;
+}
+.add-panel-handle:active { cursor: grabbing; }
+.popup-grip { width: 34px; height: 4px; border-radius: 2px; background: var(--line); }
+.add-panel-title { flex: 1; font-size: 13px; font-weight: 600; }
+.add-panel-body { padding: 10px; font-size: 13px; max-height: 70vh; overflow: auto; }
+.add-panel-body label { display: block; margin-top: 8px; font-size: 11px; color: var(--ink-soft); }
+.add-text-original {
+  margin-top: 2px; padding: 8px; background: #fff; border: 1px solid var(--line);
+  border-radius: var(--radius); font-size: 13px; line-height: 1.5; max-height: 90px; overflow: auto;
+}
+.add-panel-body textarea {
+  width: 100%; margin-top: 2px; font-family: inherit; font-size: 13px;
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 6px;
+  background: #fff; color: var(--ink); resize: vertical;
+}
+.edit-actions { margin-top: 10px; display: flex; gap: 8px; }
+.btn-save, .btn-cancel { flex: 1; border: none; border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
+.btn-save { background: var(--shuiro); color: #fff; }
+.btn-cancel { background: var(--line); color: var(--ink); }
+.gh-hint { font-size: 11px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+
+/* ---- GitHub config modal ---- */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 80;
+}
+.drawer-overlay.hidden { display: none; }
+.gh-panel-modal {
+  position: fixed; z-index: 90; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(360px, 92vw); max-height: 86vh; overflow: auto;
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.gh-panel-modal.hidden { display: none; }
+.gh-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.gh-panel-header h2 { font-size: 15px; margin: 0; }
+.gh-panel label { display: block; margin-top: 8px; font-size: 11px; color: var(--ink-soft); }
+.gh-panel input {
+  width: 100%; font-size: 13px; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 7px; background: #fff; color: var(--ink); margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+  .topbar-title { font-size: 13px; }
+  .file-open-btn { font-size: 11px; }
+}
+
+/* ---- Pane B: JSON reader (dịch + phân tích) ---- */
+.json-toolbar .file-open-btn { max-width: 62%; text-align: left; background: none; border: 1px dashed var(--line); }
+.mode-toggle {
+  display: flex; gap: 4px; padding: 6px 8px; background: var(--paper-raised);
+  border-bottom: 1px solid var(--line); flex-shrink: 0;
+}
+.mode-btn {
+  flex: 1; border: 1px solid var(--line); background: transparent; color: var(--ink-soft);
+  border-radius: var(--radius); font-size: 12px; padding: 6px 4px;
+}
+.mode-btn.active { background: var(--aizome); color: #fff; border-color: var(--aizome); }
+.mode-btn.edit-btn { flex: 0 0 40px; font-size: 14px; }
+.json-scroll { background: var(--paper); display: block; }
+.json-content { max-width: 640px; margin: 0 auto; padding: 14px 16px 40px; }
+.json-section { margin-bottom: 18px; }
+.json-section-title {
+  font-size: 12px; font-weight: 700; color: var(--shuiro); text-transform: uppercase;
+  letter-spacing: .03em; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px;
+}
+.translation-text { font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
+.an-item {
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 8px 10px; margin-bottom: 8px; font-size: 13px;
+}
+.an-type {
+  display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: var(--aizome);
+  border-radius: 3px; padding: 1px 6px; margin-right: 6px; vertical-align: middle;
+}
+.an-item.grammar .an-type { background: var(--shuiro); }
+.an-item .an-type[data-type="vocab"] { background: #2E7D32; }
+.an-phrase { font-weight: 600; }
+.an-explain { margin-top: 4px; color: var(--ink-soft); line-height: 1.55; }
+.an-empty { color: var(--ink-soft); font-size: 12px; font-style: italic; }
+
+/* ---- Chỉnh sửa nội dung Dịch / Phân tích (Pane B) ---- */
+.an-item.edit { display: flex; flex-direction: column; gap: 6px; }
+.edit-translation, .an-edit-phrase, .an-edit-explain {
+  width: 100%; font-family: inherit; font-size: 13px;
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 7px;
+  background: #fff; color: var(--ink); resize: vertical;
+}
+.an-edit-phrase { font-weight: 600; }
+.json-edit-actions { margin-top: 16px; }
+
+/* ---- Mục lục drawer (danh sách book/chapter) ---- */
+.toc-list { display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow: auto; margin-top: 6px; }
+.toc-list.hidden { display: none; }
+.toc-item {
+  text-align: left; border: 1px solid var(--line); border-radius: var(--radius);
+  background: #fff; color: var(--ink); font-size: 13px; padding: 9px 10px;
+}
+.toc-item:active { background: var(--line); }
+#tocChapterWrap.hidden { display: none; }
+
+/* ---- Bảng nhập & đẩy dữ liệu lên GitHub ---- */
+.import-log {
+  margin-top: 10px; max-height: 30vh; overflow: auto; font-size: 12px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
+}
+.import-log:empty { display: none; }
+.import-log-line { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.import-log-line:last-child { border-bottom: none; }
+.import-log-line.ok { color: #2E7D32; }
+.import-log-line.err { color: var(--shuiro); }
+
+@media (max-width: 640px) {
+  .json-content { padding: 12px 12px 32px; }
+}

@@ -1,0 +1,70 @@
+{
+  "book": "Book1",
+  "chapter": "chp2",
+  "pages": [
+    {
+      "page": 1,
+      "translation": "Từ số 0 đến số 1 1\r\nMột ưu điểm lớn của hệ thống kỹ thuật số là các khối cấu tạo khá đơn \r\ngiản: chỉ là các số 1 và 0. Chúng không yêu cầu toán học phức tạp hay kiến \r\nthức vật lý sâu rộng. Thay vào đó, thách thức của nhà thiết kế là kết hợp \r\ncác khối đơn giản này thành các hệ thống phức tạp. Vi xử lý có thể là hệ \r\nthống đầu tiên bạn xây dựng mà quá phức tạp để có thể tích hợp vào không gian của bạn.\r\nChúng tôi giả định rằng bạn đã có kiến thức cơ bản về điện, một số kinh \r\nnghiệm lập trình trước đó và sự quan tâm thực sự đến việc hiểu những gì diễn \r\nra bên trong một chiếc máy tính. Cuốn sách này tập trung vào thiết kế các \r\nhệ thống kỹ thuật số, hoạt động trên các bit 1 và 0. Chúng ta bắt đầu với \r\ncác cổng logic kỹ thuật số nhận bit 1 và 0 làm đầu vào và tạo ra bit 1 và 0 \r\nlàm đầu ra. Sau đó, chúng ta khám phá cách kết hợp các cổng logic thành các \r\nmô-đun phức tạp hơn, chẳng hạn như bộ cộng và bộ nhớ. Tiếp theo, chúng ta \r\nchuyển sang lập trình bằng ngôn ngữ assembly, ngôn ngữ gốc của bộ vi xử lý. \r\nCuối cùng, chúng ta ghép các cổng lại với nhau để xây dựng một bộ vi xử lý \r\nchạy các chương trình assembly này.\r\nVi xử lý đã cách mạng hóa thế giới của chúng ta trong ba thập kỷ qua. Một \r\nmáy tính xách tay ngày nay có khả năng vượt trội hơn nhiều so với một máy \r\ntính chủ cỡ lớn của những năm trước. Một chiếc ô tô hạng sang chứa khoảng \r\n100 vi xử lý. Những tiến bộ trong vi xử lý đã giúp điện thoại di động và \r\nInternet ra đời, cải thiện đáng kể y học và thay đổi cách thức tiến hành \r\nchiến tranh. Doanh thu ngành công nghiệp bán dẫn toàn cầu đã tăng từ 21 tỷ \r\nđô la Mỹ năm 1985 lên 400 tỷ đô la Mỹ năm 2020, và vi xử lý là một phần quan \r\ntrọng trong doanh thu này.\r\nChúng tôi tin rằng bộ vi xử lý không chỉ quan trọng về mặt kỹ thuật, kinh tế và xã \r\nhội, mà còn là một phát minh đầy thú vị của con người. Sau khi đọc xong cuốn sách \r\nnày, bạn sẽ biết cách thiết kế và chế tạo bộ vi xử lý của riêng mình. Những kỹ năng \r\nbạn học được trong quá trình này sẽ giúp bạn thiết kế nhiều hệ thống kỹ thuật số khác.\r\n1\r\n>”xin chào\r\nthế giới!\"\r\nVận hành\r\nỨng dụng\r\nPhần mềm\r\nNgành kiến trúc\r\nThiết bị\r\nHệ thống\r\nĐiện tử\r\nTương tự +\r\n+\r\nMạch điện\r\nLogic\r\nKiến \r\ntrúc vi mô\r\nMạch điện\r\nVật lý",
+      "grammar": [
+        {
+          "phrase": "the girl who loved me",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"girl\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": ":Break the ice",
+          "explain": "Phá vỡ sự ngại ngùng ban đầu"
+        },
+        {
+          "type": "slang",
+          "phrase": ":Cool",
+          "explain": "Tuyệt vời"
+        },
+        {
+          "type": "collocation",
+          "phrase": ":Make a decision",
+          "explain": "Quyết định"
+        },
+        {
+          "type": "phrase",
+          "phrase": ":In advance",
+          "explain": "Trước"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "translation": "Hello",
+      "grammar": [
+        {
+          "phrase": "the girl who loved me",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"girl\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": ":Break the ice",
+          "explain": "Phá vỡ sự ngại ngùng ban đầu"
+        },
+        {
+          "type": "slang",
+          "phrase": ":Cool",
+          "explain": "Tuyệt vời"
+        },
+        {
+          "type": "collocation",
+          "phrase": ":Make a decision",
+          "explain": "Quyết định"
+        },
+        {
+          "type": "phrase",
+          "phrase": ":In advance",
+          "explain": "Trước"
+        }
+      ]
+    }
+  ]
+}

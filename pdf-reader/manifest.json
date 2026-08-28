@@ -1,0 +1,15 @@
+{
+  "name": "PDF Dual Reader",
+  "short_name": "PDF Dual",
+  "description": "Mở 2 file PDF song song, chia đôi ngang/dọc, chọn text để highlight/gạch chân/thêm ghi chú lên GitHub",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EDE7D6",
+  "theme_color": "#EDE7D6",
+  "orientation": "any",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

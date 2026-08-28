@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#EDE7D6">
+<title>PDF Dual Reader</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+  <button id="btnToggleTopbar" class="bar-handle" aria-label="Ẩn/hiện thanh công cụ" title="Ẩn/hiện thanh công cụ">⌃</button>
+  <div class="topbar-content" id="topbarContent">
+    <div class="topbar-title">PDF Dual Reader</div>
+    <div class="topbar-actions">
+      <button id="btnImport" class="icon-btn" aria-label="Nhập dữ liệu JSON từ máy & đẩy lên GitHub" title="Nhập & đẩy dữ liệu JSON lên GitHub">⇪</button>
+      <button id="btnLayout" class="icon-btn" aria-label="Đổi bố cục" title="Đổi bố cục chia đôi">⬓</button>
+      <button id="btnGithubStatus" class="icon-btn" aria-label="Cấu hình GitHub" data-connected="false" title="Cấu hình GitHub">☁</button>
+    </div>
+  </div>
+</header>
+
+<main id="splitContainer" class="split layout-horizontal">
+  <!-- ================= PANE A — PDF ================= -->
+  <section class="pane" id="paneA" data-slot="A">
+    <div class="pane-toolbar" id="toolbarA">
+      <button class="bar-handle" id="btnToggleToolbarA" aria-label="Ẩn/hiện thanh thông tin" title="Ẩn/hiện thanh thông tin">⌃</button>
+      <div class="pane-toolbar-content">
+        <label class="file-open-btn">
+          <span id="paneATitle">Mở PDF…</span>
+          <input type="file" accept="application/pdf" id="fileA" hidden>
+        </label>
+        <button id="btnOpenPdfGithub" class="icon-btn icon-btn-wide" aria-label="Mở PDF từ GitHub" title="Mở PDF từ GitHub">PDF ☁</button>
+        <div class="pane-nav">
+          <button class="nav-btn small" data-act="zoomOut">−</button>
+          <button class="nav-btn small" data-act="zoomIn">+</button>
+          <button class="nav-btn small" data-act="prev">‹</button>
+          <span class="page-indicator" id="pageIndA">–</span>
+          <button class="nav-btn small" data-act="next">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="pane-scroll" id="scrollA">
+      <div class="page-wrap" id="pageWrapA">
+        <canvas id="canvasA"></canvas>
+        <div class="textLayer" id="textLayerA"></div>
+        <div class="highlightLayer" id="highlightLayerA"></div>
+      </div>
+      <div class="pane-empty" id="emptyA">Chưa mở PDF nào ở cột này.</div>
+    </div>
+  </section>
+
+  <div class="pane-resizer" id="paneResizer" role="separator" aria-label="Kéo để đổi kích thước 2 cột"></div>
+
+  <!-- ================= PANE B — JSON (dịch + phân tích) ================= -->
+  <section class="pane" id="paneB" data-slot="B">
+    <div class="pane-toolbar json-toolbar" id="toolbarB">
+      <button class="bar-handle" id="btnToggleToolbarB" aria-label="Ẩn/hiện thanh thông tin" title="Ẩn/hiện thanh thông tin">⌃</button>
+      <div class="pane-toolbar-content">
+        <button class="file-open-btn" id="btnOpenToc" type="button">
+          <span id="paneBTitle">Chọn sách / chương…</span>
+        </button>
+        <div class="pane-nav">
+          <button class="nav-btn small" data-act="prev">‹</button>
+          <span class="page-indicator" id="pageIndB">–</span>
+          <button class="nav-btn small" data-act="next">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" data-mode="translation">Dịch</button>
+      <button class="mode-btn" data-mode="analysis">Phân tích</button>
+      <button class="mode-btn" data-mode="both">Cả hai</button>
+      <button class="mode-btn edit-btn" id="btnJsonEdit" type="button" title="Sửa nội dung trang này">✎</button>
+    </div>
+    <div class="pane-scroll json-scroll" id="scrollB">
+      <div class="json-content" id="jsonContent"></div>
+      <div class="pane-empty" id="emptyB">Chưa chọn sách/chương nào. Bấm "Chọn sách / chương…" ở trên.</div>
+    </div>
+  </section>
+</main>
+
+<!-- Toolbar nổi khi bôi đen text: Highlight / Gạch chân / Add -->
+<div id="hlToolbar" class="hl-toolbar hidden">
+  <button class="hl-act-btn" data-act="highlight" title="Highlight">▮ Highlight</button>
+  <button class="hl-act-btn" data-act="underline" title="Gạch chân">U Gạch chân</button>
+  <span class="hl-swatches" id="hlSwatches">
+    <button class="swatch" data-color="#F7E27A" style="background:#F7E27A"></button>
+    <button class="swatch" data-color="#A8D5BA" style="background:#A8D5BA"></button>
+    <button class="swatch" data-color="#9AC5E8" style="background:#9AC5E8"></button>
+    <button class="swatch" data-color="#E7A6C0" style="background:#E7A6C0"></button>
+  </span>
+  <button class="hl-act-btn add" data-act="add" title="Thêm ghi chú">＋ Add</button>
+</div>
+
+<!-- Bảng thêm ghi chú — kéo thả tự do -->
+<div id="addPanel" class="add-panel hidden">
+  <div class="add-panel-handle" id="addPanelHandle">
+    <span class="popup-grip"></span>
+    <span class="add-panel-title">Thêm ghi chú</span>
+    <button id="btnCloseAddPanel" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <div class="add-panel-body">
+    <label>Text gốc</label>
+    <div class="add-text-original" id="addTextOriginal"></div>
+
+    <label>Từ vựng</label>
+    <textarea id="addVocab" rows="2" placeholder="Nhập hoặc dán text…"></textarea>
+
+    <label>Ngữ pháp</label>
+    <textarea id="addGrammar" rows="2" placeholder="Nhập hoặc dán text…"></textarea>
+
+    <label>Chú ý</label>
+    <textarea id="addNote" rows="2" placeholder="Nhập hoặc dán text…"></textarea>
+
+    <label>Dịch nghĩa</label>
+    <textarea id="addTranslation" rows="2" placeholder="Nhập hoặc dán text…"></textarea>
+
+    <div class="edit-actions">
+      <button id="btnAddSubmit" class="btn-save">Thêm</button>
+      <button id="btnAddCancel" class="btn-cancel">Hủy</button>
+    </div>
+    <div id="addStatus" class="gh-hint"></div>
+  </div>
+</div>
+
+<!-- Mục lục JSON: chọn book -> chọn chapter -->
+<div id="tocOverlay" class="drawer-overlay hidden"></div>
+<div id="tocPanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Mục lục</h2>
+    <button id="btnCloseToc" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint" id="tocHint">Chọn sách (thư mục trong <code>data/</code> trên GitHub):</p>
+  <div id="tocBookList" class="toc-list"></div>
+  <div id="tocChapterWrap" class="hidden">
+    <p class="gh-hint">Chọn chương:</p>
+    <div id="tocChapterList" class="toc-list"></div>
+    <button id="btnTocBack" class="btn-cancel" style="margin-top:8px;width:100%;">‹ Quay lại chọn sách</button>
+  </div>
+  <div id="tocStatus" class="gh-hint"></div>
+</div>
+
+<!-- Chọn PDF từ GitHub (thư mục pdf/ trong repo) -->
+<div id="pdfPickOverlay" class="drawer-overlay hidden"></div>
+<div id="pdfPickPanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Mở PDF từ GitHub</h2>
+    <button id="btnClosePdfPick" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint" id="pdfPickHint">Đang ở thư mục gốc.</p>
+  <div id="pdfPickList" class="toc-list"></div>
+  <button id="btnPdfPickBack" class="btn-cancel hidden" style="margin-top:8px;width:100%;">‹ Quay lại thư mục cha</button>
+  <div id="pdfPickStatus" class="gh-hint"></div>
+</div>
+
+<!-- Nhập dữ liệu JSON từ thư mục máy & đẩy lên GitHub -->
+<div id="importOverlay" class="drawer-overlay hidden"></div>
+<div id="importPanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Nhập & đẩy dữ liệu lên GitHub</h2>
+    <button id="btnCloseImport" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint">
+    Chọn 1 thư mục sách trên máy (ví dụ <code>create_data/book1</code>) chứa các file
+    <code>chp1.json</code>, <code>chp2.json</code>… Ứng dụng sẽ đọc và đẩy từng file lên repo GitHub
+    vào <code>data/&lt;tên thư mục&gt;/</code>. Chỉ hoạt động tốt trên trình duyệt Chrome/Edge trên Windows/máy tính.
+  </p>
+  <label>Tên sách sẽ lưu trên GitHub (mặc định lấy theo tên thư mục)</label>
+  <input type="text" id="importBookName" placeholder="book1">
+  <div class="edit-actions">
+    <button id="btnPickFolder" class="btn-save">Chọn thư mục & đẩy lên</button>
+    <button id="btnCancelImport" class="btn-cancel">Đóng</button>
+  </div>
+  <div id="importLog" class="import-log"></div>
+</div>
+
+<!-- Cấu hình GitHub -->
+<div id="githubOverlay" class="drawer-overlay hidden"></div>
+<div id="githubConfigPanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Cấu hình GitHub</h2>
+    <button id="btnCloseGhConfig" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint">Nhập 1 lần, lưu trên máy này. Token tạo tại GitHub → Settings → Developer settings → Fine-grained tokens, chỉ cấp quyền <b>Contents: Read & Write</b> cho đúng repo này.</p>
+  <label>GitHub username</label>
+  <input type="text" id="cfgOwner" placeholder="haithanhtran1994">
+  <label>Tên repo</label>
+  <input type="text" id="cfgRepo" placeholder="Book_ver2">
+  <label>Đường dẫn tới thư mục app trong repo (để trống nếu index.html nằm ngay gốc repo)</label>
+  <input type="text" id="cfgPrefix" placeholder="pdf-dual-reader-pwa">
+  <label>Đường dẫn file JSON lưu ghi chú (trong thư mục app ở trên)</label>
+  <input type="text" id="cfgNotesPath" placeholder="data/notes.json" value="data/notes.json">
+  <label>Thư mục dữ liệu sách JSON (trong thư mục app ở trên)</label>
+  <input type="text" id="cfgBooksPath" placeholder="data" value="data">
+  <label>Thư mục chứa file PDF sách (trong thư mục app ở trên)</label>
+  <input type="text" id="cfgPdfPath" placeholder="pdf" value="pdf">
+  <label>Thư mục lưu highlight/gạch chân (trong thư mục app ở trên)</label>
+  <input type="text" id="cfgHlPath" placeholder="highlights" value="highlights">
+  <label>Branch</label>
+  <input type="text" id="cfgBranch" value="main">
+  <label>Personal Access Token</label>
+  <input type="password" id="cfgToken" placeholder="github_pat_...">
+  <div class="edit-actions">
+    <button id="btnSaveGhConfig" class="btn-save">Lưu cấu hình</button>
+    <button id="btnCancelGhConfig" class="btn-cancel">Hủy</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/github.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
