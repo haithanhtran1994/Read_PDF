@@ -243,6 +243,10 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: .03em; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px;
 }
 .translation-text { font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
+.summary-text {
+  font-size: 13.5px; color: var(--ink-soft); background: var(--paper-raised);
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
+}
 .an-item {
   background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 8px 10px; margin-bottom: 8px; font-size: 13px;

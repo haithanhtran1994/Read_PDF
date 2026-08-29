@@ -21,6 +21,7 @@ Trong cột B:
   "pages": [
     {
       "page": 1,
+      "summary": "Tóm tắt/tổng kết đầy đủ ý của trang 1: nội dung tổng quát, các ý chính cần hiểu, phần cần tìm hiểu thêm...",
       "translation": "Bản dịch tiếng Việt của trang 1...",
       "grammar": [
         { "phrase": "the girl who loved me", "explain": "mệnh đề quan hệ bổ nghĩa cho \"girl\"" }
@@ -35,12 +36,27 @@ Trong cột B:
 ```
 `analysis[].type` là 1 trong: `vocab` (từ đơn lẻ khó/hiếm/chuyên ngành), `idiom`, `slang`, `collocation`, `phrase` (cụm từ dài đáng chú ý khác).
 
+`summary` là tùy chọn — trang/chương cũ chưa có field này thì app tự bỏ qua, không hiển thị mục
+"Tóm tắt", không lỗi gì cả.
+
 ## 3. Tạo dữ liệu bằng Excel
 - Mỗi **sách** = 1 file Excel (`book1.xlsx`), mỗi **chapter** = 1 **sheet** (tên sheet = tên chapter, ví dụ `chp1`).
 - Cột trong mỗi sheet: `page | translation | grammar | analysis`
+  - `translation`: bản dịch nguyên trang. **Tùy chọn**: có thể thêm phần "Tóm tắt" (tổng quan,
+    ý chính cần hiểu, phần cần tìm hiểu thêm) ở ĐẦU ô, trước bản dịch, phân tách bằng 2 dòng marker
+    riêng (Alt+Enter xuống dòng):
+    ```
+    === TÓM TẮT ===
+    nội dung tóm tắt…
+    === BẢN DỊCH ===
+    nội dung bản dịch…
+    ```
+    Không có 2 dòng marker này thì cả ô được hiểu là bản dịch thuần (không có tóm tắt) — vẫn hoạt động bình thường.
   - `grammar`: mỗi dòng (Alt+Enter trong ô Excel) = 1 mục, dạng `cụm từ :: giải thích`.
   - `analysis`: mỗi dòng = 1 mục, dạng `loại: cụm từ :: giải thích` (loại: vocab/idiom/slang/collocation/phrase).
 - Chi tiết + ví dụ xem trong công cụ `tools/xlsx-to-json.html` (mở file này trực tiếp trong trình duyệt, không cần cài gì).
+- Nếu dùng `batch_ocr_pdf_gemini.py` để tạo Excel bằng Gemini: script tự ghi đúng 2 marker trên vào ô
+  `translation`, không cần làm gì thêm.
 
 ## 4. Quy trình làm việc trên Windows → đẩy lên GitHub → đọc trên iPhone
 1. Trên Windows, nhập liệu vào file Excel theo định dạng ở mục 3.

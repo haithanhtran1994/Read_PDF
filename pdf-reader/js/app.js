@@ -775,6 +775,12 @@ function renderJsonPage() {
   const mode = j.mode;
   let html = "";
   if (mode === "translation" || mode === "both") {
+    if (page.summary && page.summary.trim()) {
+      html += `<div class="json-section">
+        <div class="json-section-title">Tóm tắt</div>
+        <div class="translation-text summary-text">${escapeHtml(page.summary)}</div>
+      </div>`;
+    }
     html += `<div class="json-section">
       <div class="json-section-title">Bản dịch</div>
       <div class="translation-text">${escapeHtml(page.translation || "(chưa có bản dịch)")}</div>
@@ -818,6 +824,10 @@ function renderJsonEditForm() {
   let html = "";
   if (j.mode === "translation" || j.mode === "both") {
     html += `<div class="json-section">
+      <div class="json-section-title">Tóm tắt (đang sửa)</div>
+      <textarea class="edit-translation" id="editSummary" rows="5" placeholder="Nội dung tổng quát, ý chính cần hiểu, phần cần tìm hiểu thêm…">${escapeHtml(page.summary || "")}</textarea>
+    </div>
+    <div class="json-section">
       <div class="json-section-title">Bản dịch (đang sửa)</div>
       <textarea class="edit-translation" id="editTranslation" rows="6" placeholder="Nhập bản dịch…">${escapeHtml(page.translation || "")}</textarea>
     </div>`;
@@ -865,7 +875,9 @@ async function saveJsonEdits() {
   const j = state.json;
   const page = j.pages[j.pageIdx];
   if (j.mode === "translation" || j.mode === "both") {
+    const taSum = $("#editSummary");
     const ta = $("#editTranslation");
+    if (taSum) page.summary = taSum.value;
     if (ta) page.translation = ta.value;
   }
   if (j.mode === "analysis" || j.mode === "both") {
