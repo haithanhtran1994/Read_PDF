@@ -37,6 +37,7 @@
         </label>
         <button id="btnOpenPdfGithub" class="icon-btn icon-btn-wide" aria-label="Mở PDF từ GitHub" title="Mở PDF từ GitHub">PDF ☁</button>
         <button id="btnSearchToggleA" class="icon-btn" aria-label="Tìm trong trang" title="Tìm trong trang này">🔍</button>
+        <button id="btnOutlineA" class="icon-btn" aria-label="Mục lục PDF" title="Mục lục (nhảy nhanh tới mục)">📑</button>
         <button id="btnSpeakA" class="icon-btn" aria-label="Đọc văn bản" title="Đọc to (bôi đen 1 đoạn để chỉ đọc đoạn đó, không thì đọc cả trang)">🔊</button>
         <div class="pane-nav">
           <button class="nav-btn small" data-act="zoomOut">−</button>
@@ -153,6 +154,17 @@
     <button id="btnTocBack" class="btn-cancel" style="margin-top:8px;width:100%;">‹ Quay lại chọn sách</button>
   </div>
   <div id="tocStatus" class="gh-hint"></div>
+</div>
+
+<!-- Mục lục PDF (outline/bookmark nhúng sẵn trong file) -->
+<div id="outlineOverlay" class="drawer-overlay hidden"></div>
+<div id="outlinePanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Mục lục PDF</h2>
+    <button id="btnCloseOutline" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <div id="outlineList" class="toc-list outline-list"></div>
+  <div id="outlineStatus" class="gh-hint"></div>
 </div>
 
 <!-- Chọn PDF từ GitHub (thư mục pdf/ trong repo) -->

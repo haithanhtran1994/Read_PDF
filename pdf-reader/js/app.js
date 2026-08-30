@@ -143,6 +143,7 @@ async function init() {
   $("#btnOpenPdfGithub").addEventListener("click", openPdfPicker);
   bindPdfPicker();
   bindSearchBar("A");
+  bindPdfOutline();
   const speakBtn = $("#btnSpeakA");
   // Bấm vào nút Đọc thường làm trình duyệt HỦY vùng bôi đen đang chọn (vì mousedown/touchstart
   // chuyển focus sang nút) -> lúc click chạy thì window.getSelection() đã rỗng, tưởng nhầm là
@@ -435,10 +436,91 @@ async function loadPdfIntoPane(slot, arrayBuffer, name, source) {
   pane.source = source || { type: "device" };
   pane.pdfId = computePdfId(name, pane.source);
   pane.highlightsByPage = {};
+  pane.outline = undefined; // chưa biết có mục lục hay không, đang tải
   pe.title.textContent = name;
   pe.empty.classList.add("hidden");
   await fitAndRender(slot, true);
   loadHighlightsForPane(slot).catch(() => {});
+  loadPdfOutline(slot).catch(() => { pane.outline = null; });
+}
+
+// ---------- Mục lục PDF (outline/bookmark nhúng sẵn trong file) ----------
+async function loadPdfOutline(slot) {
+  const pane = state.panes[slot];
+  if (!pane.pdfDoc) return;
+  try {
+    const outline = await pane.pdfDoc.getOutline();
+    pane.outline = (outline && outline.length) ? outline : null;
+  } catch (e) {
+    pane.outline = null;
+  }
+}
+
+function bindPdfOutline() {
+  $("#btnOutlineA").addEventListener("click", () => openPdfOutline("A"));
+  $("#btnCloseOutline").addEventListener("click", closePdfOutline);
+  $("#outlineOverlay").addEventListener("click", closePdfOutline);
+}
+
+function closePdfOutline() {
+  $("#outlineOverlay").classList.add("hidden");
+  $("#outlinePanel").classList.add("hidden");
+}
+
+async function openPdfOutline(slot) {
+  const pane = state.panes[slot];
+  const listEl = $("#outlineList");
+  const statusEl = $("#outlineStatus");
+  listEl.innerHTML = "";
+  statusEl.textContent = "";
+  $("#outlineOverlay").classList.remove("hidden");
+  $("#outlinePanel").classList.remove("hidden");
+
+  if (!pane.pdfDoc) { statusEl.textContent = "Chưa mở PDF nào ở cột này."; return; }
+  if (pane.outline === undefined) {
+    statusEl.textContent = "Đang tải mục lục…";
+    await loadPdfOutline(slot);
+  }
+  if (!pane.outline) {
+    statusEl.textContent = "PDF này không có mục lục nhúng sẵn (không phải file PDF nào cũng có).";
+    return;
+  }
+  statusEl.textContent = "";
+  renderOutlineList(listEl, pane.outline, slot, 0);
+}
+
+function renderOutlineList(container, items, slot, depth) {
+  items.forEach((item) => {
+    const btn = document.createElement("button");
+    btn.className = "toc-item outline-item";
+    btn.style.paddingLeft = (12 + depth * 16) + "px";
+    btn.textContent = item.title ? item.title.trim() : "(không có tiêu đề)";
+    btn.addEventListener("click", () => jumpToOutlineItem(slot, item));
+    container.appendChild(btn);
+    if (item.items && item.items.length) {
+      renderOutlineList(container, item.items, slot, depth + 1);
+    }
+  });
+}
+
+async function jumpToOutlineItem(slot, item) {
+  const pane = state.panes[slot];
+  const statusEl = $("#outlineStatus");
+  if (!pane.pdfDoc || !item.dest) return;
+  try {
+    let dest = item.dest;
+    if (typeof dest === "string") dest = await pane.pdfDoc.getDestination(dest);
+    if (!dest || !dest.length) return;
+    const ref = dest[0];
+    const pageIndex = (typeof ref === "object" && ref !== null)
+      ? await pane.pdfDoc.getPageIndex(ref)
+      : ref; // vài PDF cũ dùng số trang trực tiếp thay vì object ref
+    pane.pageNum = pageIndex + 1;
+    closePdfOutline();
+    await fitAndRender(slot, true);
+  } catch (e) {
+    if (statusEl) statusEl.textContent = `Không nhảy được tới mục này: ${e.message}`;
+  }
 }
 
 // ---------- Render PDF ----------

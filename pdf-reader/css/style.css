@@ -314,6 +314,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---- Mục lục drawer (danh sách book/chapter) ---- */
 .toc-list { display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow: auto; margin-top: 6px; }
+.outline-list { max-height: 60vh; }
+.outline-item { text-align: left; }
 .toc-list.hidden { display: none; }
 .toc-item {
   text-align: left; border: 1px solid var(--line); border-radius: var(--radius);
