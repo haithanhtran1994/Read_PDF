@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#EDE7D6">
+<title>Từ điển tra cứu — Ngữ pháp / Từ vựng</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">Từ điển tra cứu</div>
+  <div class="topbar-actions">
+    <button id="btnSync" class="icon-btn" title="Đồng bộ dữ liệu từ GitHub">⟳ Đồng bộ</button>
+    <button id="btnGhConfig" class="icon-btn" title="Cấu hình GitHub">☁</button>
+  </div>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Tra cụm từ (Anh/Nhật) hoặc nghĩa tiếng Việt…" autocomplete="off">
+  <div class="filter-row" id="typeChips">
+    <button class="chip active" data-type="grammar">Ngữ pháp</button>
+    <button class="chip active" data-type="vocab">Từ vựng</button>
+    <button class="chip active" data-type="idiom">Thành ngữ</button>
+    <button class="chip active" data-type="slang">Slang</button>
+    <button class="chip active" data-type="collocation">Collocation</button>
+    <button class="chip active" data-type="phrase">Cụm từ</button>
+    <select id="bookFilter"><option value="">Tất cả sách</option></select>
+  </div>
+</div>
+
+<div class="result-stats" id="resultStats"></div>
+<div class="sync-status" id="syncStatus"></div>
+<div id="results"></div>
+
+<!-- Bảng đồng bộ dữ liệu -->
+<div id="syncOverlay" class="drawer-overlay hidden"></div>
+<div id="syncPanel" class="gh-panel hidden">
+  <div class="gh-panel-header">
+    <h2>Đồng bộ dữ liệu</h2>
+    <button id="btnCloseSync" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint">Quét toàn bộ sách/chương trong thư mục dữ liệu trên GitHub, gom hết ngữ pháp/từ vựng/idiom/slang/collocation/cụm từ vào 1 danh sách tra cứu.</p>
+  <div id="syncLog" class="sync-log"></div>
+</div>
+
+<!-- Cấu hình GitHub -->
+<div id="githubOverlay" class="drawer-overlay hidden"></div>
+<div id="githubPanel" class="gh-panel hidden">
+  <div class="gh-panel-header">
+    <h2>Cấu hình GitHub</h2>
+    <button id="btnCloseGhConfig" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint">Dùng chung repo với app đọc sách. Token chỉ cần quyền <b>Contents: Read</b> (app này không ghi gì lên GitHub).</p>
+  <label>GitHub username</label>
+  <input type="text" id="cfgOwner" placeholder="haithanhtran1994">
+  <label>Tên repo</label>
+  <input type="text" id="cfgRepo" placeholder="Book_ver2">
+  <label>Thư mục dữ liệu sách JSON</label>
+  <input type="text" id="cfgBooksPath" placeholder="data" value="data">
+  <label>Branch</label>
+  <input type="text" id="cfgBranch" value="main">
+  <label>Personal Access Token</label>
+  <input type="password" id="cfgToken" placeholder="github_pat_...">
+  <div class="edit-actions">
+    <button id="btnSaveGhConfig" class="btn-save">Lưu & đồng bộ</button>
+    <button id="btnCancelGhConfig" class="btn-cancel">Hủy</button>
+  </div>
+</div>
+
+<script src="js/db.js"></script>
+<script src="js/github.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

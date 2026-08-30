@@ -54,6 +54,19 @@ button { font-family: inherit; cursor: pointer; }
 }
 .icon-btn:active { background: var(--line); }
 .icon-btn-wide { width: auto; padding: 0 10px; font-size: 12px; white-space: nowrap; }
+
+/* ---- Thanh tìm kiếm trong trang (Pane A) ---- */
+.search-bar {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px 10px;
+}
+.search-bar.hidden { display: none; }
+.search-bar input[type="text"] {
+  flex: 1; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--paper, #fff); color: var(--ink); font-size: 14px;
+}
+.search-bar .search-count { font-size: 12px; color: var(--ink); opacity: .7; white-space: nowrap; min-width: 40px; text-align: center; }
+.textLayer mark.search-hit { background: #ffe066; opacity: .55; color: transparent; border-radius: 2px; }
+.textLayer mark.search-hit.active { background: #ff922b; opacity: .6; }
 #btnGithubStatus[data-connected="true"] { color: var(--shuiro); border-color: var(--shuiro-soft); background: var(--shuiro-soft); }
 
 /* ---- Split layout ---- */
@@ -134,6 +147,34 @@ button { font-family: inherit; cursor: pointer; }
   white-space: pre;
   cursor: text;
   transform-origin: 0 0;
+}
+/* QUAN TRỌNG: từ pdf.js v4.x, class TextLayer không set font-size trực tiếp bằng JS nữa —
+   nó chỉ ghi các biến CSS (--font-height, --scale-x, --rotate...) lên từng span, còn việc
+   áp dụng thành font-size/transform thật sự là do CSS chính thức của pdf.js (pdf_viewer.css)
+   đảm nhiệm. App tự viết lại .textLayer CSS nên thiếu đúng phần này — hậu quả: mọi span đều
+   render ở font-size mặc định của trình duyệt (16px) thay vì đúng cỡ chữ trong PDF, và
+   --scale-x (hệ số giãn ngang bù trừ font thay thế) bị set nhưng không bao giờ được áp dụng.
+   Dòng càng dài thì sai số càng cộng dồn, khiến nó "phình" ngang ra khỏi trang — đây chính là
+   nguyên nhân search/bôi bị lệch theo chiều NGANG (khác với lỗi lệch dọc do scrollIntoView đã
+   fix trước đó). Copy nguyên khối rule dưới đây từ pdfjs-dist/web/pdf_viewer.css chính thức. */
+.textLayer {
+  --user-unit: 1;
+  --total-scale-factor: var(--scale-factor, 1);
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.textLayer > :not(.markedContent),
+.textLayer .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent {
+  display: contents;
 }
 .textLayer ::selection { background: rgba(44,74,110,.35); }
 .textLayer mark.hl { background: var(--hl-color, #F7E27A); opacity: .55; color: transparent; border-radius: 2px; }

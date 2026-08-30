@@ -46,12 +46,14 @@ Trong cột B:
     ý chính cần hiểu, phần cần tìm hiểu thêm) ở ĐẦU ô, trước bản dịch, phân tách bằng 2 dòng marker
     riêng (Alt+Enter xuống dòng):
     ```
-    === TÓM TẮT ===
+    [TÓM TẮT]
     nội dung tóm tắt…
-    === BẢN DỊCH ===
+    [BẢN DỊCH]
     nội dung bản dịch…
     ```
     Không có 2 dòng marker này thì cả ô được hiểu là bản dịch thuần (không có tóm tắt) — vẫn hoạt động bình thường.
+    (Lưu ý: marker dùng `[...]` chứ không dùng `===...===`, vì ô Excel bắt đầu bằng dấu `=` sẽ bị Excel
+    hiểu nhầm thành công thức và có thể làm hỏng nội dung ô khi mở file.)
   - `grammar`: mỗi dòng (Alt+Enter trong ô Excel) = 1 mục, dạng `cụm từ :: giải thích`.
   - `analysis`: mỗi dòng = 1 mục, dạng `loại: cụm từ :: giải thích` (loại: vocab/idiom/slang/collocation/phrase).
 - Chi tiết + ví dụ xem trong công cụ `tools/xlsx-to-json.html` (mở file này trực tiếp trong trình duyệt, không cần cài gì).
@@ -100,3 +102,14 @@ file PDF (có thể vài MB) lên GitHub, rất chậm và tốn dung lượng l
 nhanh, đồng bộ qua GitHub được, và hoạt động giống nhau dù mở PDF từ máy hay từ GitHub. Nếu bạn thực
 sự cần highlight nằm ngay trong file PDF (để mở bằng app đọc PDF khác cũng thấy), nói lại — đây là
 một hướng làm khác, phức tạp hơn, cần tính kỹ lại.
+
+## 7. Tìm kiếm trong trang & Đọc to văn bản (Pane A)
+
+- **🔍 Tìm trong trang**: chỉ tìm trong trang PDF đang mở (không tìm toàn bộ file). Gõ từ khóa, tự
+  tìm sau ~0.25s hoặc bấm Enter; các kết quả được tô vàng, kết quả đang chọn tô cam đậm và tự cuộn
+  tới. Dùng nút ‹ › (hoặc Enter / Shift+Enter) để nhảy qua từng kết quả. Đổi trang hoặc zoom thì
+  kết quả cũ tự xóa (vì tìm theo trang hiện tại).
+- **🔊 Đọc to**: nếu đang bôi đen (select) 1 đoạn text trong trang PDF thì chỉ đọc đoạn đó; không
+  chọn gì thì đọc cả trang. Tự nhận diện tiếng Nhật (có Hiragana/Katakana/Kanji) hay tiếng Anh để
+  đọc đúng giọng. Bấm lại nút khi đang đọc để dừng. Cần trình duyệt hỗ trợ Web Speech API (Chrome,
+  Edge, Safari đều có; chất lượng giọng phụ thuộc giọng đọc cài sẵn trên máy/hệ điều hành).

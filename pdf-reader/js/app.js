@@ -15,8 +15,11 @@
      (phân biệt với cuộn dọc bình thường).
 */
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+// Ghi chú: pdf.js từ bản 4.x trở đi CHỈ phát hành dạng ES module (.mjs), không còn bản
+// <script> toàn cục cũ. Nên pdf.js được nạp bằng <script type="module"> ở index.html
+// (gán ra window.pdfjsLib), và dòng cấu hình workerSrc dưới đây được dời vào init()
+// (chạy sau khi trang đã parse xong, chắc chắn window.pdfjsLib đã sẵn sàng) thay vì
+// chạy ngay khi app.js được nạp như trước.
 
 const state = {
   layout: "horizontal",
@@ -28,6 +31,7 @@ const state = {
       pdfId: null,            // định danh ổn định để lưu/đọc highlight
       viewport: null,         // viewport pdf.js của lần render gần nhất (dùng để đổi tọa độ)
       highlightsByPage: {},   // { [pageNum]: [ {id, page, mode, color, quads, createdAt} ] }
+      search: { query: "", matches: [], index: -1 }, // tìm kiếm trong TRANG hiện tại (không lưu lại)
     },
   },
   pdfBrowse: { stack: [] }, // ngăn xếp thư mục đang duyệt khi mở PDF từ GitHub
@@ -108,6 +112,14 @@ function paneEls(slot) {
 
 // ---------- Khởi tạo ----------
 async function init() {
+  if (!window.pdfjsLib) {
+    // Script module nạp pdf.js chưa xong kịp (hiếm khi xảy ra vì module luôn chạy
+    // trước DOMContentLoaded, nhưng phòng hờ) — đợi tối đa vài giây.
+    for (let i = 0; i < 50 && !window.pdfjsLib; i++) await new Promise((r) => setTimeout(r, 100));
+  }
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.worker.min.mjs";
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js").catch(() => {});
   }
@@ -130,6 +142,15 @@ async function init() {
   });
   $("#btnOpenPdfGithub").addEventListener("click", openPdfPicker);
   bindPdfPicker();
+  bindSearchBar("A");
+  const speakBtn = $("#btnSpeakA");
+  // Bấm vào nút Đọc thường làm trình duyệt HỦY vùng bôi đen đang chọn (vì mousedown/touchstart
+  // chuyển focus sang nút) -> lúc click chạy thì window.getSelection() đã rỗng, tưởng nhầm là
+  // "không chọn gì" nên đọc nhầm cả trang / đoạn khác. Chặn hành vi mặc định đó để giữ nguyên
+  // vùng đang bôi đen cho tới khi đọc xong việc kiểm tra trong toggleSpeak().
+  speakBtn.addEventListener("mousedown", (e) => e.preventDefault());
+  speakBtn.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+  speakBtn.addEventListener("click", () => toggleSpeak("A"));
 
   // Khôi phục PDF đã mở lần trước (lưu trong IndexedDB), kèm nguồn gốc (device/github)
   // để biết đọc/ghi highlight đúng chỗ.
@@ -453,18 +474,23 @@ async function fitAndRender(slot, refit) {
   pe.textLayer.style.height = viewport.height + "px";
   pe.textLayer.style.setProperty("--scale-factor", pane.scale);
   const textContent = await page.getTextContent();
-  const task = pdfjsLib.renderTextLayer({
+  pane.lastTextContent = textContent; // dùng lại khi tìm kiếm trong trang, khỏi getTextContent lại
+  // pdf.js >= 4.x đã bỏ hàm renderTextLayer() cũ, thay bằng class TextLayer.
+  const textLayerObj = new pdfjsLib.TextLayer({
     textContentSource: textContent,
     container: pe.textLayer,
     viewport,
   });
-  await task.promise;
+  await textLayerObj.render();
 
   if (pe.highlightLayer) {
     pe.highlightLayer.style.width = viewport.width + "px";
     pe.highlightLayer.style.height = viewport.height + "px";
     renderHighlightOverlay(slot);
   }
+
+  // Đổi trang / zoom lại thì kết quả tìm kiếm cũ (nếu có) không còn khớp DOM nữa — reset.
+  resetSearch(slot);
 
   pe.pageInd.textContent = `${pane.pageNum}/${pane.numPages}`;
 }
@@ -476,6 +502,194 @@ function handlePaneNav(slot, act) {
   if (act === "next" && pane.pageNum < pane.numPages) { pane.pageNum++; fitAndRender(slot, false); }
   if (act === "zoomIn") { pane.scale = Math.min(4, (pane.scale || 1) + 0.15); fitAndRender(slot, false); }
   if (act === "zoomOut") { pane.scale = Math.max(0.3, (pane.scale || 1) - 0.15); fitAndRender(slot, false); }
+}
+
+// ---------- Tìm kiếm trong TRANG hiện tại (Pane A) ----------
+// Bọc lại textLayer sạch (chưa có <mark> tìm kiếm nào) từ cache textContent + viewport
+// của lần render gần nhất, khỏi phải getPage/getTextContent lại từ PDF.
+async function rebuildTextLayerOnly(slot) {
+  const pane = state.panes[slot];
+  const pe = paneEls(slot);
+  if (!pane.viewport || !pane.lastTextContent) return;
+  pe.textLayer.innerHTML = "";
+  pe.textLayer.style.setProperty("--scale-factor", pane.scale);
+  const textLayerObj = new pdfjsLib.TextLayer({
+    textContentSource: pane.lastTextContent,
+    container: pe.textLayer,
+    viewport: pane.viewport,
+  });
+  await textLayerObj.render();
+}
+
+function bindSearchBar(slot) {
+  const bar = $(`#searchBar${slot}`);
+  const input = $(`#searchInput${slot}`);
+  $(`#btnSearchToggle${slot}`).addEventListener("click", () => {
+    const willOpen = bar.classList.contains("hidden");
+    bar.classList.toggle("hidden");
+    if (willOpen) { input.focus(); if (input.value.trim()) runSearch(slot); }
+    else closeSearch(slot);
+  });
+  $(`#btnSearchClose${slot}`).addEventListener("click", () => { bar.classList.add("hidden"); closeSearch(slot); });
+  $(`#btnSearchPrev${slot}`).addEventListener("click", () => stepSearch(slot, -1));
+  $(`#btnSearchNext${slot}`).addEventListener("click", () => stepSearch(slot, 1));
+  let debounceTimer = null;
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => runSearch(slot), 250);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); stepSearch(slot, e.shiftKey ? -1 : 1); }
+    if (e.key === "Escape") { bar.classList.add("hidden"); closeSearch(slot); }
+  });
+}
+
+async function runSearch(slot) {
+  const pane = state.panes[slot];
+  const input = $(`#searchInput${slot}`);
+  const query = input.value.trim();
+  await rebuildTextLayerOnly(slot); // luôn bắt đầu từ textLayer sạch trước khi đánh dấu lại
+  pane.search = { query, matches: [], index: -1 };
+  if (!query) { updateSearchCount(slot); return; }
+  const pe = paneEls(slot);
+  const ql = query.toLowerCase();
+  const spans = Array.from(pe.textLayer.querySelectorAll("span"));
+  const allMatches = [];
+  spans.forEach((span) => {
+    const node0 = span.firstChild;
+    if (!node0 || node0.nodeType !== 3) return;
+    const text = node0.nodeValue;
+    const lower = text.toLowerCase();
+    const positions = [];
+    let idx = 0;
+    while (true) {
+      const found = lower.indexOf(ql, idx);
+      if (found === -1) break;
+      positions.push(found);
+      idx = found + ql.length;
+    }
+    if (!positions.length) return;
+    const spanWrappers = [];
+    // Bọc từ phải sang trái trong span để offset các match còn lại không bị lệch sau khi tách text node
+    for (let i = positions.length - 1; i >= 0; i--) {
+      const start = positions[i];
+      const end = start + query.length;
+      const node = span.firstChild;
+      if (!node || node.nodeType !== 3) continue;
+      const range = document.createRange();
+      try { range.setStart(node, start); range.setEnd(node, end); } catch (e) { continue; }
+      const wrappers = [];
+      wrapRangeNodes(range, () => {
+        const m = document.createElement("mark");
+        m.className = "search-hit";
+        return m;
+      }, wrappers);
+      if (wrappers[0]) spanWrappers.unshift(wrappers[0]);
+    }
+    allMatches.push(...spanWrappers);
+  });
+  pane.search.matches = allMatches;
+  pane.search.index = allMatches.length ? 0 : -1;
+  updateSearchCount(slot);
+  if (allMatches.length) focusSearchMatch(slot);
+}
+
+function stepSearch(slot, dir) {
+  const pane = state.panes[slot];
+  const n = pane.search.matches.length;
+  if (!n) return;
+  pane.search.index = (pane.search.index + dir + n) % n;
+  focusSearchMatch(slot);
+}
+
+function focusSearchMatch(slot) {
+  const pane = state.panes[slot];
+  pane.search.matches.forEach((el) => el.classList.remove("active"));
+  const el = pane.search.matches[pane.search.index];
+  if (el) {
+    el.classList.add("active");
+    scrollMatchIntoView(slot, el);
+  }
+  updateSearchCount(slot);
+}
+
+// pdf.js chèn thêm 1 div nội bộ ("endOfContent") cao hơn nhiều so với khung trang thật
+// vào bên trong .textLayer, để hỗ trợ kéo-chọn mượt khi rê chuột qua cuối trang. Việc này
+// khiến .textLayer (dù overflow:hidden) vẫn được trình duyệt coi là "cuộn được" bên trong nó
+// (scrollHeight > clientHeight). Nếu gọi thẳng el.scrollIntoView() trên 1 <mark> nằm trong đó,
+// trình duyệt có thể tự cuộn luôn scrollTop của chính .textLayer để "canh giữa" — trong khi
+// canvas (ảnh PDF) là phần tử anh em, KHÔNG nằm trong .textLayer nên không cuộn theo, làm lớp
+// text bị lệch hẳn so với ảnh bên dưới (và lệch này còn tồn tại cho các thao tác bôi/chọn sau
+// đó, tới khi trang được render lại). Nên tự tính toạ độ và chỉ cuộn khung ngoài (pe.scroll),
+// đồng thời ép textLayer/highlightLayer về scrollTop 0 cho chắc.
+function scrollMatchIntoView(slot, el) {
+  const pe = paneEls(slot);
+  const scroller = pe.scroll;
+  if (scroller) {
+    const elRect = el.getBoundingClientRect();
+    const scRect = scroller.getBoundingClientRect();
+    const elTopInScroller = (elRect.top - scRect.top) + scroller.scrollTop;
+    const elCenterInScroller = elTopInScroller + elRect.height / 2;
+    const target = elCenterInScroller - scroller.clientHeight / 2;
+    scroller.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+  }
+  if (pe.textLayer) pe.textLayer.scrollTop = 0;
+  if (pe.highlightLayer) pe.highlightLayer.scrollTop = 0;
+}
+
+function updateSearchCount(slot) {
+  const pane = state.panes[slot];
+  const n = pane.search.matches.length;
+  $(`#searchCount${slot}`).textContent = n ? `${pane.search.index + 1}/${n}` : "0/0";
+}
+
+function closeSearch(slot) {
+  rebuildTextLayerOnly(slot); // xóa hết <mark> tìm kiếm, trả textLayer về sạch
+  state.panes[slot].search = { query: "", matches: [], index: -1 };
+  updateSearchCount(slot);
+}
+
+function resetSearch(slot) {
+  const pane = state.panes[slot];
+  pane.search = { query: "", matches: [], index: -1 };
+  const countEl = document.getElementById(`searchCount${slot}`);
+  if (countEl) countEl.textContent = "0/0";
+}
+
+// ---------- Đọc to văn bản (chọn đoạn thì đọc đoạn đó, không thì đọc cả trang) ----------
+function detectSpeechLang(text) {
+  // Có ký tự Hiragana/Katakana/Kanji -> đọc tiếng Nhật, không thì mặc định tiếng Anh
+  return /[\u3040-\u30ff\u3400-\u9fff]/.test(text) ? "ja-JP" : "en-US";
+}
+
+function toggleSpeak(slot) {
+  const btn = $(`#btnSpeak${slot}`);
+  if (!("speechSynthesis" in window)) {
+    alert("Trình duyệt này không hỗ trợ đọc văn bản (Web Speech API).");
+    return;
+  }
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+    btn.textContent = "🔊";
+    return;
+  }
+  const pe = paneEls(slot);
+  let text = "";
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.toString().trim() && pe.textLayer.contains(sel.anchorNode)) {
+    text = sel.toString();
+  } else {
+    text = pe.textLayer.textContent || "";
+  }
+  text = text.trim();
+  if (!text) { alert("Không có văn bản để đọc — mở 1 trang PDF trước đã."); return; }
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = detectSpeechLang(text);
+  utter.rate = 0.95;
+  utter.onend = () => { btn.textContent = "🔊"; };
+  utter.onerror = () => { btn.textContent = "🔊"; };
+  btn.textContent = "⏹";
+  window.speechSynthesis.speak(utter);
 }
 
 // ---------- Chọn & mở PDF từ GitHub (thư mục cfg.pdfPrefix, có thể có thư mục con) ----------

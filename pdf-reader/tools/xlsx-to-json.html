@@ -48,9 +48,9 @@
       <td style="padding:6px;border:1px solid var(--line);">Bản dịch tiếng Việt nguyên trang, theo đúng ngữ cảnh.
         <b>Tùy chọn:</b> có thể thêm phần "Tóm tắt" (tổng quan, ý chính cần hiểu, phần cần tìm hiểu thêm)
         ở ĐẦU ô, viết trước bản dịch, phân tách bằng 2 dòng marker riêng:<br>
-        <code>=== TÓM TẮT ===</code><br>
+        <code>[TÓM TẮT]</code><br>
         <i>nội dung tóm tắt…</i><br>
-        <code>=== BẢN DỊCH ===</code><br>
+        <code>[BẢN DỊCH]</code><br>
         <i>nội dung bản dịch…</i><br>
         Nếu không có 2 dòng marker này, cả ô sẽ được hiểu là bản dịch (không có tóm tắt) — không sao cả.</td></tr>
     <tr><td style="padding:6px;border:1px solid var(--line);"><code>grammar</code></td>
@@ -136,14 +136,14 @@ function parseAnalysisCell(text) {
 
 // Ô "translation" có thể chứa CẢ 2 phần "Tóm tắt" + "Bản dịch" ghép chung, phân
 // tách bằng marker cố định (đúng marker mà batch_ocr_pdf_gemini.py xuất ra):
-//   === TÓM TẮT ===
+//   [TÓM TẮT]
 //   ...nội dung tóm tắt...
-//   === BẢN DỊCH ===
+//   [BẢN DỊCH]
 //   ...nội dung bản dịch...
 // Nếu ô không có marker (dữ liệu cũ, hoặc gõ tay không có tóm tắt) -> coi toàn bộ
 // nội dung ô là "translation", "summary" để rỗng (tương thích ngược hoàn toàn).
-const SUMMARY_MARKER = "=== TÓM TẮT ===";
-const TRANSLATION_MARKER = "=== BẢN DỊCH ===";
+const SUMMARY_MARKER = "[TÓM TẮT]";
+const TRANSLATION_MARKER = "[BẢN DỊCH]";
 
 function parseTranslationCell(text) {
   const str = String(text == null ? "" : text);

@@ -1,0 +1,88 @@
+:root{
+  --paper:#EDE7D6; --paper-raised:#F5F1E4; --ink:#211C15; --ink-soft:#59524A;
+  --line:#D8D0BC; --shuiro:#B7410E; --aizome:#2C4A6E; --radius:6px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; background: var(--paper); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+body { display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--paper-raised); border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.topbar-title { font-weight: 700; font-size: 16px; }
+.topbar-actions { display: flex; gap: 8px; }
+.icon-btn {
+  border: 1px solid var(--line); background: #fff; border-radius: var(--radius);
+  font-size: 16px; padding: 6px 10px; cursor: pointer; color: var(--ink);
+}
+
+.search-bar { padding: 10px 14px; background: var(--paper-raised); border-bottom: 1px solid var(--line); flex-shrink: 0; }
+#searchInput {
+  width: 100%; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: #fff; color: var(--ink);
+}
+.filter-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+.chip {
+  border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+  border-radius: 999px; font-size: 12px; padding: 5px 10px; cursor: pointer;
+}
+.chip.active { background: var(--aizome); color: #fff; border-color: var(--aizome); }
+#bookFilter {
+  margin-left: auto; font-size: 12px; padding: 5px 8px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: #fff; color: var(--ink);
+}
+
+.result-stats { padding: 8px 14px 0; font-size: 12px; color: var(--ink-soft); flex-shrink: 0; }
+.sync-status { padding: 2px 14px 8px; font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
+
+#results { flex: 1; overflow: auto; padding: 8px 14px 24px; max-width: 700px; width: 100%; margin: 0 auto; }
+.dict-item {
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 10px 12px; margin-bottom: 8px;
+}
+.dict-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.dict-type {
+  font-size: 10px; font-weight: 700; color: #fff; background: var(--aizome);
+  border-radius: 3px; padding: 1px 6px;
+}
+.dict-type[data-type="grammar"] { background: var(--shuiro); }
+.dict-type[data-type="vocab"] { background: #2E7D32; }
+.dict-phrase { font-size: 15px; font-weight: 700; }
+.dict-explain { margin-top: 4px; font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+.dict-source { margin-top: 6px; font-size: 11px; color: var(--ink-soft); }
+.dict-empty { padding: 20px 0; text-align: center; color: var(--ink-soft); font-size: 13px; }
+
+.hidden { display: none !important; }
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 50;
+}
+.gh-panel {
+  position: fixed; z-index: 51; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  width: min(440px, 92vw); max-height: 86vh; overflow: auto; padding: 16px 18px;
+}
+.gh-panel h2 { margin: 0 0 4px; font-size: 16px; }
+.gh-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.gh-panel label { display: block; font-size: 12px; color: var(--ink-soft); margin-top: 10px; }
+.gh-panel input[type=text], .gh-panel input[type=password] {
+  width: 100%; font-size: 13px; border: 1px solid var(--line); border-radius: 4px;
+  padding: 8px; margin-top: 4px; background: #fff; color: var(--ink);
+}
+.gh-hint { font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+.edit-actions { display: flex; gap: 8px; margin-top: 14px; }
+.btn-save, .btn-cancel {
+  border: none; border-radius: var(--radius); padding: 9px 14px; font-size: 13px; cursor: pointer;
+}
+.btn-save { background: var(--shuiro); color: #fff; }
+.btn-cancel { background: var(--line); color: var(--ink); }
+
+.sync-log { margin-top: 10px; max-height: 40vh; overflow: auto; font-size: 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); }
+.sync-log-line { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.sync-log-line:last-child { border-bottom: none; }
+.sync-log-line.ok { color: #2E7D32; }
+.sync-log-line.err { color: var(--shuiro); }

@@ -2,7 +2,7 @@
    Lưu ý: thư viện pdf.js tải từ CDN (cdnjs) — lần đầu mở app CẦN có mạng để tải.
    Trình duyệt sẽ tự cache các file CDN đó theo cơ chế HTTP cache thông thường.
 */
-const CACHE_NAME = "pdf-dual-reader-v5";
+const CACHE_NAME = "pdf-dual-reader-v8";
 const APP_SHELL = [
   "./",
   "./index.html",

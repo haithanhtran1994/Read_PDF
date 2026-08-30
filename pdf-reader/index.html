@@ -36,6 +36,8 @@
           <input type="file" accept="application/pdf" id="fileA" hidden>
         </label>
         <button id="btnOpenPdfGithub" class="icon-btn icon-btn-wide" aria-label="Mở PDF từ GitHub" title="Mở PDF từ GitHub">PDF ☁</button>
+        <button id="btnSearchToggleA" class="icon-btn" aria-label="Tìm trong trang" title="Tìm trong trang này">🔍</button>
+        <button id="btnSpeakA" class="icon-btn" aria-label="Đọc văn bản" title="Đọc to (bôi đen 1 đoạn để chỉ đọc đoạn đó, không thì đọc cả trang)">🔊</button>
         <div class="pane-nav">
           <button class="nav-btn small" data-act="zoomOut">−</button>
           <button class="nav-btn small" data-act="zoomIn">+</button>
@@ -43,6 +45,13 @@
           <span class="page-indicator" id="pageIndA">–</span>
           <button class="nav-btn small" data-act="next">›</button>
         </div>
+      </div>
+      <div id="searchBarA" class="search-bar hidden">
+        <input type="text" id="searchInputA" placeholder="Tìm trong trang này…" autocomplete="off">
+        <button id="btnSearchPrevA" class="nav-btn small" aria-label="Kết quả trước">‹</button>
+        <span class="search-count" id="searchCountA">0/0</span>
+        <button id="btnSearchNextA" class="nav-btn small" aria-label="Kết quả sau">›</button>
+        <button id="btnSearchCloseA" class="icon-btn" aria-label="Đóng tìm kiếm">✕</button>
       </div>
     </div>
     <div class="pane-scroll" id="scrollA">
@@ -212,7 +221,13 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- pdf.js từ bản 4.x trở lên chỉ phát hành dạng ES module (.mjs), không còn <script> toàn cục
+     cũ như bản 3.x. Nạp bằng module rồi gán ra window.pdfjsLib để js/app.js (script thường,
+     không phải module) dùng được như trước — xem thêm ghi chú đầu js/app.js. -->
+<script type="module">
+  import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs";
+  window.pdfjsLib = pdfjsLib;
+</script>
 <script src="js/db.js"></script>
 <script src="js/github.js"></script>
 <script src="js/app.js"></script>
