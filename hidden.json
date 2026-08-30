@@ -1,0 +1,32 @@
+[
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong/khung kiem thu mo phong bang phan mem cho thiet ke phan cung",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường/khung kiểm thử mô phỏng bằng phần mềm cho thiết kế phần cứng"
+  },
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong kiem thu / mo phong phan cung",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường kiểm thử / mô phỏng phần cứng"
+  },
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong mo phong kiem thu phan cung",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường mô phỏng kiểm thử phần cứng"
+  },
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong mo phong/kiem thu phan cung",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường mô phỏng/kiểm thử phần cứng"
+  },
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong/ma kiem thu duoc thiet ke de mo phong va kiem tra chuc nang cua vi mach (dut).",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường/mã kiểm thử được thiết kế để mô phỏng và kiểm tra chức năng của vi mạch (DUT)."
+  }
+]
