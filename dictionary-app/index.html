@@ -16,6 +16,7 @@
   <div class="topbar-title">Từ điển tra cứu</div>
   <div class="topbar-actions">
     <button id="btnSync" class="icon-btn" title="Đồng bộ dữ liệu từ GitHub">⟳ Đồng bộ</button>
+    <button id="btnHidden" class="icon-btn" title="Mục đã ẩn trên app này">🗑 <span id="hiddenCount">0</span></button>
     <button id="btnGhConfig" class="icon-btn" title="Cấu hình GitHub">☁</button>
   </div>
 </header>
@@ -48,6 +49,18 @@
   <div id="syncLog" class="sync-log"></div>
 </div>
 
+<!-- Mục đã ẩn (chỉ trên app này, không đụng dữ liệu gốc) -->
+<div id="hiddenOverlay" class="drawer-overlay hidden"></div>
+<div id="hiddenPanel" class="gh-panel hidden">
+  <div class="gh-panel-header">
+    <h2>Mục đã ẩn trên app này</h2>
+    <button id="btnCloseHidden" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint">Những mục này chỉ bị ẩn trên riêng app tra cứu này — dữ liệu gốc trên GitHub
+    (app đọc sách) không hề bị đụng tới. Bấm "Khôi phục" rồi bấm "Đồng bộ" lại để mục đó hiện lại.</p>
+  <div id="hiddenList"></div>
+</div>
+
 <!-- Cấu hình GitHub -->
 <div id="githubOverlay" class="drawer-overlay hidden"></div>
 <div id="githubPanel" class="gh-panel hidden">
@@ -55,13 +68,18 @@
     <h2>Cấu hình GitHub</h2>
     <button id="btnCloseGhConfig" class="icon-btn" aria-label="Đóng">✕</button>
   </div>
-  <p class="gh-hint">Dùng chung repo với app đọc sách. Token chỉ cần quyền <b>Contents: Read</b> (app này không ghi gì lên GitHub).</p>
+  <p class="gh-hint">Dùng chung repo với app đọc sách. Token cần quyền <b>Contents: Read and write</b>
+    (app này có ghi lại lên GitHub khi dùng chức năng "Sửa", và khi "Xóa" — xóa chỉ ẩn khỏi từ điển
+    này chứ không đụng gì tới dữ liệu gốc grammar/analysis của app đọc sách, danh sách ẩn được lưu
+    thành 1 file JSON dùng chung nên mở từ điện thoại hay PC đều đồng bộ).</p>
   <label>GitHub username</label>
   <input type="text" id="cfgOwner" placeholder="haithanhtran1994">
   <label>Tên repo</label>
   <input type="text" id="cfgRepo" placeholder="Book_ver2">
   <label>Thư mục dữ liệu sách JSON</label>
   <input type="text" id="cfgBooksPath" placeholder="data" value="data">
+  <label>File lưu danh sách đã ẩn (dùng chung mọi thiết bị)</label>
+  <input type="text" id="cfgHiddenPath" placeholder="dictionary-app/hidden.json" value="hidden.json">
   <label>Branch</label>
   <input type="text" id="cfgBranch" value="main">
   <label>Personal Access Token</label>
