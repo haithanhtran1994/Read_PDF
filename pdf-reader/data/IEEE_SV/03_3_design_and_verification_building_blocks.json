@@ -1,0 +1,864 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "03_3_design_and_verification_building_blocks",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc Chương 3 (\"Design and verification building blocks\") của tiêu chuẩn kĩ thuật IEEE Std 1800-2023 cho ngôn ngữ SystemVerilog. Trang đưa ra cái nhìn tổng quan về các thành phần cấu trúc cốt lõi được sử dụng để mô tả phần cứng và xây dựng môi trường kiểm thử (verification environment).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Nội dung chính của Chương 3 (Mục 3.1):** Nêu phạm vi bao quát của chương gồm mục đích các khối mô hình hóa, khái niệm hàm/thủ tục (subroutines), gói (packages), cấu hình (configurations), phân cấp thiết kế (design hierarchy), quy trình biên dịch/tinh chỉnh (compilation/elaboration), không gian tên (namespaces), và thời gian mô phỏng (simulation time).\r\n  2. **Phần tử thiết kế - Design Elements (Mục 3.2):** Khái niệm \"Phần tử thiết kế\" bao gồm `module`, `program`, `interface`, `checker`, `package`, `primitive`, và `config`. Đây là các \"thùng chứa\" (containers) chứa các khai báo và mã lệnh thực thi trong SystemVerilog.\r\n  3. **Module trong SystemVerilog (Mục 3.3):** Module là khối xây dựng cơ bản nhất, được giới hạn bởi hai từ khóa `module` và `endmodule`. Chi tiết các thành phần một module có thể chứa bao gồm: cổng kết nối (ports), khai báo dữ liệu (nets, variables, structures, unions), hằng số, kiểu dữ liệu tự định nghĩa, lớp (class), subroutine, gán liên tục (continuous assignments), cũng như việc khởi tạo (instantiation) các phần tử khác hoặc đối tượng class.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Compilation (Biên dịch) & Elaboration (Tinh chỉnh/Dựng cây phân cấp):** Hai giai đoạn cực kỳ quan trọng trong công cụ mô phỏng HDL. Biên dịch chuyển đổi mã nguồn thành dạng trung gian, còn Elaboration là quá trình kết nối các phần tử thiết kế, tính toán tham số và dựng nên cây phân cấp phần cứng thực tế trước khi chạy mô phỏng.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\n**3. Các khối xây dựng thiết kế và kiểm thử**\r\n\r\n**3.1 Tổng quan**\r\nĐiều khoản này mô tả các nội dung sau:\r\n— Mục đích của các module, program, interface, checker và primitive\r\n— Tổng quan về các subroutine (thủ tục con)\r\n— Tổng quan về các package (gói)\r\n— Tổng quan về các configuration (cấu hình)\r\n— Tổng quan về phân cấp thiết kế (design hierarchy)\r\n— Định nghĩa về quá trình biên dịch (compilation) và tinh chỉnh (elaboration)\r\n— Không gian tên khai báo (declaration name spaces)\r\n— Thời gian mô phỏng, đơn vị thời gian và độ chính xác thời gian\r\n\r\nĐiều khoản này định nghĩa một số thuật ngữ và khái niệm SystemVerilog quan trọng được sử dụng xuyên suốt tài liệu này. Điều khoản cũng cung cấp cái nhìn tổng quan về mục đích và cách sử dụng các khối mô hình hóa được dùng để diễn tả một thiết kế phần cứng và môi trường kiểm thử của nó.\r\n\r\n**3.2 Các phần tử thiết kế**\r\nMột *phần tử thiết kế* (design element) là một module SystemVerilog (xem Điều khoản 23), program (xem Điều khoản 24), interface (xem Điều khoản 25), checker (xem Điều khoản 17), package (xem Điều khoản 26), primitive (xem Điều khoản 28) hoặc configuration (xem Điều khoản 33). Các cấu trúc này được giới thiệu lần lượt bởi các từ khóa **module**, **program**, **interface**, **checker**, **package**, **primitive**, và **config**.\r\n\r\nCác phần tử thiết kế là những khối xây dựng chính được sử dụng để mô hình hóa và xây dựng nên một thiết kế cũng như môi trường kiểm thử. Các khối xây dựng này là các thùng chứa dành cho những khai báo và mã thủ tục được thảo luận trong các điều khoản tiếp theo của tài liệu này.\r\n\r\nĐiều khoản này mô tả mục đích của các khối xây dựng này. Chi tiết đầy đủ về cú pháp và ngữ nghĩa của các khối này được định nghĩa trong các điều khoản sau của tiêu chuẩn này.\r\n\r\n**3.3 Các Module**\r\nKhối xây dựng cơ bản trong SystemVerilog là module, được đóng gói giữa các từ khóa **module** và **endmodule**. Các module chủ yếu được sử dụng để đại diện cho các khối thiết kế, nhưng cũng có thể đóng vai trò làm thùng chứa cho mã kiểm thử và các kết nối giữa các khối kiểm thử và khối thiết kế. Một số cấu trúc mà các module có thể chứa bao gồm:\r\n— Các cổng (ports), cùng với khai báo cổng\r\n— Khai báo dữ liệu, chẳng hạn như net, biến (variables), cấu trúc (structures) và union\r\n— Khai báo hằng số\r\n— Định nghĩa kiểu dữ liệu do người dùng tự định nghĩa\r\n— Định nghĩa lớp (class)\r\n— Nhập (import) các khai báo từ các package\r\n— Định nghĩa subroutine\r\n— Khởi tạo (instantiation) các module, program, interface, checker và primitive khác\r\n— Khởi tạo các đối tượng lớp (class objects)\r\n— Phép gán liên tục (continuous assignments)",
+      "grammar": [
+        {
+          "phrase": "terms and concepts that are used throughout this document",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng \"that\" bổ nghĩa cho cụm danh từ \"terms and concepts\", diễn đạt ở dạng bị động \"are used\""
+        },
+        {
+          "phrase": "building blocks used to model and build up a design and verification environment",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân tử (reduced relative clause) bổ nghĩa cho \"building blocks\", viết đầy đủ là \"which are used to model...\""
+        },
+        {
+          "phrase": "enclosed between the keywords module and endmodule",
+          "explain": "cụm quá khứ phân tử (past participle phrase) làm bổ ngữ rút gọn bổ nghĩa trực tiếp cho danh từ \"the module\" đứng trước"
+        },
+        {
+          "phrase": "Some of the constructs that modules can contain include the following",
+          "explain": "mệnh đề quan hệ \"that modules can contain\" bổ nghĩa cho danh từ \"constructs\", đóng vai trò làm tân ngữ trong mệnh đề phụ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "elaboration",
+          "explain": "(danh từ) quá trình tinh chỉnh/dựng cấu trúc hệ thống phần cứng từ mã nguồn sau bước biên dịch trong ngôn ngữ HDL"
+        },
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(danh từ) phần tử nguyên thủy, khối xây dựng cơ bản nhất ở cấp cổng logic trong mô tả phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiation",
+          "explain": "(danh từ) sự khởi tạo, việc tạo ra một bản thể (instance) cụ thể từ một cấu trúc mẫu (module, class, interface...)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "building block",
+          "explain": "(cụm danh từ) khối xây dựng, thành phần cấu tạo nên hệ thống"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(cụm danh từ) phép gán liên tục (dùng từ khóa `assign` để mô tả mạch kết hợp trong HDL)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "serve as containers for verification code",
+          "explain": "đóng vai trò làm vật chứa/thùng chứa cho mã nguồn kiểm thử"
+        },
+        {
+          "type": "phrase",
+          "phrase": "design and verification environment",
+          "explain": "môi trường thiết kế và kiểm thử phần cứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "user-defined type definitions",
+          "explain": "các định nghĩa kiểu dữ liệu do người dùng tự thiết lập"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "**Nội dung tổng quát:**\r\nTrang 51 của tiêu chuẩn IEEE Std 1800-2023 về ngôn ngữ SystemVerilog khép lại phần giới thiệu các khối thành phần trong `module` và chuyển sang trình bày chi tiết về **Mục 3.4: Program (Khối chương trình)**. Trang này phân định rõ sự khác biệt về vai trò và ngữ nghĩa mô phỏng giữa `module` (dùng cho thiết kế phần cứng) và `program` (dùng cho môi trường kiểm thử/testbench).\r\n\r\n**Những ý chính người đọc bắt buộc phải nắm:**\r\n1. **Ví dụ về Module**: Cung cấp mã mẫu một bộ dồn kênh 2-sang-1 (`mux2to1`), minh họa cách kết hợp khai báo cổng/kiểu dữ liệu và khối thủ tục `always_comb`.\r\n2. **Khái niệm và Mục đích của `program`**:\r\n   - Được bao bởi từ khóa `program...endprogram`, thiết kế riêng cho mô hình hóa môi trường kiểm thử (testbench), không tập trung vào chi tiết phần cứng (như dây nối, phân cấp phần cứng).\r\n   - Có 3 mục đích cơ bản: (1) Tạo điểm khởi chạy (entry point) cho testbench; (2) Tạo phạm vi đóng gói dữ liệu, task và function; (3) Cung cấp ngữ cảnh cú pháp cho việc lập lịch trong tập vùng phản ứng (reactive region set).\r\n3. **Ngữ nghĩa mô phỏng & Cơ chế tránh tranh chấp (Race-free)**:\r\n   - `program` giúp phân tách rõ giữa phần thiết kế (design) và phần kiểm thử. Kết hợp với `clocking block`, nó đảm bảo tương tác không bị tranh chấp dữ liệu (race-free) và hỗ trợ trừu tượng hóa mức chu kỳ (cycle-level) cũng như mức giao dịch (transaction-level).\r\n4. **Quy tắc thành phần trong `program`**:\r\n   - **ĐƯỢC CHỨA**: Khai báo dữ liệu, định nghĩa class, định nghĩa subroutine (task/function), khởi tạo đối tượng, các khối thủ tục `initial` hoặc `final`.\r\n   - **KHÔNG ĐƯỢC CHỨA**: Các khối thủ tục `always`, các thể hiện của primitive, module, interface hoặc program khác.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Vùng lập lịch mô phỏng (Simulation Scheduling Regions)**: Cần hiểu khái niệm \"reactive region set\" trong SystemVerilog để biết tại sao khối `program` lại tránh được race condition so với khối `module` thông thường.\r\n- **Clocking blocks (Điều 14)** và **Module (Điều 23)**: Cần tham chiếu thêm để hiểu cách kết hợp đồng bộ hóa tín hiệu giữa testbench và design.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Mô tả Phần cứng, Quy cách và Kiểm thử Hợp nhất\r\n\r\n— Các khối thủ tục (Procedural blocks)\r\n— Các khối sinh tự động (Generate blocks)\r\n— Các khối chỉ định định thời (Specify blocks)\r\n\r\nMỗi thành phần cấu trúc trong danh sách trên được thảo luận chi tiết trong các điều khoản tiếp theo của tiêu chuẩn này.\r\n\r\nLƯU Ý—Danh sách trên không bao hàm tất cả. Các module có thể chứa thêm các thành phần cấu trúc khác, vốn cũng được thảo luận trong các điều khoản tiếp theo của tiêu chuẩn này.\r\n\r\nDưới đây là một ví dụ đơn giản về một module biểu diễn bộ dồn kênh 2-sang-1:\r\n\r\nmodule mux2to1 (input wire a, b, sel, // khai báo kết hợp cổng và kiểu dữ liệu\r\n                output logic y);\r\n\r\n  always_comb begin // khối thủ tục\r\n    if (sel) y = a; // câu lệnh thủ tục\r\n    else y = b;\r\n  end\r\nendmodule: mux2to1\r\n\r\nCác module được trình bày chi tiết hơn ở Điều 23. Xem thêm mục 3.11 về việc tạo phân cấp thiết kế với các module.\r\n\r\n### 3.4 Khối chương trình (Programs)\r\n\r\nKhối xây dựng chương trình được đóng gói giữa các từ khóa `program...endprogram`. Thành phần cấu trúc này được cung cấp để mô hình hóa môi trường kiểm thử (testbench). Thành phần `module` hoạt động tốt cho việc mô tả phần cứng. Tuy nhiên, đối với testbench, trọng tâm không nằm ở các chi tiết cấp phần cứng như dây nối, phân cấp cấu trúc và đường kết nối, mà nằm ở việc mô hình hóa toàn bộ môi trường mà trong đó một thiết kế được kiểm thử.\r\n\r\nKhối chương trình phục vụ ba mục đích cơ bản sau:\r\n— Cung cấp một điểm khởi chạy cho việc thực thi các testbench.\r\n— Tạo ra một phạm vi đóng gói dữ liệu, các task và function trên toàn chương trình.\r\n— Cung cấp một ngữ cảnh cú pháp quy định việc lập lịch trong tập vùng phản ứng (reactive region set).\r\n\r\nThành phần `program` đóng vai trò là ranh giới phân tách rõ ràng giữa phần thiết kế và testbench, và quan trọng hơn, nó quy định ngữ nghĩa thực thi mô phỏng chuyên biệt. Cùng với các khối xung nhịp (clocking blocks - xem Điều 14), thành phần `program` mang lại sự tương tác không bị tranh chấp dữ liệu (race-free) giữa thiết kế và testbench, đồng thời cho phép các mức trừu tượng hóa theo chu kỳ và theo giao dịch.\r\n\r\nMột khối chương trình có thể chứa các khai báo dữ liệu, định nghĩa lớp (class), định nghĩa chương trình con (subroutine), các thể hiện đối tượng (object instances), và một hoặc nhiều thủ tục `initial` hoặc `final`. Nó không thể chứa các thủ tục `always`, các thể hiện của primitive, thể hiện của module, thể hiện của interface, hoặc các thể hiện của program khác.\r\n\r\nCác thành phần trừu tượng hóa và mô hình hóa của SystemVerilog giúp đơn giản hóa việc tạo và bảo trì testbench. Khả năng khởi tạo và kết nối riêng lẻ từng thể hiện program cho phép sử dụng chúng như các mô hình tổng quát hóa.\r\n\r\nMột khai báo chương trình mẫu có dạng như sau:\r\n\r\nprogram test (input clk, input [16:1] addr, inout [7:0] data);\r\n  initial begin\r\n    ...\r\n  end\r\nendprogram",
+      "grammar": [
+        {
+          "phrase": "Each of the constructs in the preceding list is discussed in detail in subsequent clauses of this standard.",
+          "explain": "cấu trúc bị động (passive voice) với chủ ngữ \"Each of the constructs\" đi kèm động từ số ít \"is discussed\""
+        },
+        {
+          "phrase": "The module construct works well for the description of hardware. However, for the testbench, the emphasis is not on the hardware-level details such as wires, structural hierarchy, and interconnects, but in modeling the complete environment in which a design is verified.",
+          "explain": "cấu trúc song song phủ định-khẳng định \"not on A, but in B\" kết hợp mệnh đề quan hệ \"in which a design is verified\" bổ nghĩa cho danh từ \"environment\""
+        },
+        {
+          "phrase": "Together with clocking blocks (see Clause 14), the program construct provides for race-free interaction between the design and the testbench and enables cycle- and transaction-level abstractions.",
+          "explain": "cụm giới từ đồng hành \"Together with...\" đặt đầu câu, kết nối hai động từ song song chia theo chủ ngữ số ít (\"provides...\" và \"enables...\")"
+        },
+        {
+          "phrase": "The ability to instantiate and individually connect each program instance enables their use as generalized models.",
+          "explain": "cụm danh từ làm chủ ngữ phức hợp với danh từ trung tâm \"ability\" đi kèm động từ nguyên mẫu có to (\"to instantiate and individually connect...\"), chi phối động từ chính \"enables\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "construct",
+          "explain": "(danh từ) thành phần cấu trúc / cú pháp trong ngôn ngữ lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường kiểm thử mô phỏng phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "encapsulate",
+          "explain": "(động từ) đóng gói, bao bọc (dữ liệu hoặc chức năng trong một phạm vi)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "semantics",
+          "explain": "(danh từ) ngữ nghĩa thực thi (quy tắc hoạt động của mã lệnh trong mô phỏng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subroutine",
+          "explain": "(danh từ) chương trình con (trong SystemVerilog thường chỉ task hoặc function)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "all inclusive",
+          "explain": "(cụm từ) bao hàm toàn bộ, đầy đủ tất cả"
+        },
+        {
+          "type": "collocation",
+          "phrase": "entry point",
+          "explain": "(cụm danh từ) điểm khởi chạy / điểm truy cập đầu tiên của chương trình"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race-free",
+          "explain": "(tính từ) không bị tranh chấp dữ liệu (tránh xung đột race condition trong mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "structural hierarchy",
+          "explain": "(cụm danh từ) phân cấp cấu trúc phần cứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "cycle- and transaction-level abstractions",
+          "explain": "(cụm từ) các mức trừu tượng hóa theo chu kỳ và theo giao dịch (TLM)"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "Trang này trình bày về cấu trúc **Interface (Giao diện)** trong ngôn ngữ SystemVerilog (Mục 3.5), một cơ chế quan trọng giúp đóng gói việc truyền thông và kết nối giữa các khối thiết kế cũng như giữa khối thiết kế với khối kiểm thử (testbench).\r\n\r\nCác ý chính quan trọng người đọc cần nắm vững:\r\n- **Tầm quan trọng và vai trò:** Interface giúp đơn giản hóa sơ đồ kết nối, hỗ trợ tái sử dụng mã nguồn và cho phép tinh chỉnh thiết kế một cách mượt mà từ mức hệ thống trừu tượng xuống mức chuyển đổi thanh ghi (RTL) và mức cấu trúc.\r\n- **Tính chất ở mức thấp:** Ở dạng cơ bản nhất, interface đóng vai trò là một \"bó\" (bundle) gồm các dây tín hiệu (nets) hoặc biến được đặt tên, giúp thay thế hàng loạt danh sách cổng lặp đi lặp lại bằng một tên giao diện duy nhất.\r\n- **Tính chất ở mức cao:** Ở dạng nâng cao, interface hoạt động tương tự như một lớp mẫu (class template), có thể chứa tham số, biến, hàm (function), tác vụ (task). Điều này cho phép thay đổi giao thức hoặc độ chi tiết trừu tượng của giao tiếp mà không cần sửa đổi các module kết nối.\r\n- **Cấu trúc `modport`:** Được sử dụng để quy định hướng của cổng (input/output) và phân quyền sử dụng các hàm/task đối với từng module kết nối cụ thể.\r\n- **Tích hợp tính năng kiểm thử:** Interface có thể chứa các tiến trình (`initial`, `always`), phép gán liên tục (continuous assignment), bộ kiểm tra giao thức (protocol checker), đo đạc độ phủ tính năng (functional coverage) và các lời khẳng định (assertions).\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **RTL (Register-Transfer Level):** Cần biết về mức mô tả mạch số RTL để hiểu bối cảnh hạ cấp thiết kế từ hệ thống xuống phần cứng cụ thể.\r\n- **Cấu trúc `modport`, `assertion`, `coverage` trong SystemVerilog:** Cần tìm hiểu các tính năng này trong các chương sau để nắm trọn cách vận hành toàn diện của một Interface trong xác minh phần cứng (verification).",
+      "translation": "Phần cấu trúc chương trình (program construct) được thảo luận đầy đủ hơn trong Điều 24.\r\n\r\n**3.5 Các giao diện (Interfaces)**\r\n\r\nCấu trúc giao diện, được đóng gói giữa các từ khóa `interface...endinterface`, đóng gói sự truyền thông giữa các khối thiết kế, và giữa các khối thiết kế với các khối xác minh (verification blocks), cho phép chuyển đổi mượt mà từ thiết kế cấp hệ thống trừu tượng thông qua việc tinh chỉnh nối tiếp xuống các chế độ xem mức chuyển đổi thanh ghi (RTL) và mức cấu trúc của thiết kế. Bằng cách đóng gói sự truyền thông giữa các khối, cấu trúc giao diện cũng tạo điều kiện thuận lợi cho việc tái sử dụng thiết kế.\r\n\r\nỞ mức thấp nhất, một giao diện là một tập hợp (bundle) được đặt tên gồm các lưới (nets) hoặc các biến. Giao diện được khởi tạo trong một thiết kế và có thể được kết nối với các cổng giao diện của các module, giao diện và chương trình được khởi tạo khác. Một giao diện có thể được truy cập thông qua một cổng như một mục đơn lẻ, và các lưới hoặc biến thành phần có thể được tham chiếu khi cần thiết. Một tỷ lệ đáng kể của một thiết kế thường bao gồm các danh sách cổng và danh sách kết nối cổng, vốn chỉ là sự lặp lại của các tên. Khả năng thay thế một nhóm tên bằng một tên duy nhất có thể giảm đáng kể kích thước của bản mô tả và cải thiện tính dễ bảo trì của nó.\r\n\r\nSức mạnh bổ sung của giao diện đến từ khả năng đóng gói chức năng cũng như khả năng kết nối, làm cho giao diện, ở mức cao nhất của nó, giống như một khuôn mẫu lớp (class template). Một giao diện có thể có các tham số, hằng số, biến, hàm và tác vụ (task). Các loại phần tử trong một giao diện có thể được khai báo, hoặc các kiểu có thể được truyền vào dưới dạng tham số. Các biến và hàm thành viên được tham chiếu tương đối so với tên thể hiện của giao diện dưới dạng các biến thể hiện. Do đó, các module được kết nối qua một giao diện có thể đơn giản gọi các thành viên thủ tục (subroutine members) của giao diện đó để điều khiển việc truyền thông. Với chức năng được đóng gói trong giao diện và tách biệt khỏi module, mức độ trừu tượng và/hoặc độ chi tiết của giao thức truyền thông có thể dễ dàng thay đổi bằng cách thay thế giao diện bằng một giao diện khác chứa các thành viên tương tự, nhưng được thực thi ở một mức độ trừu tượng khác. Các module được kết nối qua giao diện không cần phải thay đổi gì cả.\r\n\r\nĐể cung cấp thông tin hướng cổng cho các cổng module và kiểm soát việc sử dụng các thủ tục bên trong các module cụ thể, cấu trúc `modport` được cung cấp. Đúng như tên gọi, các hướng là những hướng được nhìn từ phía module.\r\n\r\nNgoài các phương thức thủ tục, một giao diện cũng có thể chứa các tiến trình (tức là các thủ tục `initial` hoặc `always`) và các phép gán liên tục (continuous assignments), vốn rất hữu ích cho việc mô hình hóa cấp hệ thống và các ứng dụng môi trường kiểm thử (testbench). Điều này cho phép giao diện bao gồm, ví dụ, trình kiểm tra giao thức riêng của nó, trình này tự động xác minh rằng tất cả các module được kết nối qua giao diện đều tuân thủ giao thức đã chỉ định. Các ứng dụng khác, chẳng hạn như ghi nhận và báo cáo độ phủ tính năng (functional coverage), kiểm tra giao thức, và các khẳng định (assertions) cũng có thể được tích hợp trực tiếp vào giao diện.\r\n\r\nMột ví dụ đơn giản về định nghĩa và sử dụng giao diện như sau:\r\n\r\ninterface simple_bus(input logic clk); // Định nghĩa giao diện\r\n    logic req, gnt;\r\n    logic [7:0] addr, data;\r\n    logic [1:0] mode;\r\n    logic start, rdy;\r\nendinterface: simple_bus\r\n\r\nmodule memMod(simple_bus a); // cổng giao diện simple_bus\r\n    logic avail;\r\n    // Khi memMod được khởi tạo trong module top, a.req là tín hiệu req\r\n    // trong thể hiện sb_intf của giao diện 'simple_bus'\r\n    always @(posedge a.clk) a.gnt <= a.req & avail;\r\nendmodule",
+      "grammar": [
+        {
+          "phrase": "allows a smooth migration from abstract system-level design through successive refinement down to lower level register-transfer and structural views",
+          "explain": "cấu trúc diễn đạt sự chuyển đổi tuần tự qua nhiều cấp độ \"allows... from... through... down to...\" (cho phép chuyển đổi từ... qua... xuống tận...)"
+        },
+        {
+          "phrase": "The ability to replace a group of names by a single name can significantly reduce the size of a description",
+          "explain": "danh từ \"The ability\" được bổ nghĩa bởi cụm động từ nguyên mẫu \"to replace...\", làm chủ ngữ cho động từ khuyết thiếu \"can reduce\""
+        },
+        {
+          "phrase": "modules that are connected via an interface can simply call the subroutine members of that interface to drive the communication",
+          "explain": "mệnh đề quan hệ \"that are connected...\" bổ nghĩa cho chủ ngữ \"modules\", kết hợp với cụm động từ nguyên mẫu chỉ mục đích \"to drive...\""
+        },
+        {
+          "phrase": "allows the interface to include, for example, its own protocol checker, which automatically verifies that all modules connected via the interface conform to the specified protocol",
+          "explain": "cấu trúc \"allow + object + to-V\" kết hợp với mệnh đề quan hệ không xác định \"which...\", trong đó chứa mệnh đề bổ ngữ danh từ \"that all modules...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "encapsulate",
+          "explain": "(động từ) đóng gói, bao bọc (dữ liệu hoặc chức năng vào một khối) — từ vựng chuyên ngành công nghệ/lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "refinement",
+          "explain": "(danh từ) sự tinh chỉnh, sự hoàn thiện dần qua từng bước"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) tạo một thể hiện/thực thể (instance) từ một lớp hoặc định nghĩa giao diện"
+        },
+        {
+          "type": "vocab",
+          "phrase": "granularity",
+          "explain": "(danh từ) độ chi tiết, mức độ phân nhỏ của một hệ thống hoặc dữ liệu"
+        },
+        {
+          "type": "vocab",
+          "phrase": "conform",
+          "explain": "(động từ) tuân thủ, phù hợp với (quy tắc, chuẩn mực, giao thức)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "register-transfer level",
+          "explain": "(phrase) mức chuyển đổi thanh ghi (RTL) — thuật ngữ mô tả thiết kế phần cứng vi mạch"
+        },
+        {
+          "type": "phrase",
+          "phrase": "bundle of nets",
+          "explain": "(phrase) bó tín hiệu/tập hợp các dây dẫn trong thiết kế vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "class template",
+          "explain": "(collocation) khuôn mẫu lớp — khái niệm trong lập trình hướng đối tượng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "functional coverage",
+          "explain": "(phrase) độ phủ chức năng — tiêu chí đo lường mức độ hoàn thành kiểm thử phần cứng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(collocation) phép gán liên tục — cấu trúc gán giá trị tự động cập nhật trong Verilog/SystemVerilog"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang sách tiếp tục giới thiệu các thành phần dựng bản (building blocks) và cấu trúc ngôn ngữ cơ bản trong tiêu chuẩn SystemVerilog (IEEE Std 1800-2023). Các phần được đề cập gồm có: ví dụ về việc kết nối Interface (Giao diện) vào Module, khối Kiểm tra (Checkers), khối Nguyên mẫu (Primitives), Chương trình con (Subroutines gồm Task và Function), và Không gian tên (Packages/Scopes).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Kết nối Interface:** Ví dụ mã nguồn minh họa cách khai báo một cổng giao diện (`simple_bus`) trong module và cách kết nối đối tượng interface (`sb_intf`) tới các module con (`memMod`, `cpuMod`) ở cấp `top`.\r\n  2. **Checker (Khối kiểm tra):** Khối nằm giữa `checker...endchecker`, đóng gói các câu lệnh kiểm chứng (assertions) cùng mã mô hình hóa. Được dùng làm thư viện kiểm chứng hoặc mô hình phụ trợ cho kiểm minh hình thức (formal verification).\r\n  3. **Primitive (Nguyên mẫu):** Dùng để mô tả các cổng logic và công tắc cấp thấp, gồm loại tích hợp sẵn (built-in) và loại do người dùng tự định nghĩa (UDP - `primitive...endprimitive`). Khối này giúp mô hình hóa mạch kỹ thuật số chính xác về thời gian (mô hình cấp cổng - gate-level models).\r\n  4. **Subroutine (Chương trình con):** Gồm 2 dạng chính:\r\n     - *Task:* Được gọi như một câu lệnh độc lập, có thể có các tham số (`input`, `output`, `inout`, `ref`), không trả về giá trị, và **có thể chặn/chờ thời gian mô phỏng** (thời điểm thoát task có thể sau thời điểm gọi).\r\n     - *Function:* Có thể trả về giá trị hoặc không (`void function`). Hàm không trả về giá trị được gọi như câu lệnh, hàm có trả về giá trị được dùng như một toán hạng trong biểu thức. Hàm **thi hành không làm chặn thời gian mô phỏng** (dù nó có thể tạo ra/fork các tiến trình con có tính năng chặn thời gian).\r\n  5. **Package / Scope (Phạm vi không gian tên):** Các phần tử như module, interface, program, checker tạo ra một không gian tên cục bộ. Các định danh khai báo bên trong sẽ không gây xung đột với các phần tử khác.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Formal Verification (Kiểm minh hình thức):* Phương pháp chứng minh tính đúng đắn của thiết kế phần cứng bằng thuật toán toán học thay vì chỉ mô phỏng ngẫu nhiên.\r\n  - *Gate-level modeling (Mô hình hóa cấp cổng):* Cách mô tả mạch điện bằng các cổng logic cơ bản (AND, OR, NOT...) đi kèm độ trễ thời gian thực tế.\r\n  - *Blocking simulation time (Chặn thời gian mô phỏng):* Khái niệm thời gian mô phỏng trong HDL (ví dụ tiêu tốn chu kỳ xung nhịp `#delay` hoặc `@(posedge clk)` làm ngưng tiến trình cho đến khi sự kiện xảy ra).",
+      "translation": "[Mã nguồn mẫu]\r\nmodule cpuMod(simple_bus b); // Cổng giao diện simple_bus\r\n  ...\r\nendmodule\r\n\r\nmodule top;\r\n  logic clk = 0;\r\n\r\n  simple_bus sb_intf(.clk(clk)); // Khởi tạo giao diện (interface)\r\n\r\n  memMod mem(.a(sb_intf)); // Kết nối giao diện tới thể hiện của module\r\n  cpuMod cpu(.b(sb_intf)); // Kết nối giao diện tới thể hiện của module\r\n\r\nendmodule\r\n\r\nXem Điều 25 để có mô tả đầy đủ về các giao diện (interfaces).\r\n\r\n3.6 Khối kiểm tra (Checkers)\r\nCấu trúc checker, được bao bọc bởi các từ khóa `checker...endchecker`, đại diện cho một khối kiểm chứng bao bọc các câu lệnh assertion cùng với mã mô hình hóa. Mục đích sử dụng của các checker là làm các đơn vị thư viện kiểm chứng hoặc làm các khối xây dựng để tạo ra các mô hình phụ trợ trừu tượng được dùng trong kiểm minh hình thức (formal verification). Cấu trúc checker được thảo luận chi tiết trong Điều 17.\r\n\r\n3.7 Nguyên mẫu (Primitives)\r\nKhối xây dựng primitive được sử dụng để đại diện cho các cổng logic và công tắc cấp thấp. SystemVerilog bao gồm một số loại primitive tích hợp sẵn. Các nhà thiết kế có thể bổ sung cho các primitive tích hợp sẵn bằng các primitive do người dùng tự định nghĩa (UDP - User-Defined Primitives). Một UDP được bao bọc giữa các từ khóa `primitive...endprimitive`. Các cấu trúc primitive tích hợp sẵn và UDP cho phép mô hình hóa các mạch kỹ thuật số chính xác về mặt thời gian, thường được gọi là các mô hình cấp cổng (gate-level models). Mô hình hóa cấp cổng được thảo luận chi tiết hơn trong Điều 28 đến Điều 31.\r\n\r\n3.8 Chương trình con (Subroutines)\r\nCác subroutine cung cấp một cơ chế để đóng gói mã thực thi có thể được gọi từ một hoặc nhiều nơi. Có hai dạng subroutine: task (13.3) và function (13.4).\r\n\r\nMột task được gọi dưới dạng một câu lệnh. Một task có thể có số lượng đối số `input`, `output`, `inout`, và `ref` tùy ý, nhưng không trả về giá trị. Các task có thể làm chặn (tiêu tốn) thời gian mô phỏng trong quá trình thực thi. Nghĩa là, thời điểm kết thúc task có thể diễn ra ở một thời điểm mô phỏng muộn hơn so với khi task đó được gọi.\r\n\r\nMột function có thể trả về một giá trị hoặc có thể được định nghĩa là một hàm trống (`void function`) - loại không trả về giá trị. Lời gọi hàm có trả về giá trị được sử dụng như một toán hạng bên trong một biểu thức. Một void function được gọi dưới dạng một câu lệnh. Một function có thể có các đối số `input`, `output`, `inout`, và `ref`. Các function thực thi mà không làm chặn thời gian mô phỏng, nhưng có thể rẽ nhánh tạo ra các tiến trình có tính năng chặn thời gian.\r\n\r\n3.9 Gói (Packages)\r\nCác module, interface, program, và checker cung cấp một không gian tên cục bộ cho các khai báo. Các định danh được khai báo bên trong một module, interface, program, hoặc checker sẽ mang tính cục bộ đối với phạm vi đó, và không ảnh hưởng hoặc xung đột với các khai báo trong các khối xây dựng khác.",
+      "grammar": [
+        {
+          "phrase": "The checker construct, enclosed by the keywords checker...endchecker, represents a verification block",
+          "explain": "mệnh đề tính từ rút gọn dạng quá khứ phân từ (\"enclosed by...\") bổ nghĩa cho chủ ngữ \"The checker construct\""
+        },
+        {
+          "phrase": "The intended use of checkers is to serve as verification library units",
+          "explain": "cấu trúc \"intended use + is + to-infinitive\" dùng để nêu mục đích thiết kế/sử dụng của một đối tượng"
+        },
+        {
+          "phrase": "built-in primitives with user-defined primitives",
+          "explain": "cấu trúc đối lập sử dụng tính từ ghép \"built-in\" (tích hợp sẵn) và \"user-defined\" (do người dùng định nghĩa)"
+        },
+        {
+          "phrase": "commonly referred to as gate-level models",
+          "explain": "mệnh đề tính từ rút gọn dạng quá khứ phân từ bổ nghĩa cho cụm từ \"digital circuits\" phía trước"
+        },
+        {
+          "phrase": "the task exit can occur at a later simulation time than when the task was called",
+          "explain": "cấu trúc so sánh hơn (\"at a later simulation time than...\") kết hợp với mệnh đề quan hệ thời gian \"when...\""
+        },
+        {
+          "phrase": "Functions execute without blocking simulation time, but can fork off processes that do block time",
+          "explain": "mệnh đề chứa giới từ \"without + V-ing\", kết hợp mệnh đề quan hệ \"that...\" dùng trợ động词 \"do\" để nhấn mạnh (emphatic do)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "encapsulate",
+          "explain": "(động từ) đóng gói, bao hàm gói gọn nhiều thành phần bên trong"
+        },
+        {
+          "type": "vocab",
+          "phrase": "auxiliary",
+          "explain": "(tính từ) phụ trợ, bổ trợ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(danh từ) phần tử nguyên mẫu, thành phần cơ bản nhất (như cổng logic AND, OR)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subroutine",
+          "explain": "(danh từ) chương trình con (thuật ngữ chung chỉ task/function)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "operand",
+          "explain": "(danh từ) toán hạng (đối tượng thực hiện phép toán trong biểu thức)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "formal verification",
+          "explain": "(cụm danh từ chuyên ngành) kiểm minh hình thức (phương pháp xác minh thiết kế bằng toán học)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "gate-level model",
+          "explain": "(cụm danh từ chuyên ngành) mô hình cấp cổng logic"
+        },
+        {
+          "type": "phrase",
+          "phrase": "block simulation time",
+          "explain": "(cụm động từ chuyên ngành) làm ngưng trệ/chiếm dụng thời gian mô phỏng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "fork off processes",
+          "explain": "(cụm động từ) rẽ nhánh/tạo ra các tiến trình chạy song song"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "Trang này thuộc Chương 3 của Tiêu chuẩn IEEE 1800-2023 cho ngôn ngữ SystemVerilog, trình bày ba khái niệm quan trọng trong việc tổ chức và xây dựng cấu trúc mã nguồn thiết kế phần cứng: Gói khai báo (Packages), Cấu hình (Configurations), và Tổng quan về phân cấp (Overview of hierarchy).\r\n\r\nNhững ý chính người đọc bắt buộc phải hiểu:\r\n1. **Package (Gói)**: Là vùng không gian dùng để khai báo các kiểu dữ liệu, hàm, biến... có thể chia sẻ và nạp (import) vào các khối xây dựng khác (kể cả các package khác). Được định nghĩa bằng cặp từ khóa `package...endpackage`. Chi tiết xem tại Điều 26 (Clause 26).\r\n2. **Configuration (Cấu hình)**: Cho phép chỉ định thông tin ràng buộc (binding) giữa các bản thể (instance) của module với đoạn mã nguồn SystemVerilog cụ thể thông qua việc sử dụng các thư viện. Chi tiết xem tại Điều 33 (Clause 33).\r\n3. **Design Hierarchy (Phân cấp thiết kế)**: Phân cấp được tạo ra khi một khối xây dựng (module, program, interface, checker) khởi tạo (*instantiate*) một khối xây dựng khác bên trong nó. Sự giao tiếp giữa các cấp phân cấp chủ yếu thông qua việc kết nối tới các cổng (ports). Cung cấp ví dụ module `top` khởi tạo module `mux2to1` tạo thành thiết kế gồm 2 cấp phân cấp.\r\n\r\nKhái niệm/kiến thức nền cần tìm hiểu thêm:\r\n- Khái niệm về Thiết kế Phân cấp (Hierarchical Design) trong VLSI/RTL: để hiểu cách thiết kế lớn được chia nhỏ thành các module con.\r\n- Cơ chế nhúng/khởi tạo bản thể (Instantiation) và kết nối cổng (Port mapping) trong Verilog/SystemVerilog.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nCác gói (package) cung cấp một không gian khai báo, không gian này có thể được chia sẻ bởi các khối xây dựng khác. Các khai báo trong package có thể được nhập (import) vào các khối xây dựng khác, bao gồm cả các package khác.\r\n\r\nMột package được định nghĩa giữa các từ khóa **package...endpackage**. Ví dụ:\r\n\r\npackage ComplexPkg;\r\n    typedef struct {\r\n        shortreal i, r;\r\n    } Complex;\r\n\r\n    function Complex add(Complex a, b);\r\n        add.r = a.r + b.r;\r\n        add.i = a.i + b.i;\r\n    endfunction\r\n\r\n    function Complex mul(Complex a, b);\r\n        mul.r = (a.r * b.r) - (a.i * b.i);\r\n        mul.i = (a.r * b.i) + (a.i * b.r);\r\n    endfunction\r\nendpackage : ComplexPkg\r\n\r\nĐầy đủ cú pháp và ngữ nghĩa của package được mô tả trong Điều 26.\r\n\r\n### 3.10 Các cấu hình (Configurations)\r\n\r\nSystemVerilog cung cấp khả năng chỉ định các cấu hình thiết kế, dùng để xác định thông tin ràng buộc của các bản thể module (module instances) tới mã nguồn SystemVerilog cụ thể. Các cấu hình sử dụng các thư viện. Thư viện là một tập hợp các module, interface, program, checker, primitive, package và các cấu hình khác. Các tệp ánh xạ thư viện riêng biệt sẽ chỉ định vị trí mã nguồn cho các ô (cell) chứa trong thư viện. Tên của các tệp ánh xạ thư viện thường được chỉ định dưới dạng tùy chọn gọi khi chạy trình mô phỏng hoặc các công cụ phần mềm khác đọc mã nguồn SystemVerilog.\r\n\r\nXem Điều 33 để biết chi tiết về các cấu hình.\r\n\r\n### 3.11 Tổng quan về phân cấp (Overview of hierarchy)\r\n\r\nCác khối xây dựng cơ bản gồm module, program, interface, checker và primitive được sử dụng để xây dựng nên một *phân cấp thiết kế (design hierarchy)*. Phân cấp được tạo ra bằng việc một khối xây dựng *khởi tạo (instantiating)* một khối xây dựng khác. Khi một module chứa một *bản thể (instance)* của một module, interface, program, hoặc checker khác, một cấp phân cấp mới sẽ được tạo ra. Sự giao tiếp qua các cấp phân cấp chủ yếu thông qua các kết nối tới các cổng (ports) của module, interface, program hoặc checker được khởi tạo đó.\r\n\r\nDưới đây là một ví dụ đơn giản về hai khai báo module có sử dụng một số khai báo đơn giản. Module `top` chứa một bản thể của module `mux2to1`, tạo ra một thiết kế với hai cấp phân cấp.\r\n\r\nmodule top; // module không có cổng\r\n    logic in1, in2, select; // khai báo biến\r\n    wire out1; // khai báo dây dẫn (net)\r\n\r\n    mux2to1 m1 (.a(in1), .b(in2), .sel(select), .y(out1)); // bản thể module\r\n\r\nendmodule : top\r\n\r\nmodule mux2to1 (input wire a, b, sel, // khai báo kết hợp cổng và kiểu\r\n                output logic y);",
+      "grammar": [
+        {
+          "phrase": "Packages provide a declaration space, which can be shared by other building blocks",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"which\" bổ nghĩa cho \"a declaration space\""
+        },
+        {
+          "phrase": "SystemVerilog provides the ability to specify design configurations, which specify the binding information of module instances to specific SystemVerilog source code",
+          "explain": "mệnh đề quan hệ không xác định bổ nghĩa cho \"design configurations\""
+        },
+        {
+          "phrase": "Hierarchy is created by one building block instantiating another building block",
+          "explain": "cấu trúc bị động kết hợp danh động từ (gerund) đóng vai trò làm tân ngữ sau giới từ \"by\""
+        },
+        {
+          "phrase": "When a module contains an instance of another module, interface, program, or checker, a new level of hierarchy is created",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian đứng trước mệnh đề chính dạng bị động \"a new level of hierarchy is created\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "declaration space",
+          "explain": "(cụm danh từ) không gian khai báo (vùng phạm vi định nghĩa các biến, kiểu dữ liệu, hàm)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "building block",
+          "explain": "(cụm danh từ) khối xây dựng (các thành phần cấu trúc cơ bản như module, package, interface)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "design hierarchy",
+          "explain": "(cụm danh từ) cấu trúc phân cấp thiết kế"
+        },
+        {
+          "type": "vocab",
+          "phrase": "binding",
+          "explain": "(danh từ) sự ràng buộc / liên kết (gắn kết giữa instance với mã nguồn thực thi cụ thể)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiating",
+          "explain": "(động từ - dạng V-ing) sự khởi tạo bản thể / nhúng một thành phần phần cứng vào thành phần khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(danh từ) phần tử nguyên thủy (khối phần tử logic mức thấp nhất do ngôn ngữ cung cấp sẵn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "module instance",
+          "explain": "(cụm danh từ) bản thể module (một đối tượng cụ thể được tạo ra từ việc khởi tạo module)"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Nội dung trang 55 của chuẩn IEEE Std 1800-2023 tập trung trình bày về cấu trúc phân cấp thiết kế (design hierarchy) và các khái niệm nền tảng của quá trình Biên dịch (Compilation) và Liên kết phân cấp (Elaboration) trong ngôn ngữ SystemVerilog.\r\n\r\nNhững ý chính người đọc bắt buộc phải nắm được:\r\n1. Quy tắc phân cấp (Hierarchy tree): Các thành phần như module, interface, program, checker có thể khởi tạo các thành phần khác. Trái lại, primitive (nguyên tố cơ bản) là các lá (leaves) của cây phân cấp và không thể khởi tạo bất kỳ khối xây dựng nào khác.\r\n2. Khối phân cấp cấp cao nhất (Top-level hierarchy block): Bất kỳ module/program nào được phát triển nhưng không được khởi tạo tường minh trong mã nguồn sẽ được hệ thống ngầm định khởi tạo một lần ở đỉnh của cây phân cấp. SystemVerilog hỗ trợ nhiều top-level block.\r\n3. Tên đường dẫn phân cấp (Hierarchical path names): Cho phép truy xuất các định danh ở bất kỳ cấp độ phân cấp nào từ bất kỳ đâu trong thiết kế.\r\n4. Quá trình Biên dịch (Compilation): Là việc đọc mã nguồn, giải mã mã hóa, kiểm tra lỗi cú pháp và ngữ nghĩa. Có thể biên dịch đơn tệp hoặc đa tệp (thông qua compilation units).\r\n5. Quá trình Elaboration: Diễn ra sau khi phân tích cú pháp mã nguồn và trước khi mô phỏng. Elaboration bao gồm việc mở rộng các thể hiện khởi tạo, tính toán giá trị tham số, giải quyết tên đường dẫn phân cấp, nối mạng net và chuẩn bị toàn bộ thiết kế cho giai đoạn mô phỏng.\r\n6. Tính linh hoạt trong thực thi: Quá trình biên dịch và elaboration không bắt buộc phải tách rời. Lỗi thời gian biên dịch (\"compile-time error\") có thể được trình biên dịch báo ở bất kỳ thời điểm nào trước khi mô phỏng bắt đầu. Thứ tự biên dịch tự do, ngoại trừ hai trường hợp: ranh giới của đơn vị biên dịch (compilation units) và việc biên dịch gói (package) bắt buộc phải diễn ra trước khi có lệnh tham chiếu đến gói đó.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Module, Interface, Checker, Primitive trong SystemVerilog: Các thành phần kiến trúc cốt lõi của phần cứng.\r\n- Compilation Unit và Package (Gói): Để hiểu rõ quy tắc về phạm vi biến và thứ tự biên dịch trong dự án lớn.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\n// netlist sử dụng các thể hiện của primitive có sẵn\r\nnot g1 (sel_n, sel);\r\nand g2 (a_s, a, sel_n);\r\nand g3 (b_s, b, sel);\r\nor  g4 (y, a_s, b_s);\r\nendmodule: mux2to1\r\n\r\nCác module có thể khởi tạo các module khác, program, interface, checker, và primitive, tạo thành một cây phân cấp. Các interface cũng có thể khởi tạo các khối xây dựng khác và tạo ra một cây phân cấp. Các program và checker có thể khởi tạo các checker khác. Các primitive không thể khởi tạo các khối xây dựng khác; chúng là các lá trong một cây phân cấp.\r\n\r\nThông thường, một module hoặc program được phát triển nhưng không được khởi tạo một cách tường minh sẽ được khởi tạo ngầm định một lần ở đỉnh của cây phân cấp và trở thành một *khối phân cấp cấp cao nhất (top-level hierarchy block)* (xem 23.3 và 24.3). SystemVerilog cho phép có nhiều khối cấp cao nhất.\r\n\r\nCác định danh nằm trong bất kỳ cấp phân cấp nào đều có thể được tham chiếu từ bất kỳ cấp phân cấp nào khác bằng cách sử dụng *tên đường dẫn phân cấp (hierarchical path names)* (xem 23.6).\r\n\r\nCú pháp khởi tạo và phân cấp thiết kế được trình bày chi tiết hơn trong Điều 23 (Clause 23).\r\n\r\n3.12 Biên dịch và elaboration\r\n\r\n*Biên dịch (Compilation)* là quá trình đọc mã nguồn SystemVerilog, giải mã mã được mã hóa, và phân tích mã nguồn để tìm các lỗi cú pháp và lỗi ngữ nghĩa. Các công cụ thực thi có thể biên dịch trong một hoặc nhiều bước (pass). Các công cụ có thể lưu trữ kết quả biên dịch dưới một định dạng trung gian độc quyền, hoặc có thể chuyển trực tiếp kết quả đã biên dịch sang giai đoạn elaboration. Không phải tất cả cú pháp và ngữ nghĩa đều có thể được kiểm tra trong quá trình biên dịch. Một số kiểm tra chỉ có thể được thực hiện trong quá trình hoặc khi hoàn tất elaboration.\r\n\r\nSystemVerilog hỗ trợ cả biên dịch đơn tệp và biên dịch đa tệp thông qua việc sử dụng các đơn vị biên dịch (compilation units) (xem 3.12.1).\r\n\r\n*Elaboration* là quá trình liên kết các thành phần tạo nên một thiết kế lại với nhau. Các thành phần này có thể bao gồm các thể hiện module, thể hiện program, thể hiện interface, thể hiện checker, thể hiện primitive, và cấp cao nhất của phân cấp thiết kế. Elaboration diễn ra sau khi phân tích cú pháp mã nguồn và trước khi mô phỏng; và nó bao gồm việc mở rộng các thể hiện khởi tạo, tính toán các giá trị tham số, giải quyết các tên phân cấp, thiết lập kết nối mạng net và nhìn chung là chuẩn bị thiết kế cho việc mô phỏng. Xem 23.10.4 để biết thêm chi tiết về quá trình elaboration.\r\n\r\nMặc dù tiêu chuẩn này định nghĩa các kết quả của biên dịch và elaboration, các bước biên dịch và elaboration không bắt buộc phải là các giai đoạn tách biệt trong một công cụ thực thi. Trong xuyên suốt tiêu chuẩn này, các thuật ngữ *compilation*, *compile*, và *compiler* thường ám chỉ quá trình biên dịch và elaboration kết hợp. Vì vậy, chẳng hạn như khi tiêu chuẩn đề cập đến \"lỗi thời gian biên dịch\", một công cụ thực thi được phép báo lỗi tại bất kỳ thời điểm nào trước khi bắt đầu mô phỏng.\r\n\r\nTiêu chuẩn này thường không quy định các yêu cầu liên quan đến thứ tự biên dịch cho các phần tử thiết kế. Hai ngoại lệ là các quy tắc liên quan đến \"đơn vị biên dịch\" (xem 3.12.1) nơi ranh giới tệp thực tế trong quá trình biên dịch là đáng chú ý, và các quy tắc liên quan đến việc tham chiếu đến các mục trong package (xem 26.3) nơi việc biên dịch một package được yêu cầu phải diễn ra trước các tham chiếu tới package đó.\r\n\r\n3.12.1 Đơn vị biên dịch\r\n\r\nSystemVerilog hỗ trợ biên dịch riêng biệt sử dụng các đơn vị được biên dịch. Các thuật ngữ và định nghĩa sau đây được cung cấp:",
+      "grammar": [
+        {
+          "phrase": "a module or program that is elaborated but not explicitly instantiated is implicitly instantiated once",
+          "explain": "mệnh đề quan hệ (that is elaborated...) bổ nghĩa cho chủ ngữ \"a module or program\", kết hợp với thể bị động (is implicitly instantiated)"
+        },
+        {
+          "phrase": "Identifiers within any level of hierarchy can be referenced from any other level of hierarchy using hierarchical path names",
+          "explain": "câu bị động với động từ khuyết thiếu (can be referenced) đi kèm danh động từ chỉ phương thức (using...)"
+        },
+        {
+          "phrase": "Implementations may save compiled results in a proprietary intermediate format, or may pass the compiled results directly to an elaboration phase",
+          "explain": "cấu trúc song song thể hiện sự lựa chọn của động từ khuyết thiếu (may save... or may pass...)"
+        },
+        {
+          "phrase": "when the standard refers to a “compile-time error,” an implementation is permitted to report the error at any time prior to the start of simulation",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian (when...) kết hợp cấu trúc bị động chỉ sự cho phép (is permitted to report)"
+        },
+        {
+          "phrase": "where actual file boundaries during compilation are significant",
+          "explain": "mệnh đề quan hệ trạng từ (where...) bổ nghĩa cho tình huống/trường hợp được nhắc tới trước đó"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) khởi tạo thể hiện (tạo một đối tượng/khối cụ thể từ định nghĩa có sẵn trong thiết kế phần cứng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "hierarchy",
+          "explain": "(danh từ) cấu trúc phân cấp, thứ bậc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "elaboration",
+          "explain": "(danh từ) quá trình liên kết phân cấp, tính toán tham số và mở rộng thiết kế trước mô phỏng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "decrypt",
+          "explain": "(động từ) giải mã (dữ liệu/mã nguồn bị mã hóa)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "implicit",
+          "explain": "(tính từ) ngầm định, ẩn (không khai báo trực tiếp)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "top-level hierarchy block",
+          "explain": "(cụm danh từ) khối phân cấp cấp cao nhất trong cây phân cấp thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "hierarchical path name",
+          "explain": "(cụm danh từ) tên đường dẫn phân cấp (dùng để truy cập biến/định danh xuyên qua các cấp phân cấp)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ) đơn vị biên dịch (tập hợp các tệp mã nguồn được biên dịch cùng nhau)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "proprietary intermediate format",
+          "explain": "(cụm danh từ) định dạng trung gian độc quyền (do nhà cung cấp công cụ tự thiết kế)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "prior to the start of simulation",
+          "explain": "(cụm giới từ) trước khi bắt đầu mô phỏng"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "- **Nội dung tổng quát:** Trang 56 thuộc Tiêu chuẩn IEEE Std 1800-2023 quy định ngôn ngữ SystemVerilog, tập trung trình bày chi tiết về khái niệm \"đơn vị biên dịch\" (compilation unit), \"phạm vi đơn vị biên dịch\" (compilation-unit scope), từ khóa `$unit`, các mô hình biên dịch, tầm nhìn (visibility) của các khai báo và quy tắc thứ tự tìm kiếm/phân giải định danh (identifier resolution).\r\n- **Các ý chính bắt buộc nắm:**\r\n  1. **Định nghĩa cơ bản:** *compilation unit* là một hoặc nhiều tệp nguồn được biên dịch cùng nhau; *compilation-unit scope* là phạm vi cục bộ của đơn vị biên dịch chứa các khai báo ngoài mọi phạm vi khác; `$unit` là định danh dùng để truy cập trực tiếp vào phạm vi này.\r\n  2. **Các mô hình biên dịch (Compilation models):** Trình biên dịch phải hỗ trợ 2 mô hình: (a) Tất cả các tệp trên dòng lệnh hợp thành 1 đơn vị biên dịch duy nhất; (b) Mỗi tệp là 1 đơn vị biên dịch riêng biệt.\r\n  3. **Tác động của file bao gồm (`include) và khai báo dở dang:** Các tệp được nhúng bằng chỉ thị `` `include `` sẽ trở thành một phần của đơn vị biên dịch chứa nó. Nếu một khai báo chưa hoàn thành ở cuối tệp, đơn vị biên dịch sẽ mở rộng sang các tệp kế tiếp cho đến khi hoàn tất.\r\n  4. **Tầm nhìn và truy cập:** Các khai báo thuộc phạm vi compilation-unit không thể được truy cập bằng tên từ bên ngoài đơn vị biên dịch đó (trừ khi dùng giao diện PLI). Các thiết kế như module, interface, package... có thể nhìn thấy xuyên suốt các đơn vị biên dịch.\r\n  5. **Thứ tự phân giải tên định danh (Identifier resolution order):** Khi một tên định danh được tham chiếu trong một scope, công cụ biên dịch sẽ tìm kiếm theo thứ tự 3 bước:\r\n     - Bước 1: Tìm trong phạm vi lồng nhau (nested scope) hiện tại (bao gồm các module con, các package được import).\r\n     - Bước 2: Tìm trong phần phạm vi của compilation-unit được định nghĩa *trước* thời điểm tham chiếu đó (bao gồm các package import tại phạm vi này).\r\n     - Bước 3: Tìm trong cây phân cấp thể hiện (instance hierarchy) theo quy tắc phân giải tên phân cấp.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **PLI (Programming Language Interface):** Giao diện lập trình cho phép mã C/C++ tương tác với trình mô phỏng SystemVerilog để truy cập các phần tử ẩn.\r\n  - **Compiler Directives (`include, `define...):** Các chỉ thị biên dịch và phạm vi ảnh hưởng của chúng đối với quá trình dịch từng file riêng biệt hoặc dịch chung.\r\n  - **Hierarchical Name Resolution & Package Import:** Cơ chế truy vết tên phân cấp và cách thức import các gói (package) vào các scope khác nhau.",
+      "translation": "**IEEE Std 1800-2023**\r\nIEEE Standard cho SystemVerilog—Ngôn ngữ Thiết kế, Quy cách và Kiểm định Phần cứng Hợp nhất\r\n\r\n— **compilation unit (đơn vị biên dịch):** Một tập hợp gồm một hoặc nhiều tệp nguồn SystemVerilog được biên dịch cùng nhau.\r\n— **compilation-unit scope (phạm vi đơn vị biên dịch):** Một phạm vi mang tính cục bộ đối với đơn vị biên dịch. Nó chứa tất cả các khai báo nằm ngoài bất kỳ phạm vi nào khác.\r\n— **$unit:** Tên được sử dụng để truy cập một cách rõ ràng các định danh nằm trong phạm vi đơn vị biên dịch.\r\n\r\nCơ chế chính xác để xác định những tệp nào cấu thành một đơn vị biên dịch phụ thuộc vào từng công cụ cụ thể. Tuy nhiên, các công cụ tuân thủ tiêu chuẩn phải cung cấp các mô hình sử dụng cho phép cả hai trường hợp sau:\r\na) Tất cả các tệp trên một dòng lệnh biên dịch tạo thành một đơn vị biên dịch duy nhất (trong trường hợp đó, các khai báo trong các tệp đó có thể truy cập được theo các quy tắc tầm nhìn thông thường trên toàn bộ tập hợp các tệp).\r\nb) Mỗi tệp là một đơn vị biên dịch riêng biệt (trong trường hợp đó, các khai báo trong từng phạm vi đơn vị biên dịch chỉ có thể truy cập được bên trong tệp tương ứng).\r\n\r\nNội dung của các tệp được bao gồm bằng cách sử dụng một hoặc nhiều chỉ thị `` `include `` sẽ trở thành một phần của đơn vị biên dịch thuộc tệp chứa chúng.\r\n\r\nNếu có một khai báo chưa hoàn thành ở cuối một tệp, thì đơn vị biên dịch chứa tệp đó sẽ mở rộng qua từng tệp kế tiếp cho đến khi không còn khai báo nào chưa hoàn thành ở cuối nhóm tệp đó.\r\n\r\nCó những cách ánh xạ khả thi khác từ tệp sang các đơn vị biên dịch, và các cơ chế để xác định chúng phụ thuộc vào công cụ và có thể không mang tính di động.\r\n\r\nMặc dù phạm vi đơn vị biên dịch không phải là một package, nó có thể chứa bất kỳ mục nào có thể được định nghĩa bên trong một package (xem 26.2) và cả các cấu trúc bind (xem 23.11). Các mục này nằm trong không gian tên phạm vi đơn vị biên dịch (xem 3.13).\r\n\r\nCác mục sau đây hiển thị trong tất cả các đơn vị biên dịch: module, primitive, program, interface, và package. Các mục được định nghĩa trong phạm vi đơn vị biên dịch không thể được truy cập bằng tên từ bên ngoài đơn vị biên dịch đó. Các mục trong phạm vi đơn vị biên dịch có thể được truy cập bằng cách sử dụng PLI, giao diện này phải cung cấp một con lặp (iterator) để duyệt qua tất cả các đơn vị biên dịch.\r\n\r\nCác mục trong phạm vi đơn vị biên dịch có thể có các tham chiếu phân cấp đến các định danh. Đối với việc tham chiếu tên ngược lên trên (xem 23.8), phạm vi đơn vị biên dịch được xử lý giống như một phần tử thiết kế cấp cao nhất (top-level design element). Điều này có nghĩa là nếu đây không phải là các tham chiếu đến các định danh được tạo bên trong phạm vi đơn vị biên dịch hoặc được hiển thị thông qua việc import package vào phạm vi đơn vị biên dịch, chúng sẽ được xử lý như các tên đường dẫn đầy đủ bắt đầu từ đỉnh của thiết kế (`$root`, được mô tả trong 23.3.1).\r\n\r\nTrong một đơn vị được biên dịch riêng biệt, các chỉ thị trình biên dịch một khi xuất hiện sẽ áp dụng cho tất cả văn bản nguồn tiếp theo. Tuy nhiên, các chỉ thị trình biên dịch từ một đơn vị được biên dịch riêng biệt sẽ không ảnh hưởng đến các đơn vị biên dịch khác. Điều này có thể dẫn đến sự khác biệt về hành vi giữa việc biên dịch các đơn vị riêng biệt hoặc biên dịch toàn bộ nguồn thành một đơn vị duy nhất.\r\n\r\nKhi một định danh được tham chiếu bên trong một scope:\r\n— Đầu tiên, phạm vi lồng nhau được tìm kiếm (xem 23.9) (bao gồm các khai báo module lồng nhau), bao gồm bất kỳ định danh nào được cung cấp thông qua các khai báo import package.\r\n— Tiếp theo, phần phạm vi đơn vị biên dịch được định nghĩa trước thời điểm tham chiếu sẽ được tìm kiếm (bao gồm bất kỳ định danh nào được cung cấp thông qua các khai báo import package).\r\n— Cuối cùng, nếu định danh tuân theo các quy tắc phân giải tên phân cấp, cây phân cấp thể hiện sẽ được tìm kiếm (xem 23.8 và 23.9).",
+      "grammar": [
+        {
+          "phrase": "A scope that is local to the compilation unit",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"A scope\", xác định tính chất cục bộ của phạm vi biên dịch"
+        },
+        {
+          "phrase": "The exact mechanism for defining which files constitute a compilation unit is tool-specific",
+          "explain": "mệnh đề danh ngữ \"which files constitute a compilation unit\" làm tân ngữ cho danh từ/giới từ, nằm trong cấu trúc chủ ngữ phức tạp"
+        },
+        {
+          "phrase": "in which case the declarations within those files are accessible following normal visibility rules throughout the entire set of files",
+          "explain": "mệnh đề quan hệ nối tiếp bắt đầu bằng giới từ + \"which case\" (`in which case`), dùng để diễn tả hệ quả của trường hợp a"
+        },
+        {
+          "phrase": "The contents of files included using one or more `include directives become part of the compilation unit of the file within which they are included",
+          "explain": "mệnh đề rút gọn dạng bị động \"included using...\" và mệnh đề quan hệ \"within which they are included\" bổ nghĩa cho danh từ \"file\""
+        },
+        {
+          "phrase": "If there is a declaration that is incomplete at the end of a file, then the compilation unit including that file will extend through each successive file until there are no incomplete declarations at the end of the group of files",
+          "explain": "câu điều kiện loại 1 kết hợp mệnh đề chỉ thời gian \"until...\" và mệnh đề quan hệ \"that is incomplete\""
+        },
+        {
+          "phrase": "Items defined in the compilation-unit scope cannot be accessed by name from outside the compilation unit",
+          "explain": "mệnh đề rút gọn dạng bị động \"defined in...\" bổ nghĩa cho chủ ngữ \"Items\""
+        },
+        {
+          "phrase": "Next, the portion of the compilation-unit scope defined prior to the reference is searched",
+          "explain": "thể bị động \"is searched\" đi kèm cụm phân từ bị động \"defined prior to the reference\" bổ nghĩa cho chủ ngữ \"portion\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "constitute",
+          "explain": "(động từ) tạo thành, cấu thành nên"
+        },
+        {
+          "type": "vocab",
+          "phrase": "successive",
+          "explain": "(tính từ) liên tiếp, kế tiếp nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "portable",
+          "explain": "(tính từ) có tính di động, có thể chạy trên nhiều nền tảng/công cụ khác nhau mà không cần sửa đổi"
+        },
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(danh từ) phần tử nguyên thủy/cơ bản trong ngôn ngữ mô tả phần cứng (như cổng logic built-in)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "tool-specific",
+          "explain": "(tính từ) tùy thuộc vào công cụ (phần mềm biên dịch) cụ thể"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directive",
+          "explain": "(cụm danh từ) chỉ thị trình biên dịch (các lệnh tiền xử lý bắt đầu bằng dấu backtick như `define, `include)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ chuyên ngành) đơn vị biên dịch (tập hợp file nguồn được dịch cùng lúc)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "compilation-unit scope",
+          "explain": "(cụm danh từ chuyên ngành) phạm vi của đơn vị biên dịch (phạm vi ngoài cùng của tệp biên dịch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "upward referencing",
+          "explain": "(cụm từ chuyên ngành) tham chiếu ngược (truy xuất các định danh ở cấp cao hơn trong cây phân cấp)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "prior to",
+          "explain": "(giới từ) trước khi, trước một mốc thời điểm/sự kiện nào đó"
+        },
+        {
+          "type": "phrase",
+          "phrase": "instance hierarchy",
+          "explain": "(cụm danh từ chuyên ngành) cây phân cấp thể hiện trong thiết kế phần cứng"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "Trang 57 của tài liệu IEEE Std 1800-2023 (Chuẩn ngôn ngữ SystemVerilog) tập trung vào hai nội dung chính thuộc Chương 3: Sử dụng phạm vi đơn vị biên dịch (`$unit`) và Khái niệm/phân loại các không gian tên (Name spaces).\r\n\r\n**Các ý chính cần nắm vững:**\r\n1. **Phạm vi `$unit` (Compilation-unit scope):**\r\n   - `$unit` đại diện cho phạm vi ngoài cùng bao bọc toàn bộ một đơn vị biên dịch. Nó cho phép truy xuất trực tiếp các khai báo ở cấp ngoài cùng thông qua toán tử giải quyết phạm vi `::` (ví dụ: `$unit::b`).\r\n   - **Quy tắc quan trọng:** Ngoại trừ tên hàm/tác vụ (task/function), tất cả các biến hay kiểu dữ liệu trong `$unit` phải được định nghĩa *trước* khi tham chiếu. Cú pháp `$unit::` chỉ dùng để phân biệt tên trùng lặp (disambiguation) chứ **không hỗ trợ tham chiếu xuôi** (forward referencing).\r\n   - **Hạn chế:** `$unit` không thể dùng kết hợp với lệnh nhập gói (`import`), và các thành phần thuộc `$unit` không thể bị truy cập từ bên ngoài bằng đường dẫn phân cấp (hierarchical reference).\r\n\r\n2. **Các không gian tên trong SystemVerilog (Section 3.13 Name spaces):**\r\n   - SystemVerilog định nghĩa 8 không gian tên (2 toàn cục, 2 toàn cục theo đơn vị biên dịch, 4 cục bộ). Trang này trình bày 4 không gian tên đầu tiên:\r\n     - *Definitions name space (Không gian tên định nghĩa):* Chứa tên các khối `module`, `primitive`, `program`, `interface` không lồng nhau. Mỗi tên chỉ được dùng 1 lần trên toàn bộ chương trình.\r\n     - *Package name space (Không gian tên gói):* Chứa tên các `package`. Mỗi tên gói là duy nhất trên toàn bộ các đơn vị biên dịch.\r\n     - *Compilation-unit scope name space (Không gian tên phạm vi đơn vị biên dịch):* Nằm ngoài các khối cấu trúc chính, bao gồm các hàm, tác vụ, tham số, sự kiện, biến và kiểu dữ liệu tự định nghĩa.\r\n     - *Text macro name space (Không gian tên macro văn bản):* Toàn cục trong đơn vị biên dịch, nhận biết qua ký tự nháy ngược (`` ` ``) và xử lý theo thứ tự xuất hiện tuyến tính.\r\n\r\n**Khái niệm/kiến thức nền cần tìm hiểu thêm:**\r\n- **Compilation unit (Đơn vị biên dịch):** Cần hiểu khái niệm đơn vị biên dịch trong các trình biên dịch EDA (là tập hợp các tệp mã nguồn được trình biên dịch xử lý cùng một lúc).\r\n- **Scope resolution operator (`::`):** Toán tử phân giải phạm vi dùng để phân biệt các định danh cục bộ và toàn cục hoặc truy cập thành phần thuộc gói/phạm vi `$unit`.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Mô tả và Kiểm định Phần cứng Hợp nhất\r\n\r\n`$unit` là tên của phạm vi bao quanh một đơn vị biên dịch. Mục đích của nó là cho phép tham chiếu không mơ hồ đến các khai báo ở cấp ngoài cùng của một đơn vị biên dịch (tức là những khai báo nằm trong phạm vi đơn vị biên dịch). Điều này được thực hiện thông qua cùng một toán tử giải quyết phạm vi được sử dụng để truy cập các thành phần trong gói (xem 23.6.3).\r\n\r\nVí dụ:\r\nbit b;\r\ntask t;\r\n    int b;\r\n    b = 5 + $unit::b;    // $unit::b là biến b bên ngoài\r\nendtask\r\n\r\nNgoại trừ tên tác vụ và hàm (xem 23.8.1), các tham chiếu chỉ được phép thực hiện đối với những tên đã được định nghĩa trước đó trong đơn vị biên dịch. Việc sử dụng tiền tố `$unit::` rõ ràng chỉ cung cấp khả năng phân biệt tên và không thêm khả năng tham chiếu đến các thành phần xuất hiện sau trong đơn vị biên dịch.\r\n\r\nVí dụ:\r\ntask t;\r\n    int x;\r\n    x = 5 + b;        // không hợp lệ - \"b\" được định nghĩa sau\r\n    x = 5 + $unit::b; // không hợp lệ - $unit không hỗ trợ tham chiếu xuôi đặc biệt\r\nendtask\r\nbit b;\r\n\r\nPhạm vi đơn vị biên dịch cho phép người dùng dễ dàng chia sẻ các khai báo (ví dụ: kiểu dữ liệu) trên toàn bộ đơn vị biên dịch mà không cần phải khai báo một gói rồi sau đó nhập các khai báo từ gói đó. Vì không có tên, phạm vi đơn vị biên dịch không thể được sử dụng với câu lệnh khai báo nhập (`import`), và các định danh được khai báo bên trong phạm vi này cũng không thể truy cập được thông qua tham chiếu phân cấp. Tuy nhiên, trong một đơn vị biên dịch cụ thể, tên đặc biệt `$unit` có thể được sử dụng để truy cập trực tiếp các khai báo thuộc phạm vi đơn vị biên dịch đó.\r\n\r\n### 3.13 Không gian tên\r\n\r\nSystemVerilog có tám không gian tên dành cho các định danh: hai không gian tên toàn cục (không gian tên định nghĩa và không gian tên gói), hai không gian tên toàn cục đối với đơn vị biên dịch (không gian tên phạm vi đơn vị biên dịch và không gian tên macro văn bản), và bốn không gian tên cục bộ. Tám không gian tên được mô tả như sau:\r\n\r\na) *Không gian tên định nghĩa* hợp nhất tất cả các định danh **module**, **primitive**, **program**, và **interface** không lồng nhau được định nghĩa bên ngoài tất cả các khai báo khác. Một khi một tên đã được sử dụng để định nghĩa một module, primitive, program hoặc interface trong một đơn vị biên dịch, tên đó sẽ không được sử dụng lại (trong bất kỳ đơn vị biên dịch nào) để khai báo một module, primitive, program hoặc interface không lồng nhau khác bên ngoài tất cả các khai báo.\r\n\r\nb) *Không gian tên gói* hợp nhất tất cả các định danh **package** được định nghĩa giữa tất cả các đơn vị biên dịch. Một khi một tên đã được sử dụng để định nghĩa một package trong một đơn vị biên dịch, tên đó sẽ không được sử dụng lại để khai báo một package khác trong bất kỳ đơn vị biên dịch nào.\r\n\r\nc) *Không gian tên phạm vi đơn vị biên dịch* tồn tại bên ngoài các cấu trúc **module**, **interface**, **package**, **checker**, **program**, và **primitive**. Nó hợp nhất các định nghĩa của các hàm, tác vụ, checker, tham số, sự kiện có tên, khai báo net, khai báo biến, và các kiểu dữ liệu do người dùng định nghĩa bên trong phạm vi đơn vị biên dịch.\r\n\r\nd) *Không gian tên macro văn bản* là toàn cục trong đơn vị biên dịch. Vì các tên macro văn bản được giới thiệu và sử dụng với ký tự ` phía trước, chúng không bị lẫn lộn với bất kỳ không gian tên nào khác. Các tên macro văn bản được định nghĩa theo thứ tự xuất hiện tuyến tính trong tập hợp các tệp đầu vào...",
+      "grammar": [
+        {
+          "phrase": "is the name of the scope that encompasses a compilation unit",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng \"that\" bổ nghĩa cho danh từ \"the scope\""
+        },
+        {
+          "phrase": "used to access package items",
+          "explain": "mệnh đề rút gọn quá khứ phân từ (past participial clause) bổ nghĩa cho \"scope resolution operator\""
+        },
+        {
+          "phrase": "references shall only be made to names already defined in the compilation unit",
+          "explain": "cấu trúc bị động với động từ khuyết thiếu \"shall be made\" kết hợp cụm tính từ/quá khứ phân từ rút gọn \"already defined\" bổ nghĩa cho \"names\""
+        },
+        {
+          "phrase": "without having to declare a package from which the declarations are subsequently imported",
+          "explain": "danh động từ sau giới từ \"without having to\" đi kèm mệnh đề quan hệ chứa giới từ \"from which\" bổ nghĩa cho \"a package\""
+        },
+        {
+          "phrase": "Once a name is used to define a module..., the name shall not be used again...",
+          "explain": "câu điều kiện/thời gian với liên từ \"Once\" ở vế đầu kết hợp dạng bị động mang tính quy định \"shall not be used\" ở vế chính"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "encompass",
+          "explain": "(động từ) bao gồm, bao quanh, chứa đựng toàn bộ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "disambiguation",
+          "explain": "(danh từ) sự làm rõ nghĩa, khử sự mơ hồ/nhập nhằng giữa các tên trùng nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subsequently",
+          "explain": "(trạng từ) sau đó, về sau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "identifier",
+          "explain": "(danh từ) định danh, tên đặt cho biến/hàm/khối trong ngôn ngữ lập trình"
+        },
+        {
+          "type": "collocation",
+          "phrase": "scope resolution operator",
+          "explain": "(cụm danh từ) toán tử giải quyết phạm vi (ký hiệu `::`)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ) đơn vị biên dịch (tập hợp các tệp nguồn được biên dịch cùng một lúc)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "forward referencing",
+          "explain": "(cụm danh từ) tham chiếu xuôi (truy cập/sử dụng một biến hoặc đối tượng trước khi nó được khai báo)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hierarchical reference",
+          "explain": "(cụm danh từ) tham chiếu phân cấp (truy cập biến/khối theo đường dẫn cây phân cấp, ví dụ: `top.mod1.var`)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "linear order of appearance",
+          "explain": "(cụm từ) thứ tự xuất hiện tuyến tính (thứ tự đọc dòng mã từ trên xuống dưới trong tệp)"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "- **Nội dung tổng quát:** Trang 58 tiếp tục trình bày định nghĩa chi tiết về các không gian tên (*name spaces*) còn lại trong SystemVerilog (không gian tên module, block, port, attribute) cùng quy tắc cấm khai báo lại tên; đồng thời chuyển sang Mục 3.14 quy định về đơn vị thời gian mô phỏng (*simulation time units*) và độ chính xác thời gian (*simulation time precision*).\r\n- **Những ý chính BẮT BUỘC phải hiểu:**\r\n  1. *Đặc điểm các không gian tên:* \r\n     - *Module name space:* Khởi tạo bởi các cấu trúc module, interface, package, program, checker, primitive; chứa các định nghĩa hàm, task, biến, tham số, event, kiểu dữ liệu tự định nghĩa...\r\n     - *Block name space:* Khởi tạo bởi các khối lệnh (named/unnamed blocks), specify, function, task.\r\n     - *Port name space:* Định nghĩa kết nối cấu trúc giữa các đối tượng ở hai không gian tên khác nhau (đơn hướng: input/output, hoặc hai hướng: inout/ref). Tên cổng có thể được tái định nghĩa trong module name space bằng cách khai báo biến/net cùng tên.\r\n     - *Attribute name space:* Được bao quanh bởi cặp ký hiệu `(*` và `*)`.\r\n  2. *Quy tắc khai báo tên:* Trong cùng một không gian tên, cấm tuyệt đối việc tái khai báo (*redeclare*) một tên đã được định nghĩa trước đó.\r\n  3. *Khái niệm thời gian mô phỏng (Simulation time):* Thời gian mô phỏng mô hình hóa thời gian thực tế mà hệ thống chạy.\r\n  4. *Cấu thành của giá trị thời gian:* Gồm hai yếu tố là đơn vị thời gian (*time unit* - từ 100s xuống 1fs) và độ chính xác thời gian (*time precision* - cấp độ chính xác của độ trễ).\r\n  5. *Ký hiệu đơn vị:* Sử dụng các chuỗi `s`, `ms`, `us`, `ns`, `ps`, `fs` với bội số 1, 10, hoặc 100 (Bảng 3-1).\r\n- **Khái niệm/kiến thức nền CẦN tìm hiểu thêm:** \r\n  - Khái niệm không gian tên (*scope/namespace*) trong ngôn ngữ lập trình để hiểu lý do tại sao các tên biến/hàm trùng nhau có thể tồn tại ở các phạm vi khác nhau.\r\n  - Mô phỏng sự kiện rời rạc (*Discrete Event Simulation*) trong thiết kế phần cứng vi mạch để hiểu tầm quan trọng của *time unit* và *time precision* đối với độ trễ lan truyền (*propagation delay*).",
+      "translation": "tạo thành đơn vị biên dịch. Các định nghĩa tiếp theo có cùng tên sẽ ghi đè lên các định nghĩa trước đó đối với phần còn lại của các tệp đầu vào.\r\n\r\ne) *Không gian tên module* được khởi tạo bởi các cấu trúc **module**, **interface**, **package**, **program**, **checker**, và **primitive**. Nó hợp nhất các định nghĩa của module, interface, program, checker, hàm (function), tác vụ (task), khối có tên (named block), tên thể hiện (instance name), tham số (parameter), sự kiện có tên (named event), khai báo net, khai báo biến và các kiểu dữ liệu do người dùng tự định nghĩa bên trong cấu trúc bao quanh.\r\n\r\nf) *Không gian tên khối* được khởi tạo bởi các khối có tên hoặc không tên, các cấu trúc **specify**, **function**, và **task**. Nó hợp nhất các định nghĩa về khối có tên, hàm, tác vụ, tham số, sự kiện có tên, kiểu khai báo biến và các kiểu dữ liệu do người dùng tự định nghĩa bên trong cấu trúc bao quanh.\r\n\r\ng) *Không gian tên cổng* được khởi tạo bởi các cấu trúc **module**, **interface**, **primitive**, và **program**. Nó cung cấp một phương thức để định nghĩa kết nối về mặt cấu trúc giữa hai đối tượng nằm trong hai không gian tên khác nhau. Kết nối này có thể là đơn hướng (hoặc **input** hoặc **output**) hoặc hai hướng (**inout** hoặc **ref**). Không gian tên cổng chồng lấp với không gian tên module và không gian tên khối. Về bản chất, không gian tên cổng xác định kiểu kết nối giữa các tên trong các không gian tên khác nhau. Các kiểu khai báo cổng bao gồm **input**, **output**, **inout**, và **ref**. Một tên cổng được khởi tạo trong không gian tên cổng có thể được tái khởi tạo trong không gian tên module bằng cách khai báo một biến hoặc một net có cùng tên với tên cổng đó.\r\n\r\nh) *Không gian tên thuộc tính* được bao bọc bởi các cấu trúc `(*` và `*)` gắn liền với một phần tử ngôn ngữ (xem 5.12). Một tên thuộc tính chỉ có thể được định nghĩa và sử dụng trong không gian tên thuộc tính. Bất kỳ kiểu tên nào khác đều không thể được định nghĩa trong không gian tên này.\r\n\r\nTrong cùng một không gian tên, việc khai báo lại một tên đã được khai báo bởi một khai báo trước đó là bất hợp lệ.\r\n\r\n**3.14 Đơn vị thời gian mô phỏng và độ chính xác**\r\n\r\nMột khía cạnh quan trọng của việc mô phỏng là thời gian. Thuật ngữ *thời gian mô phỏng* được sử dụng để chỉ giá trị thời gian được bộ mô phỏng duy trì nhằm mô hình hóa thời gian thực tế mà mô tả hệ thống sẽ mất để hoạt động. Thuật ngữ *thời gian* được sử dụng thay thế cho nhau với thời gian mô phỏng.\r\n\r\nCác giá trị thời gian được sử dụng trong các phần tử thiết kế để đại diện cho độ trễ lan truyền và khoảng thời gian giữa các lần thực thi lệnh thủ tục. Giá trị thời gian có hai thành phần: *đơn vị thời gian* và *độ chính xác thời gian*.\r\n\r\n— *Đơn vị thời gian* đại diện cho đơn vị đo lường thời gian và độ trễ, và có thể được chỉ định theo các đơn vị từ 100 giây xuống đến 1 femtosecond.\r\n\r\n— *Độ chính xác thời gian* xác định mức độ chính xác đối với các độ trễ.\r\n\r\nCả đơn vị thời gian và độ chính xác thời gian đều được biểu diễn bằng một trong các chuỗi ký tự: `s`, `ms`, `us`, `ns`, `ps`, và `fs` với cấp độ lớn là 1, 10, hoặc 100. Định nghĩa của các chuỗi ký tự này được cho trong Bảng 3-1.\r\n\r\n**Bảng 3-1—Các chuỗi ký tự đơn vị thời gian**\r\n\r\n| Chuỗi ký tự | Đơn vị đo lường |\r\n| :--- | :--- |\r\n| s | giây |\r\n| ms | mili giây |\r\n| us | micro giây |\r\n| ns | nano giây |\r\n| ps | pico giây |\r\n| fs | femto giây |",
+      "grammar": [
+        {
+          "phrase": "it shall be illegal to redeclare a name already declared by a prior declaration",
+          "explain": "cấu trúc chủ ngữ giả \"it shall be + adj + to-V\" đi kèm mệnh đề quá khứ phân tử rút gọn (\"already declared by...\") bổ nghĩa cho danh từ \"a name\""
+        },
+        {
+          "phrase": "provides a means of structurally defining connections between two objects that are in two different name spaces",
+          "explain": "cụm từ chứa danh động từ đi kèm trạng từ (\"structurally defining\") và mệnh đề quan hệ \"that are in...\" bổ nghĩa cho \"two objects\""
+        },
+        {
+          "phrase": "A port name introduced in the port name space can be reintroduced in the module name space by declaring a variable or a net with the same name as the port name",
+          "explain": "câu bị động có mệnh đề phân từ rút gọn (\"introduced in...\") bổ nghĩa cho chủ ngữ \"A port name\", kết hợp cấu trúc so sánh bằng \"the same... as...\""
+        },
+        {
+          "phrase": "used to refer to the time value maintained by the simulator to model the actual time it would take for the system description being simulated",
+          "explain": "chuỗi mệnh đề phân từ rút gọn bị động (\"maintained by...\", \"being simulated\") kết hợp mệnh đề quan hệ ẩn (\"it would take for...\") bổ nghĩa cho \"the actual time\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(danh từ kỹ thuật) phần tử nguyên thủy/cơ bản (khối logic định nghĩa sẵn hoặc do người dùng tự định nghĩa - UDP) trong Verilog/SystemVerilog"
+        },
+        {
+          "type": "vocab",
+          "phrase": "construct",
+          "explain": "(danh từ) cấu trúc cú pháp trong ngôn ngữ lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "femtosecond",
+          "explain": "(danh từ) femto giây ($10^{-15}$ giây), đơn vị thời gian cực nhỏ trong mô phỏng vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ) đơn vị biên dịch (tập hợp các tệp mã nguồn được xử lý cùng nhau trong một lần biên dịch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "name space",
+          "explain": "(cụm danh từ) không gian tên (phạm vi chứa các định danh nhằm tránh xung đột tên)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "user-defined types",
+          "explain": "(cụm danh từ) các kiểu dữ liệu do người dùng tự định nghĩa"
+        },
+        {
+          "type": "collocation",
+          "phrase": "simulation time",
+          "explain": "(cụm danh từ) thời gian mô phỏng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time precision",
+          "explain": "(cụm danh từ) độ chính xác thời gian"
+        },
+        {
+          "type": "collocation",
+          "phrase": "propagation delays",
+          "explain": "(cụm danh từ) độ trễ lan truyền tín hiệu trong mạch điện tử"
+        },
+        {
+          "type": "phrase",
+          "phrase": "for the balance of",
+          "explain": "(cụm từ) cho phần còn lại của (khoảng thời gian/tệp/tiến trình)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "used interchangeably with",
+          "explain": "(cụm từ) được sử dụng thay thế cho nhau với"
+        },
+        {
+          "type": "phrase",
+          "phrase": "order of magnitude",
+          "explain": "(cụm từ) cấp độ lớn / cấp độ số mũ (ví dụ: bội số mũ 1, 10, 100)"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "Trang này thuộc Tiêu chuẩn IEEE Std 1800-2023 cho ngôn ngữ SystemVerilog, tập trung vào hai nội dung kỹ thuật chính thuộc Mục 3.14: Quy tắc làm tròn giá trị thời gian (Time value rounding - 3.14.1) và Phương pháp khai báo đơn vị thời gian & độ chính xác (Specifying time units and precision - 3.14.2), đặc biệt đi sâu vào cách hoạt động của chỉ thị biên dịch `` `timescale `` (3.14.2.1).\r\n\r\nCác ý chính người đọc bắt buộc phải nắm được:\r\n1. Quy tắc làm tròn thời gian: Độ chính xác thời gian (`time precision`) không được phép thô hơn (dài hơn) đơn vị thời gian (`time unit`). Độ chính xác xác định cách các giá trị độ trễ (delay) được làm tròn trước khi đưa vào mô phỏng. Nếu độ chính xác bằng đơn vị thời gian, giá trị làm tròn thành số nguyên. Nếu độ chính xác nhỏ hơn 1 cấp độ lớn (ví dụ 100ps so với 1ns, tức kém 10 lần), giá trị độ trễ sẽ được làm tròn đến 1 chữ số thập phân (ví dụ 2.75ns -> 2.8ns).\r\n2. Quy định chính xác của phần tử thiết kế: Các giá trị thời gian trong một module/thiết kế được đảm bảo chính xác tới độ phân giải thời gian được chỉ định cho chính nó, độc lập với việc các phần tử khác trong hệ thống có độ chính xác nhỏ hơn.\r\n3. Cú pháp và phạm vi của chỉ thị `` `timescale ``: Cú pháp chuẩn là `` `timescale time_unit / time_precision ``. Chỉ thị này có hiệu lực từ vị trí nó xuất hiện cho tới khi gặp một chỉ thị `` `timescale `` khác thay thế. Đáng chú ý, hiệu lực của nó chỉ giới hạn trong đơn vị biên dịch (compilation unit) hiện tại chứ không lan sang các đơn vị biên dịch khác.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Thuật ngữ \"compilation unit\" (đơn vị biên dịch - Mục 3.12.1): Cần nắm rõ định nghĩa này trong SystemVerilog để hiểu giới hạn tác động của chỉ thị `` `timescale ``, tránh lỗi vô tình làm sai lệch thời gian mô phỏng giữa các t исход mã nguồn (source files) khác nhau.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nGHI CHÚ—Mặc dù s, ms, ns, ps và fs là các ký hiệu đơn vị SI thông thường cho giây, miligiây, nanogiây, picogiây và femtogiây, do thiếu ký tự Hy Lạp μ (mu) trong các bộ ký tự mã hóa, \"us\" đại diện cho ký hiệu đơn vị SI cho microgiây, chính xác là μs.\r\n\r\nĐộ chính xác thời gian của một phần tử thiết kế phải ít nhất chính xác bằng đơn vị thời gian; nó không thể là một khoảng thời gian dài hơn đơn vị thời gian.\r\n\r\n3.14.1 Làm tròn giá trị thời gian\r\n\r\nTrong một phần tử thiết kế, chẳng hạn như một module, program hoặc interface, độ chính xác thời gian chỉ định cách các giá trị độ trễ được làm tròn trước khi được sử dụng trong mô phỏng.\r\n\r\nĐộ chính xác thời gian tương quan với đơn vị thời gian. Nếu độ chính xác giống như đơn vị thời gian, thì các giá trị độ trễ sẽ được làm tròn thành số nguyên. Nếu độ chính xác nhỏ hơn đơn vị thời gian một cấp độ lớn, thì các giá trị độ trễ sẽ được làm tròn đến một chữ số thập phân. Ví dụ, nếu đơn vị thời gian được chỉ định là 1ns và độ chính xác là 100ps, thì các giá trị độ trễ được làm tròn đến một chữ số thập phân (100ps tương đương với 0.1ns). Do đó, độ trễ 2.75ns sẽ được làm tròn thành 2.8ns.\r\n\r\nCác giá trị thời gian trong một phần tử thiết kế chính xác trong khoảng độ chính xác thời gian được chỉ định cho phần tử thiết kế đó, ngay cả khi có độ chính xác thời gian nhỏ hơn được chỉ định ở nơi khác trong thiết kế.\r\n\r\n3.14.2 Khai báo đơn vị và độ chính xác thời gian\r\n\r\nĐơn vị thời gian và độ chính xác thời gian có thể được chỉ định theo hai cách sau:\r\n— Sử dụng chỉ thị biên dịch `timescale\r\n— Sử dụng các từ khóa timeunit và timeprecision\r\n\r\n3.14.2.1 Chỉ thị biên dịch `timescale\r\n\r\nChỉ thị biên dịch `timescale chỉ định đơn vị thời gian và độ chính xác mặc định cho tất cả các phần tử thiết kế đi sau chỉ thị này và không có các cấu trúc timeunit cũng như timeprecision được khai báo bên trong phần tử thiết kế đó. Chỉ thị `timescale giữ nguyên hiệu lực từ thời điểm nó được bắt gặp trong mã nguồn cho đến khi đọc được một chỉ thị biên dịch `timescale khác. Chỉ thị `timescale chỉ ảnh hưởng đến đơn vị biên dịch hiện tại; nó không trải dài qua nhiều đơn vị biên dịch (xem 3.12.1).\r\n\r\nCú pháp tổng quát cho chỉ thị `timescale là (xem 22.7 để biết thêm chi tiết):\r\n\r\n`timescale time_unit / time_precision\r\n\r\nVí dụ sau đây chỉ định đơn vị thời gian là 1 ns với độ chính xác là 10 ps (độ chính xác 2 chữ số thập phân). Chỉ thị biên dịch ảnh hưởng đến cả module A và module B. Chỉ thị `timescale thứ hai thay thế chỉ thị đầu tiên, chỉ định đơn vị thời gian là 1 ps và độ chính xác là 1 ps (độ chính xác 0 chữ số thập phân) cho module C.\r\n\r\n`timescale 1ns / 10ps\r\nmodule A (...);\r\n...\r\nendmodule\r\nmodule B (...);\r\n...\r\nendmodule\r\n`timescale 1ps/1ps\r\nmodule C (...);\r\n...\r\nendmodule",
+      "grammar": [
+        {
+          "phrase": "The time precision of a design element shall be at least as precise as the time unit",
+          "explain": "cấu trúc so sánh bằng \"at least as + adj + as\" thể hiện yêu cầu tối thiểu về độ chính xác"
+        },
+        {
+          "phrase": "If the precision is one order of magnitude smaller than the time units, then delay values are rounded off to one decimal place",
+          "explain": "câu điều kiện loại 0 (hiển nhiên/quy tắc) diễn tả quy luật làm tròn số dựa trên độ chênh lệch cấp độ lớn"
+        },
+        {
+          "phrase": "The `timescale directive remains in effect from when it is encountered in the source code until another `timescale compiler directive is read",
+          "explain": "cấu trúc thời gian \"from when... until...\" kết hợp mệnh đề bị động \"is encountered\", \"is read\" diễn tả khoảng thời gian có hiệu lực của chỉ thị biên dịch"
+        },
+        {
+          "phrase": "specifying a time unit of 1 ps and precision of 1 ps (zero decimal places of accuracy) for module C",
+          "explain": "mệnh đề danh từ/rút gọn hiện tại phân tử (present participle clause) đóng vai trò bổ nghĩa giải thích hành động của chỉ thị thứ hai"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "femtosecond",
+          "explain": "(danh từ) femto giây, đơn vị thời gian bằng $10^{-15}$ giây"
+        },
+        {
+          "type": "vocab",
+          "phrase": "microsecond",
+          "explain": "(danh từ) micro giây, đơn vị thời gian bằng $10^{-6}$ giây"
+        },
+        {
+          "type": "phrase",
+          "phrase": "order of magnitude",
+          "explain": "(cụm danh từ) cấp độ lớn (mỗi cấp tương ứng với bội số nhân hoặc chia 10)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "rounded off to",
+          "explain": "(cụm động từ) được làm tròn đến (chữ số thập phân/mức quy định)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "remain in effect",
+          "explain": "(cụm động từ) giữ nguyên hiệu lực, tiếp tục có hiệu lực"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ chuyên ngành) đơn vị biên dịch trong SystemVerilog"
+        },
+        {
+          "type": "phrase",
+          "phrase": "span multiple compilation units",
+          "explain": "(cụm động từ/ngữ pháp) kéo dài/bao phủ qua nhiều đơn vị biên dịch"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "**Nội dung tổng quát:** Trang này thuộc Chuẩn SystemVerilog IEEE Std 1800-2023 (trang 60), trình bày về giải pháp khắc phục sự phụ thuộc thứ tự biên dịch tệp do chỉ thị tiền xử lý `` `timescale `` gây ra bằng cách sử dụng hai từ khóa `timeunit` và `timeprecision`. Đồng thời, trang cũng quy định chi tiết các quy tắc ưu tiên (rules of precedence) nhằm xác định đơn vị thời gian và độ chính xác thời gian khi các từ khóa này bị khuyết.\r\n\r\n**Những ý chính người đọc bắt buộc phải hiểu:**\r\n1. **Nhược điểm của `` `timescale ``:** Do chỉ thị tiền xử lý có tính kế thừa theo thứ tự đọc file của trình biên dịch, việc thay đổi thứ tự biên dịch các file (ví dụ từ A-B-C sang C-B-A) sẽ làm thay đổi đơn vị thời gian của module (như module B), gây sai lệch kết quả mô phỏng.\r\n2. **Giải pháp dùng `timeunit` và `timeprecision`:** Việc khai báo trực tiếp đơn vị thời gian (`timeunit`) và độ chính xác thời gian (`timeprecision`) bên trong cấu trúc phần tử thiết kế (module, program, package, interface) sẽ gắn liền thông số thời gian vào chính module đó, giải quyết triệt để vấn đề phụ thuộc thứ tự file. Từ khóa `timeunit` còn hỗ trợ cú pháp kết hợp với dấu xược `/` (ví dụ: `timeunit 100ps / 10fs;`).\r\n3. **Quy tắc khai báo trong phạm vi (scope):** Mỗi scope chỉ cho phép tối đa 1 khai báo `timeunit` và 1 `timeprecision` (hoặc lặp lại nhưng phải nhất quán); các khai báo này phải đặt ở vị trí trước các phần tử khác.\r\n4. **Thứ tự ưu tiên xác định đơn vị thời gian (Precedence):** Nếu module không tự khai báo `timeunit`, đơn vị thời gian sẽ được quyết định theo thứ tự giảm dần:\r\n   - (a) Kế thừa từ module/interface bao ngoài (nếu là khối lồng nhau - nested).\r\n   - (b) Theo chỉ thị `` `timescale `` gần nhất trong cùng đơn vị biên dịch (compilation unit).\r\n   - (c) Theo khai báo `timeunit` ở phạm vi toàn cục của đơn vị biên dịch (compilation-unit scope).\r\n   - (d) Theo giá trị mặc định của trình mô phỏng (default time unit).\r\n5. **Ràng buộc quan trọng:** Chỉ có `timeunit` mới thiết lập được đơn vị thời gian cho compilation-unit scope (chỉ thị `` `timescale `` không làm được việc này). Nếu trong cùng một thiết kế có một số phần tử khai báo đơn vị thời gian còn một số khác thì không, trình biên dịch sẽ báo lỗi.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Compilation unit (Đơn vị biên dịch):** Tập hợp một hoặc nhiều file nguồn SystemVerilog được trình biên dịch xử lý cùng một lúc.\r\n- **Time unit & Time precision:** Phân biệt đơn vị đo thời gian (unit - ví dụ 1ns) và độ phân giải/bước nhảy nhỏ nhất của thời gian mô phỏng (precision - ví dụ 1ps).",
+      "translation": "Chỉ thị `` `timescale `` có thể dẫn đến các vấn đề phụ thuộc vào thứ tự biên dịch file. Nếu ba module trước đó được biên dịch theo thứ tự A, B, C (như đã hiển thị), module B sẽ mô phỏng với đơn vị thời gian là nanosecond. Nếu cùng ba file đó được biên dịch theo thứ tự C, B, A, module B lại mô phỏng với đơn vị thời gian là picosecond. Điều này có thể gây ra kết quả mô phỏng rất khác nhau, tùy thuộc vào các giá trị thời gian được chỉ định trong module B.\r\n\r\n**3.14.2.2 Các từ khóa timeunit và timeprecision**\r\n\r\nĐơn vị thời gian và độ chính xác thời gian có thể được khai báo tương ứng bằng các từ khóa `timeunit` và `timeprecision`, và được gán bằng một hằng số thời gian (xem mục 5.8). Độ chính xác thời gian cũng có thể được khai báo bằng tham số thứ hai tùy chọn đối với từ khóa `timeunit`, sử dụng dấu xược làm ký tự phân cách. Ví dụ:\r\n\r\nmodule D (...);\r\n  timeunit 100ps;\r\n  timeprecision 10fs;\r\n  ...\r\nendmodule\r\n\r\nmodule E (...);\r\n  timeunit 100ps / 10fs; // timeunit với tham số thứ hai tùy chọn\r\n  ...\r\nendmodule\r\n\r\nViệc định nghĩa các cấu trúc `timeunit` và `timeprecision` bên trong phần tử thiết kế sẽ loại bỏ các vấn đề phụ thuộc vào thứ tự biên dịch file do các chỉ thị trình biên dịch gây ra.\r\n\r\nMỗi định nghĩa module, chương trình (program), gói (package), giao diện (interface) hoặc phạm vi đơn vị biên dịch (compilation-unit scope) chỉ được phép có tối đa một đơn vị thời gian và một độ chính xác thời gian. Khai báo này sẽ xác định một phạm vi thời gian (time scope). Nếu được chỉ định, các khai báo `timeunit` và `timeprecision` phải đứng trước bất kỳ phần tử nào khác trong phạm vi thời gian hiện tại. Các khai báo `timeunit` và `timeprecision` có thể được lặp lại ở các phần tử phía sau, nhưng phải trùng khớp với khai báo trước đó trong phạm vi thời gian hiện tại.\r\n\r\n**3.14.2.3 Thứ tự ưu tiên của timeunit, timeprecision, và `timescale**\r\n\r\nNếu `timeunit` không được chỉ định bên trong định nghĩa module, program, package, hoặc interface, thì đơn vị thời gian sẽ được xác định theo các quy tắc ưu tiên sau:\r\na) Nếu định nghĩa module hoặc interface được lồng nhau (nested), đơn vị thời gian sẽ được thừa kế từ module hoặc interface bao ngoài (program và package không thể lồng nhau).\r\nb) Ngược lại, nếu chỉ thị `` `timescale `` đã được chỉ định trước đó (bên trong đơn vị biên dịch), đơn vị thời gian sẽ được thiết lập theo đơn vị của chỉ thị `` `timescale `` gần nhất.\r\nc) Ngược lại, nếu phạm vi đơn vị biên dịch (compilation-unit scope) có chỉ định đơn vị thời gian (bên ngoài tất cả các khai báo khác), thì đơn vị thời gian sẽ được đặt theo đơn vị thời gian của đơn vị biên dịch đó.\r\nd) Ngược lại, đơn vị thời gian mặc định sẽ được sử dụng.\r\n\r\nĐơn vị thời gian của phạm vi đơn vị biên dịch chỉ có thể được thiết lập bằng khai báo `timeunit`, chứ không phải bằng chỉ thị `` `timescale ``. Nếu không được chỉ định, đơn vị thời gian mặc định sẽ được sử dụng.\r\n\r\nNếu `timeprecision` không được chỉ định trong phạm vi thời gian hiện tại, độ chính xác thời gian sẽ được xác định theo cùng thứ tự ưu tiên như đối với đơn vị thời gian.\r\n\r\nĐơn vị thời gian và độ chính xác thời gian mặc định tùy thuộc vào công cụ thực thi (implementation-specific).\r\n\r\nSẽ là lỗi nếu một số phần tử thiết kế có chỉ định đơn vị thời gian và độ chính xác thời gian, trong khi các phần tử khác thì không.",
+      "grammar": [
+        {
+          "phrase": "If the previous three modules were compiled in the order of A, B, C (as shown) then module B would simulate with time units in nanoseconds",
+          "explain": "câu điều kiện loại 2 (second conditional) diễn tả giả định trái ngược với thực tế ở hiện tại/tổng quát (\"were compiled\", \"would simulate\")"
+        },
+        {
+          "phrase": "If specified, the timeunit and timeprecision declarations shall precede any other items in the current time scope",
+          "explain": "mệnh đề điều kiện rút gọn (\"If specified\" tương đương \"If they are specified\")"
+        },
+        {
+          "phrase": "If a timeunit is not specified within a module, program, package, or interface definition, then the time unit shall be determined using the following rules of precedence",
+          "explain": "câu điều kiện loại 1 kết hợp động từ khuyết thiếu pháp lý \"shall\" và thể bị động \"shall be determined\""
+        },
+        {
+          "phrase": "If the module or interface definition is nested, then the time unit shall be inherited from the enclosing module or interface",
+          "explain": "câu điều kiện loại 1 kết hợp thể bị động \"shall be inherited\""
+        },
+        {
+          "phrase": "It shall be an error if some design elements have a time unit and precision specified and others do not",
+          "explain": "cấu trúc chủ ngữ giả \"It shall be...\" kết hợp mệnh đề điều kiện \"if...\" và vế so sánh rút gọn động từ (\"others do not\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "precedence",
+          "explain": "(danh từ) thứ tự ưu tiên, quyền ưu tiên áp dụng quy tắc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "inherit",
+          "explain": "(động từ) kế thừa, thừa hưởng thuộc tính từ phạm vi cha"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nested",
+          "explain": "(tính từ) được lồng ghép bên trong một cấu trúc khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "implementation-specific",
+          "explain": "(tính từ) đặc thù theo từng công cụ/trình biên dịch, không cố định trong tiêu chuẩn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "result in",
+          "explain": "dẫn đến, gây ra hậu quả/kết quả gì"
+        },
+        {
+          "type": "collocation",
+          "phrase": "rules of precedence",
+          "explain": "các quy tắc theo thứ tự ưu tiên"
+        },
+        {
+          "type": "phrase",
+          "phrase": "file order dependency",
+          "explain": "sự phụ thuộc vào thứ tự nạp/biên dịch tệp tin"
+        },
+        {
+          "type": "phrase",
+          "phrase": "compilation-unit scope",
+          "explain": "phạm vi tầm vực của đơn vị biên dịch"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "summary": "Trang 61 thuộc tiêu chuẩn IEEE 1800-2023 về SystemVerilog giải thích chi tiết khái niệm \"Đơn vị thời gian mô phỏng\" (Simulation time unit) và mối quan hệ của nó với đơn vị thời gian đặc biệt `step` trong quá trình mô phỏng vi mạch.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm:\r\n1. **Khái niệm Độ chính xác thời gian toàn cục (Global time precision / Simulation time unit):** Đây là giá trị độ chính xác thời gian nhỏ nhất (tức mức phân giải cao nhất) được tìm thấy từ ba nguồn khai báo trong toàn bộ thiết kế: câu lệnh `timeprecision`, tham số độ chính xác trong khai báo `timeunit`, và tham số độ chính xác nhỏ nhất trong các chỉ thị biên dịch ``timescale`.\r\n2. **Khái niệm và đặc điểm của đơn vị `step`:**\r\n   - Đơn vị thời gian `step` có giá trị luôn luôn bằng với độ chính xác thời gian toàn cục (*global time precision*).\r\n   - Khác với các đơn vị thời gian thông thường (như `ns`, `ps` - đại diện cho thời gian vật lý thực tế), `step` là một đơn vị quy chuẩn nội bộ và **KHÔNG THỂ** dùng để thiết lập hay thay đổi độ chính xác hoặc đơn vị thời gian trong mô hình thiết kế.\r\n\r\nĐể hiểu trọn vẹn nội dung này, người đọc cần có kiến thức nền về cách SystemVerilog/Verilog quản lý thời gian mô phỏng thông qua chỉ thị ``timescale` cũng như các từ khóa khai báo thời gian `timeunit` và `timeprecision`.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Xác minh, Đặc tả và Thiết kế Phần cứng Hợp nhất\r\n\r\n3.14.3 Đơn vị thời gian mô phỏng\r\n\r\nĐộ chính xác thời gian toàn cục (global time precision), còn được gọi là đơn vị thời gian mô phỏng (simulation time unit), là giá trị nhỏ nhất trong số tất cả các câu lệnh timeprecision, tất cả các tham số độ chính xác thời gian truyền vào khai báo timeunit, và tham số độ chính xác thời gian nhỏ nhất của tất cả các chỉ thị biên dịch `timescale trong thiết kế.\r\n\r\nĐơn vị thời gian step bằng với độ chính xác thời gian toàn cục. Không giống như các đơn vị thời gian khác vốn đại diện cho các đơn vị vật lý, một step không thể được sử dụng để thiết lập hoặc sửa đổi độ chính xác cũng như đơn vị thời gian.",
+      "grammar": [
+        {
+          "phrase": "The global time precision, also called the simulation time unit, is the minimum of all the timeprecision statements...",
+          "explain": "mệnh đề rút gọn dạng phân từ hai (past participle clause) \"also called...\" bổ nghĩa và giải thích tên gọi khác của chủ ngữ \"The global time precision\""
+        },
+        {
+          "phrase": "is the minimum of all the timeprecision statements, all the time precision arguments to timeunit declarations, and the smallest time precision argument of all the `timescale compiler directives in the design",
+          "explain": "cấu trúc so sánh nhất (the minimum / the smallest) kết hợp liệt kê song song ba nguồn quy định độ chính xác để chọn ra giá trị nhỏ nhất"
+        },
+        {
+          "phrase": "Unlike other time units, which represent physical units, a step cannot be used to set or modify either the precision or the time unit",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) \"which represent physical units\" bổ nghĩa cho \"other time units\", kết hợp cấu trúc bị động \"cannot be used to set...\" và liên từ sóng đôi \"either... or...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "global time precision",
+          "explain": "(danh từ) độ chính xác thời gian toàn cục trong trình mô phỏng SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "simulation time unit",
+          "explain": "(danh từ) đơn vị thời gian mô phỏng (mức thời gian cơ sở của toàn hệ thống mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directive",
+          "explain": "(danh từ) chỉ thị biên dịch (lệnh bắt đầu bằng dấu ` hướng dẫn trình biên dịch xử lý mã)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "precision",
+          "explain": "(danh từ) độ chính xác, độ phân giải (trong ngữ cảnh thời gian là khoảng thời gian nhỏ nhất có thể biểu diễn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "physical unit",
+          "explain": "(danh từ) đơn vị vật lý (các đơn vị đo thời gian thực như second, millisecond, nanosecond, picosecond)"
+        }
+      ]
+    }
+  ]
+}

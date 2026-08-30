@@ -1,0 +1,515 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "01_1_overview",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "Trang sách này thuộc phần đầu (Chương 1: Overview) của tiêu chuẩn kỹ thuật IEEE Std 1800 dành cho SystemVerilog — ngôn ngữ thiết kế và kiểm tra phần cứng chuẩn hóa trong ngành vi mạch.\r\n\r\nNội dung chính người đọc cần nắm được bao gồm:\r\n1. Phạm vi (Scope - 1.1): SystemVerilog là một ngôn ngữ hợp nhất phục vụ 3 công đoạn chính: thiết kế (design), đặc tả (specification), và kiểm tra (verification). Ngôn ngữ này hỗ trợ đầy đủ các mức mô tả phần cứng (hành vi, RTL, mức cổng logic) cùng các tính năng kiểm tra tiên tiến (môi trường kiểm tra testbench, đo độ bao phủ coverage, khẳng định assertion, lập trình hướng đối tượng OOP, sinh dữ liệu ngẫu nhiên có ràng buộc) và cung cấp API để kết nối với các ngôn ngữ lập trình khác (như C/C++).\r\n2. Mục đích (Purpose - 1.2): Bản tiêu chuẩn này tiếp tục phát triển và hoàn thiện tiêu chuẩn IEEE Std 1800-2017 trước đó nhằm sửa lỗi, làm rõ nghĩa và bổ sung tính năng nâng cao giúp cải thiện hiệu quả thiết kế, kiểm tra và khả năng tương tác liên ngôn ngữ.\r\n3. Tóm tắt nội dung tài liệu (Content summary - 1.3): Tiêu chuẩn này bao gồm toàn bộ quy định về cú pháp/ngữ nghĩa chuẩn của SystemVerilog, các hàm/tác vụ hệ thống, chỉ thị biên dịch, các cơ chế giao diện lập trình nâng cao như PLI (Programming Language Interface) và VPI (Verification Procedural Interface), cùng API kiểm tra độ bao phủ.\r\n\r\nĐể hiểu trọn vẹn trang này, người đọc nên tìm hiểu thêm các khái niệm kiến thức nền về: quy trình thiết kế vi mạch kỹ thuật số (RTL design vs Gate-level), phương pháp kiểm tra vi mạch hiện đại (Coverage-driven verification, Constrained-random testing, Assertions), và các giao diện tích hợp C/C++ với Verilog/SystemVerilog (PLI/VPI/DPI).",
+      "translation": "IEEE Standard cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm tra Phần cứng Hợp nhất\r\n\r\n1. Tổng quan\r\n\r\n1.1 Phạm vi\r\n\r\nTiêu chuẩn này cung cấp định nghĩa về cú pháp và ngữ nghĩa ngôn ngữ cho SystemVerilog™ IEEE Std 1800, đây là một ngôn ngữ thiết kế, đặc tả và kiểm tra phần cứng hợp nhất. Tiêu chuẩn bao gồm sự hỗ trợ cho các mô tả phần cứng ở mức hành vi (behavioral), mức chuyển thanh ghi (RTL), và mức cổng (gate-level); môi trường kiểm tra (testbench), độ bao phủ (coverage), khẳng định (assertion), hướng đối tượng (object-oriented), và các cấu trúc ngẫu nhiên có ràng buộc (constrained random constructs); đồng thời cung cấp các giao diện lập trình ứng dụng (API) đến các ngôn ngữ lập trình bên ngoài.\r\n\r\n1.2 Mục đích\r\n\r\nTiêu chuẩn này phát triển ngôn ngữ IEEE Std 1800 SystemVerilog nhằm đáp ứng nhu cầu sử dụng ngày càng tăng của ngôn ngữ này trong thiết kế, đặc tả và kiểm tra phần cứng. Bản sửa đổi này khắc phục các lỗi và làm rõ các khía cạnh của định nghĩa ngôn ngữ trong IEEE Std 1800-2017.⁶ Bản sửa đổi này cũng cung cấp các tính năng nâng cao giúp đơn giản hóa việc thiết kế, cải thiện việc kiểm tra và tăng cường sự tương tác giữa các ngôn ngữ.\r\n\r\n1.3 Tóm tắt nội dung\r\n\r\nTiêu chuẩn này đóng vai trò là một đặc tả hoàn chỉnh cho ngôn ngữ SystemVerilog. Tiêu chuẩn này bao gồm các nội dung sau:\r\n— Cú pháp và ngữ nghĩa chính thức của tất cả các cấu trúc SystemVerilog\r\n— Các tác vụ hệ thống và hàm hệ thống trong mô phỏng, chẳng hạn như các lệnh xuất hiển thị văn bản\r\n— Các chỉ thị biên dịch, chẳng hạn như các macro thay thế văn bản và tỷ lệ thời gian mô phỏng\r\n— Cơ chế Giao diện Ngôn ngữ Lập trình (PLI)\r\n— Cú pháp và ngữ nghĩa chính thức của Giao diện Thủ tục Kiểm tra SystemVerilog (VPI)\r\n— Giao diện Lập trình Ứng dụng (API) cho truy cập độ bao phủ không có trong VPI\r\n\r\n________________________\r\n⁶Thông tin về các tài liệu tham chiếu có thể tìm thấy tại Điều 2 (Clause 2).",
+      "grammar": [
+        {
+          "phrase": "SystemVerilog language, which is a unified hardware design, specification, and verification language",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"which\" để bổ sung thông tin giải thích thêm cho \"SystemVerilog language\""
+        },
+        {
+          "phrase": "develops the IEEE Std 1800 SystemVerilog language in order to meet the increasing usage",
+          "explain": "cấu trúc chỉ mục đích \"in order to + V_bare\" (nhằm để / để làm gì)"
+        },
+        {
+          "phrase": "This revision corrects errors and clarifies aspects of the language definition",
+          "explain": "cấu trúc song song (parallelism) kết hợp hai động từ \"corrects\" và \"clarifies\" chia cùng chủ ngữ \"This revision\""
+        },
+        {
+          "phrase": "provides enhanced features that ease design, improve verification, and enhance cross-language interactions",
+          "explain": "mệnh đề quan hệ xác định (defining relative clause) dùng \"that\" bổ nghĩa cho \"enhanced features\", kết hợp 3 động từ song song \"ease\", \"improve\", \"enhance\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "syntax",
+          "explain": "(danh từ) cú pháp — quy tắc sắp xếp các ký hiệu, từ ngữ để tạo thành câu hoặc đoạn mã hợp lệ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "semantics",
+          "explain": "(danh từ) ngữ nghĩa — ý nghĩa bản chất của cấu trúc ngôn ngữ hoặc đoạn mã"
+        },
+        {
+          "type": "vocab",
+          "phrase": "directive",
+          "explain": "(danh từ) chỉ thị — lệnh hướng dẫn trình biên dịch thực hiện một thao tác xử lý đặc biệt trước khi dịch mã"
+        },
+        {
+          "type": "collocation",
+          "phrase": "register transfer level",
+          "explain": "(cụm danh từ) mức chuyển thanh ghi (RTL) — cấp độ mô tả mạch kỹ thuật số thông qua luồng dữ liệu giữa các thanh ghi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "gate-level",
+          "explain": "(tính từ/cụm danh từ) mức cổng — cấp độ mô tả thiết kế phần cứng dưới dạng các cổng logic cơ bản (AND, OR, NOT)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained random",
+          "explain": "(tính từ/cụm từ) ngẫu nhiên có ràng buộc — phương pháp tạo dữ liệu kiểm tra tự động vừa mang tính ngẫu nhiên vừa tuân theo các quy tắc khống chế"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directives",
+          "explain": "(cụm danh từ) các chỉ thị biên dịch — các câu lệnh gửi tới trình biên dịch (compiler) như `define, `timescale"
+        },
+        {
+          "type": "phrase",
+          "phrase": "application programming interface",
+          "explain": "(cụm danh từ) giao diện lập trình ứng dụng (API) — tập hợp quy tắc/giao thức cho phép các chương trình hoặc ngôn ngữ giao tiếp với nhau"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm ở phần giới thiệu của IEEE Std 1800-2023 (Chuẩn ngôn ngữ SystemVerilog). Nội dung trang này trình bày phần cuối của danh sách mục tiêu tài liệu, tóm tắt lịch sử hợp nhất giữa hai chuẩn cũ (Verilog 1364 và SystemVerilog 1800-2005) thành một tài liệu duy nhất từ bản 2009, định nghĩa các \"Thuật ngữ đặc biệt\" (Special terms) được áp dụng, và giải thích các \"Quy ước thuật ngữ\" (Terminology conventions) cùng cấu trúc phân chia tài liệu.\r\n- **Các ý chính bắt buộc hiểu:**\r\n  1. *Lịch sử hợp nhất chuẩn:* Ban đầu Verilog (IEEE 1364) là ngôn ngữ gốc hoàn chỉnh, còn SystemVerilog (IEEE 1800-2005) chỉ là phần mở rộng phụ thuộc. Từ phiên bản IEEE 1800-2009, Verilog đã được gộp hoàn toàn vào SystemVerilog để tạo thành một tiêu chuẩn độc lập duy nhất.\r\n  2. *Các thuật ngữ đặc biệt:* Định nghĩa cách hiểu cho các khái niệm như *SystemVerilog 3.1a* (bản tiền thân của Accellera), *Verilog* (ngôn ngữ HDL IEEE 1364-2005), *LRM* (Language Reference Manual - Hướng dẫn Tham chiếu Ngôn ngữ), và *Tool* (công cụ phần mềm như trình mô phỏng).\r\n  3. *Cấu trúc tài liệu:* Chuẩn được chia thành các Điều (Clause) và Điều khoản nhỏ (Subclause). Mỗi phần thường đi theo thứ tự: Giới thiệu -> Lý do căn bản (Rationale) -> Cú pháp & Ngữ nghĩa -> Ví dụ & Ghi chú.\r\n  4. *Mức độ bắt buộc của động từ khuyết thiếu (Modal verbs):*\r\n     - **shall**: Bắt buộc phải tuân thủ nghiêm ngặt (*is required to*).\r\n     - **should**: Khuyến nghị nên áp dụng, nhưng không bắt buộc hay cấm đoán lựa chọn khác (*is recommended that*).\r\n     - **may**: Cho phép làm trong phạm vi tiêu chuẩn (*is permitted to*).\r\n     - **can**: Phát biểu về khả năng, năng lực xảy ra (*is able to*).\r\n     - **must / will**: Không được dùng (deprecated) để đưa ra các yêu cầu bắt buộc trong chuẩn kỹ thuật IEEE.\r\n- **Kiến thức nền cần tìm hiểu thêm:** Cần nắm rõ quy ước viết tài liệu kỹ thuật/chuẩn hóa quốc tế (như IEEE, ISO, RFC 2119). Sự phân biệt chính xác giữa \"shall\", \"should\", \"may\", \"can\" giúp kỹ sư phần cứng/phần mềm tuân thủ đúng yêu cầu khi thiết kế hoặc phát triển công cụ EDA (Electronic Design Automation).",
+      "translation": "— Giao diện lập trình trực tiếp (DPI) để tương tác với ngôn ngữ lập trình C\r\n— Các tệp tiêu đề VPI, API, và DPI\r\n— Ngữ nghĩa hình thức của assertion đồng thời (concurrent assertion)\r\n— Cú pháp và ngữ nghĩa hình thức của các cấu trúc định dạng độ trễ tiêu chuẩn (SDF)\r\n— Các ví dụ sử dụng mang tính thông tin/tham khảo\r\n\r\nGHI CHÚ—Một tiêu chuẩn trước đó, IEEE Std 1800-2009, đại diện cho sự hợp nhất của hai tiêu chuẩn cũ: IEEE Std 1364™-2005 và IEEE Std 1800-2005. Trong các tiêu chuẩn cũ này, Verilog® là ngôn ngữ cơ sở và định nghĩa một tiêu chuẩn hoàn toàn độc lập. SystemVerilog định nghĩa một số mở rộng quan trọng cho Verilog, nhưng IEEE Std 1800-2005 không phải là một tiêu chuẩn độc lập; IEEE Std 1800-2005 đã tham chiếu và dựa vào IEEE Std 1364-2005. Hai tiêu chuẩn này được thiết kế để sử dụng như một ngôn ngữ duy nhất. Việc hợp nhất ngôn ngữ Verilog cơ sở vào tiêu chuẩn SystemVerilog giúp người dùng có được toàn bộ thông tin về cú pháp và ngữ nghĩa trong một tài liệu duy nhất.7, 8\r\n\r\n1.4 Các thuật ngữ đặc biệt\r\n\r\nXuyên suốt tiêu chuẩn này, các thuật ngữ sau đây được áp dụng:\r\n— *SystemVerilog 3.1a* đề cập đến *Hướng dẫn Tham chiếu Ngôn ngữ SystemVerilog 3.1a* của Accellera [B4], tiền thân của IEEE Std 1800-2005.9\r\n— *Verilog* đề cập đến IEEE Std 1364-2005 dành cho ngôn ngữ mô tả phần cứng Verilog (HDL).\r\n— *Hướng dẫn Tham chiếu Ngôn ngữ (LRM)* đề cập đến tài liệu mô tả tiêu chuẩn Verilog hoặc SystemVerilog.\r\n— *Công cụ (Tool)* đề cập đến một bản thực thi phần mềm đọc mã nguồn SystemVerilog, chẳng hạn như phần mềm mô phỏng logic.\r\n\r\nGHI CHÚ—Trong IEEE Std 1800-2005, *SystemVerilog* chỉ đề cập đến các phần mở rộng cho ngôn ngữ Verilog IEEE Std 1364-2005 và không bao gồm ngôn ngữ Verilog cơ sở.\r\n\r\n1.5 Các quy ước được sử dụng trong tiêu chuẩn này\r\n\r\nTiêu chuẩn này được tổ chức thành các điều, mỗi điều tập trung vào một lĩnh vực cụ thể của ngôn ngữ. Có các điều khoản nhỏ trong mỗi điều để thảo luận về các cấu trúc và khái niệm riêng lẻ. Phần thảo luận bắt đầu bằng một lời giới thiệu và lý do căn bản tùy chọn cho cấu trúc hoặc khái niệm đó, tiếp theo là mô tả cú pháp và ngữ nghĩa, sau đó là các ví dụ và ghi chú.\r\n\r\nCác quy ước về thuật ngữ được sử dụng xuyên suốt tiêu chuẩn này như sau:\r\n— Từ *shall* được sử dụng để chỉ ra các yêu cầu bắt buộc phải tuân thủ nghiêm ngặt nhằm tuân thủ tiêu chuẩn và không được phép sai lệch (*shall* tương đương với *được yêu cầu phải*).10,11\r\n— Từ *should* được sử dụng để chỉ ra rằng trong số nhiều khả năng, một khả năng được khuyến nghị là đặc biệt phù hợp, mà không đề cập hoặc loại trừ các khả năng khác; hoặc một phương hướng hành động nhất định được ưa chuộng hơn nhưng không nhất thiết phải bắt buộc; hoặc (ở dạng phủ định) một phương hướng hành động nhất định bị phản đối nhưng không bị cấm (*should* tương đương với *được khuyến nghị rằng*).\r\n— Từ *may* được sử dụng để chỉ một phương hướng hành động được phép trong các giới hạn của tiêu chuẩn (*may* tương đương với *được phép*).\r\n— Từ *can* được sử dụng cho các phát biểu về khả năng và năng lực, cho dù là về mặt vật chất, thể chất hay nguyên nhân - kết quả (*can* tương đương với *có khả năng*).\r\n\r\n--------------------------------------------------\r\n7 Các ghi chú trong văn bản, bảng và hình ảnh chỉ được đưa ra để cung cấp thông tin và không chứa các yêu cầu cần thiết để thực thi tiêu chuẩn.\r\n8 Verilog là nhãn hiệu đã đăng ký của Cadence Design Systems, Inc.\r\n9 Các số trong ngoặc vuông tương ứng với các số trong mục tài liệu tham khảo ở Phụ lục Q.\r\n10 Việc sử dụng từ *must* bị không khuyến khích (deprecated) và không thể được sử dụng khi nêu các yêu cầu bắt buộc; *must* chỉ được sử dụng để mô tả các tình huống không thể tránh khỏi.\r\n11 Việc sử dụng từ *will* bị không khuyến khích (deprecated) và không thể được sử dụng khi nêu các yêu cầu bắt buộc; *will* chỉ được sử dụng trong các phát biểu về sự thật.",
+      "grammar": [
+        {
+          "phrase": "Merging the base Verilog language into the SystemVerilog standard enabled users to have all information regarding syntax and semantics in a single document",
+          "explain": "chủ ngữ dùng danh động từ (gerund \"Merging...\") kết hợp cấu trúc \"enable somebody to do something\" (cho phép ai làm gì)"
+        },
+        {
+          "phrase": "The discussion begins with an introduction and an optional rationale for the construct or the concept, followed by syntax and semantic descriptions, followed by examples and notes",
+          "explain": "cấu trúc sử dụng phân từ quá khứ \"followed by\" làm bổ ngữ nối tiếp để diễn tả thứ tự diễn ra của các phần"
+        },
+        {
+          "phrase": "The word shall is used to indicate mandatory requirements strictly to be followed in order to conform to the standard and from which no deviation is permitted",
+          "explain": "câu phức chứa dạng bị động \"is used to indicate\", bị động của động từ nguyên mẫu \"strictly to be followed\", cụm chỉ mục đích \"in order to conform to\" và mệnh đề quan hệ bắt đầu bằng giới từ \"from which...\""
+        },
+        {
+          "phrase": "The word should is used to indicate that among several possibilities one is recommended as particularly suitable, without mentioning or excluding others",
+          "explain": "mệnh đề danh ngữ làm tân ngữ sau \"indicate\", chứa cấu trúc bị động \"is recommended as\" kết hợp cụm giới từ phủ định chứa danh động từ \"without mentioning or excluding\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "precursor",
+          "explain": "(danh từ) tiền thân, vật/người đặt nền móng cho cái phát triển sau này"
+        },
+        {
+          "type": "vocab",
+          "phrase": "deprecated",
+          "explain": "(tính từ) bị phản đối, không khuyến khích dùng (trong kỹ thuật nghĩa là tính năng/từ ngữ cũ đang được loại bỏ dần)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "deviation",
+          "explain": "(danh từ) sự sai lệch, sự lệch khỏi quy định/tiêu chuẩn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "rationale",
+          "explain": "(danh từ) lý do căn bản, cơ sở lý luận đằng sau một khái niệm/quyết định"
+        },
+        {
+          "type": "collocation",
+          "phrase": "mandatory requirement",
+          "explain": "(cụm danh từ) yêu cầu bắt buộc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hardware description language",
+          "explain": "(cụm danh từ) ngôn ngữ mô tả phần cứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "self-contained standard",
+          "explain": "(cụm danh từ) tiêu chuẩn độc lập, tự chứa đựng đầy đủ thông tin mà không phụ thuộc tài liệu khác"
+        },
+        {
+          "type": "phrase",
+          "phrase": "conform to the standard",
+          "explain": "(cụm động từ) tuân thủ theo tiêu chuẩn"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "- **Nội dung tổng quát:** Trang sách này thuộc chương mở đầu của tiêu chuẩn kỹ thuật IEEE Std 1800-2023 dành cho ngôn ngữ SystemVerilog. Trang mô tả chi tiết các quy ước trình bày văn bản, ký pháp mô tả cú pháp ngôn ngữ (Backus-Naur Form - BNF), quy định về việc sử dụng màu sắc trong tài liệu, và cấu trúc tổng quan nội dung tiêu chuẩn.\r\n- **Những ý chính bắt buộc phải hiểu:**\r\n  1. **Quy ước phông chữ:** Chữ in nghiêng dùng cho danh mục cú pháp/thuật ngữ mới; phông độ rộng cố định (monospace) dùng cho ví dụ, tên tệp, giá trị hằng số (0, 1, x, z); phông chữ cố định in đậm dùng cho từ khóa SystemVerilog.\r\n  2. **Quy ước BNF (Backus-Naur Form) dùng mô tả cú pháp:** \r\n     - Chữ in đậm-đỏ là thành phần cố định bắt buộc (từ khóa, toán tử, dấu câu).\r\n     - Dấu thanh đứng (`|`) phân tách các phương án lựa chọn thay thế.\r\n     - Ngoặc vuông (`[ ]`) bao bọc thành phần tùy chọn (có thể có hoặc không).\r\n     - Ngoặc nhọn (`{ }`) bao bọc thành phần lặp lại (xuất hiện 0 hoặc nhiều lần).\r\n  3. **Mục đích của màu sắc:** Sử dụng màu sắc tối thiểu (xanh gạch chân cho liên kết PDF, đỏ đậm cho từ khóa BNF) nhằm tăng khả năng đọc nhưng không ảnh hưởng đến nội dung khi in/xem ở dạng trắng đen.\r\n  4. **Phân loại nội dung tiêu chuẩn:** Phân biệt rõ phần \"normative\" (quy chuẩn - bắt buộc tuân thủ) và phần \"informative\" (tham khảo - chỉ cung cấp thông tin phụ trợ).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:** \r\n  - **BNF (Backus-Naur Form):** Ký pháp ngữ pháp phi bối cảnh tiêu chuẩn dùng để mô tả cú pháp của các ngôn ngữ lập trình và ngôn ngữ mô tả phần cứng. Cần nắm vững cách đọc BNF để tra cứu chính xác cú pháp viết code SystemVerilog chuẩn.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm tra Phần cứng Hợp nhất\r\n\r\n1.6 Mô tả cú pháp\r\n\r\nVăn bản chính sử dụng các quy ước sau:\r\n— Phông chữ *In nghiêng* dùng cho các danh mục cú pháp (xem Phụ lục A) hoặc khi một thuật ngữ lần đầu được định nghĩa.\r\n— Phông chữ Constant-width (độ-rộng-cố-định) dùng cho các ví dụ, tên tệp, và các tham chiếu đến hằng số, đặc biệt là các giá trị 0, 1, x, và z.\r\n— Phông chữ **Boldface constant-width (in đậm độ-rộng-cố-định)** dùng cho các từ khóa SystemVerilog, khi tham chiếu đến từ khóa thực tế.\r\n\r\nCú pháp chính thức của SystemVerilog được mô tả bằng Dạng Backus-Naur (BNF). Các quy ước sau đây được sử dụng:\r\n— Các từ viết thường, một số có chứa dấu gạch dưới nhúng, biểu thị các danh mục cú pháp. Ví dụ:\r\n    module_declaration\r\n\r\n— Các ký tự **Boldface-red (In đậm-đỏ)** biểu thị các từ khóa dành riêng, các toán tử, và các dấu câu làm một phần bắt buộc của cú pháp. Ví dụ:\r\n    module  =>  ;\r\n\r\n— Thanh đứng ( | ) không in đậm-đỏ phân tách các mục lựa chọn thay thế. Ví dụ:\r\n    unary_operator ::= + | - | ! | ~ | & | ~& | | | ~| | ^ | ~^ | ^~\r\n\r\n— Ngoặc vuông ( [ ] ) không in đậm-đỏ bao bọc các mục tùy chọn. Ví dụ:\r\n    net_port_header ::= [ port_direction ] net_port_type\r\n\r\n— Ngoặc nhọn ( { } ) không in đậm-đỏ bao bọc một mục được lặp lại. Mục đó có thể xuất hiện 0 hoặc nhiều lần; các lần lặp lại xuất hiện từ trái sang phải tương đương với quy tắc đệ quy trái. Do đó, hai quy tắc sau đây là tương đương:\r\n    list_of_param_assignments ::= param_assignment { , param_assignment }\r\n    list_of_param_assignments ::=\r\n        param_assignment\r\n      | list_of_param_assignments , param_assignment\r\n\r\n1.7 Sử dụng màu sắc trong tiêu chuẩn này\r\n\r\nTiêu chuẩn này sử dụng một lượng màu tối thiểu để tăng cường khả năng đọc. Việc tô màu là không bắt buộc và không ảnh hưởng đến độ chính xác của tiêu chuẩn này khi xem ở dạng trắng đen thuần túy. Những nơi sử dụng màu sắc bao gồm:\r\n— Các tham chiếu chéo được liên kết đến các phần khác của tiêu chuẩn này được hiển thị bằng underlined-blue text (văn bản màu xanh dương gạch chân) (việc liên kết hoạt động khi xem tiêu chuẩn này một cách tương tác dưới dạng tệp PDF).\r\n— Các từ khóa cú pháp và các thẻ bài (token) trong các định nghĩa ngôn ngữ chính thức được hiển thị bằng **boldface-red text (văn bản in đậm-đỏ)**.\r\n— Một số hình ảnh sử dụng một lượng màu tối thiểu để tăng khả năng đọc.\r\n\r\n1.8 Nội dung của tiêu chuẩn này\r\n\r\nMột bản tóm tắt về các điều khoản và phụ lục được trình bày như một tài liệu tham khảo nhanh. Tất cả các điều khoản và một số phụ lục là các phần quy chuẩn (normative) của tiêu chuẩn này. Một số phụ lục được đưa vào nhằm mục đích cung cấp thông tin (informative).",
+      "grammar": [
+        {
+          "phrase": "Italicized font for syntactic categories (see Annex A) or when a term is being defined",
+          "explain": "Cấu trúc thì hiện tại tiếp diễn thể bị động (is being defined) diễn tả hành động đang xảy ra tại thời điểm nói/xét đến."
+        },
+        {
+          "phrase": "Square brackets ([ ]) that are not in boldface-red enclose optional items",
+          "explain": "Mệnh đề quan hệ xác định (that are not in boldface-red) bổ nghĩa cho danh từ \"Square brackets\"."
+        },
+        {
+          "phrase": "The item may appear zero or more times; the repetitions occur from left to right as with an equivalent left-recursive rule",
+          "explain": "Cấu trúc so sánh/tương đương \"as with\" dùng để chỉ sự tương đồng về cơ chế hoạt động."
+        },
+        {
+          "phrase": "The coloring is not essential and does not affect the accuracy of this standard when viewed in pure black and white",
+          "explain": "Cấu trúc mệnh đề trạng ngữ chỉ thời gian rút gọn dạng bị động (\"when viewed...\" thay cho \"when it is viewed...\")."
+        },
+        {
+          "phrase": "Cross references that are hyperlinked to other portions of this standard are shown in underlined-blue text",
+          "explain": "Kết hợp mệnh đề quan hệ dạng bị động (\"that are hyperlinked...\") và động từ chính dạng bị động (\"are shown\")."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "boldface",
+          "explain": "(danh từ/tính từ) kiểu chữ in đậm"
+        },
+        {
+          "type": "vocab",
+          "phrase": "syntactic",
+          "explain": "(tính từ) thuộc về cú pháp (cấu trúc ngữ pháp của ngôn ngữ)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "punctuation",
+          "explain": "(danh từ) dấu câu, hệ thống các dấu dùng trong văn bản"
+        },
+        {
+          "type": "vocab",
+          "phrase": "recursive",
+          "explain": "(tính từ) đệ quy (quy tắc trong đó một đối tượng/quy tắc được định nghĩa thông qua chính nó)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "normative",
+          "explain": "(tính từ) có tính quy chuẩn, có giá trị bắt buộc tuân thủ trong các tiêu chuẩn kỹ thuật"
+        },
+        {
+          "type": "vocab",
+          "phrase": "informative",
+          "explain": "(tính từ) có tính chất tham khảo, cung cấp thông tin (không mang tính bắt buộc)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synopsis",
+          "explain": "(danh từ) bản tóm tắt, bảng tổng quan ngắn gọn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constant-width font",
+          "explain": "(cụm danh từ) phông chữ có độ rộng cố định (mỗi ký tự chiếm khoảng trống bằng nhau, còn gọi là monospaced font)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Backus-Naur Form",
+          "explain": "(cụm danh từ chuyên ngành) Dạng Backus-Naur (ký pháp tiêu chuẩn dùng để mô tả cú pháp của ngôn ngữ máy tính)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "reserved keywords",
+          "explain": "(cụm danh từ) các từ khóa đã dành riêng (từ khóa hệ thống không được đặt trùng tên biến/hàm)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "left-recursive rule",
+          "explain": "(cụm danh từ chuyên ngành) quy tắc đệ quy trái (quy tắc cú pháp tự gọi lại chính nó ở vị trí bên trái nhất)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "cross references",
+          "explain": "(cụm danh từ) tham chiếu chéo (chỉ dẫn liên kết tới vị trí khác trong cùng tài liệu)"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc \"Phần Một: Các Cấu trúc Thiết kế và Kiểm thử\" (Part One: Design and Verification Constructs) của tài liệu Tiêu chuẩn IEEE Std 1800-2023 cho ngôn ngữ SystemVerilog. Trang tóm tắt mục tiêu và nội dung chi tiết của 17 Điều (Clause 1 đến Clause 17) đầu tiên trong tiêu chuẩn.\r\n- **Ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Nền tảng & Cấu trúc cơ bản (Điều 1 - 5):** Giới thiệu phạm vi tiêu chuẩn, các tài liệu tham chiếu, khối xây dựng hệ thống (module, interface, package, $unit), mô hình thời gian/lập lịch mô phỏng và các quy ước từ vựng.\r\n  2. **Dữ liệu & Kiểu dữ liệu (Điều 6 - 7):** Phân loại đối tượng dữ liệu (net, variable), kiểu dữ liệu đơn lẻ, các kiểu dữ liệu phức hợp (mảng động, hàng đợi, cấu trúc, union) cùng phạm vi và vòng đời dữ liệu.\r\n  3. **Lập trình hướng đối tượng (Điều 8):** Mô tả khả năng OOP bao gồm định nghĩa lớp, kế thừa, đóng gói, tính đa hình và các lớp tham số hóa.\r\n  4. **Luồng điều khiển & Cấu trúc lập trình (Điều 9 - 13):** Khởi tạo khối thủ tục (`initial`, `always_*`), quy tắc phép gán (liên tục, chặn/không chặn), toán tử biểu thức, câu lệnh điều khiển/vòng lặp, và các chương trình con (task/function).\r\n  5. **Đồng bộ & Kiểm thử nâng cao (Điều 14 - 17):** Các cơ chế đồng bộ xung nhịp (clocking block), truyền thông giữa các tiến trình (semaphore, mailbox), kỹ thuật assertion (kiểm chứng tức thời và đồng thời) và đóng gói mô hình kiểm thử trong các checker.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **HDL (Hardware Description Language) & HVL (Hardware Verification Language):** SystemVerilog kết hợp cả hai, cần hiểu sự khác biệt giữa khối dựng phần cứng (hardware construct) và khối hỗ trợ mô phỏng/kiểm thử (verification construct).\r\n  - **Ngữ nghĩa lập lịch mô phỏng (Simulation scheduling semantics):** Hiểu cách công cụ mô phỏng phân chia thời gian và thứ tự thực thi sự kiện.\r\n  - **Lập trình hướng đối tượng (OOP):** Cần nắm các khái niệm lớp (class), đa hình (polymorphism), kế thừa (inheritance) để áp dụng vào xây dựng môi trường kiểm thử (testbench).",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nPhần Một: Các Cấu trúc Thiết kế và Kiểm thử\r\n\r\nĐiều 1 mô tả nội dung của tiêu chuẩn này và các quy ước được sử dụng trong tiêu chuẩn.\r\n\r\nĐiều 2 liệt kê các tài liệu tham chiếu đến các tiêu chuẩn khác cần thiết để thực thi tiêu chuẩn này.\r\n\r\nĐiều 3 giới thiệu các khối xây dựng chính tạo nên một môi trường thiết kế và kiểm thử SystemVerilog: các module, program, interface, checker, package, và configuration. Điều này cũng thảo luận về các nguyên tố (primitives), không gian tên (name spaces), không gian biên dịch $unit, và khái niệm thời gian mô phỏng.\r\n\r\nĐiều 4 mô tả ngữ nghĩa lập lịch mô phỏng của SystemVerilog.\r\n\r\nĐiều 5 mô tả các thẻ từ vựng (lexical tokens) được sử dụng trong văn bản nguồn SystemVerilog và các quy ước của chúng.\r\n\r\nĐiều 6 mô tả các đối tượng và kiểu dữ liệu trong SystemVerilog, bao gồm net và biến (variables), cú pháp khai báo và quy tắc sử dụng, độ mạnh nạp điện (charge strength) của các giá trị trên net. Điều này cũng thảo luận về chuỗi và các phương thức chuỗi, kiểu liệt kê (enumerated types), kiểu do người dùng định nghĩa, hằng số, phạm vi và vòng đời dữ liệu, cùng tính tương thích kiểu.\r\n\r\nĐiều 7 mô tả các kiểu dữ liệu phức hợp trong SystemVerilog: cấu trúc (structures), union, mảng (bao gồm mảng đóng gói và không đóng gói, mảng động, mảng kết hợp, và hàng đợi). Điều này cũng mô tả các phương thức mảng khác nhau.\r\n\r\nĐiều 8 mô tả các khả năng lập trình hướng đối tượng trong SystemVerilog. Các chủ đề bao gồm định nghĩa lớp, lớp giao diện, khởi tạo đối tượng động, kế thừa và lớp con, ẩn dữ liệu và đóng gói, tính đa hình, và các lớp tham số hóa.\r\n\r\nĐiều 9 mô tả các khối thủ tục trong SystemVerilog: initial, always, always_comb, always_ff, always_latch, và final. Nhóm câu lệnh tuần tự và song song, tên khối, nhãn câu lệnh, và kiểm soát tiến trình cũng được mô tả.\r\n\r\nĐiều 10 mô tả các phép gán liên tục, phép gán thủ tục chặn (blocking) và không chặn (nonblocking), và phép gán thủ tục liên tục.\r\n\r\nĐiều 11 mô tả các toán tử và toán hạng có thể được sử dụng trong các biểu thức.\r\n\r\nĐiều 12 mô tả các câu lệnh lập trình thủ tục trong SystemVerilog, chẳng hạn như các câu lệnh rẽ nhánh và cấu trúc vòng lặp.\r\n\r\nĐiều 13 mô tả task và function, là các chương trình con có thể được gọi từ nhiều vị trí trong một mô hình hành vi.\r\n\r\nĐiều 14 định nghĩa các khối xung nhịp (clocking blocks), độ lệch tín hiệu vào/ra (input/output skews), độ trễ chu kỳ (cycle delays), và khối xung nhịp mặc định.\r\n\r\nĐiều 15 mô tả truyền thông giữa các tiến trình sử dụng các kiểu sự kiện và điều khiển sự kiện, cùng các lớp semaphore và mailbox tích hợp sẵn.\r\n\r\nĐiều 16 mô tả các khẳng định (assertions) tức thời và đồng thời, property, sequence, các phép toán sequence, sequence đa xung nhịp, và độ phân giải xung nhịp.\r\n\r\nĐiều 17 mô tả các checker. Checker cho phép đóng gói các khẳng định và mã mô hình hóa để tạo thành một thực thể kiểm thử duy nhất.",
+      "grammar": [
+        {
+          "phrase": "Clause 3 introduces the major building blocks that make up a SystemVerilog design and verification environment",
+          "explain": "mệnh đề quan hệ (relative clause) dùng \"that\" bổ nghĩa cho cụm danh từ \"the major building blocks\""
+        },
+        {
+          "phrase": "Clause 6 describes SystemVerilog data objects and types, including nets and variables",
+          "explain": "hiện tại phân từ (present participle) \"including\" dùng như một giới từ bổ sung ví dụ minh họa cho danh từ trước đó"
+        },
+        {
+          "phrase": "Clause 13 describes tasks and functions, which are subroutines that can be called from more than one place in a behavioral model",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) \"which are...\" bổ nghĩa cho \"tasks and functions\", bên trong chứa mệnh đề quan hệ xác định \"that can be...\" bổ nghĩa cho \"subroutines\" và thể bị động \"can be called\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "constructs",
+          "explain": "(danh từ) các cấu trúc ngôn ngữ lập trình, thành tố cú pháp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "semantics",
+          "explain": "(danh từ) ngữ nghĩa (quy định cách thức một đoạn mã được thực thi trong ngôn ngữ lập trình)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subroutines",
+          "explain": "(danh từ) chương trình con (chỉ chung cho task và function)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "assertions",
+          "explain": "(danh từ) câu lệnh khẳng định / điều kiện kiểm thử để kiểm tra tính đúng đắn của logic"
+        },
+        {
+          "type": "vocab",
+          "phrase": "skews",
+          "explain": "(danh từ) độ lệch thời gian của tín hiệu so với mốc xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "building blocks",
+          "explain": "(collocation) các thành phần/khối cấu tạo cơ bản"
+        },
+        {
+          "type": "phrase",
+          "phrase": "charge strength",
+          "explain": "(phrase) độ mạnh nạp điện (đặc tính vật lý quy định mức ưu tiên tín hiệu trên các đường kết nối net)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "continuous assignments",
+          "explain": "(phrase) các phép gán liên tục (phép gán luồng dữ liệu tự động cập nhật giá trị)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "blocking and nonblocking procedural assignments",
+          "explain": "(phrase) các phép gán thủ tục chặn và không chặn (hai cơ chế gán dữ liệu trong khối thủ tục của HDL)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "interprocess communications",
+          "explain": "(phrase) truyền thông/giao tiếp giữa các tiến trình (IPC)"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "- **Nội dung tổng quát:** Trang 45 thuộc tài liệu Tiêu chuẩn IEEE 1800-2023 (Chuẩn ngôn ngữ SystemVerilog dùng cho Thiết kế, Tóm tắt Yêu cầu Kỹ thuật và Kiểm thử Phần cứng). Trang này liệt kê tóm tắt phạm vi nội dung của các Điều (Clause) từ Clause 18 đến Clause 34, đồng thời mở đầu cho Phần Hai của tài liệu: \"Cấu trúc Phân cấp\" (Part Two: Hierarchy Constructs).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Clause 18 & 19:* Quy định về việc tạo số ngẫu nhiên, các ràng buộc (constraints), gieo hạt giống (seeding), câu lệnh `case` ngẫu nhiên hóa và các phương pháp đo độ bao phủ (coverage points, cross coverage).\r\n  2. *Clause 20 & 21:* Tổng hợp các tác vụ và hàm hệ thống (system tasks/functions) tích hợp sẵn, đặc biệt là nhóm hàm/tác vụ phục vụ các thao tác vào/ra (I/O).\r\n  3. *Clause 22:* Trình bày về chỉ thị trình biên dịch (compiler directives) và khả năng tương thích từ khóa giữa các phiên bản Verilog/SystemVerilog.\r\n  4. *Part Two (Clause 23 - 34):* Tập trung vào cấu trúc phân cấp phần cứng và kiểm thử:\r\n     - Khái niệm về phân cấp, instance, `$root`, mô-đun lồng nhau (nested modules), đè tham số (parameter override), gán mã phụ trợ (binding code) (Clause 23).\r\n     - Cấu trúc chương trình kiểm thử (testbench program construct) nhằm loại bỏ tình trạng tranh chấp dữ liệu (race conditions) (Clause 24).\r\n     - Cú pháp giao diện (interface), cổng giao diện, modport, giao diện ảo (virtual interface) và các gói thư viện (packages) (Clause 25 & 26).\r\n     - Cấu trúc sinh mã (generate construct) để nhân bản hoặc khởi tạo phân cấp có điều kiện (Clause 27).\r\n     - Mô hình hóa phần tử nguyên thủy mức cổng/công tắc (gate/switch primitives), phần tử nguyên thủy do người dùng định nghĩa (UDP) và độ mạnh logic (Clause 28 & 29).\r\n     - Đặc tả quan hệ thời gian (timing relationships), khối kiểm tra thời gian (specify blocks), định dạng độ trễ chuẩn (SDF), cấu hình thiết kế và mã hóa/giải mã mã nguồn (Clause 30 - 34).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Constrained Random Verification (CRV) & Functional Coverage:* Để hiểu lý do SystemVerilog hỗ trợ mạnh về tạo số ngẫu nhiên có ràng buộc và đo độ bao phủ ở Clause 18-19.\r\n  - *Race Conditions trong mô phỏng:* Cần biết khái niệm đua tín hiệu giữa Testbench và RTL để hiểu lý do xuất hiện cấu trúc `program` ở Clause 24.\r\n  - *SDF (Standard Delay Format) & Timing Checks:* Kiến thức về phân tích thời gian thực (timing analysis) trong thiết kế vi mạch để nắm được ý nghĩa của Clause 30-32.",
+      "translation": "[Trang 45 - Tiêu chuẩn IEEE Std 1800-2023 cho Ngôn ngữ SystemVerilog]\r\n\r\n**Điều 18** mô tả việc tạo số ngẫu nhiên, tạo ràng buộc cho việc sinh số ngẫu nhiên, thay đổi linh hoạt các ràng buộc, gieo hạt giống cho bộ sinh số ngẫu nhiên (RNG), và thực thi câu lệnh **case** ngẫu nhiên hóa.\r\n\r\n**Điều 19** mô tả các nhóm bao phủ (coverage groups), điểm bao phủ (coverage points), bao phủ chéo (cross coverage), các tùy chọn bao phủ và phương pháp bao phủ.\r\n\r\n**Điều 20** mô tả hầu hết các tác vụ hệ thống và hàm hệ thống tích hợp sẵn.\r\n\r\n**Điều 21** mô tả các tác vụ hệ thống và hàm hệ thống bổ sung dành riêng cho các thao tác vào/ra (I/O).\r\n\r\n**Điều 22** mô tả các chỉ thị trình biên dịch khác nhau, bao gồm chỉ thị kiểm soát tính tương thích của từ khóa dự phòng giữa các phiên bản tiêu chuẩn Verilog và SystemVerilog trước đó.\r\n\r\n**Phần Hai: Cấu trúc Phân cấp**\r\n\r\n**Điều 23** mô tả cách tạo cấu trúc phân cấp trong SystemVerilog bằng cách sử dụng thể hiện của mô-đun (module instances) và thể hiện của giao diện (interface instances), cùng các quy tắc kết nối cổng. Điều này cũng thảo luận về thể hiện cấp cao nhất `$root`, mô-đun lồng nhau, mô-đun bên ngoài (extern modules), quy tắc tìm kiếm định danh, cách ghi đè giá trị tham số, và việc liên kết mã phụ trợ vào các phạm vi (scopes) hoặc các thể hiện.\r\n\r\n**Điều 24** mô tả cấu trúc chương trình kiểm thử (testbench program construct), việc loại bỏ các điều kiện tranh chấp (race conditions) trong testbench, và các tác vụ điều khiển chương trình.\r\n\r\n**Điều 25** mô tả cú pháp giao diện, cổng giao diện, modport, các chương trình con của giao diện, giao diện được tham số hóa, giao diện ảo, và việc truy cập các đối tượng bên trong giao diện.\r\n\r\n**Điều 26** mô tả các gói do người dùng định nghĩa (user-defined packages) và gói tích hợp sẵn `std`.\r\n\r\n**Điều 27** mô tả cấu trúc sinh (generate construct) và cách các cấu trúc được sinh ra có thể được sử dụng để thực hiện việc khởi tạo nhiều lần hoặc khởi tạo có điều kiện đối với mã thủ tục hoặc cấu trúc phân cấp.\r\n\r\n**Điều 28** mô tả các phần tử nguyên thủy mức cổng và mức công tắc, cùng với việc mô hình hóa độ mạnh logic.\r\n\r\n**Điều 29** mô tả cách định nghĩa một phần tử nguyên thủy do người dùng tự xác định (UDP) và cách đưa các phần tử nguyên thủy này vào trong các mô hình SystemVerilog.\r\n\r\n**Điều 30** mô tả cách xác định mối quan hệ thời gian giữa cổng vào và cổng ra của một mô-đun.\r\n\r\n**Điều 31** mô tả cách sử dụng các phép kiểm tra thời gian trong các khối `specify` để xác định xem các tín hiệu có tuân thủ các ràng buộc thời gian hay không.\r\n\r\n**Điều 32** mô tả cú pháp và ngữ nghĩa của các cấu trúc SDF (Standard Delay Format).\r\n\r\n**Điều 33** mô tả cách cấu hình nội dung của một thiết kế.\r\n\r\n**Điều 34** mô tả việc mã hóa và giải mã các vùng văn bản mã nguồn.",
+      "grammar": [
+        {
+          "phrase": "how hierarchies are created in SystemVerilog using module instances",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò tân ngữ chỉ nội dung, kết hợp thể bị động \"are created\" và cụm phân tử hiện tại \"using...\" chỉ phương tiện"
+        },
+        {
+          "phrase": "how parameter values can be overridden",
+          "explain": "mệnh đề danh từ đóng vai trò tân ngữ bắt đầu bằng \"how\", chứa động từ khuyết thiếu ở thể bị động (can be overridden)"
+        },
+        {
+          "phrase": "how generated constructs can be used to do conditional or multiple instantiations of procedural code or hierarchy",
+          "explain": "mệnh đề danh từ chỉ cách thức, chứa thể bị động dạng khả năng \"can be used to + V\""
+        },
+        {
+          "phrase": "whether signals obey the timing constraints",
+          "explain": "mệnh đề danh từ bắt đầu bằng \"whether\" làm tân ngữ cho \"determine\", diễn đạt một câu hỏi nghi vấn/điều kiện kiểm tra"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "seeding",
+          "explain": "(danh từ/động từ) sự gieo hạt giống / khởi tạo giá trị ban đầu cho bộ sinh số ngẫu nhiên"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiations",
+          "explain": "(danh từ) sự khởi tạo thể hiện (instance) của mô-đun/đối tượng phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "primitives",
+          "explain": "(danh từ) các phần tử/thành phần nguyên thủy (mức cơ bản nhất trong phần cứng như cổng AND, OR)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "semantics",
+          "explain": "(danh từ) ngữ nghĩa (ý nghĩa hoạt động của cấu trúc cú pháp trong ngôn ngữ lập trình)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "random number generators",
+          "explain": "(cụm danh từ) các bộ sinh số ngẫu nhiên (RNG)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race conditions",
+          "explain": "(cụm danh từ) các điều kiện tranh chấp / tình trạng đua dữ liệu (lỗi xung đột thời gian trong mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directives",
+          "explain": "(cụm danh từ) các chỉ thị trình biên dịch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic strength modeling",
+          "explain": "(cụm danh từ) việc mô hình hóa độ mạnh của tín hiệu logic"
+        },
+        {
+          "type": "phrase",
+          "phrase": "user-defined primitive",
+          "explain": "(cụm danh từ) phần tử nguyên thủy do người dùng tự định nghĩa (UDP)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "SDF constructs",
+          "explain": "(cụm danh từ) các cấu trúc định dạng độ trễ chuẩn (Standard Delay Format)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "binding auxiliary code",
+          "explain": "(cụm động từ/danh từ) liên kết/gán mã phụ trợ (dùng từ khóa `bind` trong SystemVerilog)"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Nội dung trang này thuộc phần giới thiệu cấu trúc tài liệu Tiêu chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog, chi tiết hóa hai phần chính còn lại của tài liệu chuẩn: **Phần Ba (Part Three: Application Programming Interfaces)** và **Phần Bốn (Part Four: Annexes)**.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm được:\r\n1. **Phần Ba (Điều 35 đến 40):** Quy định các giao diện lập trình ứng dụng (API) cho phép SystemVerilog tương tác với môi trường/ngôn ngữ bên ngoài. Bao gồm: DPI (kết nối trực tiếp với C/C++), PLI/VPI (mô hình dữ liệu đối tượng và thủ tục truy cập), cùng các API chuyên dụng cho Assertion (khẳng định định ước) và Coverage (độ bao phủ kiểm thử).\r\n2. **Phần Bốn (Phụ lục A đến M):** Bao gồm hai nhóm phụ lục:\r\n   - *Normative (Quy chuẩn - Bắt buộc):* Phụ lục A (cú pháp BNF), B (từ khóa), F (ngữ nghĩa assertion đồng thời), G (gói tiêu chuẩn chứa mailbox, semaphore,...), H/I (lớp ngôn ngữ C và file header `svdpi.h` cho DPI), J (hướng dẫn nhúng mã ngoài), K/L/M (nội dung các file header C mở rộng cho VPI như `vpi_user.h`, `vpi_compatibility.h`, `sv_vpi_user.h`).\r\n   - *Informative (Tham khảo - Không bắt buộc):* Phụ lục C (các cú pháp bị loại bỏ/không khuyến khích như `defparam`, `assign/deassign`), D (các tác vụ/hàm hệ thống phổ biến), E (chỉ thị trình biên dịch).\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Phân biệt **Normative** (quy chuẩn bắt buộc tuân thủ khi viết trình mô phỏng/biên dịch) và **Informative** (chỉ mang tính giải thích, hướng dẫn phụ trợ).\r\n- Thuật ngữ **BNF (Backus-Naur Form)**: Ký hiệu toán học dùng để mô tả cú pháp của một ngôn ngữ lập trình.\r\n- Các khái niệm về **DPI (Direct Programming Interface)** và **VPI (Verilog Procedural Interface)** trong thiết kế và kiểm thử vi mạch.",
+      "translation": "**Phần Ba: Các giao diện lập trình ứng dụng**\r\n\r\nĐiều 35 mô tả giao diện lập trình trực tiếp (DPI) của SystemVerilog, một giao diện trực tiếp kết nối với các ngôn ngữ ngoài và cú pháp để nhập (import) các hàm từ ngôn ngữ ngoài cũng như xuất (export) các thủ tục con tới ngôn ngữ ngoài.\r\n\r\nĐiều 36 cung cấp tổng quan về giao diện ngôn ngữ lập trình (PLI và VPI).\r\n\r\nĐiều 37 trình bày các sơ đồ mô hình dữ liệu VPI, trong đó tài liệu hóa các mối quan hệ đối tượng VPI và các phương thức truy cập.\r\n\r\nĐiều 38 mô tả các thủ tục VPI.\r\n\r\nĐiều 39 mô tả API dành cho assertion trong SystemVerilog.\r\n\r\nĐiều 40 mô tả API dành cho độ bao phủ (coverage) trong SystemVerilog.\r\n\r\n**Phần Bốn: Các Phụ lục**\r\n\r\nPhụ lục A (quy chuẩn) định nghĩa cú pháp chính thức của SystemVerilog, sử dụng BNF. Subclause A.10 bao gồm nội dung quy chuẩn bổ sung để làm rõ các chi tiết cụ thể của các quy tắc sản xuất BNF được định nghĩa trong A.1 đến A.9.\r\n\r\nPhụ lục B (quy chuẩn) liệt kê các từ khóa trong SystemVerilog.\r\n\r\nPhụ lục C (tham khảo) liệt kê các cấu trúc đã bị dừng khuyến khích sử dụng (deprecated) khỏi SystemVerilog. Phụ lục này cũng thảo luận về khả năng dừng khuyến khích sử dụng câu lệnh defparam và các câu lệnh assign/deassign trong tiến trình.\r\n\r\nPhụ lục D (tham khảo) mô tả các tác vụ hệ thống và hàm hệ thống thường được sử dụng, nhưng không bắt buộc trong tiêu chuẩn này.\r\n\r\nPhụ lục E (tham khảo) mô tả các chỉ thị trình biên dịch thường được sử dụng, nhưng không bắt buộc trong tiêu chuẩn này.\r\n\r\nPhụ lục F (quy chuẩn) mô tả ngữ nghĩa chính thức cho các assertion đồng thời trong SystemVerilog.\r\n\r\nPhụ lục G (quy chuẩn) mô tả gói tiêu chuẩn SystemVerilog, chứa các định nghĩa kiểu cho mailbox, semaphore, randomize, process và weak reference.\r\n\r\nPhụ lục H (quy chuẩn) định nghĩa lớp ngôn ngữ C cho DPI của SystemVerilog.\r\n\r\nPhụ lục I (quy chuẩn) định nghĩa tệp đính kèm tiêu chuẩn svdpi.h để sử dụng với các ứng dụng SystemVerilog DPI.\r\n\r\nPhụ lục J (quy chuẩn) mô tả các hướng dẫn chung cho việc tích hợp mã ngôn ngữ ngoài vào một ứng dụng SystemVerilog.\r\n\r\nPhụ lục K (quy chuẩn) cung cấp danh sách nội dung của tệp vpi_user.h.\r\n\r\nPhụ lục L (quy chuẩn) cung cấp danh sách nội dung của tệp vpi_compatibility.h, tệp này mở rộng tệp đính kèm vpi_user.h.\r\n\r\nPhụ lục M (quy chuẩn) cung cấp danh sách nội dung của tệp sv_vpi_user.h, tệp này mở rộng tệp đính kèm vpi_user.h.",
+      "grammar": [
+        {
+          "phrase": "which document the VPI object relationships and access methods",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) bổ nghĩa cho danh từ \"VPI data model diagrams\""
+        },
+        {
+          "phrase": "constructs that have been deprecated from SystemVerilog",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng thì hiện tại hoàn thành thể bị động (present perfect passive) bổ nghĩa cho \"constructs\""
+        },
+        {
+          "phrase": "tasks and system functions that are frequently used, but that are not required in this standard",
+          "explain": "cấu trúc mệnh đề quan hệ song song (parallel relative clauses) cùng bổ nghĩa cho cụm danh từ phía trước"
+        },
+        {
+          "phrase": "file, which extends the vpi_user.h include file",
+          "explain": "mệnh đề quan hệ không xác định bổ nghĩa cho tệp header được nhắc đến trước dấu phẩy"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "normative",
+          "explain": "(tính từ) có tính quy chuẩn, bắt buộc phải tuân thủ đúng theo tiêu chuẩn kỹ thuật"
+        },
+        {
+          "type": "vocab",
+          "phrase": "informative",
+          "explain": "(tính từ) có tính chất tham khảo, cung cấp thêm thông tin giải thích (không bắt buộc)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "deprecated",
+          "explain": "(tính từ) đã lỗi thời, không khuyến khích sử dụng và có thể bị loại bỏ ở các phiên bản sau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "direct programming interface",
+          "explain": "(cụm danh từ) giao diện lập trình trực tiếp (DPI)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "concurrent assertions",
+          "explain": "(cụm danh từ) các khẳng định/định ước đồng thời (kiểm tra điều kiện theo chu kỳ xung nhịp)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directives",
+          "explain": "(cụm danh từ) các chỉ thị trình biên dịch (ví dụ: `define, `ifdef)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "formal syntax",
+          "explain": "(cụm danh từ) cú pháp hình thức/chính thức (được biểu diễn bằng ký hiệu chuẩn như BNF)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "weak reference",
+          "explain": "(cụm danh từ) tham chiếu yếu (khái niệm trong quản lý bộ nhớ và con trỏ đối tượng)"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "Trang 47 của chuẩn IEEE Std 1800-2023 tập trung vào việc mô tả phần còn lại của các Phụ lục (Annex N đến Q), đồng thời quy định về các điều khoản không còn được khuyến nghị sử dụng (Deprecated clauses), bản chất của các ví dụ minh họa (Examples), và yêu cầu kiến thức tiên quyết (Prerequisites) đối với người đọc chuẩn SystemVerilog.\r\n\r\nNhững ý chính người đọc bắt buộc phải nắm được:\r\n1. **Chức năng các phụ lục từ N đến Q**:\r\n   - Phụ lục N (normative - quy chuẩn/bắt buộc): Cung cấp mã nguồn C cho các hàm hệ thống phân phối ngẫu nhiên.\r\n   - Phụ lục O (informative - tham khảo): Mô tả phương pháp bảo vệ sở hữu trí tuệ (IP) bằng cách sử dụng các chỉ thị mã hóa/giải mã pragma.\r\n   - Phụ lục P & Q (informative): Định nghĩa các thuật ngữ sử dụng trong chuẩn và danh mục các tài liệu tham khảo liên quan.\r\n2. **Các điều khoản không còn khuyến nghị (Mục 1.9)**: Phụ lục C quản lý danh sách các cấu trúc cú pháp đã bị loại bỏ từ các phiên bản chuẩn cũ (IEEE 1364 hoặc IEEE 1800) cũng như các cú pháp đang nằm trong danh sách cân nhắc loại bỏ ở các bản cập nhật tương lai.\r\n3. **Tính chất của ví dụ minh họa (Mục 1.10)**: Mọi ví dụ mã nguồn SystemVerilog trong bộ chuẩn này chỉ đóng vai trò tham khảo (informative) nhằm minh họa cách dùng trong ngữ cảnh đơn giản, không đại diện cho toàn bộ cú pháp chính thức.\r\n4. **Kiến thức tiên quyết (Mục 1.11)**: Người đọc bắt buộc phải có kiến thức thực hành tốt về ngôn ngữ lập trình C để hiểu được một số điều khoản trong tiêu chuẩn này (đặc biệt liên quan đến giao tiếp C/SystemVerilog như DPI).\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- Phân biệt **Normative** (điều khoản quy chuẩn bắt buộc tuân thủ để đạt chuẩn) và **Informative** (thông tin bổ trợ, tham khảo không bắt buộc).\r\n- Khái niệm **Deprecation** trong ngôn ngữ lập trình: lý do một cú pháp bị đào thải và quy trình thay thế bằng cú pháp mới tối ưu hơn.",
+      "translation": "Phụ lục N (bắt buộc) cung cấp mã nguồn C cho các hàm hệ thống phân phối ngẫu nhiên của SystemVerilog.\r\n\r\nPhụ lục O (mang tính tham khảo) mô tả các kịch bản khác nhau có thể áp dụng cho việc bảo vệ sở hữu trí tuệ (IP), đồng thời chỉ ra cách sử dụng các chỉ thị pragma liên quan để đạt được hiệu quả mong muốn trong việc bảo vệ, phân phối và giải mã mô hình một cách an toàn.\r\n\r\nPhụ lục P (mang tính tham khảo) định nghĩa các thuật ngữ được sử dụng trong chuẩn này.\r\n\r\nPhụ lục Q (mang tính tham khảo) liệt kê các tài liệu tham khảo có liên quan đến chuẩn này.\r\n\r\n1.9 Các điều khoản không còn được khuyến nghị sử dụng (Deprecated clauses)\r\n\r\nPhụ lục C liệt kê các cấu trúc từng xuất hiện trong các phiên bản trước của chuẩn IEEE Std 1364 hoặc IEEE Std 1800, nhưng đã bị loại bỏ và không còn xuất hiện trong chuẩn này. Phụ lục này cũng liệt kê các cấu trúc xuất hiện trong chuẩn hiện tại nhưng đang được xem xét để loại bỏ trong một phiên bản tương lai của chuẩn này.\r\n\r\n1.10 Các ví dụ\r\n\r\nCác ví dụ mã SystemVerilog nhỏ được minh họa trong xuyên suốt chuẩn này. Những ví dụ này mang tính tham khảo. Chúng được thiết kế nhằm minh họa cách sử dụng các cấu trúc SystemVerilog trong ngữ cảnh đơn giản và không định nghĩa cú pháp đầy đủ.\r\n\r\n1.11 Các điều kiện tiên quyết\r\n\r\nMột số điều khoản của chuẩn này giả định người đọc đã có kiến thức thực hành về ngôn ngữ lập trình C.",
+      "grammar": [
+        {
+          "phrase": "scenarios that can be used for intellectual property (IP) protection",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"scenarios\", kết hợp với thể bị động \"can be used\""
+        },
+        {
+          "phrase": "how the relevant pragmas can be used to achieve the desired effect of securely protecting, distributing, and decrypting the model",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò tân ngữ cho động từ \"shows\", bên trong chứa thể bị động và cụm chỉ mục đích \"to achieve...\""
+        },
+        {
+          "phrase": "constructs that appeared in previous versions of either IEEE Std 1364 or IEEE Std 1800, but that have been deprecated and do not appear in this standard",
+          "explain": "hai mệnh đề quan hệ song song nối bằng liên từ \"but\" cùng bổ nghĩa cho danh từ \"constructs\""
+        },
+        {
+          "phrase": "constructs that appear in this standard, but that are under consideration for deprecation in a future version of this standard",
+          "explain": "cấu trúc mệnh đề quan hệ kép bổ nghĩa cho danh từ \"constructs\", diễn tả hai thuộc tính đối lập nhau"
+        },
+        {
+          "phrase": "They are intended to illustrate the usage of SystemVerilog constructs in a simple context",
+          "explain": "cấu trúc bị động chỉ mục đích/thiết kế \"be intended to + V\" (được dùng/hướng tới mục đích làm gì)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "normative",
+          "explain": "(tính từ) có tính quy chuẩn, bắt buộc phải tuân theo đối với các sản phẩm/hệ thống muốn tuân thủ tiêu chuẩn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "informative",
+          "explain": "(tính từ) mang tính tham khảo/cung cấp thông tin bổ trợ, không có giá trị bắt buộc tuân thủ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "pragma",
+          "explain": "(danh từ) chỉ thị biên dịch, dùng để cung cấp thêm thông tin xử lý đặc biệt cho trình biên dịch (như mã hóa IP)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "decrypting",
+          "explain": "(danh từ/động từ dạng V-ing) việc giải mã dữ liệu đã được bảo mật"
+        },
+        {
+          "type": "vocab",
+          "phrase": "deprecated",
+          "explain": "(tính từ) không còn được khuyến nghị sử dụng, đã bị loại bỏ hoặc chuẩn bị loại bỏ trong các phiên bản tương lai"
+        },
+        {
+          "type": "vocab",
+          "phrase": "presuppose",
+          "explain": "(động từ) đòi hỏi phải có trước, giả định trước khi thực hiện hoặc hiểu một điều gì đó"
+        },
+        {
+          "type": "collocation",
+          "phrase": "intellectual property",
+          "explain": "(cụm danh từ) sở hữu trí tuệ (IP) trong thiết kế vi mạch/phần mềm"
+        },
+        {
+          "type": "phrase",
+          "phrase": "under consideration for",
+          "explain": "(cụm từ) đang trong quá trình được xem xét, cân nhắc cho một mục đích nào đó"
+        },
+        {
+          "type": "phrase",
+          "phrase": "working knowledge of",
+          "explain": "(cụm từ) kiến thức thực hành, mức độ hiểu biết đủ để áp dụng vào công việc thực tế"
+        }
+      ]
+    }
+  ]
+}

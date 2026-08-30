@@ -1,0 +1,1791 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "chp1",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "Trang sách mở đầu cho Chương 1: \"Verification Guidelines\" (Các hướng dẫn kiểm tra thiết kế) trong cuốn sách về SystemVerilog cho công tác kiểm tra thiết kế vi mạch. \r\n\r\n**Nội dung tổng quát:** Trang này đặt nền móng tư duy cho một kỹ sư kiểm tra (verification engineer) trước khi đi sâu vào ngôn ngữ lập trình. Tác giả sử dụng hình ảnh so sánh sinh động giữa việc xây dựng một ngôi nhà và việc thiết kế một môi trường kiểm tra (testbench).\r\n\r\n**Các ý chính người đọc bắt buộc phải nắm được:**\r\n1. **Tư duy lập kế hoạch trước khi viết mã:** Giống như xây nhà phải hiểu nhu cầu sử dụng và ngân sách trước khi chọn màu sơn hay nội thất, người làm kiểm tra phải hiểu rõ cách thức kiểm tra thiết kế và kiến trúc testbench trước khi viết các dòng mã SystemVerilog chi tiết.\r\n2. **Cấu trúc chung của Testbench:** Mọi testbench đều có các thành phần cốt lõi chung như tạo tín hiệu kích thích (stimulus generation) và kiểm tra phản hồi (response checking). Các phương pháp luận phổ biến như VMM, UVM, OVM đều dựa trên những khái niệm chung này.\r\n3. **Triết lý \"Bugs are good\" (Lỗi là điều tốt):** Mục tiêu của kỹ sư kiểm tra là tìm ra lỗi càng sớm càng tốt. Chi phí sửa một lỗi sẽ tăng gấp 10 lần qua mỗi giai đoạn thiết kế (từ viết mô tả kỹ thuật, viết mã, tổng hợp cho đến sản xuất). Do đó, tìm thấy bug trước giai đoạn tape-out (bàn giao bản thiết kế đi sản xuất) sẽ giúp tiết kiệm chi phí khổng lồ và tránh việc lỗi rơi vào tay khách hàng. Kỹ sư kiểm tra cần có tư duy \"xảo quyệt\", chủ động \"tra tấn\" thiết kế để ép nó bộc lộ lỗi.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Testbench (Môi trường kiểm định):** Mô hình phần mã được viết để mô phỏng và kiểm tra xem thiết kế phần cứng (RTL) có hoạt động đúng yêu cầu kỹ thuật hay không.\r\n- **VMM / UVM / OVM:** Các phương pháp luận chuẩn hóa (Methodologies) trong ngành thiết kế vi mạch giúp xây dựng testbench có tính tái sử dụng cao và dễ bảo trì.\r\n- **Tape-out:** Thời điểm hoàn tất thiết kế và gửi file dữ liệu cho nhà máy chế tạo chip (foundry) để sản xuất hàng loạt.\r\n- **Các giai đoạn thiết kế (Specification -> Coding -> Synthesis -> Manufacturing):** Chu trình phát triển vi mạch bán dẫn.",
+      "translation": "Chương 1\r\nHướng dẫn Kiểm tra\r\n\r\n*Một số người tin rằng chúng ta thiếu ngôn ngữ lập trình để mô tả thế giới hoàn hảo của bạn...*\r\n(The Matrix, 1999)\r\n\r\nHãy tưởng tượng bạn được giao nhiệm vụ xây một ngôi nhà cho ai đó. Bạn nên bắt đầu từ đâu? Bạn sẽ bắt đầu bằng việc chọn cửa ra vào và cửa sổ, lựa màu sơn và màu thảm, hay chọn thiết bị phòng tắm? Dĩ nhiên là không! Trước tiên, bạn phải cân nhắc xem chủ nhà sẽ sử dụng không gian đó như thế nào, cũng như ngân sách của họ, để có thể quyết định nên xây loại nhà nào. Các câu hỏi bạn nên cân nhắc là: Họ có thích nấu ăn và muốn có một căn bếp cao cấp, hay họ thích xem phim trong phòng chiếu phim tại gia và ăn bánh pizza mua mang về hơn? Họ muốn có một văn phòng làm việc tại nhà hay một phòng ngủ bổ sung? Hay ngân sách giới hạn họ trong một ngôi nhà khiêm tốn hơn?\r\n\r\nTrước khi bắt đầu học chi tiết về ngôn ngữ SystemVerilog, bạn cần hiểu cách bạn lên kế hoạch kiểm tra thiết kế cụ thể của mình và điều này ảnh hưởng ra sao đến cấu trúc của môi trường kiểm tra (testbench). Giống như mọi ngôi nhà đều có bếp, phòng ngủ và phòng tắm, tất cả các testbench đều chia sẻ một cấu trúc chung gồm việc tạo tín hiệu kích thích (stimulus generation) và kiểm tra phản hồi (response checking). Chương này giới thiệu một bộ các hướng dẫn và phong cách viết mã để thiết kế và xây dựng một testbench đáp ứng các nhu cầu cụ thể của bạn. Các kỹ thuật này sử dụng một số khái niệm tương tự như được thể hiện trong *Sách hướng dẫn Phương pháp luận Kiểm tra cho SystemVerilog* (VMM), Bergeron và cộng sự (2006), nhưng không bao gồm các lớp cơ sở (base classes). Các phương pháp luận khác như UVM và OVM cũng chia sẻ chung những khái niệm này.\r\n\r\nNguyên tắc quan trọng nhất bạn có thể học được với tư cách là một kỹ sư kiểm tra là: \"Lỗi (Bug) là tốt.\" Đừng né tránh việc tìm kiếm lỗi tiếp theo, đừng ngần ngại rung chuông mỗi khi bạn phát hiện ra một lỗi, và hơn nữa, hãy luôn theo dõi chi tiết từng lỗi được tìm thấy. Toàn bộ đội ngũ dự án đều giả định rằng có lỗi trong thiết kế, vì vậy mỗi lỗi được tìm thấy trước giai đoạn hoàn tất thiết kế (tape-out) là bớt đi một lỗi lọt vào tay khách hàng. Tại mỗi giai đoạn trong chu trình thiết kế như viết mô tả kỹ thuật, viết mã, tổng hợp mạch, sản xuất, chi phí sửa lỗi sẽ tăng lên theo hệ số 10, vì vậy hãy tìm những lỗi đó càng sớm và càng thường xuyên càng tốt. Bạn cần phải càng xảo quyệt càng tốt, vặn kẹo và tra tấn thiết kế để...",
+      "grammar": [
+        {
+          "phrase": "Imagine that you are given the job of building a house for someone",
+          "explain": "mệnh đề danh từ làm tân ngữ đứng sau động từ \"Imagine\", kết hợp thể bị động \"are given\" và danh động từ \"building\""
+        },
+        {
+          "phrase": "First you must consider how the owners will use the space, and their budget, so you can decide what type of house to build",
+          "explain": "câu phức kết hợp mệnh đề danh từ nghi vấn gián tiếp (\"how...\", \"what...\") và mệnh đề chỉ mục đích/kết quả (\"so you can...\")"
+        },
+        {
+          "phrase": "Questions you should consider are",
+          "explain": "mệnh đề quan hệ rút gọn lược bỏ đại từ quan hệ \"that/which\" bổ nghĩa cho \"Questions\" (gốc: \"Questions [that] you should consider are\")"
+        },
+        {
+          "phrase": "Before you start to learn details of the SystemVerilog language, you need to understand how you plan to verify your particular design and how this influences the testbench structure",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian với \"Before\" đi kèm các mệnh đề danh từ đóng vai trò tân ngữ cho động từ \"understand\""
+        },
+        {
+          "phrase": "Just as all houses have kitchens, bedrooms, and bathrooms, all testbenches share some common structure of stimulus generation and response checking",
+          "explain": "cấu trúc so sánh/tương đồng khởi đầu bằng \"Just as...\" (Cũng giống như... thì...)"
+        },
+        {
+          "phrase": "designing and constructing a testbench that meets your particular needs",
+          "explain": "mệnh đề quan hệ với \"that\" đóng vai trò chủ ngữ bổ nghĩa cho danh từ \"testbench\""
+        },
+        {
+          "phrase": "each bug found before tape-out is one fewer that ends up in the customer’s hands",
+          "explain": "cấu trúc phân từ II rút gọn \"found before tape-out\" bổ nghĩa cho danh từ \"each bug\", kết hợp đại từ \"one fewer\" và mệnh đề quan hệ bổ nghĩa \"that ends up...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường/mô hình phần mềm dùng để cấp tín hiệu đầu vào và kiểm tra tính đúng đắn của thiết kế phần cứng (vi mạch)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích, dữ liệu đầu vào được đưa vào thiết kế để kiểm tra phản ứng của mạch"
+        },
+        {
+          "type": "vocab",
+          "phrase": "tape-out",
+          "explain": "(danh từ) giai đoạn hoàn tất thiết kế vi mạch để chuyển file sang nhà máy đúc chip bắt đầu chế tạo phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synthesis",
+          "explain": "(danh từ) quá trình tổng hợp mạch (chuyển đổi mã mô tả phần cứng RTL sang mạng cổng logic)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "devious",
+          "explain": "(tính từ) xảo quyệt, ranh mãnh, luôn tìm mọi thủ thuật hay góc khuất để phát hiện lỗi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "high-end kitchen",
+          "explain": "(cụm danh từ) căn bếp cao cấp, hiện đại"
+        },
+        {
+          "type": "collocation",
+          "phrase": "takeout pizza",
+          "explain": "(cụm danh từ) bánh pizza mua mang về"
+        },
+        {
+          "type": "phrase",
+          "phrase": "shy away from",
+          "explain": "(cụm động từ) e ngại, lảng tránh làm việc gì đó"
+        },
+        {
+          "type": "phrase",
+          "phrase": "keep track of",
+          "explain": "(cụm từ) theo dõi, ghi chép và nắm bắt diễn biến của cái gì"
+        },
+        {
+          "type": "phrase",
+          "phrase": "end up in",
+          "explain": "(cụm động từ) rốt cuộc/cuối cùng rơi vào tay ai hoặc ở tình trạng nào"
+        },
+        {
+          "type": "phrase",
+          "phrase": "by a factor of 10",
+          "explain": "(cụm từ) theo hệ số 10 (tăng gấp 10 lần)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "ring a bell",
+          "explain": "(thành ngữ) ở đây dùng theo nghĩa đen/ẩn dụ là rung chuông thông báo/ăn mừng khi tìm ra lỗi mới (bug)"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "Nội dung trang 2 tập trung vào hai chủ đề quan trọng: liệt kê các đặc trưng cốt lõi của Ngôn ngữ Kiểm thử Phần cứng (HVL - Hardware Verification Language) như SystemVerilog, và giới thiệu Mục 1.1 về Quy trình Kiểm thử (The Verification Process). \r\n\r\nNhững ý chính người đọc bắt buộc phải nắm được:\r\n- Sự khác biệt của HVL so với HDL (như Verilog/VHDL) hoặc C: HVL cung cấp mức độ trừu tượng hóa cao hơn nhờ các tính năng như tạo tín hiệu ngẫu nhiên có ràng buộc (constrained-random stimulus), đo độ bao phủ chức năng (functional coverage), lập trình hướng đối tượng (OOP), đa luồng (multi-threading), giao tiếp liên tiến trình (IPC) và tích hợp sâu với bộ mô phỏng sự kiện.\r\n- Mục tiêu thực sự của kiểm thử: Không đơn thuần là \"tìm lỗi\" (bugs), mà là đảm bảo thiết kế đại diện chính xác cho bản mô tả kỹ thuật (specification). Lỗi chỉ phát sinh khi có sự bất đồng nhất (discrepancy) giữa bản thiết kế và bản mô tả.\r\n- Bản chất của quy trình kiểm thử: Là quá trình song song với thiết kế. Kỹ sư kiểm thử phải tự mình đọc bản mô tả kỹ thuật, đưa ra nhận định độc lập, tạo kế hoạch kiểm thử và tìm kiếm các trường hợp cực đoan (corner test cases) mà kỹ sư thiết kế chưa nghĩ tới nhằm bổ sung tính dư thừa (redundancy) giúp giảm thiểu sai sót.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Kiến thức cơ bản về ngôn ngữ HDL (Verilog/VHDL) và mã RTL (Register-Transfer Level) để hiểu cách thiết kế phần cứng hoạt động.\r\n- Mô hình lập trình hướng đối tượng (OOP) và khái niệm \"Transaction-level modeling\" để hiểu tại sao HVL lại mạnh mẽ hơn HDL truyền thống.",
+      "translation": "trích xuất tất cả các lỗi có thể có ngay từ bây giờ, khi chúng còn dễ khắc phục. Đừng để các kỹ sư thiết kế chiếm hết mọi vinh quang — nếu không có tay nghề và sự tinh anh của bạn, thiết kế đó có thể sẽ không bao giờ hoạt động được!\r\n\r\nCuốn sách này giả định rằng bạn đã biết ngôn ngữ Verilog và muốn học Ngôn ngữ Kiểm thử Phần cứng SystemVerilog (HVL). Một số tính năng đặc trưng của một HVL giúp phân biệt nó với Ngôn ngữ Mô tả Phần cứng (HDL) như Verilog hoặc VHDL bao gồm:\r\n\r\n• Tạo tín hiệu kiểm thử ngẫu nhiên có ràng buộc (Constrained-random stimulus generation)\r\n• Đo độ bao phủ chức năng (Functional coverage)\r\n• Các cấu trúc cấp cao hơn, đặc biệt là Lập trình hướng đối tượng (OOP), và mô hình hóa cấp giao dịch\r\n• Đa luồng và giao tiếp liên tiến trình (IPC)\r\n• Hỗ trợ các kiểu dữ liệu HDL chẳng hạn như các giá trị 4 trạng thái của Verilog\r\n• Tích hợp chặt chẽ với trình mô phỏng sự kiện để điều khiển thiết kế\r\n\r\nCòn rất nhiều tính năng hữu ích khác, nhưng những tính năng này cho phép bạn tạo ra các môi trường kiểm thử (testbench) ở mức độ trừu tượng cao hơn so với những gì bạn có thể đạt được bằng HDL hoặc một ngôn ngữ lập trình như C.\r\n\r\n1.1 Quy trình Kiểm thử\r\n\r\nMục tiêu của việc kiểm thử là gì? Nếu bạn trả lời là “Tìm lỗi”, bạn chỉ mới đúng một phần. Mục tiêu của thiết kế phần cứng là tạo ra một thiết bị thực hiện một nhiệm vụ cụ thể, chẳng hạn như đầu đĩa DVD, bộ tuyến router mạng, hoặc bộ xử lý tín hiệu radar, dựa trên bản mô tả kỹ thuật thiết kế. Mục đích của bạn với tư cách là một kỹ sư kiểm thử là đảm bảo thiết bị có thể hoàn thành nhiệm vụ đó một cách thành công — nghĩa là thiết kế phản ánh chính xác bản mô tả kỹ thuật. Lỗi là những gì bạn nhận được khi có sự không thống nhất. Hành vi của thiết bị khi được sử dụng bên ngoài mục đích ban đầu không thuộc trách nhiệm của bạn, mặc dù bạn vẫn muốn biết các ranh giới đó nằm ở đâu.\r\n\r\nQuy trình kiểm thử diễn ra song song với quy trình tạo ra thiết kế. Một kỹ sư thiết kế đọc bản mô tả kỹ thuật phần cứng cho một khối logic, diễn giải phần mô tả bằng ngôn ngữ tự nhiên, và tạo ra logic tương ứng ở dạng máy có thể đọc được, thường là mã RTL. Để làm được điều này, anh ấy hoặc cô ấy cần hiểu định dạng đầu vào, hàm chuyển đổi và định dạng của đầu ra. Luôn có sự mơ hồ trong việc diễn giải này, có thể do sự mơ hồ trong tài liệu gốc, thiếu chi tiết, hoặc các mô tả mâu thuẫn nhau. Với tư cách là một kỹ sư kiểm thử, bạn cũng phải đọc bản mô tả kỹ thuật phần cứng, lập kế hoạch kiểm thử, và sau đó làm theo kế hoạch đó để xây dựng các bài kiểm tra nhằm chứng minh mã RTL thực thi đúng các tính năng. Do đó, với tư cách là kỹ sư kiểm thử, bạn không chỉ phải hiểu thiết kế và mục đích của nó, mà còn phải xem xét tất cả các trường hợp kiểm thử biên (corner test cases) mà kỹ sư thiết kế có thể chưa nghĩ tới.\r\n\r\nBằng cách có nhiều hơn một người thực hiện cùng một việc diễn giải, bạn đã thêm tính dư thừa vào quy trình thiết kế. Với tư cách là kỹ sư kiểm thử, công việc của bạn là đọc cùng một bản mô tả kỹ thuật phần cứng đó và đưa ra đánh giá độc lập về ý nghĩa của chúng. Sau đó, các bài kiểm tra của bạn sẽ vận hành mã RTL để chứng minh rằng nó khớp với sự diễn giải của bạn.",
+      "grammar": [
+        {
+          "phrase": "without your craft and cunning, the design might never work",
+          "explain": "cấu trúc câu điều kiện ẩn với giới từ \"without\" diễn tả giả định trái thực tế ở hiện tại/tương lai"
+        },
+        {
+          "phrase": "features of an HVL that distinguish it from a Hardware Description Language",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"features of an HVL\""
+        },
+        {
+          "phrase": "at a higher level of abstraction than you are able to achieve with an HDL",
+          "explain": "cấu trúc so sánh hơn (comparative) đi kèm mệnh đề bổ nghĩa"
+        },
+        {
+          "phrase": "not only do you have to understand the design and its intent, but also, you have to consider all the corner test cases",
+          "explain": "cấu trúc đảo ngữ với \"Not only + trợ động từ... but also...\" dùng để nhấn mạnh hai hành động song song"
+        },
+        {
+          "phrase": "the corner test cases that the designer might not have thought about",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"corner test cases\" kết hợp động từ khuyết thiếu ở quá khứ (might not have thought)"
+        },
+        {
+          "phrase": "By having more than one person perform the same interpretation",
+          "explain": "cấu trúc chỉ phương thức \"By + V-ing\" kết hợp dạng sai khiến \"have someone do something\" (perform ở dạng nguyên mẫu không to)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": "steal all the glory",
+          "explain": "(thành ngữ) cướp mất công lao, chiếm hết sự chú ý và khen ngợi của người khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "cunning",
+          "explain": "(danh từ) sự mưu trí, sự tinh anh, kỹ năng giải quyết vấn đề linh hoạt"
+        },
+        {
+          "type": "phrase",
+          "phrase": "constrained-random stimulus generation",
+          "explain": "(cụm từ chuyên ngành) kỹ thuật tạo kịch bản/tín hiệu kiểm thử ngẫu nhiên có ràng buộc điều kiện"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm từ chuyên ngành) độ bao phủ chức năng — chỉ số đo lường mức độ các yêu cầu chức năng đã được kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "discrepancy",
+          "explain": "(danh từ) sự khác biệt, sự không đồng nhất giữa hai thông tin/tài liệu đáng lẽ phải giống nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "corner test cases",
+          "explain": "(cụm từ chuyên ngành) các trường hợp kiểm thử biên/tình huống cực đoan dễ phát sinh lỗi mà người thiết kế ít nghĩ tới"
+        },
+        {
+          "type": "vocab",
+          "phrase": "redundancy",
+          "explain": "(danh từ) tính dư thừa (trong kỹ thuật nghĩa là việc tạo ra nhiều lớp bảo vệ/kiểm tra độc lập để tăng độ tin cậy)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "independent assessment",
+          "explain": "(cụm từ/kết hợp từ) sự đánh giá/nhận định một cách độc lập"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "Nội dung trang 3 nằm trong Mục 1.1 \"Quy trình Kiểm thử\" (The Verification Process), tập trung thảo luận về chủ đề \"Kiểm thử ở các cấp độ khác nhau\" (Testing at Different Levels) của một thiết kế vi mạch/hệ thống phần cứng. \r\n\r\nNgười đọc cần nắm vững các ý chính sau:\r\n1. Kiểm thử cấp khối (Block-level testing): Đây là cấp độ dễ phát hiện lỗi nhất vì phạm vi hẹp (do một người thiết kế). Ưu điểm là tốc độ mô phỏng rất nhanh, nhưng nhược điểm là kỹ sư kiểm thử phải mất nhiều công sức tạo ra tín hiệu kích thích (stimuli) giả lập các khối xung quanh.\r\n2. Cấp độ tích hợp (Integration phase): Kiểm thử tại ranh giới giữa các khối. Lỗi thường phát sinh do các kỹ sư khác nhau đọc cùng một bản tả chi tiết (specification) nhưng lại hiểu và hiện thực hóa theo các cách khác nhau.\r\n3. Kiểm thử cấp hệ thống (System-level / DUT): Kiểm thử toàn bộ hệ thống (Design Under Test). Lúc này tốc độ mô phỏng chậm nhất, nhưng giúp phát hiện các lỗi định thời (timing) và căn chỉnh dữ liệu (data alignment) khi các khối hoạt động đồng thời (concurrently). Nếu kiểm thử tốt ở mức này, sản phẩm sẽ tránh được hiện tượng bị treo/đóng băng (lock up) khi người dùng thực hiện nhiều thao tác cùng lúc.\r\n4. Chèn lỗi và xử lý lỗi (Error injection and handling): Một phần cực kỳ thách thức trong kiểm thử là kiểm tra xem hệ thống ứng phó thế nào khi gặp dữ liệu bị hỏng, giao dịch bị gián đoạn hoặc các điều kiện bất thường.\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- DUT (Design Under Test): Thuật ngữ chỉ khối thiết kế đang được đưa vào môi trường kiểm thử.\r\n- Testbench & Stimuli: Môi trường kiểm thử và các tín hiệu đầu vào được tạo ra để kích thích thiết kế hoạt động.\r\n- Sự đánh đổi (Trade-off) giữa tốc độ mô phỏng (Simulation speed) và phạm vi kiểm thử (Coverage/Integration level).",
+      "translation": "1.1 Quy trình Kiểm thử\r\n3\r\n\r\n1.1.1 Kiểm thử ở các cấp độ khác nhau\r\n\r\nNhững loại lỗi nào đang ẩn nấp bên trong thiết kế? Những lỗi dễ phát hiện nhất nằm ở cấp độ khối (block level), trong các mô-đun do một người duy nhất tạo ra. Bộ ALU có cộng hai số chính xác không? Mọi giao dịch trên bus có hoàn tất thành công không? Tất cả các gói dữ liệu có đi qua được một phần của bộ chuyển mạch mạng không? Việc viết các bài kiểm thử định hướng (directed tests) để tìm những lỗi này gần như là điều vô cùng đơn giản, vì chúng nằm hoàn toàn bên trong một khối của thiết kế.\r\n\r\nSau cấp độ khối, nơi tiếp theo cần tìm kiếm sự bất đồng bộ là tại ranh giới giữa các khối. Đây được gọi là giai đoạn tích hợp (integration phase). Những vấn đề thú vị phát sinh khi hai hoặc nhiều nhà thiết kế cùng đọc một bản mô tả nhưng lại có cách hiểu khác nhau. Đối với một giao thức cho trước, tín hiệu nào thay đổi và thay đổi khi nào? Nhà thiết kế thứ nhất xây dựng một bộ phát bus (bus driver) với góc nhìn spec này, trong khi nhà thiết kế thứ hai lại xây dựng bộ nhận (receiver) với một góc nhìn hơi khác một chút. Nhiệm vụ của bạn là tìm ra các vùng logic đang tranh chấp đó và thậm chí có thể giúp dung hòa hai góc nhìn khác nhau này.\r\n\r\nĐể mô phỏng một khối thiết kế đơn lẻ, bạn cần tạo các bài kiểm thử nhằm sinh ra tín hiệu kích thích từ tất cả các khối xung quanh — đây là một công việc khá vất vả. Lợi ích là các mô phỏng cấp thấp này chạy rất nhanh. Tuy nhiên, bạn có thể phát hiện ra lỗi ở cả thiết kế lẫn môi trường kiểm thử (testbench), vì môi trường kiểm thử đòi hỏi một lượng mã nguồn rất lớn để cung cấp tín hiệu kích thích từ các khối còn thiếu. Khi bạn bắt đầu tích hợp các khối thiết kế, chúng có thể tự kích thích lẫn nhau, làm giảm khối lượng công việc của bạn. Những mô phỏng đa khối này có thể phát hiện ra nhiều lỗi hơn, nhưng chúng cũng chạy chậm hơn. Việc phân tích hành vi để xác định nguyên nhân gốc rễ của lỗi sẽ tốn nhiều thời gian hơn ở các cấp độ cao hơn.\r\n\r\nỞ cấp độ cao nhất của Thiết kế Đang được Kiểm thử (DUT), toàn bộ hệ thống được kiểm tra, nhưng hiệu năng mô phỏng bị giảm đi đáng kể. Các bài kiểm thử của bạn nên cố gắng để tất cả các khối cùng thực hiện các hoạt động thú vị một cách đồng thời. Tất cả các cổng I/O đều hoạt động, các bộ xử lý đang xử lý dữ liệu và bộ nhớ đệm (cache) đang được nạp lại. Với tất cả các hoạt động này, các lỗi về căn chỉnh dữ liệu và định thời chắc chắn sẽ xảy ra.\r\n\r\nỞ cấp độ này, bạn có thể chạy các bài kiểm thử phức tạp để DUT thực thi nhiều thao tác đồng thời nhằm giữ cho càng nhiều khối hoạt động càng tốt. Điều gì sẽ xảy ra nếu một máy nghe nhạc MP3 đang phát nhạc và người dùng cố gắng tải nhạc mới từ máy tính host? Sau đó, trong quá trình tải xuống, người dùng lại nhấn liên tục nhiều nút trên máy nghe nhạc? Bạn biết rằng khi thiết bị thực tế được sử dụng, chắc chắn sẽ có ai đó làm tất cả những điều này, vậy tại sao không thử nghiệm nó trước khi sản phẩm được chế tạo? Việc kiểm thử này tạo ra sự khác biệt giữa một sản phẩm được đánh giá là dễ sử dụng và một sản phẩm liên tục bị treo.\r\n\r\nMột khi bạn đã xác minh rằng DUT thực hiện đúng các chức năng được chỉ định của nó, bạn cần xem nó hoạt động như thế nào khi có lỗi xảy ra. Thiết kế có thể xử lý một giao dịch bị dở dang, hoặc một giao dịch có dữ liệu hoặc các trường điều khiển bị hỏng không? Chỉ riêng việc cố gắng liệt kê tất cả các vấn đề có thể xảy ra đã là rất khó khăn, chưa nói đến việc xác định thiết kế nên khôi phục như thế nào từ những lỗi đó. Việc chèn lỗi và xử lý lỗi có thể là phần thách thức nhất của quy trình kiểm thử.\r\n\r\nKhi bạn chuyển sang kiểm thử ở cấp độ hệ thống, các thách thức cũng chuyển lên một cấp độ cao hơn. Ở cấp độ khối, bạn có thể chứng minh rằng các ô dữ liệu riêng lẻ chảy qua các khối của một bộ tuyến ATM một cách chính xác, nhưng ở cấp độ hệ thống, bạn có thể phải xem xét những gì...",
+      "grammar": [
+        {
+          "phrase": "It is almost trivial to write directed tests to find these bugs",
+          "explain": "cấu trúc chủ ngữ giả \"It is + adj + to V\" (thật là... khi làm việc gì đó)"
+        },
+        {
+          "phrase": "Interesting problems arise when two or more designers read the same description yet have different interpretations",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian với \"when\", kết hợp liên từ \"yet\" để diễn tả sự đối lập"
+        },
+        {
+          "phrase": "you need to create tests that generate stimuli from all the surrounding blocks",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng \"that\" làm chủ ngữ bổ nghĩa cho \"tests\""
+        },
+        {
+          "phrase": "Analyzing the behavior to determine the root cause of a bug is more time consuming at higher levels",
+          "explain": "danh từ hóa động từ (gerund clause \"Analyzing...\") đóng vai trò làm chủ ngữ trong cấu trúc so sánh hơn"
+        },
+        {
+          "phrase": "Your tests should strive to have all blocks performing interesting activities concurrently",
+          "explain": "cấu trúc truyền dụng/sai khiến \"have + object + V-ing\" (giữ cho/khiến cho các đối tượng duy trì một hoạt động)"
+        },
+        {
+          "phrase": "Once you have verified that the DUT performs its designated functions correctly",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian dùng \"Once\" kết hợp thì hiện tại hoàn thành để nhấn mạnh hành động đã hoàn tất"
+        },
+        {
+          "phrase": "not to mention determining how the design should recover from them",
+          "explain": "cấu trúc \"not to mention + V-ing\" (chưa kể đến/chưa nói tới việc...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "lurk",
+          "explain": "(động từ) ẩn nấp, rình rập — dùng để tả các lỗi (bugs) tiềm ẩn chưa phát hiện"
+        },
+        {
+          "type": "vocab",
+          "phrase": "trivial",
+          "explain": "(tính từ) tầm thường, rất dễ dàng, không tốn nhiều công sức"
+        },
+        {
+          "type": "vocab",
+          "phrase": "discrepancy",
+          "explain": "(danh từ) sự sai lệch, sự không thống nhất giữa các thông tin/góc nhìn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "reconcile",
+          "explain": "(động từ) hòa giải, dung hòa các quan điểm/thiết kế khác nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "chore",
+          "explain": "(danh từ) công việc vặt vất vả, tốn công tốn sức"
+        },
+        {
+          "type": "vocab",
+          "phrase": "concurrent",
+          "explain": "(tính từ) đồng thời, diễn ra cùng một lúc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "enumerate",
+          "explain": "(động từ) liệt kê chi tiết từng mục một"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Design Under Test",
+          "explain": "(cụm danh từ) thiết kế đang được kiểm thử (DUT) — thuật ngữ chuyên ngành bán dẫn/VLSI"
+        },
+        {
+          "type": "collocation",
+          "phrase": "root cause",
+          "explain": "(cụm danh từ) nguyên nhân gốc rễ của một sự cố"
+        },
+        {
+          "type": "collocation",
+          "phrase": "error injection",
+          "explain": "(cụm danh từ) kỹ thuật chèn lỗi/tiêm lỗi chủ động vào hệ thống để kiểm thử"
+        },
+        {
+          "type": "phrase",
+          "phrase": "lock up",
+          "explain": "(cụm động từ) bị treo, bị đóng băng (thiết bị/phần mềm không phản hồi)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "directed test",
+          "explain": "(cụm danh từ) bài kiểm thử định hướng (viết kịch bản cố định cho một trường hợp cụ thể)"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang sách tiếp tục thảo luận về tính chất không thể triệt để hoàn toàn của công tác kiểm định (Verification), giới thiệu khái niệm **Kế hoạch kiểm định (Verification Plan)** và chuyển sang Mục 1.2 về **Sổ tay Phương pháp luận Kiểm định (Verification Methodology Manual - VMM)** cùng với lý do cuốn sách này tập trung vào ngôn ngữ SystemVerilog nền tảng trước khi bước vào các khung phương pháp luận phức tạp như UVM/VMM.\r\n- **Ý chính người đọc cần nắm:**\r\n  1. **Không thể chứng minh thiết kế hoàn toàn sạch lỗi (bugs):** Do đó người làm kiểm định phải liên tục sáng tạo và áp dụng các chiến thuật kiểm thử mới.\r\n  2. **Kế hoạch kiểm định (Verification Plan):** Được xây dựng từ bản tả chi tiết phần cứng (specifications), xác định rõ những tính năng nào cần kiểm tra (exercise) và áp dụng các kỹ thuật nào (kiểm thử định hướng/ngẫu nhiên, assertion, đồng kiểm định HW/SW, emulaiton, formal proof, VIP).\r\n  3. **Lịch sử và mối liên hệ giữa các phương pháp luận:** VMM có nguồn gốc từ OpenVera (Janick Bergeron sáng lập), sau đó phát triển cho SystemVerilog và là tiền đề cho RVM, OVM, UVM hiện đại.\r\n  4. **Mục tiêu của cuốn sách:** Đóng vai trò là hướng dẫn sử dụng ngôn ngữ SystemVerilog, làm cầu nối giúp người mới lập trình hướng đối tượng (OOP) và kiểm thử ngẫu nhiên có ràng buộc (CRT) nắm vững nền tảng trước khi học UVM/VMM.\r\n  5. **Lựa chọn công cụ phù hợp quy mô:** UVM/VMM phù hợp nhất cho các thiết kế khổng lồ (hàng trăm triệu cổng logic, nhiều giao thức phức tạp). Với các khối mô-đun nhỏ hơn, không nhất thiết phải dùng toàn bộ khung phức tạp đó, nhưng mã nguồn vẫn nên tuân thủ chuẩn UVM/VMM để tái sử dụng về sau.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **OOP (Object-Oriented Programming):** Lập trình hướng đối tượng trong SystemVerilog (Class, Polymorphism, Inheritance).\r\n  - **CRT (Constrained-Random Testing):** Phương pháp tạo kịch bản kiểm thử ngẫu nhiên nhưng có rào chắn/ràng buộc về mặt hợp lệ.\r\n  - **UVM / VMM / OVM / RVM:** Các khung phương pháp luận kiểm định chuẩn hóa quy trình tạo testbench trong vi mạch.\r\n  - **Formal Proofs & Assertions:** Kiểm định hình thức và tính năng kiểm tra theo điều kiện khẳng định logic.",
+      "translation": "điều gì xảy ra nếu có nhiều luồng dữ liệu với độ ưu tiên khác nhau. Việc xác định ô dữ liệu nào nên được chọn tiếp theo không phải lúc nào cũng rõ ràng ở mức tổng quan cao nhất. Bạn có thể phải phân tích thống kê từ hàng nghìn ô để xem liệu hành vi tổng hợp có chính xác hay không.\r\nMột điểm cuối cùng: bạn không bao giờ có thể chứng minh rằng không còn lỗi (bug) nào trong thiết kế, vì vậy bạn cần liên tục đưa ra các chiến thuật kiểm định mới.\r\n\r\n1.1.2 Kế hoạch Kiểm định\r\n\r\nKế hoạch kiểm định được xây dựng dựa trên bản mô tả kỹ thuật phần cứng và chứa phần mô tả về những tính năng nào cần được kiểm tra cũng như các kỹ thuật sẽ được sử dụng. Các bước này có thể bao gồm kiểm thử định hướng (directed testing) hoặc ngẫu nhiên (random testing), các câu lệnh khẳng định (assertions), đồng kiểm định phần cứng/phần mềm (HW/SW co-verification), giả lập phần cứng (emulation), chứng minh hình thức (formal proofs), và việc sử dụng IP kiểm định (verification IP). Để thảo luận đầy đủ hơn về kiểm định, xem Bergeron (2006).\r\n\r\n1.2 Sổ tay Phương pháp luận Kiểm định\r\n\r\nCuốn sách bạn đang cầm trên tay dựa trên VMM, vốn có nguồn gốc từ một phương pháp luận được phát triển bởi Janick Bergeron và các đồng nghiệp tại Qualis Design. Họ bắt đầu với các thực hành tiêu chuẩn trong ngành và tinh chỉnh chúng dựa trên kinh nghiệm từ nhiều dự án. Các kỹ thuật của VMM ban đầu được phát triển để sử dụng với ngôn ngữ OpenVera và đã được mở rộng vào năm 2005 cho SystemVerilog. VMM và tiền thân của nó, Phương pháp luận Kiểm định Tham chiếu (RVM) dành cho Vera, đã được sử dụng thành công để kiểm định nhiều loại thiết kế phần cứng, từ các thiết bị mạng đến các bộ vi xử lý. Các phương pháp luận mới hơn như OVM và UVM đều sử dụng nhiều ý tưởng tương tự. Cuốn sách này dựa trên nhiều khái niệm giống với tất cả các phương pháp luận đó, mặc dù đã được đơn giản hóa đi rất nhiều.\r\n\r\nCuốn sách này đóng vai trò là sách hướng dẫn người dùng cho ngôn ngữ SystemVerilog. Nó mô tả nhiều cấu trúc ngôn ngữ và đưa ra các chỉ dẫn để chọn ra những cấu trúc phù hợp nhất với nhu cầu của bạn. Nếu bạn là người mới làm quen với kiểm định, có ít kinh nghiệm về Lập trình hướng đối tượng (OOP), hoặc chưa quen thuộc với kiểm thử ngẫu nhiên có ràng buộc (CRT), cuốn sách này có thể chỉ cho bạn con đường đúng đắn để lựa chọn. Một khi đã quen thuộc với chúng, bạn sẽ thấy việc tiến lên UVM và VMM là một bước chuyển dễ dàng.\r\n\r\nVậy tại sao cuốn sách này không dạy bạn UVM hay VMM ngay? Giống như bất kỳ công cụ nâng cao nào, các phương pháp luận này được thiết kế để sử dụng bởi những người dùng đã có kinh nghiệm, và phát huy tối đa sức mạnh trước những bài toán khó. Bạn có đang phụ trách kiểm định một thiết kế 100 triệu cổng logic với nhiều giao thức truyền thông, xử lý lỗi phức tạp và một thư viện IP không? Nếu đúng như vậy, UVM hoặc VMM chính là những công cụ phù hợp cho công việc đó. Tuy nhiên, nếu bạn đang làm việc trên các mô-đun nhỏ hơn với một giao thức duy nhất, bạn có thể không cần đến một phương pháp luận cồng kềnh/đồ sộ như vậy. Chỉ cần nhớ rằng khối thiết kế của bạn là một phần của một hệ thống lớn hơn; mã nguồn tuân thủ UVM hoặc VMM có thể tái sử dụng cả trong suốt dự án lẫn cho các thiết kế sau này. Chi phí cho việc kiểm định vượt xa phạm vi dự án trước mắt của bạn.",
+      "grammar": [
+        {
+          "phrase": "Which cell should be chosen next is not always obvious at the highest level",
+          "explain": "mệnh đề danh ngữ (noun clause) đóng vai trò làm chủ ngữ cho động từ \"is\""
+        },
+        {
+          "phrase": "you can never prove there are no bugs left",
+          "explain": "mệnh đề danh ngữ rút gọn \"that\" làm tân ngữ cho \"prove\", kết hợp tính từ/phân từ \"left\" bổ nghĩa cho \"no bugs\""
+        },
+        {
+          "phrase": "draws upon the VMM that has its roots in a methodology developed by Janick Bergeron",
+          "explain": "mệnh đề quan hệ bắt đầu bằng \"that\" bổ nghĩa cho VMM, bên trong chứa mệnh đề phân từ quá khứ rút gọn \"developed by...\" bổ nghĩa cho \"methodology\""
+        },
+        {
+          "phrase": "If you are new to verification, have little experience with Object-Oriented Programming (OOP), or are unfamiliar with constrained-random tests (CRT), this book can show you the right path to choose",
+          "explain": "câu điều kiện loại 1 với mệnh đề \"if\" có 3 vế động từ song song kết hợp động từ nguyên mẫu có \"to\" (\"to choose\") bổ nghĩa cho \"path\""
+        },
+        {
+          "phrase": "Just remember that your block is part of a larger system",
+          "explain": "câu mệnh lệnh (imperative clause) kết hợp mệnh đề danh ngữ bắt đầu bằng \"that\" làm tân ngữ cho \"remember\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "aggregate",
+          "explain": "(tính từ) tổng hợp, gom lại từ nhiều thành phần"
+        },
+        {
+          "type": "phrase",
+          "phrase": "come up with",
+          "explain": "nảy ra, nghĩ ra (ý tưởng, giải pháp, chiến thuật)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "verification plan",
+          "explain": "kế hoạch kiểm định phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "exercise",
+          "explain": "(động từ kỹ thuật) vận hành, kiểm tra, bắt một tính năng/mạch phần cứng chạy thử"
+        },
+        {
+          "type": "collocation",
+          "phrase": "HW/SW co-verification",
+          "explain": "đồng kiểm định phần cứng và phần mềm"
+        },
+        {
+          "type": "phrase",
+          "phrase": "draw upon",
+          "explain": "khai thác, tận dụng, dựa vào (kinh nghiệm, nguồn tri thức)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "predecessor",
+          "explain": "(danh từ) tiền thân, hệ thống/tiền nhiệm đi trước"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random tests",
+          "explain": "kiểm thử ngẫu nhiên có ràng buộc (CRT)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "step up",
+          "explain": "một bước tiến lên, nấc thang nâng cao"
+        },
+        {
+          "type": "vocab",
+          "phrase": "excel",
+          "explain": "(động từ) thể hiện xuất sắc, phát huy thế mạnh vượt trội"
+        },
+        {
+          "type": "collocation",
+          "phrase": "100 million-gate design",
+          "explain": "thiết kế phần cứng vi mạch quy mô 100 triệu cổng logic"
+        },
+        {
+          "type": "vocab",
+          "phrase": "compliant",
+          "explain": "(tính từ) tuân thủ đúng theo chuẩn hoặc quy định"
+        },
+        {
+          "type": "phrase",
+          "phrase": "beyond your immediate project",
+          "explain": "vượt ra ngoài phạm vi dự án trước mắt / ngắn hạn"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "Trang 5 nằm ở phần mở đầu của sách, tập trung trình bày hai chủ đề trọng tâm: các chức năng cơ bản của một môi trường kiểm thử (Testbench) và phương pháp \"Kiểm thử hướng mục tiêu\" (Directed Testing) - phương pháp truyền thống trong kiểm thử thiết kế phần cứng (DUT).\r\n\r\nSau khi đọc trang này, người đọc cần nắm được các ý chính sau:\r\n1. Quy trình 5 bước cơ bản của một Testbench: Tạo tín hiệu kích thích (stimulus), đưa kích thích vào thiết kế (DUT), thu thập phản hồi, kiểm tra tính đúng đắn của phản hồi, và đo đạc tiến độ so với mục tiêu đề ra.\r\n2. Bản chất của Directed Testing: Người viết kiểm thử đọc tài liệu tả kỹ thuật, lập kế hoạch, viết các vector tín hiệu thủ công cho từng nhóm tính năng cụ thể, chạy mô phỏng và tự soi tệp log/giản đồ sóng (waveform) để xác nhận kết quả.\r\n3. Ưu và nhược điểm của Directed Testing: Ưu điểm là đem lại kết quả ngay, dễ thấy tiến độ (thích hợp cho quản lý theo dõi) và không tốn chi phí xây dựng hạ tầng kiểm thử ban đầu. Nhược điểm chí mạng là khả năng mở rộng rất kém; khi độ phức tạp của thiết kế tăng gấp đôi, khối lượng công việc và thời gian/nhân lực cần thiết cũng tăng gấp đôi do tốc độ tiến triển không đổi (độ dốc tiến độ cố định).\r\n\r\nCác khái niệm/thuật ngữ nền cần tìm hiểu thêm:\r\n- DUT (Device Under Test): Thiết kế vi mạch đang được kiểm thử.\r\n- UVM / VMM (Universal/Verification Methodology Manual): Các phương pháp luận kiểm thử chuẩn trong công nghiệp vi mạch sử dụng SystemVerilog.\r\n- Waveform & Log file: Giản đồ sóng hiển thị dạng tín hiệu theo thời gian và tệp nhật ký ghi lại các sự kiện mô phỏng.\r\n- Coverage (Độ bao phủ): Chỉ số đo lường tỷ lệ phần trăm các tính năng/dòng code đã được kiểm thử.",
+      "translation": "1.4 Kiểm thử hướng mục tiêu (Tiếp theo)\r\n\r\nUVM và VMM có một tập hợp các lớp cơ sở (base classes) dành cho dữ liệu và môi trường, các tiện ích quản lý tệp nhật ký (log files) và giao tiếp giữa các tiến trình (interprocess communication), cùng nhiều tính năng khác. Sách này là tài liệu nhập môn về SystemVerilog, trình bày các kỹ thuật và thủ thuật cấu thành nên những lớp và tiện ích này, giúp bạn hiểu sâu hơn về cách chúng được xây dựng.\r\n\r\n1.3 Chức năng cơ bản của Testbench\r\n\r\nMục đích của một testbench là xác định tính đúng đắn của DUT. Điều này được thực hiện thông qua các bước sau:\r\n• Tạo tín hiệu kích thích (stimulus)\r\n• Đưa tín hiệu kích thích vào DUT\r\n• Thu thập phản hồi\r\n• Kiểm tra tính đúng đắn\r\n• Đo đạc tiến độ so với mục tiêu kiểm thử tổng thể\r\n\r\nMột số bước được thực hiện tự động bởi testbench, trong khi các bước khác do bạn quyết định thủ công. Phương pháp luận mà bạn lựa chọn sẽ quyết định cách triển khai các bước nói trên.\r\n\r\n1.4 Kiểm thử hướng mục tiêu\r\n\r\nTheo truyền thống, khi đối mặt với nhiệm vụ kiểm tra tính đúng đắn của một thiết kế, có thể bạn đã sử dụng các bài kiểm thử hướng mục tiêu (directed tests). Với phương pháp này, bạn nghiên cứu bản tả kỹ thuật phần cứng và viết một kế hoạch kiểm thử với danh sách các bài test, mỗi bài tập trung vào một tập hợp các tính năng liên quan. Khi đã có kế hoạch này trong tay, bạn viết các vector kích thích để thực thi những tính năng đó trên DUT. Sau đó, bạn mô phỏng DUT với các vector này và xem lại tệp nhật ký cùng giản đồ sóng (waveforms) bằng tay để đảm bảo thiết kế hoạt động đúng như mong đợi. Khi bài test chạy đúng, bạn tích chọn hoàn thành trong kế hoạch kiểm thử và chuyển sang bài tiếp theo.\r\n\r\nCách tiếp cận tịnh tiến này giúp tạo ra tiến độ đều đặn, điều luôn được các quản lý ưa thích vì thấy dự án đang tiến triển. Nó cũng mang lại kết quả gần như ngay lập tức, vì chỉ cần rất ít hạ tầng khi chính bạn là người điều phối việc tạo ra từng vector kích thích. Nếu có đủ thời gian và nhân lực, kiểm thử hướng mục tiêu là đủ để kiểm tra nhiều thiết kế.\r\n\r\nHình 1.1 cho thấy cách các bài test hướng mục tiêu bao phủ dần các tính năng trong kế hoạch kiểm thử. Mỗi bài test hướng tới một tập hợp các phần tử thiết kế rất cụ thể. Nếu có đủ thời gian, bạn có thể viết tất cả các bài test cần thiết để đạt độ bao phủ 100% cho toàn bộ kế hoạch kiểm thử.\r\n\r\nNhưng điều gì sẽ xảy ra nếu bạn không có đủ thời gian hoặc nguồn lực cần thiết để thực hiện phương pháp kiểm thử hướng mục tiêu? Như bạn có thể thấy, mặc dù bạn luôn có thể đạt được tiến triển, nhưng độ dốc (tốc độ tiến triển) vẫn giữ nguyên. Khi độ phức tạp của thiết kế tăng gấp đôi, bạn sẽ mất thời gian gấp đôi để hoàn thành hoặc cần số lượng nhân sự gấp đôi để triển khai.",
+      "grammar": [
+        {
+          "phrase": "shows the techniques and tricks that go into these classes and utilities, giving you insight into their construction",
+          "explain": "mệnh đề quan hệ (that go into...) kết hợp mệnh đề V-ing rút gọn chỉ kết quả/bổ sung nghĩa (giving you insight...)"
+        },
+        {
+          "phrase": "The methodology you choose determines how the preceding steps are carried out",
+          "explain": "mệnh đề quan hệ rút gọn lược bỏ đại từ quan hệ (you choose) kết hợp mệnh đề danh từ làm tân ngữ (how the preceding steps are carried out)"
+        },
+        {
+          "phrase": "Armed with this plan, you write stimulus vectors that exercise these features in the DUT",
+          "explain": "mệnh đề trạng ngữ rút gọn dạng quá khứ phân từ (Armed with this plan) chỉ trạng thái chuẩn bị sẵn sàng"
+        },
+        {
+          "phrase": "Once the test works correctly, you check it off in the verification plan and move to the next one",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian dùng liên từ \"Once\" (một khi / sau khi)"
+        },
+        {
+          "phrase": "What if you do not have the necessary time or resources to carry out the directed testing approach",
+          "explain": "cấu trúc câu hỏi giả định \"What if...\" (Chuyện gì sẽ xảy ra nếu...) dùng để đặt vấn đề"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường mô phỏng/kiểm thử phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích, dữ liệu đầu vào để kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "headway",
+          "explain": "(danh từ) sự tiến triển, sự tiến bộ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "infrastructure",
+          "explain": "(danh từ) cơ sở hạ tầng, nền tảng hệ thống"
+        },
+        {
+          "type": "vocab",
+          "phrase": "complexity",
+          "explain": "(danh từ) độ phức tạp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "interprocess communication",
+          "explain": "(danh từ) giao tiếp giữa các tiến trình (IPC)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "verification plan",
+          "explain": "(danh từ) kế hoạch kiểm thử/xác minh thiết kế"
+        },
+        {
+          "type": "collocation",
+          "phrase": "stimulus vector",
+          "explain": "(danh từ) chuỗi/mảng tín hiệu kích thích dùng cho mô phỏng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "armed with",
+          "explain": "(cụm từ) được trang bị với, có sẵn trong tay"
+        },
+        {
+          "type": "collocation",
+          "phrase": "make headway",
+          "explain": "(collocation) đạt được tiến triển, tiến bộ"
+        },
+        {
+          "type": "phrase",
+          "phrase": "check it off",
+          "explain": "(cụm động từ) đánh dấu tích đã hoàn thành bài test trong danh sách"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Trang 6 của chương 1 tập trung thảo luận về hạn chế của phương pháp kiểm thử định hướng (Directed testing) và kiểm thử vét cạn (Brute force), đồng thời đưa ra các nguyên tắc cốt lõi của phương pháp luận kiểm thử hiện đại.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm được:\r\n- Kiểm thử định hướng (Directed testing) làm tăng độ bao phủ (coverage) rất chậm (theo từng nấc thang nhỏ) và tiêu tốn nhiều thời gian.\r\n- Kiểm thử vét cạn (Brute force) - tức thử tất cả các trường hợp kết hợp đầu vào - là hoàn toàn bất khả thi đối với các thiết kế phức tạp (ví dụ: một bộ cộng 32-bit có số lượng kết hợp quá lớn, mô phỏng sẽ mất nhiều năm).\r\n- Kiểm thử định hướng chỉ bao phủ được một phần không gian thiết kế (design space) và có thể bỏ sót nhiều tính năng cũng như lỗi (bug).\r\n- Phương pháp luận kiểm thử tiến bộ được giới thiệu trong cuốn sách dựa trên 5 nguyên tắc nền tảng: tạo kích thích ngẫu nhiên có ràng buộc, đo lường độ bao phủ chức năng, xây dựng môi trường kiểm thử phân tầng sử dụng các bộ giao dịch (transactor), dùng chung môi trường kiểm thử cho tất cả các kịch bản test, và tách biệt mã test case cụ thể khỏi môi trường kiểm thử chung.\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- Khái niệm \"Directed testing\" (kiểm thử thủ công từng kịch bản cụ thể) đối lập với \"Constrained-random verification\" (kiểm thử ngẫu nhiên có ràng buộc).\r\n- Các khái niệm cơ bản trong kiểm thử vi mạch: Testbench (môi trường kiểm thử), Coverage (độ bao phủ), Transactor (bộ giao dịch mức giao thức).",
+      "translation": "6 | 1 Hướng dẫn Kiểm thử\r\n\r\n[Hình 1.1: Trục tung: Độ bao phủ 100%, Trục hoành: Thời gian]\r\nHình 1.1 Tiến độ của bài kiểm thử định hướng theo thời gian\r\n\r\nKhông có tình huống nào trong số này là mong muốn. Bạn cần một phương pháp luận giúp tìm lỗi nhanh hơn nhằm đạt được mục tiêu độ bao phủ 100%. Phương pháp lực lượng thô bạo (brute force - thử mọi trường hợp) không có hiệu quả; nếu bạn cố gắng kiểm tra mọi kết hợp đầu vào cho một bộ cộng 32-bit, các mô phỏng của bạn sẽ vẫn đang chạy nhiều năm sau khi dự án lẽ ra đã được xuất xưởng.\r\n\r\nHình 1.2 thể hiện toàn bộ không gian thiết kế và các tính năng được bao phủ bởi các bài kiểm thử định hướng. Trong không gian này có nhiều tính năng, một số trong đó có lỗi. Bạn cần viết các bài kiểm thử bao phủ tất cả các tính năng và tìm ra các lỗi đó.\r\n\r\n[Hình 1.2 bao gồm các ô tượng trưng cho Tính năng (Feature), Lỗi (Bug), và Bài kiểm thử (Test)]\r\nHình 1.2 Độ bao phủ của bài kiểm thử định hướng\r\n\r\n1.5 Các nguyên tắc cơ bản của Phương pháp luận\r\n\r\nCuốn sách này sử dụng các nguyên tắc sau:\r\n• Tín hiệu kích thích ngẫu nhiên có ràng buộc (Constrained-random stimulus)\r\n• Độ bao phủ chức năng (Functional coverage)\r\n• Môi trường kiểm thử phân tầng sử dụng các bộ giao dịch (transactors)\r\n• Môi trường kiểm thử dùng chung cho tất cả các bài kiểm thử\r\n• Mã nguồn dành riêng cho từng bài kiểm thử được giữ tách biệt khỏi môi trường kiểm thử",
+      "grammar": [
+        {
+          "phrase": "in order to reach the goal of 100% coverage",
+          "explain": "Cụm từ chỉ mục đích \"in order to + V\", nối với cụm danh từ chỉ mục tiêu cần đạt được."
+        },
+        {
+          "phrase": "if you tried to verify every combination of inputs for a 32-bit adder, your simulations would still be running years after the project should have shipped",
+          "explain": "Câu điều kiện loại 2 giả định một tình huống không thực tế ở hiện tại/tương lai (dùng \"tried\" và \"would still be running\"), kết hợp với cụm \"should have + V3\" chỉ một việc đáng lẽ phải hoàn tất trong quá khứ."
+        },
+        {
+          "phrase": "features that are covered by directed test cases",
+          "explain": "Mệnh đề quan hệ dạng bị động (dùng đại từ \"that\") bổ nghĩa cho danh từ \"features\"."
+        },
+        {
+          "phrase": "some of which have bugs",
+          "explain": "Mệnh đề quan hệ không xác định chứa định từ số lượng (\"some of which\"), bổ nghĩa cho danh từ \"features\" phía trước."
+        },
+        {
+          "phrase": "Test case-specific code kept separate from testbench",
+          "explain": "Mệnh đề rút gọn dạng quá khứ phân tử (\"kept separate\"), đóng vai trò tính từ bổ nghĩa cho danh từ \"code\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "methodology",
+          "explain": "(danh từ) phương pháp luận, hệ thống các phương pháp làm việc mang tính lý luận"
+        },
+        {
+          "type": "vocab",
+          "phrase": "transactor",
+          "explain": "(danh từ) bộ giao dịch trong kiểm thử vi mạch (thành phần chuyển đổi các gói dữ liệu giao dịch mức cao thành tín hiệu mức pin/bus)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "brute force",
+          "explain": "(cụm danh từ/tính từ) phương pháp vét cạn, thử lần lượt từng trường hợp một cách thủ công mà không dùng thuật toán tối ưu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "design space",
+          "explain": "(cụm danh từ) không gian thiết kế (tập hợp toàn bộ các trạng thái, đầu vào và tính năng của hệ thống)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "should have shipped",
+          "explain": "(cụm động từ) lẽ ra đã phải được xuất xưởng/bàn giao (diễn tả một sự việc đáng lẽ phải xảy ra theo kế hoạch nhưng thực tế không diễn ra)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random stimulus",
+          "explain": "(cụm danh từ chuyên ngành) tín hiệu kích thích ngẫu nhiên có ràng buộc (kỹ thuật sinh dữ liệu kiểm thử tự động dựa trên quy tắc)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ chuyên ngành) độ bao phủ chức năng (chỉ số đo lường mức độ các tính năng thiết kế đã được bài kiểm thử duyệt qua)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test cases",
+          "explain": "(cụm danh từ) các trường hợp kiểm thử định hướng (kịch bản kiểm thử được viết thủ công cho một trường hợp cụ thể)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "testbench",
+          "explain": "(danh từ kỹ thuật) môi trường kiểm thử (mã nguồn dựng nên khung cảnh để đưa dữ liệu vào và kiểm tra đầu ra của thiết kế)"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "Trang 7 trình bày về nguyên lý cơ bản của phương pháp kiểm thử ngẫu nhiên có ràng buộc (Constrained-Random Verification - CRV) so với phương pháp kiểm thử có hướng truyền thống (Directed Testing) trong quy trình thiết kế và xác minh vi mạch.\r\n\r\nNgười đọc cần nắm vững các ý chính sau:\r\n- So sánh hiệu quả: Directed test chỉ tìm được các lỗi mà người thiết kế đã dự đoán trước, trong khi random test có khả năng phát hiện ra các lỗi bất ngờ ngoài kịch bản.\r\n- Hạ tầng Testbench ngẫu nhiên: Để triển khai kiểm thử ngẫu nhiên, cần có độ bao phủ chức năng (functional coverage) để đo tiến độ, cùng khối kiểm tra/dự đoán tự động (scoreboard/reference model). Mô hình testbench phân tầng (layered testbench) và các khối transactor giúp quản lý độ phức tạp và tái sử dụng mã nguồn.\r\n- Đánh đổi về mặt thời gian: Việc dựng môi trường kiểm thử ngẫu nhiên đòi hỏi nỗ lực ban đầu rất lớn (up-front work), khiến thời điểm chạy bài test đầu tiên bị trễ hơn so với directed test. Tuy nhiên, khi hạ tầng đã hoàn thiện, tốc độ đạt độ bao phủ và phát hiện lỗi của random test vượt trội hơn rất nhiều.\r\n- Chiến lược kết hợp: Phần lớn các lỗi được phát hiện bằng kiểm thử ngẫu nhiên. Khi tốc độ tìm lỗi giảm dần, kiểm thử có hướng (hoặc thêm các ràng buộc mới) sẽ được dùng để \"quét\" nốt những lỗi cuối cùng. Đáng chú ý: từ testbench ngẫu nhiên có thể ép ràng buộc để tạo thành directed test, nhưng không thể biến một directed testbench thành random testbench.\r\n\r\nKhái niệm/kiến thức nền cần tìm hiểu thêm: Functional Coverage (độ bao phủ chức năng), Scoreboard/Reference Model (mô hình tham chiếu kiểm tra kết quả), Layered Testbench (môi trường kiểm thử phân tầng), Transactor (bộ chuyển đổi giao thức).",
+      "translation": "1.5 Các nguyên lý cơ bản của phương pháp luận\r\n\r\nTất cả các nguyên lý này đều có liên quan với nhau. Tín hiệu kích thích ngẫu nhiên (random stimulus) đóng vai trò quyết định trong việc thử nghiệm các thiết kế phức tạp. Một bài kiểm thử có hướng (directed test) chỉ tìm thấy những lỗi mà bạn đã dự đoán là sẽ có trong thiết kế, trong khi một bài kiểm thử ngẫu nhiên (random test) có thể phát hiện ra những lỗi bạn chưa bao giờ lường trước. Khi sử dụng các tín hiệu kích thích ngẫu nhiên, bạn cần có độ bao phủ chức năng (functional coverage) để đo lường tiến độ xác minh. Hơn nữa, một khi đã bắt đầu sử dụng các tín hiệu kích thích được tạo tự động, bạn cần một phương thức tự động để dự đoán kết quả — thông thường là một bảng ghi điểm (scoreboard) hoặc một mô hình tham chiếu (reference model). Việc xây dựng hạ tầng môi trường kiểm thử (testbench infrastructure), bao gồm cả cơ chế tự dự đoán kết quả, đòi hỏi một lượng công sức đáng kể. Một môi trường kiểm thử phân tầng (layered testbench) sẽ giúp bạn kiểm soát độ phức tạp bằng cách chia nhỏ bài toán thành các phần dễ quản lý. Các bộ chuyển đổi giao thức (transactor) cung cấp một mô hình hữu ích để xây dựng các thành phần này. Với sự chuẩn bị kế hoạch phù hợp, bạn có thể xây dựng một hạ tầng testbench dùng chung cho tất cả các bài test mà không cần phải liên tục sửa đổi. Bạn chỉ cần để lại các \"điểm nối\" (hooks), nơi các bài test có thể thực hiện một số thao tác nhất định như định hình tín hiệu kích thích hoặc chèn vào các nhiễu loạn. Nguồn mã riêng cho một bài test cụ thể phải được tách biệt khỏi testbench để tránh làm phức tạp hạ tầng chung.\r\n\r\nViệc xây dựng môi trường kiểm thử theo phong cách này mất nhiều thời gian hơn so với một testbench có hướng truyền thống — đặc biệt là các phần tự động kiểm tra. Kết quả là, có thể có một khoảng thời gian trễ đáng kể trước khi bài test đầu tiên được chạy. Khoảng trống này có thể khiến người quản lý hoang mang, vì vậy hãy đưa nỗ lực này vào kế hoạch tiến độ của bạn. Trong Hình 1.3, bạn có thể thấy khoảng thời gian trễ ban đầu trước khi bài test ngẫu nhiên đầu tiên được thực thi.\r\n\r\n[Hình 1.3: Tiến độ của kiểm thử ngẫu nhiên có ràng buộc theo thời gian so với kiểm thử có hướng]\r\nTrục tung: Coverage (Độ bao phủ, 100%)\r\nTrục hoành: Time (Thời gian)\r\nĐường nét đứt: Random Test (Kiểm thử ngẫu nhiên)\r\nĐường nét liền hình bậc thang: Directed Test (Kiểm thử có hướng)\r\n\r\nMặc dù khối lượng công việc ban đầu này có vẻ đáng ngại, nhưng hiệu quả mang lại là rất cao. Mỗi bài test ngẫu nhiên mà bạn tạo ra đều dùng chung hạ tầng testbench này, trái ngược với các bài test có hướng — nơi mỗi bài test đều phải viết lại từ đầu. Mỗi bài test ngẫu nhiên chỉ chứa vài chục dòng lệnh để ràng buộc tín hiệu kích thích theo một hướng nhất định và tạo ra các ngoại lệ mong muốn, chẳng hạn như tạo ra sự vi phạm giao thức. Kết quả là môi trường kiểm thử ngẫu nhiên có ràng buộc duy nhất của bạn giờ đây tìm thấy lỗi nhanh hơn nhiều so với hàng loạt bài test có hướng.\r\n\r\nKhi tốc độ phát hiện lỗi bắt đầu giảm xuống, bạn có thể tạo ra các ràng buộc ngẫu nhiên mới để khám phá các khu vực mới. Một vài lỗi cuối cùng có thể chỉ được tìm thấy bằng các bài test có hướng, nhưng đại đa số các lỗi sẽ được phát hiện bằng các bài test ngẫu nhiên. Nếu bạn tạo một testbench ngẫu nhiên, bạn luôn có thể ràng buộc nó để tạo ra các bài test có hướng, nhưng một testbench có hướng thì không bao giờ có thể chuyển thành một testbench ngẫu nhiên đúng nghĩa.",
+      "grammar": [
+        {
+          "phrase": "a directed test finds the bugs you expect to be in the design, whereas a random test can find bugs you never anticipated.",
+          "explain": "Mệnh đề song song sử dụng liên từ \"whereas\" thể hiện sự tương phản; kết hợp mệnh đề quan hệ rút gọn lược bỏ đại từ quan hệ \"that/which\" (you expect..., you never anticipated...)"
+        },
+        {
+          "phrase": "once you start using automatically generated stimuli, you need an automated way to predict the results",
+          "explain": "Mệnh đề chỉ thời gian với liên từ \"once\" (một khi / sau khi) kết hợp danh từ đi kèm động từ dạng V-ing (\"start using\")"
+        },
+        {
+          "phrase": "code specific to a single test must be kept separate from the testbench to prevent it from complicating the infrastructure.",
+          "explain": "Cụm tính từ bổ nghĩa cho danh từ (\"code specific to...\"), thể bị động \"must be kept\", và cấu trúc \"prevent someone/something from doing something\""
+        },
+        {
+          "phrase": "While this up-front work may seem daunting, the payback is high.",
+          "explain": "Mệnh đề nhượng bộ mở đầu bằng liên từ \"While\" (Mặc dù... nhưng...)"
+        },
+        {
+          "phrase": "If you create a random testbench, you can always constrain it to created directed tests, but a directed testbench can never be turned into a true random testbench.",
+          "explain": "Câu điều kiện loại 1 kết hợp với mệnh đề đẳng lập chứa câu bị động (\"can never be turned into\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích đầu vào trong kiểm thử vi mạch (dạng số nhiều: stimuli)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "scoreboard",
+          "explain": "(danh từ) khối so sánh và kiểm tra kết quả tự động trong testbench"
+        },
+        {
+          "type": "vocab",
+          "phrase": "transactor",
+          "explain": "(danh từ) thành phần chuyển đổi dữ liệu cấp cao thành giao thức mức pin trong testbench"
+        },
+        {
+          "type": "vocab",
+          "phrase": "daunting",
+          "explain": "(tính từ) làm nản lòng, mang lại cảm giác lo ngại/thử thách lớn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test",
+          "explain": "(cụm danh từ) bài kiểm thử có hướng, kịch bản kiểm thử cố định"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (tiêu chuẩn đo lường mức độ kiểm thử các tính năng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "up-front work",
+          "explain": "(cụm danh từ) công việc/nỗ lực cần đầu tư ngay từ giai đoạn đầu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "protocol violation",
+          "explain": "(cụm danh từ) sự vi phạm quy chuẩn giao thức truyền thông"
+        },
+        {
+          "type": "phrase",
+          "phrase": "exercise complex designs",
+          "explain": "(cụm từ) vận hành/thử nghiệm các thiết kế phức tạp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "written from scratch",
+          "explain": "(cụm từ) được viết mới hoàn toàn từ đầu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "drop off",
+          "explain": "(phrasal verb) sụt giảm, suy giảm dần (về mức độ hoặc tốc độ)"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "Trang 8 trình bày về khái niệm **Constrained-Random Stimulus (Tín hiệu kích thích ngẫu nhiên có ràng buộc)** - một phương pháp tạo dữ liệu đầu vào tự động nhưng có kiểm soát trong kiểm định phần cứng (vi mạch/IC) bằng ngôn ngữ SystemVerilog.\r\n\r\n**Những ý chính cần nắm vững:**\r\n1. **Tại sao cần tạo ngẫu nhiên có ràng buộc:** Việc tạo dữ liệu hoàn toàn ngẫu nhiên sẽ sinh ra nhiều giá trị phi lý/không hợp lệ. Ràng buộc (constraints) giúp giới hạn tập dữ liệu đầu vào trong phạm vi hợp lệ (ví dụ: kích thước gói tin < 32 bytes, opcode nằm trong danh sách cho phép).\r\n2. **Cơ chế so sánh kết quả:** Tín hiệu kích thích sau khi tạo ra sẽ được đưa đồng thời vào thiết kế thực tế (DUT) và một mô hình tham chiếu cấp cao (high-level model/golden model). Trình mô phỏng sẽ so sánh đầu ra thực tế với đầu ra dự đoán từ mô hình tham chiếu để phát hiện lỗi.\r\n3. **Ưu điểm và thách thức của kiểm thử ngẫu nhiên (Hình 1.4):** \r\n   - Giúp bao phủ không gian kiểm thử rộng hơn nhiều so với viết test thủ công (directed test).\r\n   - Có thể phát hiện ra các lỗi tiềm ẩn ở những vùng kịch bản mà kỹ sư chưa lường trước.\r\n   - Tuy nhiên, nếu đi vào vùng không hợp lệ (illegal area), kỹ sư phải viết thêm ràng buộc để loại trừ. Nếu còn vùng trống chưa bao phủ được, cần viết thêm kịch bản hướng đích (directed testcase).\r\n4. **Quy trình hội tụ độ bao phủ - Coverage Convergence (Hình 1.5):** Là một vòng lặp kín: Chạy test ngẫu nhiên với nhiều hạt giống (seed) khác nhau $\\rightarrow$ Đo độ bao phủ chức năng (Functional Coverage) $\\rightarrow$ Phát hiện lỗ hổng độ bao phủ (Coverage holes) $\\rightarrow$ Chỉnh sửa mã nguồn/ràng buộc hoặc thêm kịch bản hướng đích $\\rightarrow$ Lặp lại cho đến khi đạt độ bao phủ tối đa.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **SystemVerilog Constraints:** Ngôn ngữ khai báo ràng buộc để tạo dữ liệu ngẫu nhiên theo luật.\r\n- **Reference/Golden Model:** Mô hình phần mềm viết bằng C/C++/SystemVerilog đóng vai trò làm chuẩn so sánh.\r\n- **Functional Coverage:** Chỉ số đo lường phần trăm các tính năng/kịch bản đã được thực thi trong quá trình mô phỏng.\r\n- **Random Seed:** Giá trị khởi tạo cho bộ tạo số giả ngẫu nhiên, cho phép tái hiện lại chính xác kịch bản test khi phát hiện bug.",
+      "translation": "8\r\n1   Hướng dẫn Kiểm định\r\n\r\n1.6   Tín hiệu Kích thích Ngẫu nhiên có Ràng buộc\r\n\r\nMặc dù bạn muốn trình mô phỏng tạo ra tín hiệu kích thích, nhưng bạn không muốn các giá trị hoàn toàn ngẫu nhiên. Bạn sử dụng ngôn ngữ SystemVerilog để mô tả định dạng của tín hiệu kích thích (“địa chỉ là 32-bit; mã lệnh opcode là ADD, SUB hoặc STORE; độ dài < 32 bytes”), và trình mô phỏng sẽ chọn ra các giá trị thỏa mãn các ràng buộc đó. Việc ràng buộc các giá trị ngẫu nhiên để trở thành tín hiệu kích thích phù hợp sẽ được trình bày chi tiết trong Chương 6. Các giá trị này được gửi vào thiết kế, đồng thời cũng được gửi vào một mô hình cấp cao để dự đoán kết quả đầu ra sẽ như thế nào. Đầu ra thực tế của thiết kế sau đó sẽ được so sánh với đầu ra dự đoán này.\r\n\r\nHình 1.4 thể hiện độ bao phủ của các kịch bản kiểm thử ngẫu nhiên có ràng buộc trên tổng không gian thiết kế. Đầu tiên, hãy lưu ý rằng một kịch bản kiểm thử ngẫu nhiên thường bao phủ một không gian rộng hơn so với một kịch bản kiểm thử hướng đích (directed test). Độ bao phủ bổ sung này có thể chồng lấp với các kịch bản kiểm thử khác, hoặc có thể khám phá các vùng không gian mới mà bạn chưa lường trước. Nếu các vùng mới này phát hiện ra lỗi, bạn thật may mắn! Nếu vùng mới đó là không hợp lệ, bạn cần viết thêm các ràng buộc để ngăn việc khởi tạo ngẫu nhiên tạo ra các chức năng thiết kế không hợp lệ. Cuối cùng, bạn vẫn có thể phải viết một vài kịch bản kiểm thử hướng đích để tìm ra các trường hợp chưa được bao phủ bởi bất kỳ kịch bản kiểm thử ngẫu nhiên có ràng buộc nào khác.\r\n\r\nHình 1.5 hiển thị các con đường để đạt được độ bao phủ hoàn chỉnh. Bắt đầu ở góc trên bên trái với các kịch bản kiểm thử ngẫu nhiên có ràng buộc cơ bản. Chạy chúng với nhiều hạt giống (seed) khác nhau.\r\n\r\n[Hình 1.4: Độ bao phủ của kiểm thử ngẫu nhiên có ràng buộc]\r\n- New area: Vùng mới\r\n- Test overlap: Sự chồng lấp kịch bản kiểm thử\r\n- Directed testcase: Kịch bản kiểm thử hướng đích\r\n- ?: Trường hợp nghi vấn/lỗi chưa xác định\r\n\r\n[Hình 1.5: Sự hội tụ độ bao phủ]\r\n- Constrained random tests: Các kịch bản kiểm thử ngẫu nhiên có ràng buộc\r\n- Many runs, different seeds: Chạy nhiều lần, với các hạt giống (seed) khác nhau\r\n- Functional Coverage: Độ bao phủ chức năng\r\n- Identify holes: Nhận diện các lỗ hổng (điểm thiếu sót) độ bao phủ\r\n- Minimal code modifications: Thay đổi mã nguồn tối thiểu\r\n- Add constraints: Thêm các ràng buộc\r\n- Directed testcase: Kịch bản kiểm thử hướng đích",
+      "grammar": [
+        {
+          "phrase": "the simulator picks values that meet the constraints",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"values\", dùng \"that\" đóng vai trò làm chủ ngữ trong mệnh đề phụ."
+        },
+        {
+          "phrase": "Constraining the random values to become relevant stimuli is covered in Chapter 6",
+          "explain": "danh động từ (gerund) \"Constraining...\" làm chủ ngữ của câu bị động \"is covered\"."
+        },
+        {
+          "phrase": "sent into a high-level model that predicts what the result should be",
+          "explain": "mệnh đề quan hệ \"that predicts...\" bổ nghĩa cho \"model\", bên trong chứa mệnh đề danh ngữ \"what the result should be\" làm tân ngữ cho động từ \"predicts\"."
+        },
+        {
+          "phrase": "If these new areas find a bug, you are in luck!",
+          "explain": "câu điều kiện loại 1 (first conditional) diễn tả một giả định có thể xảy ra ở hiện tại hoặc tương lai."
+        },
+        {
+          "phrase": "write more constraints to keep random generation from creating illegal design functionality",
+          "explain": "cấu trúc \"keep somebody/something from doing something\" (ngăn cản/tránh cái gì làm việc gì)."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích, dữ liệu đầu vào để kiểm thử thiết kế (số nhiều: stimuli)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random stimulus",
+          "explain": "(cụm danh từ) tín hiệu kích thích ngẫu nhiên có ràng buộc trong kiểm định phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "constraint",
+          "explain": "(danh từ) điều kiện ràng buộc, giới hạn quy định cho dữ liệu ngẫu nhiên"
+        },
+        {
+          "type": "collocation",
+          "phrase": "high-level model",
+          "explain": "(cụm danh từ) mô hình mô phỏng cấp cao (mô hình tham chiếu để đối chiếu kết quả)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test",
+          "explain": "(cụm danh từ) kịch bản kiểm thử hướng đích (kịch bản viết thủ công cho trường hợp cụ thể)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "in luck",
+          "explain": "(thành ngữ) may mắn, gặp may"
+        },
+        {
+          "type": "phrase",
+          "phrase": "keep from creating",
+          "explain": "(cụm động từ) ngăn không cho tạo ra / tránh việc sinh ra"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (tiêu chí đánh giá mức độ hoàn thành việc kiểm thử)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "coverage convergence",
+          "explain": "(cụm danh từ) sự hội tụ độ bao phủ (quá trình lặp để đạt 100% độ bao phủ)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "seed",
+          "explain": "(danh từ) hạt giống ngẫu nhiên (giá trị số dùng để khởi tạo chuỗi số giả ngẫu nhiên)"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "Trang 9 thuộc Chương 1 của tài liệu kiểm thử vi mạch bằng SystemVerilog, tập trung vào chủ đề **\"Cần ngẫu nhiên hóa những yếu tố nào trong thiết kế (What Should You Randomize?)\"**. \r\n\r\n**Nội dung tổng quát:**\r\nTrang sách hướng dẫn kỹ sư kiểm thử cách phân bổ thời gian hiệu quả trong quy trình kiểm thử ngẫu nhiên có ràng buộc (Constrained Random Verification - CRV), giải thích lý do tại sao chỉ ngẫu nhiên hóa dữ liệu đơn thuần là chưa đủ, và giới thiệu các khía cạnh quan trọng của thiết kế cần được ngẫu nhiên hóa—đặc biệt nhấn mạnh vào **Cấu hình Thiết bị và Môi trường (Device and Environment Configuration)**.\r\n\r\n**Những ý chính người đọc bắt buộc phải hiểu:**\r\n1. **Chiến lược lấp khoảng trống độ bao phủ (Coverage Holes):** Khi xem báo cáo độ bao phủ chức năng (functional coverage), kỹ sư nên ưu tiên điều chỉnh ràng buộc (constraints) hoặc chèn lỗi/trễ vào thiết kế (DUT). Chỉ nên dùng kiểm thử trực tiếp (directed tests) cho những tính năng rất hiếm khi đạt tới bằng kiểm thử ngẫu nhiên.\r\n2. **Hạn chế của việc chỉ ngẫu nhiên hóa dữ liệu (Data Randomization):** Dữ liệu ngẫu nhiên (dùng hàm `$random()`) rất dễ tạo nhưng mang lại hiệu quả phát hiện lỗi thấp (chủ yếu chỉ tìm được lỗi đường dữ liệu hoặc lỗi mức bit). Những lỗi phức tạp, hiểm hóc nhất lại nằm ở **logic điều khiển (control logic)**.\r\n3. **Các yếu tố cần ngẫu nhiên hóa:** Để tìm lỗi logic điều khiển, cần mở rộng ngẫu nhiên hóa sang: Cấu hình thiết bị, Cấu hình môi trường, Dữ liệu đầu vào, Ngoại lệ giao thức, Lỗi/vi phạm, và Khoảng trễ (Delays).\r\n4. **Tầm quan trọng của ngẫu nhiên hóa cấu hình:** Nguyên nhân phổ biến nhất khiến lỗi bị bỏ sót là do thiết kế không được thử nghiệm ở nhiều trạng thái cấu hình khác nhau (hầu hết các bản test chỉ chạy thiết kế ở trạng thái ngay sau khi reset). Một ví dụ thực tế về bộ chuyển mạch phân chia theo thời gian (TDM switch) minh họa rằng các bài test thủ công (directed testbench) không thể bao quát nổi không gian cấu hình khổng lồ trong thực tế.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **DUT (Design Under Test):** Thiết kế vi mạch đang được kiểm thử.\r\n- **Functional Coverage (Độ bao phủ chức năng):** Chỉ số đo lường xem các tính năng thiết kế đã được kiểm thử đầy đủ theo kế hoạch hay chưa.\r\n- **Directed Test vs. Random Test:** Kiểm thử trực tiếp (viết kịch bản cố định từng bước) so với kiểm thử ngẫu nhiên (tự động sinh kịch bản dựa trên ràng buộc).\r\n- **Control Logic & Data Path:** Logic điều khiển (chứa máy trạng thái FSM, tín hiệu điều hướng) và đường dữ liệu (chứa thanh ghi, ALUs, bus dữ liệu).",
+      "translation": "1.7 Bạn nên Ngẫu nhiên hóa Những gì?                                           9\r\n\r\nKhi bạn nhìn vào các báo cáo độ bao phủ chức năng, hãy tìm những lỗ hổng nơi còn khoảng trống về độ bao phủ. Sau đó, bạn thực hiện những thay đổi mã nguồn tối thiểu, có thể bằng cách sử dụng các ràng buộc mới, hoặc bằng cách chèn thêm lỗi hay khoảng trễ vào DUT. Hãy dành phần lớn thời gian của bạn trong vòng lặp bên ngoài này, và chỉ viết các bài kiểm thử trực tiếp (directed tests) cho một vài tính năng rất ít có khả năng đạt tới được bằng các bài kiểm thử ngẫu nhiên.\r\n\r\n1.7 Bạn nên Ngẫu nhiên hóa Những gì?\r\n\r\nKhi nghĩ đến việc ngẫu nhiên hóa tín hiệu kích thích cho một thiết kế, trước tiên bạn có thể sẽ chọn các trường dữ liệu. Những giá trị này là dễ tạo ra nhất — chỉ cần gọi hàm `$random()`. Vấn đề là lựa chọn này mang lại hiệu quả rất thấp xét về số lượng lỗi tìm được. Các loại lỗi chính tìm thấy với dữ liệu ngẫu nhiên là các lỗi trên đường dữ liệu (data path), có thể là các sai sót ở mức bit. Bạn cần phải tìm lỗi trong logic điều khiển (control logic), vốn là nguồn gốc của những vấn đề hiểm hóc nhất.\r\nHãy suy nghĩ rộng hơn về tất cả các đầu vào của thiết kế, chẳng hạn như những yếu tố sau:\r\n• Cấu hình thiết bị\r\n• Cấu hình môi trường\r\n• Dữ liệu đầu vào\r\n• Các ngoại lệ giao thức\r\n• Các lỗi và vi phạm\r\n• Các khoảng trễ\r\n\r\nNhững nội dung này được thảo luận trong các mục từ 1.7.1 đến 1.7.4.\r\n\r\n1.7.1 Cấu hình Thiết bị và Môi trường\r\n\r\nLý do phổ biến nhất khiến các lỗi bị bỏ sót trong quá trình kiểm thử thiết kế RTL là gì? Đó là không thử nghiệm đủ các cấu hình khác nhau. Hầu hết các bài kiểm thử chỉ sử dụng thiết kế ngay khi nó vừa thoát khỏi trạng thái reset, hoặc áp dụng một tập hợp các vectơ khởi tạo cố định để đưa nó vào một trạng thái đã biết. Điều này giống như việc kiểm thử hệ điều hành của máy tính ngay sau khi vừa cài đặt xong, nhưng lại chưa cài đặt bất kỳ ứng dụng nào. Dĩ nhiên là hiệu năng vẫn tốt và không xảy ra sự cố sự cố nào.\r\nTrong môi trường thực tế, cấu hình của DUT càng trở nên ngẫu nhiên hơn khi nó càng được sử dụng lâu. Ví dụ, tôi từng giúp một công ty xác minh bộ chuyển mạch đa truy nhập chia theo thời gian có 2000 kênh đầu vào và 12 kênh đầu ra. Kỹ sư xác minh nói rằng: “Các kênh này có thể được ánh xạ tới nhiều cấu hình khác nhau ở phía bên kia. Mỗi đầu vào có thể được dùng như một kênh đơn lẻ, hoặc được chia nhỏ tiếp thành nhiều kênh. Phần phức tạp nhất là mặc dù một vài cách phân chia tiêu chuẩn thường được dùng hầu hết thời gian, nhưng bất kỳ sự kết hợp phân chia nào cũng là hợp lệ, tạo ra một tập hợp cực kỳ lớn các cấu hình có thể có từ phía khách hàng.”\r\nĐể kiểm thử thiết bị này, kỹ sư đã phải viết vài chục dòng mã testbench dạng trực tiếp chỉ để cấu hình cho mỗi kênh. Kết quả là, cô ấy chưa bao giờ có thể thử các cấu hình có nhiều hơn một vài kênh. Cùng nhau, chúng tôi đã viết một testbench mà...",
+      "grammar": [
+        {
+          "phrase": "find the holes where there are gaps in the coverage",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng trạng từ \"where\" để bổ nghĩa cho danh từ \"holes\""
+        },
+        {
+          "phrase": "writing directed tests for only the few features that are very unlikely to be reached by random tests",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"features\", kết hợp cấu trúc \"be unlikely to + V\" (ít có khả năng xảy ra) và thể bị động \"to be reached\""
+        },
+        {
+          "phrase": "the problem is that this choice gives a very low payback in terms of bugs found",
+          "explain": "mệnh đề danh ngữ (noun clause) đứng sau động từ \"is\" làm bổ ngữ cho chủ ngữ \"the problem\""
+        },
+        {
+          "phrase": "What is the most common reason why bugs are missed during testing of the RTL design?",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho danh từ \"reason\" sử dụng trạng từ \"why\" kết hợp thể bị động \"are missed\""
+        },
+        {
+          "phrase": "This is like testing a PC’s operating system right after it has been installed",
+          "explain": "cấu trúc so sánh giả định \"like + V-ing\" kết hợp với thì hiện tại hoàn thành ở thể bị động \"has been installed\""
+        },
+        {
+          "phrase": "the DUT’s configuration becomes more random the longer it is in use",
+          "explain": "cấu trúc so sánh kép (The + comparative..., the + comparative...) thể hiện mối quan hệ tỉ lệ thuận"
+        },
+        {
+          "phrase": "although a few standard ways of breaking it down are used most of the time, any combination of breakdowns is legal",
+          "explain": "mệnh đề trạng ngữ chỉ sự nhượng bộ bắt đầu bằng \"although\" kết hợp thể bị động \"are used\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích (dữ liệu hoặc tín hiệu đầu vào cấp cho DUT để kiểm thử trong thiết kế vi mạch)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "payback",
+          "explain": "(danh từ) lợi ích thu lại, hiệu quả mang lại tương xứng với công sức bỏ ra"
+        },
+        {
+          "type": "vocab",
+          "phrase": "devious",
+          "explain": "(tính từ) tinh vi, hiểm hóc, phức tạp, khó phát hiện (nói về lỗi phần cứng/bug)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "breakdown",
+          "explain": "(danh từ) sự chia nhỏ, sự phân chia chi tiết (trong ngữ cảnh cấu hình kênh dữ liệu)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (tiêu chí đo lường mức độ kiểm thử trong thiết kế vi mạch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test",
+          "explain": "(cụm danh từ) bài kiểm thử trực tiếp (bài test được viết kịch bản cố định thủ công)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "control logic",
+          "explain": "(cụm danh từ) logic điều khiển (khối mạch xử lý trạng thái và luồng điều khiển trong vi mạch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "data path",
+          "explain": "(cụm danh từ) đường dữ liệu (luồng tính toán và truyền tải dữ liệu trong vi mạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "out of reset",
+          "explain": "(cụm từ) trạng thái vừa mới thoát khỏi quá trình khởi động lại (reset)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "a handful of",
+          "explain": "(cụm từ) một vài, một lượng nhỏ (chỉ đếm trên đầu ngón tay)"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "- Nội dung tổng quát: Trang 10 tiếp tục trình bày về chiến lược kiểm thử ngẫu nhiên có ràng buộc (Constrained-Random Verification) thuộc Chương 1: Verification Guidelines. Trang này hoàn thiện phần ngẫu nhiên hóa cấu hình môi trường (Environment Configuration), giới thiệu việc ngẫu nhiên hóa dữ liệu đầu vào (Input Data - Mục 1.7.2) và tầm quan trọng của việc chủ động giả lập các lỗi, ngoại lệ giao thức và vi phạm quy tắc thiết kế (Protocol Exceptions, Errors, and Violations - Mục 1.7.3).\r\n- Những ý chính người đọc bắt buộc phải hiểu:\r\n  1. Ngẫu nhiên hóa cấu hình môi trường (Environment Randomization): Cần ngẫu nhiên hóa các yếu tố như độ dài mô phỏng, số lượng thiết bị, vai trò Master/Slave, địa chỉ CSR... Đồng thời áp dụng ràng buộc (constraints) để cấu hình hợp lệ và dùng Functional Coverage để giám sát toàn bộ các tổ hợp đã được kiểm thử.\r\n  2. Dữ liệu đầu vào ngẫu nhiên (Input Data): Việc đưa giá trị ngẫu nhiên vào các trường dữ liệu của gói tin/giao dịch (transaction) là bước cơ bản. Tuy nhiên, kiểm thử viên cần thiết kế tốt các Transaction Class, tính trước cấu trúc giao thức phân tầng, khả năng chèn lỗi (error injection), bảng so sánh dữ liệu (scoreboard) và độ bao phủ chức năng.\r\n  3. Giả lập lỗi và vi phạm giao thức (Exceptions & Errors): Thiết bị phần tử thực tế hay bị treo (lock up) do gặp điều kiện lỗi không thể tự phục hồi. Do đó, môi trường kiểm thử phải chủ động phát ra các tín hiệu lỗi, câu lệnh sai định dạng (ill-formed commands), giao dịch không hoàn tất, hoặc vi phạm tính xung đột tín hiệu (mutually exclusive) để đảm bảo DUT xử lý đúng và không bị treo.\r\n- Kiến thức nền cần tìm hiểu thêm:\r\n  - DUT (Design Under Test): Mô hình thiết kế phần cứng đang được xác minh.\r\n  - Testbench: Môi trường mô phỏng bao quanh DUT.\r\n  - Functional Coverage: Thước đo mức độ hoàn thành các kịch bản kiểm thử chức năng đã được thực thi.\r\n  - Scoreboard: Thành phần trong testbench tự động so sánh kết quả đầu ra thực tế với kết quả kỳ vọng.\r\n  - Mutually Exclusive: Quy tắc hai tín hiệu không được phép bật đồng thời trong thiết kế phần cứng.",
+      "translation": "ngẫu nhiên hóa các tham số cho một kênh duy nhất rồi đưa vào một vòng lặp để cấu hình tất cả các kênh của bộ chuyển mạch. Giờ đây, cô ấy đã tự tin rằng các bài kiểm thử của mình sẽ phát hiện ra các lỗi liên quan đến cấu hình—những lỗi mà trước đây có thể đã bị bỏ sót.\r\n\r\nTrong thực tế, thiết bị của bạn hoạt động trong một môi trường chứa các linh kiện khác. Khi bạn xác minh DUT, nó được kết nối với một testbench đóng vai trò mô phỏng môi trường này. Bạn nên ngẫu nhiên hóa toàn bộ cấu hình môi trường, bao gồm độ dài mô phỏng, số lượng thiết bị và cách chúng được cấu hình. Tất nhiên, bạn cần tạo các ràng buộc (constraints) để đảm bảo cấu hình tạo ra là hợp lệ.\r\n\r\nTrong một ví dụ khác từ khách hàng của Synopsys, một công ty đã tạo ra một chip chuyển mạch I/O kết nối nhiều bus PCI với một bus bộ nhớ nội bộ. Khi bắt đầu mô phỏng, họ chọn ngẫu nhiên số lượng bus PCI (từ 1–4), số lượng thiết bị trên mỗi bus (từ 1–8), và các tham số cho từng thiết bị (master hoặc slave, địa chỉ CSR, v.v.). Họ theo dõi các tổ hợp đã được kiểm thử bằng cách sử dụng độ bao phủ chức năng (functional coverage) để có thể chắc chắn rằng mình đã bao phủ gần như mọi trường hợp có thể xảy ra.\r\n\r\nCác tham số môi trường khác bao gồm thời lượng kiểm thử, tỷ lệ tiêm lỗi (error injection rates) và các chế độ độ trễ (delay modes). Xem Bergeron (2006) để biết thêm các ví dụ.\r\n\r\n1.7.2 Dữ liệu đầu vào\r\n\r\nKhi đọc về tác nhân ngẫu nhiên (random stimulus), có lẽ bạn đã nghĩ đến việc lấy một giao dịch (transaction) như lệnh ghi bus hoặc ô ATM và điền vào các trường dữ liệu những giá trị ngẫu nhiên. Thực ra, phương pháp này khá đơn giản miễn là bạn chuẩn bị kỹ các lớp giao dịch (transaction classes) của mình như được trình bày trong Chương 5 và 8. Bạn cần dự đoán trước mọi giao thức phân tầng và việc tiêm lỗi, cộng với bảng chấm điểm (scoreboarding) và độ bao phủ chức năng.\r\n\r\n1.7.3 Các ngoại lệ giao thức, Lỗi và Vi phạm\r\n\r\nÍt có điều gì gây bực bội hơn việc một thiết bị như máy tính hoặc điện thoại di động bị treo. Nhiều khi, giải pháp duy nhất là tắt đi và khởi động lại. Rất có thể sâu bên trong sản phẩm có một phần mạch logic đã gặp phải một điều kiện lỗi nào đó mà nó không thể tự phục hồi, từ đó ngăn thiết bị hoạt động bình thường.\r\n\r\nLàm thế nào bạn có thể ngăn điều này xảy ra với phần cứng mà mình đang xây dựng? Nếu một sự cố có thể xảy ra trong phần cứng thực tế, bạn nên cố gắng mô phỏng nó. Hãy nhìn vào tất cả các lỗi có thể phát sinh. Điều gì xảy ra nếu một giao dịch bus không hoàn thành? Nếu gặp phải một thao tác không hợp lệ? Bản mô tả thiết kế có quy định rằng hai tín hiệu là xung đột lẫn nhau (mutually exclusive) không? Hãy kích hoạt cả hai tín hiệu đó và đảm bảo thiết bị vẫn tiếp tục hoạt động bình thường.\r\n\r\nGiống như việc bạn đang cố gắng kích động phần cứng bằng các câu lệnh sai định dạng, bạn cũng nên cố gắng bắt (kiểm soát) những trường hợp này. Ví dụ, hãy nhớ lại các tín hiệu xung đột...",
+      "grammar": [
+        {
+          "phrase": "her tests would uncover configuration-related bugs that would have been missed before",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"bugs\", sử dụng thể giả định quá khứ \"would have been missed\" dạng bị động"
+        },
+        {
+          "phrase": "When you are verifying the DUT, it is connected to a testbench that mimics this environment",
+          "explain": "mệnh đề thời gian \"When...\" đi kèm mệnh đề quan hệ \"that mimics...\" bổ nghĩa cho \"a testbench\""
+        },
+        {
+          "phrase": "They kept track of the tested combinations using functional coverage so that they could be sure that they had covered almost every possible one",
+          "explain": "cấu trúc chỉ mục đích \"so that\" kết hợp mệnh đề danh từ \"that they had covered...\" ở thì quá khứ hoàn thành"
+        },
+        {
+          "phrase": "There are few things more frustrating than when a device such as a PC or cell phone locks up",
+          "explain": "cấu trúc so sánh hơn \"more frustrating than\" đi cùng mệnh đề chỉ thời gian \"when...\""
+        },
+        {
+          "phrase": "deep inside the product there is a piece of logic that experienced some sort of error condition from which it could not recover",
+          "explain": "mệnh đề quan hệ có giới từ đứng trước đại từ quan hệ \"from which...\" bổ nghĩa cho \"error condition\""
+        },
+        {
+          "phrase": "Just as you are trying to provoke the hardware with ill-formed commands, you should also try to catch these occurrences",
+          "explain": "cấu trúc so sánh tương đồng \"Just as..., [so]...\" liên kết hai hành động đối ứng"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường mô phỏng kiểm thử phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "mimic",
+          "explain": "(động từ) bắt chước, mô phỏng lại chức năng/hành vi của linh kiện khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "constraint",
+          "explain": "(danh từ) điều kiện ràng buộc dùng trong sinh giá trị ngẫu nhiên"
+        },
+        {
+          "type": "vocab",
+          "phrase": "scoreboard",
+          "explain": "(danh từ) thành phần tự động kiểm tra và so sánh dữ liệu đầu ra trong môi trường kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "lock up",
+          "explain": "(động từ/cụm động từ) bị treo, đơ (máy tính hoặc thiết bị điện tử)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "configuration-related bugs",
+          "explain": "(cụm danh từ) các lỗi liên quan đến quá trình cấu hình hệ thống"
+        },
+        {
+          "type": "phrase",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (thước đo phần trăm các kịch bản đã được mô phỏng)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "error injection",
+          "explain": "(cụm danh từ) kỹ thuật chủ động tiêm/chèn lỗi vào hệ thống để thử khả năng chịu lỗi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "mutually exclusive",
+          "explain": "(tính từ/cụm từ) loại trừ lẫn nhau, xung đột (hai tín hiệu không thể cùng bật/xuất hiện cùng lúc)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "ill-formed commands",
+          "explain": "(cụm danh từ) các câu lệnh bị lỗi cấu trúc hoặc sai định dạng quy chuẩn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "keep track of",
+          "explain": "(cụm động từ) theo dõi, ghi chép lại thông tin/tiến trình"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm ở cuối phần 1.7 \"Cận ngẫu nhiên hóa những gì?\" (What Should You Randomize?) trong cuốn sách về xác minh thiết kế vi mạch (SystemVerilog Verification). Trang này hoàn thiện thảo luận về việc dùng Assertion/Checker để bắt lỗi sớm, tiếp đó trình bày hai mục quan trọng: 1.7.4 Độ trễ và Đồng bộ hóa (Delays and Synchronization) và 1.7.5 Kiểm thử ngẫu nhiên song song (Parallel Random Testing).\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. *Sử dụng Assertion/Checker bắt lỗi sớm:* Cần bổ sung mã kiểm tra tự động để bắt các vi phạm tín hiệu ngay gần nguồn phát sinh, tránh mất thời gian vết ngược mã nguồn khi lỗi xảy ra. Cần có cơ chế cho phép tắt dừng mô phỏng để test phần xử lý lỗi.\r\n  2. *Ngẫu nhiên hóa độ trễ (1.7.4):* Chọn độ trễ ngẫu nhiên giữa các giao dịch giúp phát hiện lỗi giao thức và lỗi điều kiện biên (boundary conditions). Cần thử nghiệm các kịch bản thời gian đa dạng (đầu vào cực nhanh nhưng đầu ra bị hãm, các tín hiệu đến đồng thời hoặc lệch pha). Dùng Functional Coverage để đo lường độ bao phủ các kết hợp này.\r\n  3. *Kiểm thử ngẫu nhiên song song & Tạo Seed duy nhất (1.7.5):* Khác với bài kiểm thử định hướng (Directed Test) cố định kịch bản, bài kiểm thử ngẫu nhiên (Random Test) tận dụng mã testbench kết hợp với một \"Random Seed\". Chạy 1 testbench với 50 seed khác nhau sẽ thu được 50 kịch bản kích thích khác nhau. Khi chạy song song nhiều job mô phỏng trên trang trại máy tính (CPU farm), để tránh bị trùng seed (dẫn đến trùng kịch bản kiểm thử), hạt giống ngẫu nhiên (seed) cần được phối hợp từ: *Thời gian trong ngày (time of day) + Tên bộ xử lý/máy chủ (processor name) + ID tiến trình (process ID)*.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *SystemVerilog Assertions (SVA):* Ngôn ngữ/cú pháp khai báo các quy tắc kiểm tra tín hiệu trong vi mạch.\r\n  - *Functional Coverage (Độ bao phủ chức năng):* Phương pháp đo đạc xem các kịch bản/kết hợp tính năng đã được kiểm thử đến đâu (sẽ học ở Chương 9).\r\n  - *Random Seed (Hạt giống ngẫu nhiên):* Giá trị đầu vào cho bộ sinh số giả ngẫu nhiên (PRNG), 결정 (quy định) chuỗi số ngẫu nhiên được tạo ra.\r\n  - *CPU Farm / Batch Queuing System:* Hệ thống nhiều máy chủ tính năng cao được quản lý theo hàng đợi để chạy mô phỏng phần cứng số lượng lớn.",
+      "translation": "...các tín hiệu xung đột. Bạn nên thêm mã kiểm tra (checker code) để tìm các vi phạm này. Mã của bạn tối thiểu nên in ra một thông điệp cảnh báo khi điều này xảy ra, và tốt nhất là tạo ra lỗi rồi kết thúc bài kiểm thử một cách êm đẹp. Thật vô cùng nản lòng khi phải mất hàng giờ truy vết ngược lại qua mã nguồn để tìm nguyên nhân gốc rễ của một sự cố, đặc biệt là khi bạn hoàn toàn có thể bắt được nó ngay gần nguồn phát sinh bằng một câu lệnh khẳng định (assertion) đơn giản. Xem tài liệu của Vijayaraghavan [2005] để biết thêm các hướng dẫn về cách viết assertion trong mã testbench và mã thiết kế của bạn. Chỉ cần đảm bảo rằng bạn có thể tắt đoạn mã dừng mô phỏng khi gặp lỗi để dễ dàng kiểm tra khả năng xử lý lỗi.\r\n\r\n1.7.4 Độ trễ và Đồng bộ hóa\r\n\r\nMôi trường kiểm thử của bạn nên gửi tín hiệu kích thích vào với tốc độ nhanh như thế nào? Bạn nên chọn các độ trễ ngẫu nhiên để giúp phát hiện các lỗi giao thức. Một bài kiểm thử với các độ trễ ngắn nhất thì dễ viết, nhưng sẽ không tạo ra được tất cả các kết hợp kích thích có thể có. Những lỗi tinh vi xung quanh các điều kiện biên thường chỉ lộ ra khi các độ trễ thực tế được lựa chọn.\r\nMột khối chức năng có thể hoạt động chính xác cho mọi hoán vị kích thích có thể xảy ra từ một giao diện đơn lẻ, nhưng các lỗi tinh vi có thể xuất hiện khi các giao dịch đang chảy đồng thời vào nhiều đầu vào. Hãy cố gắng phối hợp các bộ phát tín hiệu (driver) khác nhau để chúng có thể giao tiếp ở các tốc độ thời gian khác nhau. Điều gì sẽ xảy ra nếu các đầu vào đến với tốc độ nhanh nhất có thể, nhưng đầu ra lại bị hãm về tốc độ chậm hơn? Điều gì xảy ra nếu tín hiệu kích thích đến nhiều đầu vào cùng một lúc? Điều gì sẽ xảy ra nếu chúng được xếp lệch nhau với các độ trễ khác nhau? Hãy sử dụng độ bao phủ chức năng (functional coverage), điều sẽ được thảo luận trong Chương 9, để đo lường xem những kết hợp nào đã được tạo ra ngẫu nhiên.\r\n\r\n1.7.5 Kiểm thử ngẫu nhiên song song\r\n\r\nBạn nên chạy các bài kiểm thử như thế nào? Một bài kiểm thử định hướng (directed test) có một testbench tạo ra một tập hợp các vectơ kích thích và đáp ứng duy nhất. Để thay đổi kích thích, bạn cần phải thay đổi bài kiểm thử. Một bài kiểm thử ngẫu nhiên bao gồm mã testbench cộng với một hạt giống ngẫu nhiên (random seed). Nếu bạn chạy cùng một bài kiểm thử 50 lần, mỗi lần với một seed duy nhất, bạn sẽ thu được 50 tập hợp kích thích khác nhau. Việc chạy với nhiều seed sẽ mở rộng độ bao phủ của bài kiểm thử và phát huy tối đa công sức của bạn.\r\nBạn cần chọn một seed duy nhất cho mỗi lượt mô phỏng. Một số người sử dụng thời gian trong ngày, nhưng điều đó vẫn có thể gây ra hiện tượng trùng lặp. Điều gì xảy ra nếu bạn đang sử dụng một hệ thống hàng đợi theo lô (batch queuing system) trên một trang trại máy tính (CPU farm) và yêu cầu nó bắt đầu 10 công việc lúc nửa đêm? Nhiều công việc có thể bắt đầu cùng một lúc nhưng trên các máy tính khác nhau, và do đó sẽ nhận cùng một seed ngẫu nhiên và chạy cùng một kịch bản kích thích. Bạn nên kết hợp tên của bộ xử lý vào seed. Nếu trang trại máy tính của bạn bao gồm các máy đa xử lý, bạn vẫn có thể có hai công việc bắt đầu chạy lúc nửa đêm với cùng một seed, vì vậy bạn cũng nên đưa thêm ID tiến trình (process ID) vào. Giờ đây tất cả các công việc đều nhận được các seed duy nhất.",
+      "grammar": [
+        {
+          "phrase": "It is frustrating to spend hours tracking back through code trying to find the root of a malfunction, especially when you could have caught it close to the source with a simple assertion",
+          "explain": "Cấu trúc chủ ngữ giả \"It is + adj + to V\" kết hợp với \"spend time V-ing\" và cấu trúc giả định quá khứ \"could have + V3\" (đáng lẽ ra đã có thể làm gì đó trong quá khứ)"
+        },
+        {
+          "phrase": "Just make sure that you can disable the code that stops simulation on error so that you can easily test error handling",
+          "explain": "Cấu trúc mệnh đề chỉ mục đích \"so that + S + V\" kết hợp với mệnh đề quan hệ bổ nghĩa cho vật \"that stops...\""
+        },
+        {
+          "phrase": "Subtle bugs around boundary conditions are often revealed when realistic delays are chosen",
+          "explain": "Cấu trúc thể bị động ở thì hiện tại đơn (\"are revealed\", \"are chosen\") kết hợp mệnh đề trạng ngữ chỉ thời gian với \"when\""
+        },
+        {
+          "phrase": "What if the inputs arrive at the fastest possible rate, but the output is being throttled back to a slower rate",
+          "explain": "Cấu trúc câu hỏi giả định \"What if...?\" kết hợp với thể bị động của thì hiện tại tiếp diễn (\"is being throttled back\")"
+        },
+        {
+          "phrase": "If you run the same test 50 times, each time with a unique seed, you will get 50 different sets of stimuli",
+          "explain": "Câu điều kiện loại 1 (If + hiện tại đơn, tương lai đơn) diễn tả khả năng có thể xảy ra ở hiện tại hoặc tương lai"
+        },
+        {
+          "phrase": "If your CPU farm includes multiprocessor machines, you could have two jobs start running at midnight with the same seed",
+          "explain": "Cấu trúc câu điều kiện loại 1 mở rộng với động từ khuyết thiếu \"could\" và cấu trúc sai khiến/tác động \"have someone/something do something\" (have two jobs start...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "malfunction",
+          "explain": "(danh từ) sự cố, sự hoạt động sai/trục trặc của phần cứng hoặc phần mềm"
+        },
+        {
+          "type": "vocab",
+          "phrase": "assertion",
+          "explain": "(danh từ) câu lệnh khẳng định/kiểm định trong ngôn ngữ mô phỏng dùng để phát hiện vi phạm tín hiệu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "wind down",
+          "explain": "(cụm động từ) thu dọn, kết thúc dần dần một quy trình hoặc bài test"
+        },
+        {
+          "type": "collocation",
+          "phrase": "root of a malfunction",
+          "explain": "(cụm danh từ) nguyên nhân gốc rễ của sự cố"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích đầu vào cho thiết bị mô phỏng (dạng số nhiều: stimuli)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "boundary conditions",
+          "explain": "(cụm danh từ) các điều kiện biên, ranh giới hoạt động của hệ thống"
+        },
+        {
+          "type": "vocab",
+          "phrase": "permutation",
+          "explain": "(danh từ) sự hoán vị, các cách sắp xếp/kết hợp khác nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "throttle back",
+          "explain": "(cụm động từ) hãm lại, kiềm chế lại, giảm tốc độ lưu lượng dữ liệu"
+        },
+        {
+          "type": "vocab",
+          "phrase": "staggered",
+          "explain": "(tính từ) được xếp lệch nhau, không xảy ra đồng thời"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (tiêu chí đo đạc mức độ hoàn thành bài test)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test",
+          "explain": "(cụm danh từ) bài kiểm thử định hướng (kịch bản cố định được viết thủ công)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "random seed",
+          "explain": "(cụm danh từ) hạt giống ngẫu nhiên (giá trị khởi tạo cho thuật toán sinh số ngẫu nhiên)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "leverage your work",
+          "explain": "(cụm từ) phát huy/tối ưu hóa công sức làm việc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "batch queuing system",
+          "explain": "(cụm danh từ) hệ thống quản lý hàng đợi công việc theo lô"
+        },
+        {
+          "type": "collocation",
+          "phrase": "CPU farm",
+          "explain": "(cụm danh từ) trang trại máy tính (dàn máy chủ dùng để tính toán/mô phỏng song song)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "throw in",
+          "explain": "(cụm động từ) bổ sung thêm vào, đưa thêm vào (cách nói thân mật)"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "summary": "Trang 12 thuộc Chương 1: Verification Guidelines (Hướng dẫn Kiểm thử), tiếp tục thảo luận về cách quản lý tệp tin khi chạy mô phỏng ngẫu nhiên và giới thiệu chuyên sâu về khái niệm Độ bao phủ Chức năng (Functional Coverage) cùng Phương pháp Kiểm thử Dựa trên Độ bao phủ (Coverage-Driven Verification - CDV).\r\n\r\nCác ý chính người đọc bắt buộc phải nắm được:\r\n- **Quản lý tệp dữ liệu mô phỏng**: Khi chạy nhiều bài test ngẫu nhiên (chạy với các giá trị random seed khác nhau), tốt nhất nên thêm giá trị seed vào tên thư mục để dễ quản lý các tệp log và dữ liệu coverage sinh ra từ từng lần chạy.\r\n- **Khái niệm & Vai trò của Functional Coverage**: Việc tạo tín hiệu kích thích ngẫu nhiên (constrained-random stimulus) có hạn chế là sẽ lặp lại một số trạng thái thường xuyên, trong khi tốn quá nhiều thời gian (hoặc thậm chí không bao giờ) chạm tới các trạng thái khó/không thể tiếp cận. Functional Coverage là công cụ đo lường xem những chức năng nào trong kế hoạch kiểm thử đã thực sự được duyệt qua.\r\n- **Các bước thực hiện Functional Coverage**: (1) Thêm mã giám sát đầu vào và phản ứng của thiết bị; (2) Chạy nhiều mô phỏng với các hạt giống (seed) khác nhau; (3) Hợp nhất (merge) kết quả thành một báo cáo; (4) Phân tích báo cáo để viết thêm testcase đánh vào các vùng logic chưa được bao phủ.\r\n- **Kiểm thử Dựa trên Độ bao phủ (CDV - Coverage-Driven Verification)**: Ban đầu độ bao phủ tăng nhanh, nhưng sau đó sẽ tiệm cận giới hạn. Nếu không có cơ chế phản hồi (feedback) để điều chỉnh testcase, độ bao phủ sẽ tăng rất chậm. Cơ chế phản hồi giúp kỹ sư nhanh chóng đạt 100% độ bao phủ (Hình 1.6).\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Random Seed**: Số khởi tạo cho bộ sinh số giả ngẫu nhiên.\r\n- **Constrained-Random Verification (CRV)**: Phương pháp kiểm thử ngẫu nhiên có ràng buộc (đã đề cập ở các mục 1.6 và 1.7).\r\n- **SystemVerilog Coverage (Chương 9)**: Kiến thức chi tiết về syntax và cách triển khai covergroup/coverpoint trong ngôn ngữ SystemVerilog.",
+      "translation": "12\r\n1   Hướng dẫn Kiểm thử\r\n\r\nBạn cần lập kế hoạch tổ chức các tệp dữ liệu để xử lý nhiều mô phỏng cùng lúc. Mỗi tác vụ mô phỏng sẽ tạo ra một tập hợp các tệp đầu ra, chẳng hạn như tệp nhật ký (log) và dữ liệu độ bao phủ chức năng (functional coverage). Bạn có thể chạy từng tác vụ trong một thư mục riêng biệt, hoặc đặt một tên duy nhất cho mỗi tệp. Cách dễ nhất là nối thêm giá trị hạt giống ngẫu nhiên (random seed) vào tên thư mục.\r\n\r\n1.8 Độ bao phủ Chức năng (Functional Coverage)\r\n\r\nCác Mục 1.6 và 1.7 đã trình bày cách tạo ra các kích thích (stimuli) có thể duyệt ngẫu nhiên qua toàn bộ không gian của các đầu vào có thể có. Với phương pháp này, môi trường kiểm thử (testbench) của bạn sẽ thường xuyên truy cập vào một số vùng nhất định, nhưng lại mất quá nhiều thời gian để chạm tới tất cả các trạng thái có thể xảy ra. Những trạng thái không thể chạm tới (unreachable states) sẽ không bao giờ được truy cập, ngay cả khi cho thời gian mô phỏng vô hạn. Bạn cần đo lường những gì đã được kiểm tra để đánh dấu hoàn thành các mục trong kế hoạch kiểm thử của mình.\r\n\r\nQuy trình đo lường và sử dụng độ bao phủ chức năng gồm nhiều bước. Đầu tiên, bạn thêm mã vào testbench để giám sát kích thích đi vào thiết bị, cũng như phản ứng và kết quả của nó, nhằm xác định những chức năng nào đã được thực thi. Hãy chạy nhiều mô phỏng, mỗi lần chạy sử dụng một hạt giống ngẫu nhiên (seed) khác nhau. Tiếp theo, hợp nhất các kết quả từ những lần mô phỏng này thành một báo cáo. Cuối cùng, bạn cần phân tích kết quả và xác định cách tạo ra kích thích mới để chạm tới các điều kiện và logic chưa được kiểm thử. Chương 9 sẽ mô tả chi tiết về độ bao phủ chức năng trong SystemVerilog.\r\n\r\n1.8.1 Phản hồi từ Độ bao phủ Chức năng đến Kích thích\r\n\r\nMột bài kiểm tra ngẫu nhiên sẽ phát triển dựa trên sự phản hồi. Bài kiểm tra ban đầu có thể được chạy với nhiều hạt giống khác nhau, từ đó tạo ra nhiều chuỗi đầu vào độc nhất. Theo thời gian, bài kiểm tra — ngay cả khi dùng một hạt giống mới — cũng ít có khả năng tạo ra kích thích tiếp cận được các vùng còn lại của không gian thiết kế. Khi độ bao phủ chức năng tiến dần đến tiệm cận giới hạn của nó, bạn cần thay đổi bài kiểm tra để tìm ra các phương pháp mới nhằm chạm tới các vùng chưa được bao phủ trong thiết kế. Phương pháp này được gọi là “kiểm thử dựa trên độ bao phủ” (coverage-driven verification) và được thể hiện trong Hình 1.6.\r\n\r\n100% | Có phản hồi\r\nĐộ bao phủ | Không có phản hồi\r\nThời gian\r\n\r\nHình 1.6 Tiến trình kiểm thử có và không có phản hồi",
+      "grammar": [
+        {
+          "phrase": "The easiest approach is to append the random seed value to the directory name.",
+          "explain": "Cấu trúc bổ ngữ cho chủ ngữ dùng động từ nguyên mẫu có \"to\" (subject complement with to-infinitive: \"is to append...\")."
+        },
+        {
+          "phrase": "create stimuli that can randomly walk through the entire space of possible inputs",
+          "explain": "Mệnh đề quan hệ (relative clause) sử dụng \"that\" làm chủ ngữ bổ nghĩa cho danh từ \"stimuli\"."
+        },
+        {
+          "phrase": "Unreachable states will never be visited, even given unlimited simulation time.",
+          "explain": "Mệnh đề rút gọn sử dụng phân từ quá khứ \"given...\" mang nghĩa \"ngay cả khi được cung cấp / trong điều kiện...\"."
+        },
+        {
+          "phrase": "As the functional coverage asymptotically approaches its limit, you need to change the test to find new approaches to reach uncovered areas of the design.",
+          "explain": "Mệnh đề trạng ngữ chỉ tiến trình/thời gian với \"As\" (khi/theo đà...), kết hợp với chỉ mục đích \"to find... to reach...\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) kích thích, tín hiệu/dữ liệu đầu vào cho bài kiểm thử (dạng số nhiều: stimuli)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường kiểm thử / mô phỏng phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "seed",
+          "explain": "(danh từ) hạt giống ngẫu nhiên (giá trị khởi tạo cho bộ sinh số ngẫu nhiên)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "asymptotically",
+          "explain": "(trạng từ) theo kiểu tiệm cận (tiến gần đến đường giới hạn nhưng khó chạm hẳn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng (tiêu chí đo lường mức độ các tính năng của thiết kế đã được kiểm thử)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "coverage-driven verification",
+          "explain": "(cụm danh từ) phương pháp kiểm thử dựa trên độ bao phủ (CDV)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "random seed value",
+          "explain": "(cụm danh từ) giá trị hạt giống ngẫu nhiên"
+        },
+        {
+          "type": "phrase",
+          "phrase": "walk through",
+          "explain": "(cụm động từ) duyệt qua / đi qua từng bước một"
+        },
+        {
+          "type": "phrase",
+          "phrase": "check off",
+          "explain": "(cụm động từ) đánh dấu hoàn thành (trong danh sách/kế hoạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "design space",
+          "explain": "(cụm danh từ) không gian thiết kế (tập hợp tất cả các trạng thái và đầu vào có thể có của mạch)"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "summary": "- **Nội dung tổng quát:** Trang sách tiếp tục thảo luận về các chiến lược tạo tín hiệu kích thích (stimulus generation) trong kiểm thử phần cứng—từ việc tự động hóa với vòng phản hồi (feedback loop) đến việc áp dụng các công cụ phân tích hình thức (formal analysis tools). Sau đó, trang chuyển sang Mục 1.9 giới thiệu khái niệm cơ bản về các thành phần của một môi trường kiểm thử (Testbench Components) và sự khác biệt giữa Testbench bằng phần mềm mô phỏng và Thiết bị kiểm thử phần cứng (Hardware Tester).\r\n\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Hạn chế của bài kiểm thử định hướng (Directed Tests):* Viết kiểm thử thủ công mất rất nhiều công sức căn chỉnh thời gian (timing). Khi thiết kế thay đổi dù chỉ một chút, toàn bộ các kiểm thử thủ công này sẽ bị hỏng và phải phân tích/chỉnh sửa lại từ đầu.\r\n  2. *Kiểm thử ngẫu nhiên có ràng buộc và Vòng phản hồi (Constrained-Random & Feedback):* Sử dụng giao dịch ngẫu nhiên giúp tăng độ bao phủ theo thời gian và linh hoạt thích ứng khi timing thay đổi. Vòng phản hồi có thể tự động thay đổi trọng số ràng buộc (constraint weights) để hướng kiểm thử tới các kịch bản chưa đạt độ bao phủ.\r\n  3. *Thực tế về Phản hồi động (Dynamic Feedback):* Trong các thiết kế thực tế phức tạp, việc tự động điều chỉnh kích thích dựa trên phản hồi độ bao phủ chức năng là rất khó. Do đó, kỹ sư thường phải phân tích báo cáo bao phủ thủ công rồi chỉnh sửa ràng buộc ngẫu nhiên bằng tay, hoặc dùng các công cụ phân tích hình thức (như Magellan) để tìm các trạng thái chưa chạm tới.\r\n  4. *Khái niệm Testbench & Mức độ trừu tượng (Section 1.9):* Testbench bao bọc xung quanh DUT (Design Under Test) để cung cấp tín hiệu vào và thu nhận kết quả ra. Sự khác biệt cốt lõi: Hardware Tester chỉ làm việc ở mức bit, còn phần mềm Testbench làm việc ở nhiều mức trừu tượng cao hơn (chuỗi giao dịch, gói tin) trước khi quy đổi thành chuỗi bit.\r\n\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *HVL (Hardware Verification Language):* Ngôn ngữ xác minh phần cứng chuyên dụng (như SystemVerilog, e, Vera) giúp viết testbench nhanh và linh hoạt hơn Verilog/VHDL thuần.\r\n  - *Functional Coverage (Độ bao phủ chức năng):* Thước đo xem các tính năng/kịch bản thiết kế đã được kiểm thử thực tế chưa.\r\n  - *Formal Verification / Analysis (Kiểm chứng hình thức):* Phương pháp dùng chứng minh toán học để kiểm tra mọi trạng thái khả thi của thiết kế mà không cần mô phỏng toàn bộ.",
+      "translation": "Điều gì sẽ xảy ra nếu môi trường kiểm thử (testbench) của bạn đủ thông minh để làm điều này thay bạn? Trong một công việc trước đây, tôi đã viết một bài kiểm thử tạo ra mọi giao dịch bus cho một vi xử lý và đồng thời kích hoạt mọi bộ kết thúc bus (Thành công, Lỗi chẵn lẻ, Thử lại) ở mỗi chu kỳ. Điều này diễn ra trước khi có các ngôn ngữ kiểm thử phần cứng (HVL), vì vậy tôi đã viết một tập hợp dài các bài kiểm thử định hướng (directed tests) và mất nhiều ngày để căn chỉnh mã kết thúc sao cho nó kích hoạt đúng vào các chu kỳ mong muốn. Sau rất nhiều công sức phân tích thủ công, tôi tuyên bố thành công — độ bao phủ (coverage) đạt 100%. Nhưng sau đó, thời gian đáp ứng (timing) của vi xử lý thay đổi một chút! Giờ đây tôi lại phải phân tích lại bài kiểm thử và thay đổi các tín hiệu kích thích (stimuli).\r\n\r\nMột chiến lược kiểm thử hiệu quả hơn là sử dụng các giao dịch và bộ kết thúc ngẫu nhiên. Bạn chạy bài kiểm thử càng lâu thì độ bao phủ càng cao. Như một điểm cộng, bài kiểm thử có thể được làm đủ linh hoạt để tạo ra các kích thích hợp lệ ngay cả khi thời gian đáp ứng của thiết kế thay đổi. Bạn có thể đạt được điều này bằng cách thêm một vòng phản hồi (feedback loop) quan sát các kích thích đã tạo ra cho đến nay (đã tạo tất cả các chu kỳ ghi chưa?) và sau đó thay đổi trọng số ràng buộc (giảm trọng số ghi xuống bằng 0). Cải tiến này sẽ giảm đáng kể thời gian cần thiết để đạt độ bao phủ toàn diện, mà lại ít cần sự can thiệp thủ công.\r\n\r\nTuy nhiên, đây không phải là một tình huống điển hình, bởi vì việc phản hồi từ độ bao phủ chức năng (functional coverage) đến kích thích ở đây quá đơn giản. Trong một thiết kế thực tế, làm thế nào bạn có thể thay đổi kích thích để đạt đến một trạng thái thiết kế mong muốn? Điều này đòi hỏi kiến thức sâu sắc về thiết kế và các kỹ thuật kiểm chứng hình thức (formal techniques) mạnh mẽ. Không có câu trả lời dễ dàng, vì vậy phản hồi động hiếm khi được sử dụng cho kích thích ngẫu nhiên có ràng buộc. Thay vào đó, bạn cần phân tích thủ công các báo cáo độ bao phủ chức năng và điều chỉnh các ràng buộc ngẫu nhiên của mình.\r\n\r\nPhản hồi được sử dụng trong các công cụ phân tích hình thức như Magellan (Synopsys 2003). Nó phân tích một thiết kế để tìm tất cả các trạng thái duy nhất, có thể đạt tới được. Sau đó, nó chạy một mô phỏng ngắn để xem có bao nhiêu trạng thái đã được đi qua. Cuối cùng, nó tìm kiếm ngược từ máy trạng thái đến các đầu vào thiết kế để tính toán kích thích cần thiết nhằm đạt đến bất kỳ trạng thái còn lại nào, rồi Magellan áp dụng kích thích này vào DUT (Thiết kế cần kiểm thử).\r\n\r\n1.9 Các thành phần của Testbench\r\n\r\nTrong mô phỏng, testbench bao bọc xung quanh DUT, giống như một thiết bị kiểm thử phần cứng kết nối với một chip vật lý, như thể hiện trong Hình 1.7. Cả testbench và thiết bị kiểm thử đều cung cấp kích thích và ghi nhận các phản hồi. Sự khác biệt giữa chúng là testbench của bạn cần hoạt động trên một phạm vi rộng các mức độ trừu tượng, tạo ra các giao dịch và chuỗi giao dịch, mà cuối cùng được chuyển đổi thành các chuỗi bit (bit vectors). Còn thiết bị kiểm thử chỉ hoạt động ở mức độ bit.\r\n\r\n[Hình 1.7: Testbench — môi trường thiết kế]",
+      "grammar": [
+        {
+          "phrase": "What if your testbench were smart enough to do this for you?",
+          "explain": "Câu giả định (subjunctive mood với \"were\") diễn tả giả định trái ngược với thực tế ở hiện tại, kết hợp cấu trúc tính từ đi với enough \"adj + enough + to-V\"."
+        },
+        {
+          "phrase": "The longer you run it, the higher the coverage.",
+          "explain": "Cấu trúc so sánh kép (The + comparative + S + V, the + comparative + S + V) biểu thị mối quan hệ phụ thuộc tỉ lệ thuận."
+        },
+        {
+          "phrase": "As a bonus, the test can be made flexible enough to create valid stimuli even if the design’s timing changed.",
+          "explain": "Thể bị động của động từ khuyết thiếu (can be made) kết hợp với liên từ điều kiện/nhượng bộ \"even if\"."
+        },
+        {
+          "phrase": "This improvement would greatly reduce the time needed to get to full coverage",
+          "explain": "Mệnh đề tính ngữ/phân tử rút gọn dạng quá khứ phân tử (\"needed\" thay cho \"which is needed\") bổ nghĩa cho danh từ \"time\"."
+        },
+        {
+          "phrase": "Lastly, it searches from the state machine to the design inputs to calculate the stimulus needed to reach any remaining states",
+          "explain": "Cấu trúc câu ghép với động từ nguyên mẫu chỉ mục đích (to calculate..., to reach...) và quá khứ phân tử rút gọn (needed)."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường/khung kiểm thử mô phỏng bằng phần mềm cho thiết kế phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh me) tín hiệu kích thích, dữ liệu đầu vào cấp cho thiết kế để kiểm thử (số nhiều: stimuli)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "DUT",
+          "explain": "(viết tắt) Design Under Test - khối thiết kế đang được tiến hành kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "HVL",
+          "explain": "(viết tắt) Hardware Verification Language - ngôn ngữ xác minh phần cứng chuyên dụng (SystemVerilog, e, Vera)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ bao phủ chức năng - chỉ số đo lường mức độ các yêu cầu chức năng đã được mô phỏng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random stimulus",
+          "explain": "(cụm danh từ) tín hiệu kích thích ngẫu nhiên có ràng buộc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "dynamic feedback",
+          "explain": "(cụm danh từ) cơ chế phản hồi động (tự điều chỉnh kích thích dựa trên kết quả chạy thực tế)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "feedback loop",
+          "explain": "(cụm danh từ) vòng phản hồi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "line up",
+          "explain": "(cụm động từ) căn chỉnh, sắp xếp cho khớp hoặc đồng bộ thời gian với nhau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "formal analysis",
+          "explain": "(cụm danh từ) phân tích hình thức (phương pháp toán học chứng minh thuộc tính của thiết kế)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "level of abstraction",
+          "explain": "(cụm danh từ) mức độ trừu tượng (từ mức bit/cổng logic lên mức giao dịch/kiến trúc)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bit vector",
+          "explain": "(cụm danh từ) chuỗi bit (tập hợp các bit 0 và 1 biểu diễn tín hiệu song song)"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "summary": "Trang 14 nằm trong Chương 1 \"Verification Guidelines\", tập trung giới thiệu hai nội dung quan trọng về kiến trúc testbench trong kiểm thử vi mạch (SystemVerilog):\r\n\r\n1. **Các thành phần Testbench & Mô hình BFM (Bus Functional Model):**\r\n   - Testbench chứa các BFM (hoặc transactor mức cao) đóng vai trò làm các thiết bị ngoại vi/giao tiếp thực tế (như AMBA, USB, PCI, SPI) nối với DUT (Design Under Test).\r\n   - Các BFM này tạo tín hiệu kích thích (stimulus) và kiểm tra phản hồi từ DUT. Thường chúng không cần tổng hợp phần cứng (non-synthesizable) để chạy mô phỏng nhanh hơn, trừ trường hợp chạy thử nghiệm trên FPGA/Emulation thì BFM mới cần tổng hợp được (synthesizable).\r\n\r\n2. **Kiến trúc Testbench Phân tầng (Layered Testbench):**\r\n   - Khái niệm cốt lõi của phương pháp kiểm thử hiện đại: chia mã testbench thành các tầng (layers) độc lập để đơn giản hóa việc phát triển và bảo trì.\r\n   - Tránh việc viết một hàm/chương trình đơn lẻ (flat testbench) cố gắng xử lý mọi tác vụ từ tạo tín hiệu ngẫu nhiên, chèn lỗi đến xử lý giao thức phức tạp vì sẽ rất khó bảo trì.\r\n   - Tiếp cận phân tầng cho phép ứng dụng các nguyên lý Lập trình Hướng đối tượng (OOP) như tính đóng gói (encapsulation) và tái sử dụng IP Kiểm thử (Verification IP - VIP).\r\n\r\n*Khái niệm/Kiến thức nền cần tìm hiểu thêm:* BFM (Bus Functional Model), Transactor, Mã tổng hợp được (Synthesizable) vs Không tổng hợp được (Non-synthesizable), VIP (Verification IP), Lập trình hướng đối tượng (OOP) ứng dụng trong Verification.",
+      "translation": "14                                                     1 Các hướng dẫn kiểm thử\r\n\r\nBên trong khối testbench đó bao gồm những gì? Nó được cấu thành từ nhiều Mô hình Chức năng Bus (Bus Functional Model - BFM), mà bạn có thể coi là các thành phần của testbench — đối với thiết bị được kiểm thử (DUT), chúng trông giống như các thành phần thực sự, nhưng chúng thuộc về testbench chứ không phải thiết kế RTL. Nếu thiết bị thực kết nối với các bus AMBA, USB, PCI và SPI, bạn phải xây dựng các thành phần tương đương trong testbench của mình để có thể tạo tín hiệu kích thích và kiểm tra phản hồi, như được hiển thị trong Hình 1.8. Đây không phải là các mô hình tổng hợp được chi tiết, mà thay vào đó là các bộ giao dịch (transactor) cấp cao tuân thủ giao thức và thực thi nhanh hơn. Mặt khác, nếu bạn đang làm bản mẫu thử nghiệm bằng FPGA hoặc emulation, các BFM này cần phải tổng hợp được.\r\n\r\n[Hình 1.8 Các thành phần của Testbench]\r\n\r\n1.10 Testbench Phân tầng\r\n\r\nMột khái niệm then chốt cho bất kỳ phương pháp luận kiểm thử hiện đại nào là testbench phân tầng. Mặc dù quá trình này dường như khiến testbench trở nên phức tạp hơn, nhưng nó thực sự giúp công việc của bạn dễ dàng hơn bằng cách chia nhỏ mã nguồn thành các phần nhỏ hơn có thể phát triển độc lập. Đừng cố gắng viết một hàm đơn lẻ có thể tạo ngẫu nhiên tất cả các loại tín hiệu kích thích, cả hợp lệ và không hợp lệ, cộng với việc chèn lỗi với một giao thức đa tầng. Hàm đó sẽ nhanh chóng trở nên phức tạp và không thể bảo trì. Ngoài ra, tiếp cận theo hướng phân tầng cho phép tái sử dụng và đóng gói IP Kiểm thử (Verification IP - VIP), vốn là các khái niệm của Lập trình Hướng đối tượng (OOP).\r\n\r\n1.10.1 Testbench Phẳng\r\n\r\nKhi bạn mới học Verilog và bắt đầu viết các bài kiểm thử, chúng có lẽ trông giống như đoạn mã mức thấp trong Mẫu 1.1, thực hiện một thao tác Ghi APB (AMBA Peripheral Bus) đơn giản hóa. (Người dùng VHDL có thể cũng đã viết mã tương tự).",
+      "grammar": [
+        {
+          "phrase": "which you can think of as testbench components",
+          "explain": "mệnh đề quan hệ phi xác định (non-defining relative clause) bổ nghĩa cho cụm danh từ \"Bus Functional Models (BFM)\""
+        },
+        {
+          "phrase": "if the real device connects to AMBA, USB, PCI, and SPI buses, you have to build equivalent components in your testbench that can generate stimulus and check the response",
+          "explain": "câu điều kiện loại 1 (first conditional) kết hợp với mệnh đề quan hệ bổ nghĩa cho \"equivalent components\""
+        },
+        {
+          "phrase": "highlevel transactors that obey the protocol, and execute more quickly",
+          "explain": "mệnh đề quan hệ (relative clause) dùng \"that\" bổ nghĩa cho danh từ \"highlevel transactors\""
+        },
+        {
+          "phrase": "by dividing the code into smaller pieces that can be developed separately",
+          "explain": "cấu trúc chỉ phương thức \"by + V-ing\" kết hợp với mệnh đề quan hệ bổ nghĩa cho \"smaller pieces\""
+        },
+        {
+          "phrase": "Don’t try to write a single routine that can randomly generate all types of stimuli",
+          "explain": "câu mệnh lệnh phủ định (imperative clause) kết hợp mệnh đề quan hệ bổ nghĩa cho \"a single routine\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "Bus Functional Model",
+          "explain": "(BFM) mô hình chức năng bus, khối mã mô phỏng hành vi giao thức bus trong testbench"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Design Under Test",
+          "explain": "(DUT) thiết kế đang được kiểm thử (khối RTL phần cứng cần kiểm tra)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "transactor",
+          "explain": "(danh từ) bộ giao dịch, hợp phần chuyển đổi các giao dịch dữ liệu mức cao thành tín hiệu mức bus"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synthesizable",
+          "explain": "(tính từ) có thể tổng hợp được (mã có thể chuyển đổi thành mạch phần cứng thực tế)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích / dữ liệu đầu vào cấp cho DUT để kiểm thử (dạng số nhiều: stimuli)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "layered testbench",
+          "explain": "testbench phân tầng, kiến trúc chia mã kiểm thử thành nhiều lớp trừu tượng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Verification IP",
+          "explain": "(VIP) IP kiểm thử, khối mã kiểm thử được đóng gói để tái sử dụng cho các giao thức chuẩn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "encapsulation",
+          "explain": "(danh từ) tính đóng gói, một nguyên lý cơ bản trong lập trình hướng đối tượng (OOP)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "flat testbench",
+          "explain": "testbench phẳng, dạng testbench viết thủ công ở mức tín hiệu thấp (low-level), chưa phân tầng"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm trong Mục 1.10 \"Layered Testbench\" (Môi trường kiểm thử phân tầng) thuộc tài liệu hướng dẫn kiểm thử vi mạch/SoC bằng SystemVerilog. Trang này đưa ra một ví dụ thực tế về cách kiểm thử giao tiếp buýt APB (AMBA Peripheral Bus) theo phong cách lập trình tuyến tính/truyền thống bằng cách tác động trực tiếp lên các chân tín hiệu (pin-level driving).\r\n- **Ý chính người đọc cần nắm:**\r\n  1. Mô hình kiểm thử cơ bản ở mức chân tín hiệu (Pin-level testbench): Người viết testbench phải tự tạo tín hiệu Reset, sau đó căn theo từng sườn lên của xung nhịp (`posedge clk`) để đặt địa chỉ (`PAddr`), dữ liệu (`PWData`), tín hiệu chọn thiết bị (`PSel`), tín hiệu chỉ định hướng đọc/ghi (`PWrite`), và tín hiệu cho phép (`PEnable`).\r\n  2. Cách kiểm tra kết quả (Checking): Dùng câu lệnh điều kiện `if` để thâm nhập trực tiếp vào mảng bộ nhớ bên trong mô-đun thiết kế (`top.mem.memory[...]`) nhằm đối chiếu giá trị vừa ghi có chính xác hay không.\r\n  3. Đặt vấn đề chuyển đổi sang Layered Testbench: Việc viết mã ở cấp độ chân tín hiệu khiến mã nguồn rất lặp đi lặp lại (repetitive), tốn thời gian và khó bảo trì. Từ đó dẫn đến nhu cầu đóng gói các chuỗi thao tác này thành các hàm/nhiệm vụ (`task`) có tính tái sử dụng cao (sẽ trình bày ở Ví dụ 1.2).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Chuẩn buýt APB (AMBA Peripheral Bus):** Cần hiểu quy trình bắt tay (handshake) và giản đồ dạng sóng của tín hiệu APB (gồm các pha Setup Phase, Enable Phase) để hiểu tại sao trong mã nguồn lại cần 2 chu kỳ xung nhịp để tạo xung `PEnable`.\r\n  - **Cú pháp Verilog/SystemVerilog cơ bản:** Hiểu về khối `initial`, phép gán phi tuần tự (`<=`), các hàm hệ thống (`$display`, `$finish`), và cơ chế gán giá trị theo sự kiện xung nhịp (`@(posedge clk)`).",
+      "translation": "1.10 Môi trường kiểm thử phân tầng                           Trang 15\r\n\r\nVí dụ 1.1 Điều khiển các chân tín hiệu APB\r\n\r\nmodule test(PAddr, PWrite, PSel, PWData, PEnable, Rst, clk);\r\n// Đã lược bỏ khai báo các cổng...\r\n\r\n  initial begin\r\n    // Điều khiển tín hiệu reset\r\n    Rst <= 0;\r\n    #100 Rst <= 1'b1;\r\n\r\n    // Điều khiển buýt điều khiển\r\n    @(posedge clk)\r\n    PAddr <= 16'h50;\r\n    PWData <= 32'h50;\r\n    PWrite <= 1'b1;\r\n    PSel <= 1'b1;\r\n\r\n    // Bật/tắt tín hiệu PEnable\r\n    @(posedge clk)\r\n    PEnable <= 1'b1;\r\n    @(posedge clk)\r\n    PEnable <= 1'b0;\r\n\r\n    // Kiểm tra kết quả\r\n    if (top.mem.memory[16'h50] == 32'h50)\r\n      $display(\"Success\");\r\n    else\r\n      $display(\"Error, wrong value in memory\");\r\n    $finish;\r\n  end\r\nendmodule\r\n\r\nSau vài ngày viết mã theo cách này, có thể bạn đã nhận ra rằng công việc này rất trùng lặp, vì vậy bạn đã tạo các task cho những thao tác chung như ghi dữ liệu lên buýt, giống như minh họa trong Ví dụ 1.2.",
+      "grammar": [
+        {
+          "phrase": "After a few days of writing code like this",
+          "explain": "cấu trúc giới từ \"After\" đi kèm danh động từ (gerund \"writing\") chỉ khoảng thời gian hoặc hành động diễn ra trước"
+        },
+        {
+          "phrase": "you probably realized that it is very repetitive",
+          "explain": "mệnh đề danh ngữ (noun clause) đóng vai trò tân ngữ đứng sau động từ \"realized\", bắt đầu bằng từ nối \"that\""
+        },
+        {
+          "phrase": "so you created tasks for common operations such as a bus write",
+          "explain": "mệnh đề chỉ kết quả với liên từ \"so\", kết hợp với cụm từ \"such as\" dùng để đưa ra ví dụ minh họa"
+        },
+        {
+          "phrase": "as shown in Sample 1.2",
+          "explain": "mệnh đề rút gọn dạng bị động (rút gọn từ \"as it is shown...\"), thường dùng để tham chiếu tới hình ảnh, bảng biểu hoặc ví dụ trong tài liệu kỹ thuật"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "repetitive",
+          "explain": "(tính từ) có tính chất lặp đi lặp lại, dễ gây nhàm chán"
+        },
+        {
+          "type": "vocab",
+          "phrase": "omit",
+          "explain": "(động từ) bỏ qua, bỏ sót, không đề cập đến (dạng quá khứ phân từ: omitted)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "drive the bus",
+          "explain": "(cụm từ chuyên ngành) cấp/tạo tín hiệu điều khiển trên đường buýt tín hiệu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "posedge clk",
+          "explain": "(cụm từ chuyên ngành) sườn lên của tín hiệu xung nhịp (positive edge of clock)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bus write",
+          "explain": "(cụm từ chuyên ngành) thao tác ghi dữ liệu lên đường buýt giao tiếp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "such as",
+          "explain": "(cụm từ) như là, ví dụ như (dùng để bổ sung danh từ làm ví dụ)"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "summary": "Trang 16 tập trung trình bày phương pháp tối ưu hóa và đơn giản hóa mã kiểm thử (testbench) trong ngôn ngữ Verilog bằng cách áp dụng kỹ thuật đóng gói các thao tác bus thành các tác vụ (task). Đây là bước khởi đầu quan trọng hướng tới việc xây dựng mô hình testbench phân lớp (layered testbench) chuyên nghiệp trong kiểm định thiết kế vi mạch.\r\n\r\nNgười đọc cần nắm vững các ý chính sau:\r\n1. **Viết Task đóng gói giao thức bus (Ví dụ 1.2):** Tác vụ `write` được định nghĩa để quản lý chi tiết việc gán tín hiệu cho chuẩn bus APB (như `PAddr`, `PWData`, `PWrite`, `PSel`, `PEnable`) đồng bộ theo từng sườn lên của xung nhịp (`posedge clk`). Việc này giúp che giấu sự phức tạp của việc điều khiển chân tín hiệu (pin-level control).\r\n2. **Đơn giản hóa mã kịch bản kiểm thử (Ví dụ 1.3):** Trong khối `initial`, thay vì phải viết lại hàng loạt dòng lệnh gán tín hiệu cho mỗi giao dịch, người viết testbench chỉ cần gọi các lệnh ngắn gọn như `reset()` hay `write(...)`. Mã kiểm thử trở nên vô cùng rõ ràng, tập trung vào kịch bản (ghi dữ liệu -> kiểm tra bộ nhớ -> đưa ra thông báo).\r\n3. **Lợi ích của trừu tượng hóa:** Gom các hành động dùng chung vào một thủ tục (routine) giúp tăng hiệu suất làm việc, giảm thiểu sai sót lập trình và là cơ sở để chia testbench thành \"Tầng vật lý\" (Physical layer - quản lý tín hiệu) và \"Tầng lệnh\" (Command layer - thực thi thao tác).\r\n\r\nKhái niệm nền tảng cần tìm hiểu thêm:\r\n- **Chuẩn giao tiếp APB (Advanced Peripheral Bus):** Cần hiểu chu trình ghi/đọc của bus APB (gồm Phase Setup và Phase Access với các tín hiệu `PSel`, `PEnable`) để hiểu tại sao lệnh `@(posedge clk)` lại xuất hiện ở các vị trí đó trong Ví dụ 1.2.\r\n- **Layered Testbench Architecture:** Kiến trúc testbench phân lớp giúp tách rời kịch bản kiểm thử mức cao khỏi chi tiết tín hiệu mức thấp.",
+      "translation": "16\r\n1 Hướng dẫn Kiểm định\r\n\r\n**Ví dụ 1.2** Một tác vụ (task) để điều khiển các chân tín hiệu APB\r\n\r\ntask write(reg [15:0] addr, reg [31:0] data);\r\n    // Điều khiển bus Control\r\n    @(posedge clk)\r\n    PAddr <= addr;\r\n    PWData <= data;\r\n    PWrite <= 1'b1;\r\n    PSel <= 1'b1;\r\n\r\n    // Bật/tắt PEnable\r\n    @(posedge clk)\r\n    PEnable <= 1'b1;\r\n    @(posedge clk)\r\n    PEnable <= 1'b0;\r\nendtask\r\n\r\nGiờ đây, testbench của bạn đã trở nên đơn giản hơn, như được hiển thị trong Ví dụ 1.3.\r\n\r\n**Ví dụ 1.3** Bài kiểm thử Verilog cấp thấp\r\n\r\nmodule test(PAddr,PWrite,PSel,PWData,PEnable,Rst,clk);\r\n    // Các khai báo cổng được lược bỏ...\r\n\r\n    // Các tác vụ (task) giống như trong Ví dụ 1-2\r\n\r\n    initial begin\r\n        reset();                // Reset thiết bị\r\n        write(16'h50, 32'h50);  // Ghi dữ liệu vào bộ nhớ\r\n\r\n        // Kiểm tra kết quả\r\n        if (top.mem.memory[16'h50] == 32'h50)\r\n            $display(\"Success\");\r\n        else\r\n            $display(\"Error, wrong value in memory\");\r\n        $finish;\r\n    end\r\nendmodule\r\n\r\nBằng cách gom các hành động chung (chẳng hạn như reset, đọc và ghi bus) lại và đưa chúng vào một thủ tục (routine), bạn đã làm việc hiệu quả hơn và mắc ít sai sót hơn. Việc tạo ra các tầng vật lý (physical layer) và tầng lệnh (command layer) này chính là bước đầu tiên hướng tới một testbench phân lớp (layered testbench).",
+      "grammar": [
+        {
+          "phrase": "By taking the common actions (such as reset, bus reads and writes) and putting them in a routine, you became more efficient",
+          "explain": "Mệnh đề trạng ngữ chỉ phương thức \"By + V-ing 1 and V-ing 2\", diễn tả cách thức hoặc hành động dẫn đến kết quả ở mệnh đề chính."
+        },
+        {
+          "phrase": "This creation of the physical and command layers is the first step to a layered testbench",
+          "explain": "Cấu trúc danh từ hóa (Nominalization: \"creation of...\") đóng vai trò làm chủ ngữ, giúp câu văn mang tính trang trọng và mang phong cách kỹ thuật/học thuật."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "testbench",
+          "explain": "(danh từ) môi trường/mã kiểm thử được thiết kế để mô phỏng và kiểm tra chức năng của vi mạch (DUT)."
+        },
+        {
+          "type": "vocab",
+          "phrase": "routine",
+          "explain": "(danh từ) thủ tục/hàm/tác vụ đóng gói một chuỗi câu lệnh để tái sử dụng trong lập trình."
+        },
+        {
+          "type": "collocation",
+          "phrase": "drive the APB pins",
+          "explain": "(cụm từ) điều khiển/gán giá trị điện áp (mức 0 hoặc 1) cho các chân tín hiệu của chuẩn bus APB."
+        },
+        {
+          "type": "collocation",
+          "phrase": "layered testbench",
+          "explain": "(cụm danh từ) kiến trúc testbench phân lớp, phân chia mã kiểm thử thành các tầng chức năng riêng biệt."
+        },
+        {
+          "type": "phrase",
+          "phrase": "physical and command layers",
+          "explain": "(cụm danh từ) tầng vật lý (điều khiển tín hiệu phần cứng trực tiếp) và tầng lệnh (thực hiện các giao dịch mức cao)."
+        },
+        {
+          "type": "phrase",
+          "phrase": "posedge clk",
+          "explain": "(cụm từ kỹ thuật Verilog) sườn lên của tín hiệu xung nhịp (positive edge of clock), dùng để đồng bộ thời gian."
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "summary": "- **Nội dung tổng quát:** Trang sách tiếp tục trình bày kiến trúc môi trường kiểm thử phân tầng (Layered Testbench Architecture), cụ thể là mô tả chi tiết chức năng và sự tương tác giữa ba tầng cốt lõi: Tầng Tín hiệu (Signal Layer), Tầng Lệnh (Command Layer) và Tầng Chức năng (Functional Layer).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Tầng Tín hiệu (Signal Layer):** Nằm ở đáy cùng, bao gồm thiết bị/mạch đang được kiểm thử (DUT - Design Under Test) và các đường tín hiệu vật lý nối DUT với môi trường kiểm thử.\r\n  2. **Tầng Lệnh (Command Layer):** Nằm ngay trên tầng tín hiệu. *Driver* thực thi các lệnh đơn lẻ (như đọc/ghi bus) để lái tín hiệu vào DUT. *Monitor* theo dõi các chuyển trạng thái tín hiệu đầu ra của DUT và nhóm chúng thành các lệnh. *Assertions* hoạt động đan xen giữa tầng tín hiệu và tầng lệnh để kiểm tra tính đúng đắn của từng tín hiệu cũng như toàn bộ một lệnh.\r\n  3. **Tầng Chức năng (Functional Layer):** Nằm trên tầng lệnh. Khối *Agent* (còn gọi là *Transactor* trong VMM) nhận các giao dịch phức tạp cấp cao (như đọc/ghi DMA) và chia nhỏ thành các lệnh/giao dịch đơn lẻ. Các lệnh này một mặt gửi xuống tầng lệnh (*Driver*), mặt khác gửi sang *Scoreboard* (để dự đoán kết quả chuẩn). Khối *Checker* so sánh kết quả thực tế từ *Monitor* với kết quả dự đoán từ *Scoreboard*.\r\n- **Kiến thức/Thuật ngữ cần tìm hiểu thêm:**\r\n  - **VMM (Verification Methodology Manual):** Phương pháp luận kiểm thử kinh điển cho SystemVerilog (tiền thân của UVM ngày nay).\r\n  - **DMA (Direct Memory Access):** Khái niệm truy cập bộ nhớ trực tiếp trong kiến trúc máy tính.\r\n  - **UVM / SystemVerilog Verification Concepts:** Hiểu rõ mối liên hệ giữa các thành phần Driver, Monitor, Agent, Scoreboard, Checker để nắm vững tư duy kiểm thử vi mạch hiện đại.",
+      "translation": "1.10 Môi trường kiểm thử phân tầng\r\n\r\n1.10.2 Tầng Tín hiệu và Tầng Lệnh\r\n\r\nHình 1.9 thể hiện các tầng phía dưới của một môi trường kiểm thử.\r\n\r\n[Sơ đồ Hình 1.9:\r\n- Tầng Lệnh (Command): Khối Lái (Driver) | Khối Khẳng định (Assertions) | Khối Giám sát (Monitor)\r\n- Tầng Tín hiệu (Signal): Thiết bị được kiểm thử (DUT)]\r\n\r\nHình 1.9 Tầng tín hiệu và tầng lệnh\r\n\r\nỞ dưới cùng là tầng tín hiệu chứa thiết bị được kiểm thử (DUT) và các tín hiệu kết nối nó với môi trường kiểm thử.\r\nCấp cao hơn tiếp theo là tầng lệnh. Các đầu vào của DUT được lái bởi khối driver - thành phần chạy các lệnh đơn lẻ, chẳng hạn như đọc hoặc ghi bus. Đầu ra của DUT lái khối monitor - thành phần ghi nhận các chuyển trạng thái của tín hiệu và gom nhóm chúng lại thành các lệnh. Khối assertions cũng bắc cầu qua tầng lệnh/tín hiệu, vì chúng vừa quan sát các tín hiệu riêng lẻ vừa theo dõi các thay đổi diễn ra trong toàn bộ một lệnh.\r\n\r\n1.10.3 Tầng Chức năng\r\n\r\nHình 1.10 thể hiện môi trường kiểm thử khi đã thêm tầng chức năng, tầng này truyền dữ liệu xuống tầng lệnh. Khối agent (được gọi là transactor trong phương pháp VMM) nhận các giao dịch cấp cao hơn như đọc hoặc ghi DMA và chia nhỏ chúng thành các lệnh hoặc giao dịch riêng lẻ. Những lệnh này cũng được gửi tới khối scoreboard - nơi dự đoán kết quả của giao dịch. Khối checker sẽ so sánh các lệnh nhận được từ monitor với các kết quả dự đoán trong scoreboard.\r\n\r\n[Sơ đồ Hình 1.10:\r\n- Tầng Chức năng (Functional): Agent -> Bảng điểm (Scoreboard) -> Khối Đối chiếu (Checker)\r\n- Tầng Lệnh (Command): Driver -> Assertions -> Monitor (Monitor nối lên Checker)\r\n- Tầng Tín hiệu (Signal): DUT]\r\n\r\nHình 1.10 Môi trường kiểm thử khi đã thêm tầng chức năng",
+      "grammar": [
+        {
+          "phrase": "the monitor that takes signal transitions and groups them together into commands",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho danh từ \"the monitor\", giải thích chức năng của khối monitor"
+        },
+        {
+          "phrase": "Figure 1.10 shows the testbench with the functional layer added, which feeds down into the command layer",
+          "explain": "kết hợp giữa phân từ quá khứ \"added\" rút gọn bổ nghĩa cho \"functional layer\" và mệnh đề quan hệ không xác định \"which feeds down...\" bổ nghĩa cho toàn bộ ý đằng trước"
+        },
+        {
+          "phrase": "The agent block (called the transactor in the VMM) receives higher-level transactions",
+          "explain": "mệnh đề rút gọn dạng quá khứ phân từ (reduced relative clause) \"called...\" bổ nghĩa cho \"The agent block\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "design under test",
+          "explain": "(cụm danh từ) thiết bị/mạch đang được kiểm thử (viết tắt là DUT)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "transactor",
+          "explain": "(danh từ) bộ chuyển đổi giao dịch trong kiểm thử (chuyển đổi gói tin/giao dịch mức cao thành chuỗi lệnh mức thấp)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "scoreboard",
+          "explain": "(danh từ) khối bảng điểm/dự đoán kết quả mẫu trong môi trường kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "assertion",
+          "explain": "(danh từ) câu lệnh khẳng định/mệnh đề kiểm tra điều kiện đúng trong kiểm thử vi mạch"
+        },
+        {
+          "type": "phrase",
+          "phrase": "feed down into",
+          "explain": "(cụm động từ) truyền thông tin/dữ liệu xuống tầng bên dưới"
+        },
+        {
+          "type": "phrase",
+          "phrase": "break something into",
+          "explain": "(cụm động từ) chia nhỏ/phân tích một cái gì đó thành các phần nhỏ hơn"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "summary": "- **Nội dung tổng quát**: Trang 18 nằm trong Chương 1 (Hướng dẫn Kiểm thử - Verification Guidelines), trình bày chi tiết về **Tầng kịch bản (Scenario Layer)** và mở đầu về **Tầng kiểm thử (Test Layer) cùng Độ bao phủ chức năng (Functional Coverage)** thuộc kiến trúc môi trường kiểm thử phân tầng (Layered Testbench Architecture).\r\n- **Ý chính người đọc cần nắm**:\r\n  1. **Tầng kịch bản (Scenario Layer)**: Chịu trách nhiệm tạo ra các kịch bản kiểm thử (như tải tệp, phát nhạc trên máy MP3) bằng cách điều phối chuỗi các thao tác chi tiết ở tầng chức năng. Nó sử dụng các giá trị ngẫu nhiên có ràng buộc (constrained-random values) cho các tham số đầu vào.\r\n  2. **Tính tái sử dụng và sự ổn định của Testbench**: Môi trường kiểm thử (bên trong nét đứt) cần được giữ ổn định, không nên chỉnh sửa mã nguồn trực tiếp cho từng bài test riêng lẻ. Thay vào đó, các kỹ sư tạo ra các \"móc nối\" (hooks) bằng mô hình Factory Pattern và Callbacks để thay đổi hành vi kiểm thử mà không cần viết lại khung testbench.\r\n  3. **Tầng kiểm thử (Test Layer) & Functional Coverage**: Tầng kiểm thử nằm ở vị trí cao nhất, đóng vai trò như \"nhạc trưởng\" đưa ra các ràng buộc để tạo ra tín hiệu kích thích (stimulus). Độ bao phủ chức năng (Functional Coverage) là thước đo đánh giá xem các bài test đã đáp ứng đầy đủ kế hoạch kiểm thử ban đầu hay chưa.\r\n- **Kiến thức nền cần tìm hiểu thêm**:\r\n  - *Mô hình Testbench phân tầng (Layered Testbench Architecture)*: Giúp hiểu lý do tại sao môi trường kiểm thử lại chia thành Signal, Command, Functional, Scenario và Test layers.\r\n  - *Phương pháp Kiểm thử ngẫu nhiên có ràng buộc (Constrained-Random Verification - CRV)*: Để hiểu cách bộ tạo (Generator) tạo tham số ngẫu nhiên nhưng vẫn hợp lệ.\r\n  - *Mẫu thiết kế Factory (Factory Pattern) & Callback*: Kiến thức lập trình hướng đối tượng để nắm cơ chế chèn \"hooks\" vào testbench mà không làm thay đổi kiến trúc cố định.",
+      "translation": "18\r\n1  Hướng dẫn Kiểm thử\r\n\r\n1.10.4  Tầng kịch bản (The Scenario Layer)\r\n\r\nTầng chức năng được điều khiển bởi bộ tạo (generator) ở tầng kịch bản, như thể hiện trong Hình 1.11. Kịch bản là gì? Hãy nhớ rằng công việc của bạn với tư cách là một kỹ sư kiểm thử là đảm bảo thiết bị này hoàn thành nhiệm vụ được thiết kế. Một thiết bị ví dụ là máy nghe nhạc MP3 có thể đồng thời phát nhạc từ bộ nhớ, tải nhạc mới từ máy chủ và phản hồi đầu vào từ người dùng, chẳng hạn như điều chỉnh âm lượng và trình điều khiển bài hát. Mỗi thao tác này là một kịch bản. Việc tải xuống một tệp nhạc cần thực hiện qua nhiều bước, chẳng hạn như đọc và ghi các thanh ghi điều khiển để thiết lập thao tác, nhiều lần ghi DMA để truyền bài hát, và sau đó là một nhóm các thao tác đọc và ghi khác. Tầng kịch bản của testbench sẽ điều phối tất cả các bước này với các giá trị ngẫu nhiên có ràng buộc cho các tham số như kích thước bài hát và vị trí bộ nhớ.\r\n\r\n[Hình 1.11: Testbench khi đã thêm tầng kịch bản]\r\n(Sơ đồ gồm các tầng: Kịch bản -> Generator; Chức năng -> Agent -> Scoreboard -> Checker; Mệnh lệnh -> Driver, Assertions, Monitor; Tín hiệu -> DUT. Tất cả các khối ngoại trừ DUT nằm trong khung \"Môi trường\" nét đứt).\r\n\r\nFig. 1.11  Testbench khi được thêm tầng kịch bản\r\n\r\nCác khối trong môi trường testbench (bên trong đường nét đứt của Hình 1.11) được viết ở giai đoạn đầu của quá trình phát triển. Trong suốt dự án, chúng có thể phát triển và bạn có thể thêm chức năng, nhưng các khối này không nên thay đổi đối với từng bài kiểm thử riêng lẻ. Điều này được thực hiện bằng cách để lại các \"móc nối\" (hooks) trong mã nguồn sao cho một bài kiểm thử có thể thay đổi hành vi của các khối này mà không cần phải viết lại chúng. Bạn tạo ra các móc nối này bằng mô hình nhà máy (factory patterns - Phần 8.2) và các hàm gọi lại (callbacks - Phần 8.7).\r\n\r\n1.10.5  Tầng kiểm thử và Độ bao phủ chức năng\r\n\r\nHiện tại bạn đang ở tầng cao nhất của testbench, tức là tầng kiểm thử (test layer), như thể hiện ở Hình 1.12. Các lỗi thiết kế xảy ra giữa các khối DUT thường khó tìm hơn vì chúng liên quan đến nhiều người cùng đọc và diễn giải nhiều tài liệu mô tả kỹ thuật khác nhau.\r\n\r\nBài kiểm thử cấp cao nhất này đóng vai trò như một nhạc trưởng: ông ấy không chơi bất kỳ nhạc cụ nào, mà thay vào đó hướng dẫn nỗ lực của những người khác. Bài kiểm thử chứa các ràng buộc (constraints) để tạo ra tín hiệu kích thích (stimulus).\r\n\r\nĐộ bao phủ chức năng (Functional coverage) đo lường tiến độ của tất cả các bài kiểm thử trong việc đáp ứng các yêu cầu của kế hoạch kiểm thử. Mã nguồn độ bao phủ chức năng sẽ thay đổi liên tục trong suốt dự án.",
+      "grammar": [
+        {
+          "phrase": "as shown in Fig. 1.11",
+          "explain": "mệnh đề rút gọn bị động chỉ sự so sánh/minh họa (dạng đầy đủ: as it is shown in Fig. 1.11)"
+        },
+        {
+          "phrase": "Remember that your job as a verification engineer is to make sure that this device accomplishes its intended task",
+          "explain": "mệnh đề danh từ làm tân ngữ (that your job...) chứa mệnh đề danh từ phụ (that this device accomplishes...) làm tân ngữ cho \"make sure\""
+        },
+        {
+          "phrase": "an MP3 player that can concurrently play music from its storage, download new music from a host, and respond to input from the user",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"an MP3 player\", sử dụng cấu trúc song song (parallel structure) cho 3 động từ: play, download, respond"
+        },
+        {
+          "phrase": "leaving \"hooks\" in the code so that a test can change the behavior of these blocks without having to rewrite them",
+          "explain": "danh động từ chỉ phương thức (leaving...) kết hợp mệnh đề chỉ mục đích (so that...) và cụm giới từ chỉ sự loại trừ (without having to...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "orchestrate",
+          "explain": "(động từ) điều phối, phối hợp các hoạt động phức tạp một cách nhịp nhàng (nghĩa gốc: phối dàn nhạc)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "concurrently",
+          "explain": "(trạng từ) đồng thời, xảy ra cùng một lúc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích đầu vào cấp cho thiết bị (DUT) để kiểm thử"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random values",
+          "explain": "(cụm danh từ) các giá trị ngẫu nhiên có ràng buộc — kỹ thuật tạo dữ liệu test tự động trong kiểm thử vi mạch"
+        },
+        {
+          "type": "phrase",
+          "phrase": "leave hooks in the code",
+          "explain": "(cụm từ) để lại các điểm nối/chèn trong mã nguồn để dễ dàng can thiệp thay đổi hành vi sau này"
+        },
+        {
+          "type": "vocab",
+          "phrase": "factory pattern",
+          "explain": "(danh từ) mẫu thiết kế nhà máy — một mẫu thiết kế định hình cách tạo đối tượng linh hoạt trong OOP"
+        },
+        {
+          "type": "vocab",
+          "phrase": "callback",
+          "explain": "(danh từ) hàm gọi lại — cơ chế cho phép chèn thêm đoạn mã xử lý tùy biến vào một chương trình đang chạy"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(danh từ) độ bao phủ chức năng — chỉ số đo lường mức độ các tính năng của thiết kế đã được kiểm thử thành công"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "summary": "- **Nội dung tổng quát:** Trang sách giải thích kiến trúc tổng thể của môi trường kiểm thử phân tầng (Layered Testbench) trong SystemVerilog (Hình 1.12), cách phối hợp kiểm thử định hướng (directed test) trong môi trường ngẫu nhiên (constrained-random), cùng các nguyên tắc thực tế để điều chỉnh cấu trúc testbench và phân bổ nhân lực kiểm thử phù hợp với quy mô dự án.\r\n- **Ý chính người đọc BẮT BUỘC phải hiểu:**\r\n  1. *Chèn test định hướng vào môi trường ngẫu nhiên:* Việc chèn kịch bản kiểm thử định hướng (directed test) vào giữa luồng dữ liệu ngẫu nhiên tạo ra \"nhiễu nền\" (background noise), giúp bộc lộ các lỗi ẩn ở các khối chức năng không ngờ tới.\r\n  2. *Cấu trúc tổng thể của Layered Testbench (Hình 1.12):* Tầng Test nằm ngoài Environment để điều khiển Generator; dữ liệu từ Generator qua Agent đến Driver nạp vào DUT; dữ liệu phản hồi từ DUT được Monitor và Assertions ghi nhận để Checker và Scoreboard xác minh, đồng thời kết nối tới khối Functional Coverage.\r\n  3. *Linh hoạt điều chỉnh số lượng tầng:* Không phải testbench nào cũng cần tất cả các tầng. Thiết kế đơn giản có thể gộp scenario layer với agent; nhưng thiết kế phức tạp nhiều tầng giao thức (như TCP/IP/Ethernet) đòi hỏi các tầng kiểm thử tương ứng.\r\n  4. *Quy tắc ước tính nhân lực kiểm thử:* Khối lượng công việc kiểm thử được tính theo **số lượng kỹ sư thiết kế** chứ không tính theo **số lượng cổng logic (gates)**. Mỗi người tăng thêm trong đội ngũ thiết kế sẽ làm tăng nguy cơ hiểu sai tài liệu kỹ thuật (specifications). Tỷ lệ điển hình là cần **hơn 2 kỹ sư kiểm thử cho mỗi 1 kỹ sư thiết kế**.\r\n  5. *Tính linh hoạt của mô hình:* Sơ đồ kiến trúc chỉ mang tính hướng dẫn chung (guidelines); tầng Test có thể cần can thiệp trực tiếp xuống tầng Driver để chủ động tạo ra các lỗi ở cấp độ vật lý.\r\n- **Khái niệm/thuật ngữ CẦN tìm hiểu thêm:**\r\n  - *Constrained-Random Verification (CRV):* Kiểm thử ngẫu nhiên có ràng buộc — phương pháp kiểm thử hiện đại trong SystemVerilog/UVM giúp tự động hóa việc sinh kịch bản test.\r\n  - *Agent, Driver, Monitor, Scoreboard, Checker, Assertions, Functional Coverage:* Các thành phần cốt lõi tạo nên một môi trường kiểm thử chuẩn (UVM/SystemVerilog).",
+      "translation": "...khi các tiêu chí khác nhau hoàn thành. Đoạn mã này liên tục được chỉnh sửa và do đó nó không phải là một phần của môi trường kiểm thử (environment).\r\n\r\n    Bạn có thể tạo một kịch bản kiểm thử định hướng (directed test) trong một môi trường ngẫu nhiên có ràng buộc (constrained-random environment). Bạn chỉ cần chèn một đoạn mã kiểm thử định hướng vào giữa một chuỗi ngẫu nhiên, hoặc chạy song song hai đoạn mã này. Đoạn mã định hướng sẽ thực hiện đúng công việc bạn muốn, nhưng \"nhiễu nền\" ngẫu nhiên xung quanh có thể khiến một lỗi ẩn lộ diện, có thể ở một khối mà bạn chưa bao giờ tính tới.\r\n\r\n[Hình 1.12 Môi trường kiểm thử hoàn chỉnh với đầy đủ các tầng]\r\n\r\n    Liệu bạn có cần tất cả các tầng này trong môi trường kiểm thử của mình không? Câu trả lời phụ thuộc vào thiết kế (DUT) của bạn trông như thế nào. Một thiết kế phức tạp đòi hỏi một môi trường kiểm thử tinh vi. Bạn luôn cần tầng kiểm thử (test layer). Đối với một thiết kế đơn giản, tầng kịch bản (scenario layer) có thể đơn giản đến mức bạn có thể gộp nó lại với thành phần agent. Khi ước tính công sức cần thiết để kiểm thử một thiết kế, đừng đếm số lượng cổng logic; hãy đếm số lượng kỹ sư thiết kế. Mỗi khi bạn thêm một người vào đội ngũ, bạn lại làm tăng nguy cơ phát sinh các cách hiểu khác nhau về tài liệu tả kỹ thuật. Các đội ngũ phần cứng điển hình cần nhiều hơn hai kỹ sư kiểm thử cho mỗi kỹ sư thiết kế.\r\n\r\n    Bạn có thể cần nhiều tầng hơn. Nếu DUT của bạn có nhiều tầng giao thức, mỗi tầng nên có tầng tương ứng riêng trong môi trường kiểm thử. Ví dụ, nếu bạn có luồng dữ liệu TCP được đóng gói trong IP và gửi đi qua các gói tin Ethernet, hãy cân nhắc sử dụng ba tầng riêng biệt cho việc tạo và kiểm tra dữ liệu. Tốt hơn hết, hãy sử dụng lại các thành phần kiểm thử (verification components) đã có sẵn.\r\n\r\n    Một lưu ý cuối cùng về Hình 1.12. Sơ đồ này thể hiện một số kết nối có thể có giữa các khối, nhưng môi trường kiểm thử của bạn có thể có một tập hợp kết nối khác. Tầng kiểm thử có thể cần can thiệp trực tiếp xuống tận tầng driver để ép tạo ra các lỗi vật lý. Những gì được mô tả ở đây chỉ là các chỉ dẫn — hãy để nhu cầu thực tế của bạn dẫn dắt những gì bạn tạo ra.\r\n\r\n1.11 Xây dựng môi trường kiểm thử phân tầng\r\n\r\nNào, giờ là lúc lấy các hình minh họa trước đó và học cách ánh xạ các thành phần này vào các cấu trúc trong SystemVerilog.",
+      "grammar": [
+        {
+          "phrase": "may cause a bug to become visible",
+          "explain": "cấu trúc \"cause + Object + to-infinitive\" (khiến cho ai/cái gì làm gì/trở nên như thế nào)"
+        },
+        {
+          "phrase": "The scenario layer may be so simple that you can merge it with the agent",
+          "explain": "cấu trúc so... that... (quá... đến mức mà...) chỉ kết quả"
+        },
+        {
+          "phrase": "Every time you add another person to the team, you increase the chance of different interpretations",
+          "explain": "mệnh đề phụ thuộc chỉ thời gian bắt đầu bằng \"every time\" đóng vai trò liên từ nối hai mệnh đề"
+        },
+        {
+          "phrase": "consider using three separate layers for generation and checking",
+          "explain": "cấu trúc \"consider + V-ing\" (cân nhắc/xem xét làm việc gì)"
+        },
+        {
+          "phrase": "What has been described here is just guidelines",
+          "explain": "mệnh đề danh từ \"What has been described here\" làm chủ ngữ chính, chứa thể bị động của thì hiện tại hoàn thành (has been described)"
+        },
+        {
+          "phrase": "let your needs guide what you create",
+          "explain": "cấu trúc \"let + Object + bare infinitive\" (để cho cái gì làm gì) kết hợp mệnh đề danh từ \"what you create\" làm tân ngữ của động từ \"guide\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "constrained-random",
+          "explain": "(tính từ chuyên ngành) ngẫu nhiên có ràng buộc — phương pháp tạo dữ liệu kiểm thử tự động dựa trên quy tắc logic đặt trước"
+        },
+        {
+          "type": "idiom",
+          "phrase": "background noise",
+          "explain": "(ẩn dụ kỹ thuật) nhiễu nền — các hoạt động ngẫu nhiên chạy ngầm song song để tạo áp lực giúp làm bộc lộ lỗi ẩn của hệ thống"
+        },
+        {
+          "type": "phrase",
+          "phrase": "count the number of designers",
+          "explain": "(cụm từ/lời khuyên) đếm số lượng kỹ sư thiết kế — nguyên lý ước tính nhân lực kiểm thử dựa vào quy mô nhân sự phát triển thay vì quy mô cổng logic của vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "verification components",
+          "explain": "(cụm danh từ chuyên ngành) các thành phần kiểm thử — khối mã nguồn kiểm thử được đóng gói để tái sử dụng (như VIP - Verification IP)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "reach down to",
+          "explain": "(cụm động từ) can thiệp sâu xuống/với tới mức dưới — việc một tầng kiểm thử ở cấp cao can thiệp trực tiếp vào chức năng của các tầng bên dưới"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "summary": "- Nội dung tổng quát: Trang này nằm ở Chương 1 (Hướng dẫn kiểm thử), giới thiệu chi tiết về khối Driver (Bộ lái tín hiệu) - một thành phần quan trọng trong môi trường testbench - và bước đầu mở ra khái niệm về các giai đoạn hoạt động (Phases) của môi trường mô phỏng vi mạch.\r\n- Những ý chính người đọc bắt buộc phải hiểu:\r\n  1. Driver là một loại \"transactor\" (bộ chuyển đổi giao dịch). Nhiệm vụ của nó là nhận lệnh mức cao từ Agent, phân tách các lệnh này thành các chuỗi tín hiệu mức thấp (như bus request, handshake) để điều khiển trực tiếp thiết bị cần kiểm thử (DUT). Nó cũng có thể chủ động chèn lỗi (inject errors) hoặc tạo độ trễ (add delays).\r\n  2. Cấu trúc cốt lõi của một transactor là một vòng lặp (loop) liên tục thực hiện 3 bước: Lấy giao dịch -> Chuyển đổi dữ liệu -> Gửi tín hiệu đi.\r\n  3. Trong kiến trúc Hướng đối tượng (OOP) của SystemVerilog, dữ liệu giao dịch được đóng gói thành đối tượng (object) và truyền giữa các khối transactor bằng cơ chế Mailbox (sẽ học kỹ ở Chương 5 và 7).\r\n  4. Môi trường kiểm thử được điều phối theo các giai đoạn (Phases) rõ ràng để tất cả mã nguồn chạy đồng bộ. Ba giai đoạn chính là: Build (Khởi tạo/Dựng môi trường), Run (Chạy mô phỏng), và Wrap-up (Tổng kết/Dọn dẹp).\r\n- Khái niệm/Kiến thức nền cần tìm hiểu thêm: Kiến thức cơ bản về kiểm thử vi mạch dùng SystemVerilog (DUT, Driver, Agent), khái niệm Lập trình hướng đối tượng (OOP), các cơ chế truyền tin (Mailbox) và phương pháp luận kiểm thử chuẩn như UVM (Universal Verification Methodology) / VMM (Verification Methodology Manual).",
+      "translation": "20\r\n1 Hướng dẫn Kiểm thử\r\n\r\n1.11.1 Tạo một Driver Đơn giản\r\n\r\nĐầu tiên, hãy nhìn kỹ hơn vào một trong các khối: khối driver (bộ lái).\r\n\r\n[Hình 1.13 Kết nối cho driver: Agent -> Driver -> DUT]\r\n\r\nFig. 1.13 Kết nối cho driver\r\n\r\nDriver được thể hiện ở Hình 1.13 nhận các lệnh từ agent. Driver có thể chèn thêm lỗi hoặc thêm độ trễ. Sau đó, nó phân tách lệnh thành các thay đổi tín hiệu riêng lẻ như các yêu cầu bus (bus requests) và bắt tay (handshakes). Thuật ngữ chung cho một khối testbench như vậy là một “transactor” (bộ thực thi giao dịch), mà về cốt lõi của nó là một vòng lặp. Mã nguồn mẫu cho một transactor được trình bày ở Ví dụ 1.4.\r\n\r\nSample 1.4 Mã nguồn transactor cơ bản\r\n\r\ntask run();\r\n  done = 0;\r\n  while (!done) begin\r\n    // Lấy giao dịch tiếp theo\r\n    // Thực hiện các biến đổi\r\n    // Gửi các giao dịch đi\r\n  end\r\nendtask\r\n\r\nChương 5 trình bày về OOP cơ bản và cách tạo một đối tượng bao gồm các thủ tục và dữ liệu cho một transactor. Một ví dụ khác về transactor là agent. Nó có thể phân tách một giao dịch phức tạp như đọc DMA thành nhiều lệnh bus. Cũng trong Chương 5, bạn sẽ thấy cách xây dựng một đối tượng chứa dữ liệu và các thủ tục tạo nên một lệnh. Các đối tượng này được gửi giữa các transactor thông qua các mailbox trong SystemVerilog. Trong Chương 7, bạn sẽ học về nhiều cách để trao đổi dữ liệu giữa các tầng khác nhau và đồng bộ hóa các transactor.\r\n\r\n1.12 Các Giai đoạn của Môi trường Mô phỏng\r\n\r\nCho đến nay bạn đã được học các phần tạo nên môi trường kiểm thử. Nhưng khi nào thì các phần này thực thi? Bạn muốn xác định rõ ràng các giai đoạn để điều phối testbench sao cho toàn bộ mã nguồn của một dự án hoạt động ăn khớp với nhau. Ba giai đoạn chính là Build (Khởi tạo), Run (Chạy mô phỏng) và Wrap-up (Tổng kết). Mỗi giai đoạn lại được chia thành các bước nhỏ hơn. Ba giai đoạn này là một tập hợp con của rất nhiều giai đoạn trong UVM và VMM.",
+      "grammar": [
+        {
+          "phrase": "breaks the command down into individual signal changes such as bus requests and handshakes",
+          "explain": "cụm động từ \"break down into\" (phân tách thành) kết hợp từ chỉ ví dụ minh họa \"such as\""
+        },
+        {
+          "phrase": "a “transactor,” which, at its core, is a loop",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) bổ nghĩa cho \"transactor\", chứa cụm từ chèn giữa \"at its core\""
+        },
+        {
+          "phrase": "create an object that includes the routines and data for a transactor",
+          "explain": "mệnh đề quan hệ xác định (defining relative clause) dùng \"that\" bổ nghĩa cho danh từ \"an object\""
+        },
+        {
+          "phrase": "These objects are sent between transactors using SystemVerilog mailboxes",
+          "explain": "câu bị động (passive voice) ở thì hiện tại đơn kết hợp cụm hiện tại phân tử \"using...\" chỉ phương tiện/cách thức thực hiện"
+        },
+        {
+          "phrase": "Up until now you have been learning what parts make up the environment",
+          "explain": "thì hiện tại hoàn thành tiếp diễn (have been learning) kết hợp mệnh đề danh ngữ (noun clause: \"what parts...\") làm tân ngữ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "transactor",
+          "explain": "(danh từ) bộ thực thi/chuyển đổi giao dịch trong kiểm thử vi mạch, nhận lệnh mức cao và dịch thành tín hiệu mức thấp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "handshake",
+          "explain": "(danh từ) cơ chế bắt tay / xác nhận giao tiếp giữa các thiết bị điện tử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "mailbox",
+          "explain": "(danh từ) hộp thư (cơ chế truyền dữ liệu và đồng bộ giữa các tiến trình trong SystemVerilog)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synchronize",
+          "explain": "(động từ) đồng bộ hóa (làm cho các tiến trình/khối hoạt động theo đúng nhịp)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subset",
+          "explain": "(danh từ) tập hợp con, một phần nhỏ nằm trong tập hợp lớn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "inject errors",
+          "explain": "chèn lỗi, cố tình đưa lỗi vào hệ thống để kiểm thử phản ứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "break down into",
+          "explain": "phân chia, bóc tách cái gì đó thành các phần nhỏ hơn"
+        },
+        {
+          "type": "phrase",
+          "phrase": "at its core",
+          "explain": "về bản chất, về cốt lõi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "phrasal verb: make up",
+          "explain": "cấu thành, tạo nên"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "summary": "- **Nội dung tổng quát**: Trang sách tiếp tục trình bày chi tiết về các quy trình/bước trong quy trình kiểm thử ASIC/SoC (tiếp tục Pha Build, Pha Run, Pha Wrap-up) và bắt đầu giới thiệu Mục 1.13 về nguyên lý \"Tái sử dụng mã nguồn tối đa\" (Maximum Code Reuse) trong thiết kế môi trường kiểm thử (testbench).\r\n- **Những ý chính người đọc BẮT BUỘC phải hiểu**:\r\n  1. *Tiếp nối Pha Build (Xây dựng)*: Gồm tạo cấu hình ngẫu nhiên, cấp phát/kết nối các thành phần testbench (như bus driver), reset DUT và nạp các thanh ghi lệnh cho DUT dựa trên cấu hình đã tạo.\r\n  2. *Pha Run (Thực thi)*: Bắt đầu chạy các bộ tạo kích thích/BFM. Để biết một bài test ngẫu nhiên đã xong hay chưa, cần theo dõi sự hoàn tất của từng tầng testbench từ trên xuống dưới (đảm bảo các tầng xả hết dữ liệu và rảnh rỗi) kết hợp các bộ theo dõi hết giờ (time-out checkers) để chống treo hệ thống.\r\n  3. *Pha Wrap-up (Tổng kết)*: Gồm bước \"Sweep\" (chờ giao dịch cuối xả khỏi DUT) và \"Report\" (quét scoreboard tìm dữ liệu bị mất/rơi để báo cáo kết quả Pass/Fail; xóa dữ liệu độ bao phủ nếu test lỗi).\r\n  4. *Tái sử dụng mã nguồn (Maximum Code Reuse)*: Thay vì viết hàng trăm bài test hướng đích (directed tests), kỹ sư nên tập trung xây dựng một testbench dùng chung đa tầng kết hợp kỹ thuật ngẫu nhiên có ràng buộc (constrained-random stimulus). Việc thêm mã vào testbench tổng quát sẽ giảm đáng kể lượng mã phải viết cho từng bài test riêng lẻ.\r\n- **Khái niệm/Kiến thức nền CẦN tìm hiểu thêm**:\r\n  - *BFM (Bus Functional Model)* & *Scoreboard*: Các thành phần cốt lõi trong testbench hiện đại dùng để giao tiếp với bus và kiểm tra tính đúng đắn của dữ liệu.\r\n  - *Constrained-Random Stimulus*: Phương pháp tạo kịch bản kiểm thử ngẫu nhiên theo các điều kiện/ràng buộc cho trước, giúp tăng độ bao phủ lỗi mà không phải viết nhiều code thủ công.\r\n  - *Functional Coverage*: Thước đo định lượng cho biết bao nhiêu phần trăm tính năng thiết kế đã được kiểm thử thành công.",
+      "translation": "Pha Build (Xây dựng) được chia thành các bước sau:\r\n- *Generate configuration (Tạo cấu hình)*: Ngẫu nhiên hóa cấu hình của DUT và môi trường xung quanh.\r\n- *Build environment (Xây dựng môi trường)*: Cấp phát và kết nối các thành phần testbench dựa trên cấu hình. Một thành phần testbench là thành phần chỉ tồn tại trong testbench, trái ngược với các thành phần vật lý trong thiết kế được xây dựng bằng mã RTL. Ví dụ, nếu cấu hình chọn ba bus driver, testbench sẽ cấp phát và khởi tạo chúng trong bước này.\r\n- *Reset the DUT (Khôi phục trạng thái ban đầu của DUT).*\r\n- *Configure the DUT (Cấu hình DUT)*: Dựa trên cấu hình được tạo ra từ bước đầu tiên, nạp các thanh ghi lệnh của DUT.\r\n\r\nPha Run (Thực thi) là nơi bài test thực sự chạy. Nó bao gồm các bước sau:\r\n- *Start environment (Khởi chạy môi trường)*: Chạy các thành phần testbench như các BFM và các bộ tạo kích thích.\r\n- *Run the test (Thực thi bài test)*: Bắt đầu bài test và sau đó chờ nó hoàn thành. Rất dễ để nhận biết khi nào một bài test hướng đích hoàn thành, nhưng việc này có thể phức tạp đối với một bài test ngẫu nhiên. Bạn có thể sử dụng các tầng của testbench làm hướng dẫn. Bắt đầu từ tầng trên cùng, chờ một tầng xả hết tất cả các đầu vào từ tầng trước đó (nếu có), chờ tầng hiện tại trở nên rảnh rỗi, và sau đó chờ tầng thấp hơn tiếp theo. Bạn cũng nên sử dụng các bộ kiểm tra thời gian chờ (time-out checkers) để đảm bảo DUT hoặc testbench không bị treo.\r\n\r\nPha Wrap-up (Tổng kết) có hai bước:\r\n- *Sweep (Xả dữ liệu)*: Sau khi tầng thấp nhất hoàn thành, bạn cần chờ các giao dịch cuối cùng được xả hết ra khỏi DUT.\r\n- *Report (Báo cáo)*: Khi DUT đã rảnh rỗi, quét testbench để tìm dữ liệu bị mất. Đôi khi scoreboard vẫn giữ các giao dịch không bao giờ đi ra ngoài, có lẽ vì chúng đã bị DUT loại bỏ. Dựa vào thông tin này, bạn có thể tạo báo cáo cuối cùng về việc bài test thành công hay thất bại. Nếu thất bại, hãy chắc chắn xóa mọi kết quả độ bao phủ chức năng, vì chúng có thể không chính xác.\r\n\r\nNhư được trình bày trong Hình 1.12, bài test bắt đầu môi trường, và môi trường sẽ lần lượt chạy từng bước. Chi tiết hơn có thể được tìm thấy trong Chương 8.\r\n\r\n1.13 Tái Sử Dụng Mã Nguồn Tối Đa\r\n\r\nĐể kiểm thử một thiết bị phức tạp với hàng trăm tính năng, bạn phải viết hàng trăm bài test hướng đích. Nếu sử dụng kích thích ngẫu nhiên có ràng buộc, bạn sẽ viết ít bài test hơn. Thay vào đó, công việc thực sự được tập trung vào việc xây dựng testbench, nơi chứa tất cả các tầng testbench thấp hơn: kịch bản (scenario), chức năng (functional), lệnh (command), và tín hiệu (signal). Mã testbench này được sử dụng bởi tất cả các bài test, vì vậy nó luôn giữ tính tổng quát.\r\n\r\nNhững hướng dẫn này có vẻ như đề xuất một testbench phức tạp quá mức, nhưng hãy nhớ rằng mỗi dòng mã bạn đưa vào testbench có thể loại bỏ một dòng mã trong từng bài test riêng lẻ. Nếu bạn biết mình sẽ tạo ra vài chục bài test, lợi ích thu lại là rất cao-",
+      "grammar": [
+        {
+          "phrase": "as opposed to physical components in the design that are built with RTL code",
+          "explain": "mệnh đề quan hệ (relative clause) \"that are built...\" bổ nghĩa cho \"physical components\", kết hợp cấu trúc tương phản \"as opposed to\""
+        },
+        {
+          "phrase": "Starting from the top, wait for a layer to drain all the inputs from the previous layer",
+          "explain": "mệnh đề phân từ hiện tại (present participle clause) \"Starting from...\" đóng vai trò trạng ngữ chỉ cách thức/trình tự thực hiện"
+        },
+        {
+          "phrase": "Armed with this information, you can create the final report on whether the test passed or failed",
+          "explain": "mệnh đề phân từ quá khứ (past participle clause) \"Armed with...\" làm trạng ngữ chỉ nguyên nhân/tiền đề cho hành động ở mệnh đề chính"
+        },
+        {
+          "phrase": "remember that every line that you put into a testbench can eliminate a line in every single test",
+          "explain": "mệnh đề danh ngữ (noun clause) làm tân ngữ cho \"remember\", bên trong chứa mệnh đề quan hệ rút gọn/xác định \"that you put...\" bổ nghĩa cho \"every line\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "DUT",
+          "explain": "(danh từ) Device Under Test - Thiết bị hoặc khối thiết kế đang được kiểm thử trong điện tử/vi mạch"
+        },
+        {
+          "type": "vocab",
+          "phrase": "RTL",
+          "explain": "(danh từ) Register-Transfer Level - Cấp chuyển giao thanh ghi, dạng mã miêu tả phần cứng (Verilog/VHDL)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "BFM",
+          "explain": "(danh từ) Bus Functional Model - Mô hình mô phỏng chức năng giao thức của xe buýt (bus)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "Scoreboard",
+          "explain": "(danh từ) Thành phần trong testbench có nhiệm vụ lưu giữ và so sánh dữ liệu thực tế với dữ liệu kỳ vọng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random stimulus",
+          "explain": "kỹ thuật tạo dữ liệu đầu vào ngẫu nhiên nhưng tuân theo các ràng buộc hợp lệ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed test",
+          "explain": "bài kiểm tra hướng đích (bài test được viết mã cố định kịch bản từ trước)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "độ bao phủ chức năng (thước đo phần trăm các tính năng thiết kế đã được test)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "lock up",
+          "explain": "(động từ) bị treo, bị kẹt, không thể tiếp tục xử lý"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in turn",
+          "explain": "(trạng từ) lần lượt, theo thứ tự kế tiếp nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "drain out",
+          "explain": "(động từ) xả hết, thoát hết dữ liệu ra ngoài"
+        },
+        {
+          "type": "phrase",
+          "phrase": "arm with",
+          "explain": "(động từ/phụ từ) được trang bị, sở hữu (thông tin, công cụ) để làm điều gì đó"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "summary": "Nội dung trang 22 tập trung vào hai phần chính: Đánh giá hiệu năng của môi trường kiểm thử (Testbench Performance) và Lời kết (Conclusion) cho Chương 1 về Quy trình kiểm thử.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm được:\r\n1. So sánh hiệu năng giữa Kiểm thử định hướng (Directed testing) và Kiểm thử ngẫu nhiên có ràng buộc (Constrained-random testing): Directed test chạy mô phỏng rất nhanh (vài giây), trong khi constrained-random test chạy lâu hơn (vài phút đến vài giờ). Tuy nhiên, nút thắt thực sự nằm ở thời gian kỹ sư phải bỏ ra để viết và debug thủ công bài test. Thời gian máy tính chạy mô phỏng là không đáng kể so với thời gian làm việc của con người.\r\n2. Ba bước cốt lõi để xây dựng bài test ngẫu nhiên có ràng buộc:\r\n   - Bước 1: Dựng môi trường kiểm thử phân lớp (layered testbench) tích hợp cơ chế tự kiểm tra (self-checking).\r\n   - Bước 2: Tạo các kịch bản kích thích (stimulus) cụ thể, thêm các ràng buộc ngẫu nhiên hoặc bơm lỗi/vi phạm giao thức. Dù tốn công ban đầu nhưng hiệu quả mang lại cực kỳ cao (tạo ra hàng nghìn biến thể giao thức).\r\n   - Bước 3: Lập kế hoạch độ phủ chức năng (functional coverage), viết mã SystemVerilog thu thập dữ liệu và phân tích kết quả để tinh chỉnh kịch bản test.\r\n3. Chi phí sửa lỗi và quy luật \"gấp 10 lần\": Chi phí phát hiện và sửa lỗi tăng gấp 10 lần qua mỗi giai đoạn (từ Mô tả yêu cầu -> Viết mã RTL -> Tổng hợp cổng -> Chế tạo chip -> Sản phẩm đến tay người dùng). Do đó, việc kết hợp tạo kích thích ngẫu nhiên có ràng buộc và độ phủ chức năng là phương pháp bắt buộc để đảm bảo chất lượng thiết kế.\r\n\r\nCác kiến thức/thuật ngữ nền cần tìm hiểu thêm:\r\n- Constrained-random testing (Kiểm thử ngẫu nhiên có ràng buộc): Phương pháp tạo dữ liệu đầu vào ngẫu nhiên dựa trên các quy tắc/ràng buộc cho trước.\r\n- Functional coverage (Độ phủ chức năng): Mẫu đo lường xem tất cả các tính năng định trước trong kế hoạch kiểm thử đã được chạy và kiểm tra chưa.\r\n- Layered testbench (Môi trường kiểm thử phân lớp): Kiến trúc chia nhỏ testbench thành các lớp riêng biệt (Driver, Monitor, Scoreboard, Generator...) để dễ tái sử dụng.",
+      "translation": "22\r\n1 Quy trình kiểm thử\r\n\r\n...trở lại trong việc tạo ra một testbench phức tạp hơn. Hãy ghi nhớ điều này khi bạn đọc Chương 8.\r\n\r\n1.14 Hiệu năng của Testbench\r\n\r\nNếu đây là lần đầu tiên bạn tiếp cận phương pháp luận này, có thể bạn sẽ băn khoăn về hiệu quả hoạt động của nó so với kiểm thử định hướng (directed testing). Một mối quan ngại phổ biến là hiệu năng của testbench. Một bài test định hướng thường chạy mô phỏng chỉ trong vài giây, trong khi các bài test ngẫu nhiên có ràng buộc sẽ đi lang thang qua không gian trạng thái trong vài phút hoặc thậm chí vài giờ. Vấn đề của lập luận này là nó đã bỏ qua một nút thắt thực sự trong kiểm thử: thời gian mà bạn cần để tạo ra một bài test. Bạn có thể tự tay viết một bài test định hướng trong một ngày và sửa lỗi rồi xác minh thủ công kết quả bằng tay trong một hai ngày khác. Thời gian chạy mô phỏng thực tế là quá nhỏ bé so với lượng thời gian mà cá nhân bạn đã đầu tư.\r\n\r\nCó một số bước để tạo ra một bài test ngẫu nhiên có ràng buộc. Bước đầu tiên và quan trọng nhất là xây dựng testbench phân lớp, bao gồm cả phần tự kiểm tra (self-checking). Lợi ích của công việc này được chia sẻ cho tất cả các bài test, vì vậy nó rất đáng công sức bỏ ra. Bước thứ hai là tạo ra kích thích cụ thể cho một mục tiêu trong kế hoạch kiểm thử. Bạn có thể tự tay tạo ra các ràng buộc ngẫu nhiên, hoặc các cách ma quái để bơm lỗi hay vi phạm giao thức. Việc xây dựng một trong những bài test này có thể tốn nhiều thời gian hơn so với việc tạo ra vài bài test định hướng, nhưng thành quả mang lại sẽ cao hơn nhiều. Một bài test ngẫu nhiên có ràng buộc thử nghiệm hàng nghìn biến thể giao thức khác nhau sẽ giá trị hơn nhiều so với một nắm các bài test định hướng có thể được tạo ra trong cùng một khoảng thời gian đó.\r\n\r\nBước thứ ba trong kiểm thử ngẫu nhiên có ràng buộc là độ phủ chức năng. Nhiệm vụ này bắt đầu bằng việc tạo ra một kế hoạch kiểm thử vững chắc với các mục tiêu rõ ràng có thể đo lường dễ dàng. Tiếp theo, bạn cần viết mã SystemVerilog để thêm các công cụ đo đạc vào môi trường và thu thập dữ liệu. Cuối cùng, điều thiết yếu là bạn phải phân tích các kết quả để xác định xem mình đã đạt được các mục tiêu hay chưa, và nếu chưa thì nên sửa đổi các bài test như thế nào.\r\n\r\n1.15 Kết luận\r\n\r\nSự tăng trưởng liên tục về độ phức tạp của các thiết kế điện tử đòi hỏi một phương pháp hiện đại, có hệ thống và tự động hóa để tạo ra các testbench. Chi phí sửa một lỗi tăng gấp mười lần khi một dự án chuyển qua từng bước từ mô tả yêu cầu kỹ thuật đến viết mã RTL, tổng hợp cổng, chế tạo chip, và cuối cùng là đến tay người dùng. Các bài test định hướng chỉ kiểm tra từng tính năng tại một thời điểm và không thể tạo ra các cấu hình và kích thích phức tạp mà thiết bị sẽ phải chịu trong thế giới thực. Để tạo ra các thiết kế bền bỉ, bạn phải sử dụng kích thích ngẫu nhiên có ràng buộc kết hợp với độ phủ chức năng nhằm tạo ra dải kích thích rộng nhất có thể.",
+      "grammar": [
+        {
+          "phrase": "The actual simulation run time is dwarfed by the amount of time that you personally invested.",
+          "explain": "câu bị động (passive voice) kết hợp mệnh đề quan hệ \"that you personally invested\" bổ nghĩa cho \"the amount of time\", nhấn mạnh sự chênh lệch lớn giữa thời gian chạy máy và thời gian con người bỏ ra"
+        },
+        {
+          "phrase": "Building one of these may take more time than making several directed tests, but the payoff will be much higher.",
+          "explain": "cấu trúc so sánh hơn \"take more time than...\" kết hợp từ nhấn mạnh mức độ \"much higher\" (cao hơn nhiều)"
+        },
+        {
+          "phrase": "Next you need to create the SystemVerilog code that adds instrumentation to the environment and gathers the data.",
+          "explain": "mệnh đề quan hệ (relative clause) dùng \"that\" làm chủ ngữ bổ nghĩa cho \"SystemVerilog code\""
+        },
+        {
+          "phrase": "The cost of fixing a bug grows tenfold as a project moves from each step of specification to RTL coding, gate synthesis, fabrication, and finally into the user’s hands.",
+          "explain": "cấu trúc miêu tả sự biến đổi đồng thời dùng liên từ \"as\" (khi/theo tiến trình) kết hợp với danh từ chỉ hành động \"fixing a bug\" làm chủ ngữ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "qualm",
+          "explain": "(danh từ) sự băn khoăn, nghi ngại, lo lắng về tính đúng đắn hoặc hiệu quả của một việc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "dwarf",
+          "explain": "(động từ) làm cho cái gì đó trở nên nhỏ bé/không đáng kể khi so sánh cùng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instrumentation",
+          "explain": "(danh từ) mã lệnh hoặc công cụ đo đạc/giám sát được chèn thêm vào chương trình để thu thập dữ liệu (ở đây là đo độ phủ functional coverage)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "fabrication",
+          "explain": "(danh từ) quá trình chế tạo/sản xuất chip bán dẫn trong nhà máy (fab)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained-random test",
+          "explain": "(cụm danh từ) bài kiểm thử ngẫu nhiên có ràng buộc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional coverage",
+          "explain": "(cụm danh từ) độ phủ chức năng (chỉ số đo lường mức độ hoàn thành kịch bản kiểm thử)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "verification plan",
+          "explain": "(cụm danh từ) kế hoạch kiểm thử thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "state space",
+          "explain": "(cụm danh từ) không gian trạng thái (tất cả các trạng thái có thể có của một hệ thống)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "hand-craft",
+          "explain": "(động từ) tự làm hoặc viết bằng tay một cách thủ công tỉ mỉ"
+        },
+        {
+          "type": "phrase",
+          "phrase": "protocol violation",
+          "explain": "(cụm danh từ) hành vi vi phạm quy chuẩn giao thức (dùng để test khả năng xử lý lỗi của thiết kế)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "grows tenfold",
+          "explain": "(cụm từ) tăng lên gấp 10 lần"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "summary": "Trang 23 bao gồm phần Bài tập (Exercises) cuối chương 1 của tài liệu về kiểm thử thiết kế vi mạch (Hardware Verification). Phần này kiểm tra kiến thức tổng hợp của người học về hai mảng chính: kỹ năng lập kế hoạch kiểm thử cho một khối chức năng cụ thể và khả năng tư duy so sánh giữa các phương pháp/cấp độ kiểm thử khác nhau.\r\n\r\nNgười đọc bắt buộc phải hiểu được các ý chính sau:\r\n- Cách xây dựng một kế hoạch kiểm thử (verification plan) cho khối xử lý số học và logic (ALU) dựa trên các thông số kỹ thuật cho trước (reset bất đồng bộ tích cực mức cao, xung nhịp, các tín hiệu đầu vào/đầu ra có dấu, và 4 tập lệnh chi tiết như Cộng, Trừ, Đảo bit, OR thu gọn).\r\n- Sự khác biệt cùng ưu/nhược điểm giữa việc thực hiện kiểm thử ở cấp độ khối đơn lẻ (block level) và cấp độ toàn hệ thống tích hợp (system level).\r\n- Sự đánh đổi giữa phương pháp kiểm thử định hướng truyền thống (directed testing - viết kịch bản cho từng trường hợp cụ thể) và phương pháp kiểm thử ngẫu nhiên có ràng buộc hiện đại (constrained random testing - tự động sinh dữ liệu ngẫu nhiên dựa trên quy tắc).\r\n\r\nĐể nắm trọn vẹn kiến thức của trang này, người đọc cần tìm hiểu thêm về:\r\n- Cấu trúc cơ bản của một ALU trong kỹ thuật máy tính và cách hoạt động của các phép toán logic/số học (đặc biệt là Reduction OR và Bit-wise invert).\r\n- Quy trình lập Verification Plan chuẩn trong ngành thiết kế IC/SoC.\r\n- Các khái niệm về môi trường kiểm thử (testbench), độ bao phủ (coverage) trong kiểm thử phần cứng.",
+      "translation": "1.16 Bài tập\r\n\r\n1. Hãy viết một kế hoạch kiểm thử (verification plan) cho một Khối số học và logic (ALU) có các đặc tính sau:\r\n• Reset đầu vào bất đồng bộ, tích cực mức cao (Asynchronous active high input reset)\r\n• Xung nhịp đầu vào (Input clock)\r\n• Các tín hiệu đầu vào 4-bit có dấu, A và B\r\n• Tín hiệu đầu ra C 5-bit có dấu, được chốt (registered) tại cạnh lên của xung nhịp đầu vào.\r\n• 4 mã lệnh (opcodes):\r\n– Cộng (Add): A + B\r\n– Trừ (Sub): A – B\r\n– Đảo từng bit (Bit-wise invert): A\r\n– OR thu gọn (Reduction Or): B\r\n\r\n2. Ưu điểm và nhược điểm của việc kiểm thử ở cấp độ khối (block level) là gì? Tại sao?\r\n3. Ưu điểm và nhược điểm của việc kiểm thử ở cấp độ hệ thống (system level) là gì? Tại sao?\r\n4. Ưu điểm và nhược điểm của kiểm thử định hướng (directed testing) là gì? Tại sao?\r\n5. Ưu điểm và nhược điểm của kiểm thử ngẫu nhiên có ràng buộc (constrained random testing) là gì? Tại sao?",
+      "grammar": [
+        {
+          "phrase": "5-bit signed output C that is registered on the positive edge of input clock",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"5-bit signed output C\", kết hợp thể bị động (is registered) để diễn tả đặc tính kỹ thuật của phần cứng được lưu vào thanh ghi theo xung nhịp"
+        },
+        {
+          "phrase": "What are the advantages and disadvantages to testing at the block level?",
+          "explain": "cấu trúc câu hỏi danh từ đi kèm giới từ \"advantages and disadvantages to + V-ing/N\" dùng để yêu cầu phân tích hai mặt ưu/nhược của một hành động hay phương pháp"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "opcode",
+          "explain": "(danh từ) mã thao tác / mã lệnh trong kiến trúc máy tính hoặc thiết kế số, dùng để xác định phép toán mà ALU cần thực hiện"
+        },
+        {
+          "type": "collocation",
+          "phrase": "verification plan",
+          "explain": "(cụm danh từ) kế hoạch kiểm thử — tài liệu chi tiết mô tả mục tiêu, chiến lược, môi trường và các trường hợp test cần thực hiện để xác minh thiết kế phần cứng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "active high",
+          "explain": "(cụm tính từ kỹ thuật) tích cực mức cao — trạng thái tín hiệu có hiệu lực/kích hoạt khi ở mức logic 1 (hoặc điện áp cao)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "registered output",
+          "explain": "(cụm danh từ kỹ thuật) đầu ra chốt qua thanh ghi — tín hiệu đầu ra được đi qua flip-flop và chỉ cập nhật giá trị theo cạnh xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bit-wise invert",
+          "explain": "(cụm danh từ/thao tác) phép đảo bit — phép toán đổi 0 thành 1 và 1 thành 0 trên từng bit độc lập của một thanh ghi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "reduction Or",
+          "explain": "(cụm danh từ/thao tác) phép OR thu gọn — phép toán thực hiện logic OR trên tất cả các bit của cùng một chuỗi bit để cho ra kết quả 1 bit"
+        },
+        {
+          "type": "collocation",
+          "phrase": "block level",
+          "explain": "(cụm danh từ kỹ thuật) cấp độ khối — phạm vi kiểm thử/thiết kế giới hạn trong một module chức năng nhỏ lẻ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "system level",
+          "explain": "(cụm danh từ kỹ thuật) cấp độ hệ thống — phạm vi kiểm thử/thiết kế cho toàn bộ chip hoặc toàn bộ hệ thống lớn gồm nhiều khối kết hợp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "directed testing",
+          "explain": "(cụm danh từ kỹ thuật) kiểm thử định hướng — phương pháp viết kịch bản test thủ công cho từng trường hợp cụ thể được dự đoán trước"
+        },
+        {
+          "type": "collocation",
+          "phrase": "constrained random testing",
+          "explain": "(cụm danh từ kỹ thuật) kiểm thử ngẫu nhiên có ràng buộc — phương pháp tự động tạo ra dữ liệu test ngẫu nhiên nằm trong các giới hạn/quy tắc định sẵn"
+        }
+      ]
+    }
+  ]
+}

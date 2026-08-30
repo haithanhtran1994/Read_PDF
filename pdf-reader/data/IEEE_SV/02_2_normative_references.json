@@ -1,0 +1,124 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "02_2_normative_references",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm ở Mục 2 \"Tài liệu tham chiếu quy chuẩn\" (Normative references) thuộc Tiêu chuẩn IEEE Std 1800-2023 về ngôn ngữ thiết kế, mô tả và kiểm định phần cứng SystemVerilog. Trang này đưa ra các quy tắc áp dụng văn bản tham chiếu và liệt kê danh mục toàn bộ các tiêu chuẩn, tài liệu kỹ thuật nền tảng được trích dẫn trong văn bản.\r\n- **Ý chính người đọc bắt buộc phải nắm:**\r\n  1. *Nguyên tắc áp dụng:* Tất cả các tài liệu được liệt kê đều là bắt buộc (indispensable) để hiểu và áp dụng tiêu chuẩn SystemVerilog.\r\n  2. *Quy tắc tài liệu có ghi năm (Dated references):* Nếu tài liệu tham chiếu có chỉ định năm/phiên bản cụ thể, chỉ đúng phiên bản đó mới có hiệu lực áp dụng.\r\n  3. *Quy tắc tài liệu không ghi năm (Undated references):* Nếu tài liệu tham chiếu không ghi năm, phiên bản mới nhất (bao gồm tất cả các bản sửa đổi `amendments` và đính chính `corrigenda`) sẽ được áp dụng.\r\n  4. *Các nhóm tiêu chuẩn tham chiếu chính:*\r\n     - Mật mã & Mã hóa: Serpent, DES (FIPS 46-3), AES (FIPS 197, NIST), SHS (FIPS 180-2), MD2 (RFC 1319), MD5 (RFC 1321), thuật toán ElGamal, ANSI X9.52 (Triple DES).\r\n     - Số học máy tính: IEEE Std 754 (Phép toán số thực phẩy động).\r\n     - Giao diện hệ điều hành: IEEE Std 1003.1 (POSIX).\r\n     - Tiêu chuẩn phần cứng tiền nhiệm: Các phiên bản lịch sử của Verilog (IEEE Std 1364 năm 1995, 2001, 2005) và SystemVerilog (IEEE Std 1800 năm 2005, 2009, 2012, 2017).\r\n  5. *Nguồn tra cứu (Chú thích chân trang):* Cung cấp địa chỉ truy cập/tải về các tài liệu tiêu chuẩn từ ANSI, FIPS (NTIS), IEEE và IETF (RFC).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Normative references (Tài liệu tham chiếu quy chuẩn):* Cần phân biệt giữa \"Normative\" (quy chuẩn - bắt buộc tuân thủ) và \"Informative\" (tham khảo - chỉ cung cấp thêm thông tin giải thích).\r\n  - *Corrigenda & Amendments:* Thuật ngữ trong quy trình xây dựng tiêu chuẩn quốc tế; hiểu rõ cách các bản đính chính lỗi (corrigenda) và bản sửa đổi bổ sung (amendments) cập nhật vào tiêu chuẩn gốc.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Mô tả Kỹ thuật và Kiểm định Phần cứng\r\n\r\n2. Tài liệu tham chiếu quy chuẩn\r\n\r\nCác tài liệu tham chiếu sau đây là không thể thiếu cho việc áp dụng tiêu chuẩn này (tức là chúng phải được hiểu và sử dụng, do đó mỗi tài liệu được tham chiếu đều được trích dẫn trong văn bản và mối quan hệ của nó với tài liệu này đã được giải thích). Đối với các tài liệu tham chiếu có ghi năm, chỉ phiên bản được trích dẫn mới áp dụng. Đối với các tài liệu tham chiếu không ghi năm, phiên bản mới nhất của tài liệu được tham chiếu (bao gồm mọi bản sửa đổi hoặc đính chính) sẽ được áp dụng.\r\n\r\nAnderson, R., Biham, E., và Knudsen, L. \"Serpent: A Proposal for the Advanced Encryption Standard,\" Đề xuất NIST AES, 1998.12\r\n\r\nANSI X9.52-1998, Tiêu chuẩn Quốc gia Hoa Kỳ cho Dịch vụ Tài chính—Các chế độ Hoạt động của Thuật toán Mã hóa Dữ liệu Ba lần (Triple DES).13\r\n\r\nElGamal, T., \"A Public-Key Cryptosystem and a Signature Scheme Based on Discrete Logarithms,\" IEEE Transactions on Information Theory, tập IT-31, số 4, trang 469–472, tháng 7 năm 1985.\r\n\r\nFIPS 46-3 (Tháng 10 năm 1999), Tiêu chuẩn Mã hóa Dữ liệu (DES).14\r\n\r\nFIPS 180-2 (Tháng 8 năm 2002), Tiêu chuẩn Băm An toàn (SHS).\r\n\r\nFIPS 197 (Tháng 11 năm 2001), Tiêu chuẩn Mã hóa Nâng cao (AES).\r\n\r\nIEEE Std 754™, Tiêu chuẩn IEEE cho Phép toán Số thực Phẩy động.15, 16\r\n\r\nIEEE Std 1003.1™, Tiêu chuẩn IEEE cho Công nghệ Thông tin—Giao diện Hệ điều hành Di động (POSIX®).\r\n\r\nIEEE Std 1364™-1995, Tiêu chuẩn IEEE cho Ngôn ngữ Mô tả Phần cứng Dựa trên Ngôn ngữ Mô tả Phần cứng Verilog®.\r\n\r\nIEEE Std 1364™-2001, Tiêu chuẩn IEEE cho Ngôn ngữ Mô tả Phần cứng Verilog.\r\n\r\nIEEE Std 1364™-2005, Tiêu chuẩn IEEE cho Ngôn ngữ Mô tả Phần cứng Verilog.\r\n\r\nIEEE Std 1800™-2005, Tiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Mô tả Kỹ thuật và Kiểm định Phần cứng.\r\n\r\nIEEE Std 1800™-2009, Tiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Mô tả Kỹ thuật và Kiểm định Phần cứng.\r\n\r\nIEEE Std 1800™-2012, Tiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Mô tả Kỹ thuật và Kiểm định Phần cứng.\r\n\r\nIEEE Std 1800™-2017, Tiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Mô tả Kỹ thuật và Kiểm định Phần cứng.\r\n\r\nIETF RFC 1319 (Tháng 4 năm 1992), Thuật toán Tóm tắt Thông điệp MD2 (MD2 Message-Digest Algorithm).17\r\n\r\nIETF RFC 1321 (Tháng 4 năm 1992), Thuật toán Tóm tắt Thông điệp MD5 (MD5 Message-Digest Algorithm).\r\n\r\n________________________\r\n12Tài liệu này có sẵn tại http://www.cl.cam.ac.uk/~rja14/Papers/serpent.tar.gz.\r\n13Các ấn phẩm của ANSI có sẵn từ Viện Tiêu chuẩn Quốc gia Hoa Kỳ (http://www.ansi.org/).\r\n14Các ấn phẩm của FIPS có sẵn từ Dịch vụ Thông tin Kỹ thuật Quốc gia (http://www.ntis.gov/).\r\n15Các ấn phẩm của IEEE có sẵn từ Viện Kỹ sư Điện và Điện tử (http://standards.ieee.org/).\r\n16Các tiêu chuẩn hoặc sản phẩm IEEE được đề cập trong khoản này là thương hiệu của Viện Kỹ sư Điện và Điện tử, Inc.\r\n17Các tài liệu IETF (tức là RFC) có sẵn để tải về tại http://www.rfc-archive.org/.\r\n\r\n48\r\nCấp phép sử dụng có ủy quyền giới hạn cho: Hai Tra. Tải về vào ngày 29 tháng 8 năm 2024 lúc 10:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "they must be understood and used, so each referenced document is cited in the text and its relationship to this document is explained",
+          "explain": "chuỗi câu bị động (passive voice) nối tiếp diễn tả nguyên tắc quy chuẩn bắt buộc của tiêu chuẩn"
+        },
+        {
+          "phrase": "For undated references, the latest edition of the referenced document (including any amendments or corrigenda) applies",
+          "explain": "cấu trúc câu có cụm giới từ làm trạng ngữ chỉ điều kiện, cụm danh từ làm chủ ngữ chứa mệnh đề ngoặc đơn bổ nghĩa và động từ \"applies\" ở dạng nội động từ chia thì hiện tại đơn"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "normative",
+          "explain": "(tính từ) quy chuẩn, mang tính bắt buộc tuân thủ trong văn bản tiêu chuẩn kỹ thuật"
+        },
+        {
+          "type": "vocab",
+          "phrase": "indispensable",
+          "explain": "(tính từ) không thể thiếu, thiết yếu, bắt buộc phải có"
+        },
+        {
+          "type": "vocab",
+          "phrase": "corrigenda",
+          "explain": "(danh từ số nhiều) các bản đính chính, bản sửa lỗi in ấn hoặc lỗi kỹ thuật nhỏ trong tài liệu chính thức (dạng số ít: corrigendum)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "amendment",
+          "explain": "(danh từ) bản sửa đổi, bổ sung cho tiêu chuẩn/văn bản pháp lý"
+        },
+        {
+          "type": "collocation",
+          "phrase": "normative references",
+          "explain": "(cụm danh từ) tài liệu tham chiếu quy chuẩn (danh mục tài liệu bắt buộc tuân thủ)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "dated references",
+          "explain": "(cụm danh từ) tài liệu tham chiếu có chỉ định năm/phiên bản cụ thể"
+        },
+        {
+          "type": "collocation",
+          "phrase": "undated references",
+          "explain": "(cụm danh từ) tài liệu tham chiếu không chỉ định năm/phiên bản cụ thể"
+        },
+        {
+          "type": "collocation",
+          "phrase": "message-digest algorithm",
+          "explain": "(cụm danh từ) thuật toán tóm tắt thông điệp (hàm băm mã hóa)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "floating-point arithmetic",
+          "explain": "(cụm danh từ) phép toán số thực phẩy động"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "Trang này thuộc phần Tài liệu tham chiếu (Bibliography / Referenced Standards) của chuẩn kỹ thuật **IEEE Std 1800-2023** dành cho ngôn ngữ SystemVerilog (Ngôn ngữ mô tả, thiết kế, quy định và kiểm định phần cứng hợp nhất).\r\n\r\nNội dung chính của trang liệt kê các tiêu chuẩn quốc tế và bài báo khoa học liên quan đến lĩnh vực **mật mã học (cryptography), an toàn thông tin và định dạng dữ liệu truyền thông**, bao gồm:\r\n1. Các tiêu chuẩn IETF RFC quy định về định dạng thư điện tử đa mục đích (MIME RFC 2045), các thuật toán mã hóa như CAST-128 (RFC 2144), RSA (RFC 2437), và định dạng thông điệp OpenPGP (RFC 2440).\r\n2. Tiêu chuẩn quốc tế ISO/IEC 10118-3:2004 quy định về các hàm băm chuyên dụng (Dedicated hash-functions).\r\n3. Các công trình nghiên cứu nổi tiếng của tác giả Bruce Schneier về thuật toán mã hóa khối Blowfish (1993) và Twofish (1999).\r\n4. Cú thích trang (Footnote 18) chỉ dẫn nơi tra cứu và tải về các tài liệu tiêu chuẩn chính thức từ ISO, IEC và ANSI.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Mã hóa khối (Block Cipher) & Hàm băm (Hash Function):** Người đọc cần hiểu khái niệm cơ bản về các thuật toán mã hóa như Blowfish, Twofish, RSA để hiểu lý do tại sao SystemVerilog lại tham chiếu các tài liệu này (thường dùng trong việc bảo mật tài sản trí tuệ IP core, bảo vệ mã nguồn thiết kế hoặc xác thực dữ liệu mô phỏng).\r\n- **IETF RFC & ISO/IEC:** Các tổ chức quy chuẩn kỹ thuật toàn cầu quy định chuẩn giao tiếp và bảo mật.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Quy định và Kiểm định Phần cứng Hợp nhất\r\n\r\nIETF RFC 2045 (Tháng 11 năm 1996), Tiện ích mở rộng Thư điện tử Đa mục đích (MIME), Phần một: Định dạng của Thân thông điệp Internet.\r\n\r\nIETF RFC 2144 (Tháng 5 năm 1997), Thuật toán Mã hóa CAST-128.\r\n\r\nIETF RFC 2437 (Tháng 10 năm 1998), PKCS #1: Quy định Mật mã học RSA, Phiên bản 2.0.\r\n\r\nIETF RFC 2440 (Tháng 11 năm 1998), Định dạng Thông điệp OpenPGP.\r\n\r\nISO/IEC 10118-3:2004, Công nghệ thông tin—Kỹ thuật an toàn—Hàm băm—Phần 3: Các hàm băm chuyên dụng.<sup>18</sup>\r\n\r\nSchneier, B., “Mô tả về Thuật toán Mã hóa Khối 64-Bit với Khóa có Độ dài Biến đổi Mới (Blowfish),” *Kỷ yếu Hội thảo An toàn Thông tin Cambridge về Mã hóa Phần mềm Tốc độ cao (Tháng 12 năm 1993)*, Nhà xuất bản Springer-Verlag, 1994, trang 191–204.\r\n\r\nSchneier, B., và các cộng sự, *Thuật toán Mã hóa Twofish: Một Thuật toán Mã hóa Khối 128-Bit*, Xuất bản lần 1, NXB Wiley, 1999.\r\n\r\n________________________\r\n<sup>18</sup>Các ấn phẩm của ISO hiện có sẵn từ Tổ chức Tiêu chuẩn hóa Quốc tế (http://www.iso.org/). Các ấn phẩm của IEC hiện có sẵn từ Ủy ban Kỹ thuật Điện Quốc tế (http://www.iec.ch). Các ấn phẩm kết hợp ISO/IEC hiện có sẵn từ Viện Tiêu chuẩn Quốc gia Hoa Kỳ (http://www.ansi.org/).\r\n\r\n49\r\nQuyền sử dụng hợp pháp được cấp cho: Hai Trac. Tải về vào ngày 28 tháng 4 năm 2024 lúc 10:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.\r\nBản quyền © 2024 IEEE. Mọi quyền được bảo lưu.",
+      "grammar": [
+        {
+          "phrase": "ISO publications are available from the International Organization for Standardization",
+          "explain": "cấu trúc \"be available from [organization]\" chỉ nguồn gốc/nơi cung cấp tài liệu chính thức."
+        },
+        {
+          "phrase": "Authorized licensed use limited to: Hai Trac",
+          "explain": "dạng rút gọn của câu bị động/mệnh đề quan hệ rút gọn (This document is authorized for licensed use which is limited to...) thường dùng trong bản quyền/dấu nước kỹ thuật số."
+        },
+        {
+          "phrase": "Downloaded on April 28,2024 at 10:36:42 UTC from IEEE Xplore",
+          "explain": "mệnh đề phân từ quá khứ (past participle phrase) đóng vai trò làm trạng ngữ ghi chú thông tin hệ thống."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "cryptography",
+          "explain": "(danh từ) mật mã học, thuật mã hóa thông tin bảo mật"
+        },
+        {
+          "type": "vocab",
+          "phrase": "cipher",
+          "explain": "(danh từ) thuật toán mã hóa, hệ thống mã hóa dữ liệu"
+        },
+        {
+          "type": "vocab",
+          "phrase": "proceedings",
+          "explain": "(danh từ số nhiều) kỷ yếu hội thảo, tập san báo cáo khoa học của hội nghị"
+        },
+        {
+          "type": "collocation",
+          "phrase": "block cipher",
+          "explain": "(cụm danh từ) thuật toán mã hóa khối (mã hóa dữ liệu theo từng nhóm bit cố định)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "variable-length key",
+          "explain": "(cụm danh từ) khóa mã hóa có độ dài linh hoạt/biến đổi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hash function",
+          "explain": "(cụm danh từ) hàm băm (hàm toán học chuyển đổi dữ liệu thành chuỗi ký tự độ dài cố định)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "et al.",
+          "explain": "(cụm từ viết tắt Latin) và các cộng sự (dùng khi trích dẫn tài liệu có nhiều tác giả)"
+        }
+      ]
+    }
+  ]
+}
