@@ -211,10 +211,31 @@ function renderBookFilter() {
 
 // ---------------- Đọc to (Web Speech API) ----------------
 
+let cachedVoices = [];
+function loadVoices() {
+  if ("speechSynthesis" in window) {
+    cachedVoices = window.speechSynthesis.getVoices();
+  }
+}
+if ("speechSynthesis" in window) {
+  loadVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+}
+
 function detectSpeechLang(text) {
   // Có Hiragana/Katakana/Kanji -> tiếng Nhật, còn lại mặc định tiếng Anh.
   if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(text)) return "ja-JP";
   return "en-US";
+}
+
+function pickVoiceForLang(lang) {
+  if (!cachedVoices.length) loadVoices();
+  const prefix = lang.split("-")[0]; // "en" hoặc "ja"
+  return (
+    cachedVoices.find((v) => v.lang === lang) ||
+    cachedVoices.find((v) => v.lang && v.lang.toLowerCase().startsWith(prefix)) ||
+    null
+  );
 }
 
 function speakText(text) {
@@ -224,8 +245,11 @@ function speakText(text) {
     return;
   }
   window.speechSynthesis.cancel();
+  const lang = detectSpeechLang(text);
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = detectSpeechLang(text);
+  utter.lang = lang;
+  const voice = pickVoiceForLang(lang);
+  if (voice) utter.voice = voice;
   utter.rate = 0.95;
   window.speechSynthesis.speak(utter);
 }
