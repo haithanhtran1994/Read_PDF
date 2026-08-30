@@ -22,5 +22,11 @@
     "type": "vocab",
     "phrase": "testbench",
     "explain": "(danh từ) môi trường mô phỏng/kiểm thử phần cứng"
+  },
+  {
+    "key": "vocab\u0000testbench\u0000(danh tu) moi truong/ma kiem thu duoc thiet ke de mo phong va kiem tra chuc nang cua vi mach (dut).",
+    "type": "vocab",
+    "phrase": "testbench",
+    "explain": "(danh từ) môi trường/mã kiểm thử được thiết kế để mô phỏng và kiểm tra chức năng của vi mạch (DUT)."
   }
 ]
