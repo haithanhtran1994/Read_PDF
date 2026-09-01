@@ -14,7 +14,7 @@
 <body>
 
 <header class="topbar" id="topbar">
-  <button id="btnToggleTopbar" class="bar-handle" aria-label="Ẩn/hiện thanh công cụ" title="Ẩn/hiện thanh công cụ">⌃</button>
+  <div class="bar-handle" aria-hidden="true"></div>
   <div class="topbar-content" id="topbarContent">
     <div class="topbar-title">PDF Dual Reader</div>
     <div class="topbar-actions">
@@ -29,7 +29,7 @@
   <!-- ================= PANE A — PDF ================= -->
   <section class="pane" id="paneA" data-slot="A">
     <div class="pane-toolbar" id="toolbarA">
-      <button class="bar-handle" id="btnToggleToolbarA" aria-label="Ẩn/hiện thanh thông tin" title="Ẩn/hiện thanh thông tin">⌃</button>
+      <div class="bar-handle" aria-hidden="true"></div>
       <div class="pane-toolbar-content">
         <label class="file-open-btn">
           <span id="paneATitle">Mở PDF…</span>
@@ -70,7 +70,7 @@
   <!-- ================= PANE B — JSON (dịch + phân tích) ================= -->
   <section class="pane" id="paneB" data-slot="B">
     <div class="pane-toolbar json-toolbar" id="toolbarB">
-      <button class="bar-handle" id="btnToggleToolbarB" aria-label="Ẩn/hiện thanh thông tin" title="Ẩn/hiện thanh thông tin">⌃</button>
+      <div class="bar-handle" aria-hidden="true"></div>
       <div class="pane-toolbar-content">
         <button class="file-open-btn" id="btnOpenToc" type="button">
           <span id="paneBTitle">Chọn sách / chương…</span>
@@ -83,9 +83,16 @@
       </div>
     </div>
     <div class="mode-toggle" id="modeToggle">
-      <button class="mode-btn active" data-mode="translation">Dịch</button>
-      <button class="mode-btn" data-mode="analysis">Phân tích</button>
-      <button class="mode-btn" data-mode="both">Cả hai</button>
+      <button class="mode-btn hl-act-mini" id="btnToggleAllBars" type="button" title="Ẩn/hiện tất cả thanh công cụ (PDF & thông tin trang)">⌃</button>
+      <button class="mode-btn mode-cycle active" id="btnModeCycle" type="button" title="Bấm để chuyển: Tóm tắt → Dịch → Phân tích → Cả ba">Tóm tắt</button>
+      <button class="mode-btn hl-act-mini" id="btnJsonHighlight" type="button" title="Highlight đoạn đã bôi đen (trong Tóm tắt/Bản dịch)">🖍</button>
+      <button class="mode-btn hl-act-mini" id="btnJsonUnderline" type="button" title="Gạch chân đoạn đã bôi đen (trong Tóm tắt/Bản dịch)">U̲</button>
+      <span class="json-hl-swatches" id="jsonHlSwatches">
+        <button class="swatch active" data-color="#F7E27A" style="background:#F7E27A" title="Vàng"></button>
+        <button class="swatch" data-color="#A8D5BA" style="background:#A8D5BA" title="Xanh lá"></button>
+        <button class="swatch" data-color="#9AC5E8" style="background:#9AC5E8" title="Xanh dương"></button>
+        <button class="swatch" data-color="#E7A6C0" style="background:#E7A6C0" title="Hồng"></button>
+      </span>
       <button class="mode-btn edit-btn" id="btnJsonEdit" type="button" title="Sửa nội dung trang này">✎</button>
     </div>
     <div class="pane-scroll json-scroll" id="scrollB">

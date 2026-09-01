@@ -41,6 +41,8 @@ const state = {
   activePage: null,
   hlMode: "highlight",
   hlColor: "#F7E27A",
+  jsonHlColor: "#F7E27A",
+  jsonMarksByBook: {}, // { [book]: [ {id, chapter, page, field, start, end, type, color} ] }
   dragging: null,
   json: {
     book: null,
@@ -48,11 +50,16 @@ const state = {
     raw: null,        // toàn bộ object JSON gốc (giữ nguyên field khác ngoài "pages")
     pages: [],       // mảng page object đã sort theo số trang
     pageIdx: 0,       // vị trí hiện tại trong mảng pages (0-based)
-    mode: "translation", // "translation" | "analysis" | "both"
+    mode: "summary", // "summary" | "translation" | "analysis" | "all"
+    activeField: null,  // "summary" | "translation" — vùng vừa bôi đen để Highlight/Gạch chân
+    activeRange: null,
     editing: false,
   },
   tocBook: null, // book đang chọn dở trong drawer mục lục
 };
+
+const JSON_MODE_CYCLE = ["summary", "translation", "analysis", "all"];
+const JSON_MODE_LABEL = { summary: "Tóm tắt", translation: "Dịch", analysis: "Phân tích", all: "Cả ba" };
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -180,8 +187,8 @@ async function init() {
 
   // Khôi phục book/chapter/mode đã đọc lần trước
   if (uiState && uiState.json && uiState.json.book && uiState.json.chapter) {
-    state.json.mode = uiState.json.mode || "translation";
-    setModeButtons(state.json.mode);
+    state.json.mode = uiState.json.mode || "summary";
+    setJsonModeButton(state.json.mode);
     loadChapter(uiState.json.book, uiState.json.chapter, uiState.json.pageIdx || 0).catch(() => {});
   }
 
@@ -219,24 +226,26 @@ function setLayout(layout, persist) {
 }
 
 // ---------- Thanh công cụ có thể ẩn/hiện (topbar + pane-toolbar) ----------
+// Gộp 3 nút ẩn/hiện riêng lẻ (topbar, toolbar cột A, toolbar cột B) thành 1 nút
+// duy nhất trên thanh mode-toggle: bấm 1 lần ẩn/hiện CẢ 3 cùng lúc.
 function bindCollapsibleBars() {
-  bindCollapsible($("#btnToggleTopbar"), $("#topbar"), () => {
-    requestAnimationFrame(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); });
+  $("#btnToggleAllBars").addEventListener("click", () => {
+    const allCollapsed = $("#topbar").classList.contains("collapsed")
+      && $("#toolbarA").classList.contains("collapsed")
+      && $("#toolbarB").classList.contains("collapsed");
+    // Nếu tất cả đã thu gọn -> mở hết. Ngược lại (còn ít nhất 1 cái đang mở) -> thu gọn hết.
+    setAllBarsCollapsed(!allCollapsed);
   });
-  bindCollapsible($("#btnToggleToolbarA"), $("#toolbarA"), () => {
-    requestAnimationFrame(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); });
-  });
-  bindCollapsible($("#btnToggleToolbarB"), $("#toolbarB"), () => {});
 }
 
-function bindCollapsible(handleEl, containerEl, onToggle) {
-  if (!handleEl || !containerEl) return;
-  handleEl.addEventListener("click", () => {
-    const collapsed = containerEl.classList.toggle("collapsed");
-    handleEl.textContent = collapsed ? "⌄" : "⌃";
-    persistJsonUiState();
-    if (onToggle) onToggle(collapsed);
+function setAllBarsCollapsed(collapsed) {
+  [$("#topbar"), $("#toolbarA"), $("#toolbarB")].forEach((el) => {
+    if (el) el.classList.toggle("collapsed", collapsed);
   });
+  const btn = $("#btnToggleAllBars");
+  if (btn) btn.textContent = collapsed ? "⌄" : "⌃";
+  persistJsonUiState();
+  requestAnimationFrame(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); });
 }
 
 function getCollapseState() {
@@ -248,17 +257,13 @@ function getCollapseState() {
 }
 
 function applyCollapseState(c) {
-  [
-    ["topbar", "btnToggleTopbar"],
-    ["toolbarA", "btnToggleToolbarA"],
-    ["toolbarB", "btnToggleToolbarB"],
-  ].forEach(([id, btnId]) => {
+  ["topbar", "toolbarA", "toolbarB"].forEach((id) => {
     if (!c[id]) return;
     const el = document.getElementById(id);
-    const btn = document.getElementById(btnId);
     if (el) el.classList.add("collapsed");
-    if (btn) btn.textContent = "⌄";
   });
+  const btn = $("#btnToggleAllBars");
+  if (btn) btn.textContent = (c.topbar && c.toolbarA && c.toolbarB) ? "⌄" : "⌃";
 }
 
 // ---------- Ranh giới có thể kéo để đổi kích thước 2 cột ----------
@@ -875,15 +880,16 @@ function bindJsonPane() {
   els.tocOverlay.addEventListener("click", closeToc);
   $("#btnTocBack").addEventListener("click", showTocBooks);
 
-  els.modeToggle.querySelectorAll(".mode-btn[data-mode]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (blockIfEditing()) return;
-      state.json.mode = btn.dataset.mode;
-      setModeButtons(state.json.mode);
-      renderJsonPage();
-      persistJsonUiState();
-    });
+  $("#btnModeCycle").addEventListener("click", () => {
+    if (blockIfEditing()) return;
+    const idx = JSON_MODE_CYCLE.indexOf(state.json.mode);
+    state.json.mode = JSON_MODE_CYCLE[(idx + 1) % JSON_MODE_CYCLE.length];
+    setJsonModeButton(state.json.mode);
+    renderJsonPage();
+    persistJsonUiState();
   });
+
+  bindJsonHlToolbar();
 
   els.btnJsonEdit.addEventListener("click", () => {
     if (!state.json.pages.length) return;
@@ -897,10 +903,9 @@ function bindJsonPane() {
   });
 }
 
-function setModeButtons(mode) {
-  els.modeToggle.querySelectorAll(".mode-btn[data-mode]").forEach((b) => {
-    b.classList.toggle("active", b.dataset.mode === mode);
-  });
+function setJsonModeButton(mode) {
+  const btn = $("#btnModeCycle");
+  if (btn) btn.textContent = JSON_MODE_LABEL[mode] || mode;
 }
 
 function handleJsonNav(act) {
@@ -1029,6 +1034,10 @@ async function loadChapter(book, chapter, pageIdx) {
   state.json.raw = data;
   state.json.pages = pages;
   state.json.pageIdx = Math.min(Math.max(0, pageIdx || 0), pages.length - 1);
+  state.json.activeField = null;
+  state.json.activeRange = null;
+
+  await loadJsonMarksForBook(book).catch((e) => console.warn("Tải mark lỗi:", e));
 
   els.emptyB.classList.add("hidden");
   renderJsonPage();
@@ -1070,19 +1079,23 @@ function renderJsonPage() {
 
   const mode = j.mode;
   let html = "";
-  if (mode === "translation" || mode === "both") {
-    if (page.summary && page.summary.trim()) {
-      html += `<div class="json-section">
-        <div class="json-section-title">Tóm tắt</div>
-        <div class="translation-text summary-text">${escapeHtml(page.summary)}</div>
-      </div>`;
-    }
+  if (mode === "summary" || mode === "all") {
+    const hasSummary = page.summary && page.summary.trim();
+    const marks = getJsonMarksFor(j.chapter, page.page, "summary");
     html += `<div class="json-section">
-      <div class="json-section-title">Bản dịch</div>
-      <div class="translation-text">${escapeHtml(page.translation || "(chưa có bản dịch)")}</div>
+      <div class="json-section-title">Tóm tắt</div>
+      <div class="translation-text summary-text" data-field="summary">${hasSummary ? buildMarkedHtml(page.summary, marks) : "(chưa có tóm tắt)"}</div>
     </div>`;
   }
-  if (mode === "analysis" || mode === "both") {
+  if (mode === "translation" || mode === "all") {
+    const hasTranslation = page.translation && page.translation.trim();
+    const marks = getJsonMarksFor(j.chapter, page.page, "translation");
+    html += `<div class="json-section">
+      <div class="json-section-title">Bản dịch</div>
+      <div class="translation-text" data-field="translation">${hasTranslation ? buildMarkedHtml(page.translation, marks) : "(chưa có bản dịch)"}</div>
+    </div>`;
+  }
+  if (mode === "analysis" || mode === "all") {
     const grammarHtml = renderAnalysisList(page.grammar, "grammar");
     const analysisHtml = renderAnalysisList(page.analysis, "analysis");
     html += `<div class="json-section">
@@ -1095,7 +1108,154 @@ function renderJsonPage() {
     </div>`;
   }
   els.jsonContent.innerHTML = html;
+  bindJsonMarkClicks();
   $("#scrollB").scrollTop = 0;
+}
+
+// ---- Highlight/gạch chân trong Tóm tắt & Bản dịch (không áp dụng cho Phân tích) ----
+// Lưu theo book (data/<book>/mark.json trên GitHub), dùng chung cho mọi chương của sách đó.
+
+function getJsonMarksFor(chapter, pageNum, field) {
+  const list = state.jsonMarksByBook[state.json.book] || [];
+  return list.filter((m) => m.chapter === chapter && m.page === pageNum && m.field === field);
+}
+
+// Dựng lại HTML từ text gốc + danh sách mark (start/end tính theo ký tự trong text gốc),
+// escape HTML đúng từng đoạn để không bị lỗi hiển thị hay lọt thẻ script.
+function buildMarkedHtml(rawText, marks) {
+  if (!marks || !marks.length) return escapeHtml(rawText);
+  const sorted = marks.slice().sort((a, b) => a.start - b.start);
+  let out = "";
+  let pos = 0;
+  sorted.forEach((m) => {
+    const start = Math.max(pos, Math.min(m.start, rawText.length));
+    const end = Math.max(start, Math.min(m.end, rawText.length));
+    if (start > pos) out += escapeHtml(rawText.slice(pos, start));
+    if (end > start) {
+      const tag = m.type === "highlight" ? "mark" : "span";
+      const cls = m.type === "highlight" ? "hl" : "ul";
+      const cssVar = m.type === "highlight" ? "--hl-color" : "--ul-color";
+      out += `<${tag} class="${cls}" style="${cssVar}:${escapeHtml(m.color || "")}" data-mark-id="${escapeHtml(m.id)}">${escapeHtml(rawText.slice(start, end))}</${tag}>`;
+    }
+    pos = end;
+  });
+  if (pos < rawText.length) out += escapeHtml(rawText.slice(pos));
+  return out;
+}
+
+function bindJsonMarkClicks() {
+  els.jsonContent.querySelectorAll("mark.hl[data-mark-id], span.ul[data-mark-id]").forEach((el) => {
+    el.title = "Chạm để xóa đánh dấu này";
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteJsonMark(el.dataset.markId);
+    });
+  });
+}
+
+async function deleteJsonMark(id) {
+  if (!confirm("Xóa đánh dấu này?")) return;
+  const book = state.json.book;
+  const list = state.jsonMarksByBook[book] || [];
+  state.jsonMarksByBook[book] = list.filter((m) => m.id !== id);
+  renderJsonPage();
+  await persistJsonMarks(book).catch((e) => console.warn("Xóa mark lỗi:", e));
+}
+
+function getPlainTextOffsetsInContainer(container, range) {
+  const preRange = document.createRange();
+  preRange.selectNodeContents(container);
+  preRange.setEnd(range.startContainer, range.startOffset);
+  const start = preRange.toString().length;
+  const end = start + range.toString().length;
+  return { start, end };
+}
+
+function bindJsonHlToolbar() {
+  $("#btnJsonHighlight").addEventListener("click", () => applyJsonMark("highlight"));
+  $("#btnJsonUnderline").addEventListener("click", () => applyJsonMark("underline"));
+  $("#jsonHlSwatches").querySelectorAll(".swatch").forEach((sw) => {
+    sw.addEventListener("click", () => {
+      state.jsonHlColor = sw.dataset.color;
+      $("#jsonHlSwatches").querySelectorAll(".swatch").forEach((s) => s.classList.remove("active"));
+      sw.classList.add("active");
+    });
+  });
+}
+
+async function applyJsonMark(mode) {
+  const j = state.json;
+  const range = j.activeRange;
+  const field = j.activeField;
+  if (!range || !field) {
+    alert("Bôi đen 1 đoạn trong Tóm tắt hoặc Bản dịch trước, rồi bấm Highlight/Gạch chân.");
+    return;
+  }
+  const page = j.pages[j.pageIdx];
+  if (!page) return;
+  const containerEl = els.jsonContent.querySelector(`.translation-text[data-field="${field}"]`);
+  if (!containerEl) return;
+
+  const { start, end } = getPlainTextOffsetsInContainer(containerEl, range);
+  if (end <= start) return;
+
+  const color = state.jsonHlColor;
+  const wrappers = [];
+  const ok = wrapRangeNodes(range, () => {
+    const el = document.createElement(mode === "highlight" ? "mark" : "span");
+    el.className = mode === "highlight" ? "hl" : "ul";
+    el.style.setProperty(mode === "highlight" ? "--hl-color" : "--ul-color", color);
+    return el;
+  }, wrappers);
+  window.getSelection().removeAllRanges();
+  j.activeRange = null;
+  j.activeField = null;
+  if (!ok) { alert("Không đánh dấu được đoạn này."); return; }
+
+  const record = {
+    id: `jm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    chapter: j.chapter,
+    page: page.page,
+    field,
+    start, end,
+    type: mode,
+    color,
+    createdAt: new Date().toISOString(),
+  };
+  if (!state.jsonMarksByBook[j.book]) state.jsonMarksByBook[j.book] = [];
+  state.jsonMarksByBook[j.book].push(record);
+  wrappers.forEach((el) => el.dataset.markId = record.id);
+  bindJsonMarkClicks();
+  await persistJsonMarks(j.book).catch((e) => console.warn("Lưu mark lỗi:", e));
+}
+
+function markRelPath(cfg, book) {
+  const booksPath = cfg.booksPath || "data";
+  return `${booksPath}/${book}/mark.json`;
+}
+
+async function persistJsonMarks(book) {
+  const items = state.jsonMarksByBook[book] || [];
+  await Store.saveMarkList(book, items).catch(() => {});
+  const cfg = await Store.getConfig();
+  if (cfg && cfg.owner && cfg.repo && cfg.token) {
+    await GH.putJSONArray(cfg, markRelPath(cfg, book), items, `Cập nhật highlight/gạch chân ${book}`);
+  }
+}
+
+async function loadJsonMarksForBook(book) {
+  let items = (await Store.getMarkList(book).catch(() => null)) || [];
+  const cfg = await Store.getConfig();
+  if (cfg && cfg.owner && cfg.repo && cfg.token) {
+    try {
+      const remote = await GH.getJSONArray(cfg, markRelPath(cfg, book));
+      if (remote) {
+        items = remote.items;
+        Store.saveMarkList(book, items).catch(() => {});
+      }
+    } catch (e) { /* offline hoặc chưa có file — dùng bản local đã có */ }
+  }
+  state.jsonMarksByBook[book] = items;
 }
 
 // ---- Sửa nội dung trang JSON (dịch / phân tích) rồi đẩy lên GitHub ----
@@ -1118,17 +1278,19 @@ function renderJsonEditForm() {
   els.pageIndB.textContent = `${j.pageIdx + 1}/${j.pages.length} (tr.${page.page ?? "?"}) — đang sửa`;
 
   let html = "";
-  if (j.mode === "translation" || j.mode === "both") {
+  if (j.mode === "summary" || j.mode === "all") {
     html += `<div class="json-section">
       <div class="json-section-title">Tóm tắt (đang sửa)</div>
       <textarea class="edit-translation" id="editSummary" rows="5" placeholder="Nội dung tổng quát, ý chính cần hiểu, phần cần tìm hiểu thêm…">${escapeHtml(page.summary || "")}</textarea>
-    </div>
-    <div class="json-section">
+    </div>`;
+  }
+  if (j.mode === "translation" || j.mode === "all") {
+    html += `<div class="json-section">
       <div class="json-section-title">Bản dịch (đang sửa)</div>
       <textarea class="edit-translation" id="editTranslation" rows="6" placeholder="Nhập bản dịch…">${escapeHtml(page.translation || "")}</textarea>
     </div>`;
   }
-  if (j.mode === "analysis" || j.mode === "both") {
+  if (j.mode === "analysis" || j.mode === "all") {
     html += renderEditableList(page.grammar, "grammar", "Ngữ pháp");
     html += renderEditableList(page.analysis, "analysis", "Slang / Idiom / Collocation / Cụm từ");
   }
@@ -1170,13 +1332,15 @@ async function saveJsonEdits() {
 
   const j = state.json;
   const page = j.pages[j.pageIdx];
-  if (j.mode === "translation" || j.mode === "both") {
+  if (j.mode === "summary" || j.mode === "all") {
     const taSum = $("#editSummary");
-    const ta = $("#editTranslation");
     if (taSum) page.summary = taSum.value;
+  }
+  if (j.mode === "translation" || j.mode === "all") {
+    const ta = $("#editTranslation");
     if (ta) page.translation = ta.value;
   }
-  if (j.mode === "analysis" || j.mode === "both") {
+  if (j.mode === "analysis" || j.mode === "all") {
     applyEditableList(page, "grammar");
     applyEditableList(page, "analysis");
   }
@@ -1302,24 +1466,38 @@ function handleSelectionEnd(e) {
     ? range.commonAncestorContainer
     : range.commonAncestorContainer.parentElement;
   const textLayerEl = anchorEl ? anchorEl.closest(".textLayer") : null;
-  if (!textLayerEl) { hideHlToolbar(); return; }
 
-  const slot = textLayerEl.id.replace("textLayer", "");
-  state.activeRange = range.cloneRange();
-  state.activeText = sel.toString().trim();
-  state.activeSlot = slot;
-  state.activePage = state.panes[slot].pageNum;
+  if (textLayerEl) {
+    const slot = textLayerEl.id.replace("textLayer", "");
+    state.activeRange = range.cloneRange();
+    state.activeText = sel.toString().trim();
+    state.activeSlot = slot;
+    state.activePage = state.panes[slot].pageNum;
 
-  const rect = range.getBoundingClientRect();
-  els.hlToolbar.classList.remove("hidden");
-  const tbH = els.hlToolbar.offsetHeight || 44;
-  const tbW = els.hlToolbar.offsetWidth || 220;
-  // Ưu tiên hiện PHÍA DƯỚI đoạn được chọn để tránh đè lên popup Copy/Look Up của iOS
-  let top = rect.bottom + 10;
-  if (top + tbH > window.innerHeight - 8) top = Math.max(8, rect.top - tbH - 10);
-  let left = Math.min(Math.max(8, rect.left), window.innerWidth - tbW - 8);
-  els.hlToolbar.style.top = top + "px";
-  els.hlToolbar.style.left = left + "px";
+    const rect = range.getBoundingClientRect();
+    els.hlToolbar.classList.remove("hidden");
+    const tbH = els.hlToolbar.offsetHeight || 44;
+    const tbW = els.hlToolbar.offsetWidth || 220;
+    // Ưu tiên hiện PHÍA DƯỚI đoạn được chọn để tránh đè lên popup Copy/Look Up của iOS
+    let top = rect.bottom + 10;
+    if (top + tbH > window.innerHeight - 8) top = Math.max(8, rect.top - tbH - 10);
+    let left = Math.min(Math.max(8, rect.left), window.innerWidth - tbW - 8);
+    els.hlToolbar.style.top = top + "px";
+    els.hlToolbar.style.left = left + "px";
+    return;
+  }
+  hideHlToolbar();
+
+  // Chọn text trong cột JSON (Tóm tắt/Bản dịch) — không có toolbar nổi, chỉ ghi nhớ
+  // vùng đã chọn để bấm nút Highlight/Gạch chân cố định trên thanh công cụ cột B.
+  const fieldEl = anchorEl ? anchorEl.closest(".translation-text[data-field]") : null;
+  if (fieldEl && !state.json.editing) {
+    state.json.activeField = fieldEl.dataset.field;
+    state.json.activeRange = range.cloneRange();
+  } else {
+    state.json.activeField = null;
+    state.json.activeRange = null;
+  }
 }
 
 function hideHlToolbar() { els.hlToolbar.classList.add("hidden"); }

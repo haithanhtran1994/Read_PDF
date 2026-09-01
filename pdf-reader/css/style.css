@@ -27,8 +27,7 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---- Thanh kéo ẩn/hiện dùng chung (topbar + toolbar từng pane) ---- */
 .bar-handle {
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; flex-shrink: 0; min-height: 28px;
+  display: block; width: 100%; flex-shrink: 0;
   border: none; background: transparent; color: var(--ink-soft);
   font-size: 11px; line-height: 1; padding: 4px 0 3px;
 }
@@ -208,6 +207,7 @@ button { font-family: inherit; cursor: pointer; }
 .hl-act-btn.add { background: var(--aizome); color: #fff; border-color: var(--aizome); }
 .hl-swatches { display: flex; gap: 4px; }
 .swatch { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); }
+.swatch.active { outline: 2px solid var(--ink); outline-offset: 1px; }
 
 /* ---- Add panel (kéo thả tự do) ---- */
 .add-panel {
@@ -268,15 +268,19 @@ button { font-family: inherit; cursor: pointer; }
 /* ---- Pane B: JSON reader (dịch + phân tích) ---- */
 .json-toolbar .file-open-btn { max-width: 62%; text-align: left; background: none; border: 1px dashed var(--line); }
 .mode-toggle {
-  display: flex; gap: 4px; padding: 6px 8px; background: var(--paper-raised);
-  border-bottom: 1px solid var(--line); flex-shrink: 0;
+  display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: var(--paper-raised);
+  border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap;
 }
 .mode-btn {
-  flex: 1; border: 1px solid var(--line); background: transparent; color: var(--ink-soft);
+  border: 1px solid var(--line); background: transparent; color: var(--ink-soft);
   border-radius: var(--radius); font-size: 12px; padding: 6px 4px;
 }
+.mode-btn.mode-cycle { flex: 0 1 auto; min-width: 0; padding: 6px 12px; }
 .mode-btn.active { background: var(--aizome); color: #fff; border-color: var(--aizome); }
-.mode-btn.edit-btn { flex: 0 0 40px; font-size: 14px; }
+.mode-btn.hl-act-mini { flex: 0 0 auto; width: 30px; padding: 6px 0; font-size: 13px; }
+.mode-btn.edit-btn { flex: 0 0 34px; font-size: 14px; padding: 6px 0; }
+.json-hl-swatches { display: flex; gap: 3px; flex: 0 0 auto; }
+.json-hl-swatches .swatch { width: 18px; height: 18px; }
 .json-scroll { background: var(--paper); display: block; }
 .json-content { max-width: 640px; margin: 0 auto; padding: 14px 16px 40px; }
 .json-section { margin-bottom: 18px; }
@@ -288,6 +292,16 @@ button { font-family: inherit; cursor: pointer; }
 .summary-text {
   font-size: 13.5px; color: var(--ink-soft); background: var(--paper-raised);
   border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
+}
+/* Highlight/gạch chân trong Tóm tắt & Bản dịch — KHÁC với .textLayer mark.hl của Pane A
+   (ở đây chữ vẫn phải đọc được bình thường, không color:transparent, vì đây là chữ thật
+   chứ không phải lớp overlay trong suốt đè lên canvas PDF). */
+.translation-text mark.hl {
+  background: var(--hl-color, #F7E27A); opacity: .6; border-radius: 2px; padding: 0 1px; cursor: pointer;
+}
+.translation-text span.ul {
+  text-decoration: underline; text-decoration-color: var(--ul-color, #C1440E);
+  text-decoration-thickness: 2px; cursor: pointer;
 }
 .an-item {
   background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);

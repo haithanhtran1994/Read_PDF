@@ -7,9 +7,12 @@
    - "state"      : key "ui" -> { layout }  (nhớ layout ngang/dọc)
    - "highlights" : key = pdfId -> [ { id, page, mode, color, quads, createdAt } ]  (cache local,
                      nguồn "thật" là file JSON trên GitHub khi có cấu hình GitHub)
+   - "jsonMarks"  : key = tên sách -> [ {id, chapter, page, field, start, end, type, color, createdAt} ]
+                     (highlight/gạch chân trong Tóm tắt & Bản dịch ở cột JSON, cache local — nguồn
+                     "thật" là data/<book>/mark.json trên GitHub khi có cấu hình GitHub)
 */
 const DB_NAME = "pdf_dual_reader_db";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -24,6 +27,8 @@ function openDB() {
       if (!db.objectStoreNames.contains("chapters")) db.createObjectStore("chapters");
       // cache highlight/underline theo từng file PDF (đọc lại nhanh + hoạt động tạm offline)
       if (!db.objectStoreNames.contains("highlights")) db.createObjectStore("highlights");
+      // cache highlight/underline trong Tóm tắt & Bản dịch, theo từng sách
+      if (!db.objectStoreNames.contains("jsonMarks")) db.createObjectStore("jsonMarks");
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -99,4 +104,7 @@ const Store = {
 
   saveHighlights: (pdfId, records) => idbSet("highlights", pdfId, records || []),
   getHighlights: (pdfId) => idbGet("highlights", pdfId),
+
+  saveMarkList: (book, records) => idbSet("jsonMarks", book, records || []),
+  getMarkList: (book) => idbGet("jsonMarks", book),
 };
