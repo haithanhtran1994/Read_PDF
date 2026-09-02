@@ -23,7 +23,6 @@
 
 const state = {
   layout: "horizontal",
-  swapped: false, // đổi vị trí hiển thị 2 bên (paneA <-> paneB) cho nhau, không đổi bố cục
   splitRatio: null, // % chiều rộng/cao dành cho paneA, null = mặc định 50/50
   panes: {
     A: {
@@ -68,7 +67,6 @@ const els = {
   splitContainer: $("#splitContainer"),
   paneResizer: $("#paneResizer"),
   btnLayout: $("#btnLayout"),
-  btnSwapSides: $("#btnSwapSides"),
   btnGithubStatus: $("#btnGithubStatus"),
   btnImport: $("#btnImport"),
   hlToolbar: $("#hlToolbar"),
@@ -135,7 +133,6 @@ async function init() {
 
   const uiState = await Store.getUiState();
   if (uiState && uiState.layout) setLayout(uiState.layout, false);
-  if (uiState && uiState.swapped) setSwapSides(true, false);
   if (uiState && uiState.splitRatio) applySplitRatio(uiState.splitRatio);
   if (uiState && uiState.collapse) applyCollapseState(uiState.collapse);
 
@@ -175,9 +172,6 @@ async function init() {
   els.btnLayout.addEventListener("click", () => {
     setLayout(state.layout === "horizontal" ? "vertical" : "horizontal", true);
   });
-  els.btnSwapSides.addEventListener("click", () => {
-    setSwapSides(!state.swapped, true);
-  });
 
   bindSelectionHandlers();
   bindHlToolbar();
@@ -211,7 +205,6 @@ function debounce(fn, ms) {
 function persistJsonUiState() {
   Store.saveUiState({
     layout: state.layout,
-    swapped: state.swapped,
     splitRatio: state.splitRatio,
     collapse: getCollapseState(),
     json: {
@@ -230,14 +223,6 @@ function setLayout(layout, persist) {
   els.splitContainer.classList.add(layout === "vertical" ? "layout-vertical" : "layout-horizontal");
   if (persist) persistJsonUiState();
   setTimeout(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); }, 50);
-}
-
-// ---------- Đổi 2 bên cho nhau (chỉ đổi VỊ TRÍ hiển thị, không đổi bố cục chia đôi) ----------
-function setSwapSides(swapped, persist) {
-  state.swapped = swapped;
-  els.splitContainer.classList.toggle("swapped", swapped);
-  if (els.btnSwapSides) els.btnSwapSides.classList.toggle("active", swapped);
-  if (persist) persistJsonUiState();
 }
 
 // ---------- Thanh công cụ có thể ẩn/hiện (topbar + pane-toolbar) ----------
@@ -307,9 +292,6 @@ function bindResizer() {
     } else {
       ratio = ((e.clientX - rect.left) / rect.width) * 100;
     }
-    // Khi đã "đổi 2 bên", paneA nằm ở phía ngược lại trên màn hình -> đảo tỉ lệ
-    // lại để % vẫn tương ứng đúng với paneA (chỗ đang kéo vẫn theo đúng ngón tay).
-    if (state.swapped) ratio = 100 - ratio;
     ratio = Math.min(85, Math.max(15, ratio));
     applySplitRatio(ratio);
   });
@@ -356,11 +338,11 @@ function bindSwipeNav(scrollEl, slot, isJson) {
 
   scrollEl.addEventListener("touchend", () => {
     if (t && t.dir === "h" && Math.abs(t.dx) > H_THRESHOLD) {
-      // Vuốt ở BÊN NÀO cũng chuyển trang cho CẢ 2 bên (PDF lẫn JSON) cùng lúc —
-      // khác với nút ‹ › riêng của từng bên (chỉ chuyển trang bên đó).
-      const dir = t.dx < 0 ? "next" : "prev";
-      handlePaneNav("A", dir);
-      handleJsonNav(dir);
+      if (t.dx < 0) {
+        isJson ? handleJsonNav("next") : handlePaneNav(slot, "next");
+      } else {
+        isJson ? handleJsonNav("prev") : handlePaneNav(slot, "prev");
+      }
     }
     t = null;
   });

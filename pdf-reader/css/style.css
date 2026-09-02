@@ -53,7 +53,6 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--ink); font-size: 15px;
 }
 .icon-btn:active { background: var(--line); }
-.icon-btn.active { background: var(--aizome); color: #fff; border-color: var(--aizome); }
 .icon-btn-wide { width: auto; padding: 0 10px; font-size: 12px; white-space: nowrap; }
 
 /* ---- Thanh tìm kiếm trong trang (Pane A) ---- */
@@ -74,10 +73,6 @@ button { font-family: inherit; cursor: pointer; }
 .split { flex: 1; display: flex; min-height: 0; }
 .split.layout-horizontal { flex-direction: row; }
 .split.layout-vertical { flex-direction: column; }
-/* Đổi 2 bên cho nhau: chỉ đảo VỊ TRÍ hiển thị (trái/phải hoặc trên/dưới) của paneA & paneB,
-   không đụng tới bố cục chia đôi (ngang/dọc) đang chọn. */
-.split.swapped.layout-horizontal { flex-direction: row-reverse; }
-.split.swapped.layout-vertical { flex-direction: column-reverse; }
 
 .pane {
   flex: 1 1 50%; min-width: 0; min-height: 0;
