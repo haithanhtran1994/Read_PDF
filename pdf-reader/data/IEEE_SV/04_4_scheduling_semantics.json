@@ -1,0 +1,744 @@
+{
+  "book": "SV_IEEE",
+  "chapter": "04_4_scheduling_semantics",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc Chương 4 \"Scheduling semantics\" (Ngữ nghĩa lập lịch) của tiêu chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog. Trang sách giới thiệu tổng quan về nguyên lý lập lịch mô phỏng dựa trên sự kiện (event-based simulation), cách thức mô hình phần cứng và môi trường kiểm thử vận hành song song, cũng như định nghĩa các khái niệm cốt lõi như tiến trình (process), sự kiện cập nhật (update event) và sự kiện đánh giá (evaluation event).\r\n\r\n- **Các ý chính bắt buộc nắm vững:**\r\n  1. **Nội dung bao quát của Chương 4:** Bao gồm ngữ nghĩa lập lịch, thuật toán lập lịch sự kiện phân tầng, tính định tính và phi định tính trong thứ tự sự kiện, các nguồn gây tranh chấp dữ liệu (race conditions), và các điểm kiểm soát PLI callback.\r\n  2. **Bản chất song song của SystemVerilog:** SystemVerilog là một ngôn ngữ lập trình song song. Ngữ nghĩa ngôn ngữ xác định rõ thứ tự thực thi nào được đảm bảo (định tính) và thứ tự nào là không xác định (phi định tính). Mọi ngữ nghĩa ngôn ngữ đều được định nghĩa dựa trên cơ sở mô phỏng.\r\n  3. **Khái niệm Tiến trình (Process):** Một mô tả SystemVerilog bao gồm các luồng thực thi/tiến trình kết nối với nhau. Tiến trình là đối tượng có thể được đánh giá, có trạng thái và phản hồi với thay đổi ở đầu vào. Các ví dụ điển hình gồm khối `initial`, `always`, `always_comb`, `always_latch`, `always_ff`, gán liên tục (continuous assignment), task bất đồng bộ.\r\n  4. **Cơ chế Sự kiện Cập nhật & Sự kiện Đánh giá:** \r\n     - *Update event (Sự kiện cập nhật):* Mọi thay đổi trạng thái của net hoặc biến.\r\n     - *Evaluation event (Sự kiện đánh giá):* Khi sự kiện cập nhật xảy ra, tất cả tiến trình nhạy với sự kiện đó sẽ được đưa vào đánh giá theo thứ tự tùy ý. Bản thân việc đánh giá một tiến trình được gọi là sự kiện đánh giá.\r\n\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Mô hình Mô phỏng Sự kiện Rời rạc (Discrete Event Simulation - DES):** Cần nắm cơ chế trục thời gian mô phỏng tiến lên theo các sự kiện kích hoạt để hiểu cách trình mô phỏng xử lý phần cứng.\r\n  - **Race Conditions (Điều kiện tranh chấp):** Hiện tượng xảy ra khi hai hay nhiều tiến trình song song truy cập cùng một tài nguyên mà thứ tự thực thi làm thay đổi kết quả cuối cùng.\r\n  - **PLI (Programming Language Interface):** Giao diện cho phép kết nối mã C/C++ với trình mô phỏng Verilog/SystemVerilog.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thống nhất Mô tả, Đặc tả và Kiểm thử Phần cứng\r\n\r\n**4. Ngữ nghĩa lập lịch**\r\n\r\n**4.1 Tổng quan**\r\n\r\nĐiều khoản này mô tả các nội dung sau:\r\n— Ngữ nghĩa lập lịch mô phỏng dựa trên sự kiện\r\n— Thuật toán lập lịch sự kiện phân tầng của SystemVerilog\r\n— Tính định tính và tính phi định tính của thứ tự sự kiện\r\n— Các nguồn phát sinh điều kiện tranh chấp (race conditions) có thể xảy ra\r\n— Các điểm kiểm soát phản hồi gọi lại (callback) của PLI\r\n\r\n**4.2 Sự thực thi của một mô hình phần cứng và môi trường kiểm thử của nó**\r\n\r\nPhần còn lại của các điều khoản trong tiêu chuẩn này mô tả hành vi của từng phần tử trong ngôn ngữ. Điều khoản này cung cấp một cái nhìn tổng quan về sự tương tác giữa các phần tử này, đặc biệt là về mặt lập lịch và thực thi các sự kiện.\r\n\r\nCác phần tử tạo nên ngôn ngữ SystemVerilog có thể được sử dụng để mô tả hành vi của phần cứng điện tử ở nhiều mức độ trừu tượng khác nhau. SystemVerilog là một ngôn ngữ lập trình song song. Việc thực thi các cấu trúc ngôn ngữ nhất định được định nghĩa bởi việc thực thi song song các khối hoặc các tiến trình (process). Điều quan trọng là phải hiểu thứ tự thực thi nào được đảm bảo cho người dùng và thứ tự thực thi nào là không xác định (phi định tính).\r\n\r\nMặc dù SystemVerilog được sử dụng cho nhiều mục đích hơn là chỉ mô phỏng, ngữ nghĩa của ngôn ngữ này được định nghĩa cho việc mô phỏng, và mọi thứ khác đều được trừu tượng hóa từ định nghĩa cơ sở này.\r\n\r\n**4.3 Mô phỏng sự kiện**\r\n\r\nNgôn ngữ SystemVerilog được định nghĩa dựa trên mô hình thực thi sự kiện rời rạc. Mô phỏng sự kiện rời rạc được mô tả chi tiết hơn trong điều khoản này nhằm cung cấp ngữ cảnh để mô tả ý nghĩa và sự diễn giải hợp lệ của các cấu trúc SystemVerilog. Những định nghĩa kết quả này cung cấp thuật toán tham chiếu tiêu chuẩn cho việc mô phỏng, điều mà tất cả các trình mô phỏng tuân thủ chuẩn phải triển khai. Trong khuôn khổ mô hình thực thi sự kiện sau đây, có rất nhiều sự lựa chọn, và sự khác biệt trong một số chi tiết thực thi được dự đoán trước giữa các trình mô phỏng khác nhau. Ngoài ra, các trình mô phỏng SystemVerilog có thể tự do sử dụng các thuật toán khác với thuật toán được mô tả trong điều khoản này, miễn là hiệu ứng mà người dùng nhìn thấy nhất quán với thuật toán tham chiếu.\r\n\r\nMột mô tả SystemVerilog bao gồm các luồng thực thi hoặc tiến trình được kết nối với nhau. Tiến trình là các đối tượng có thể được đánh giá, có thể lưu giữ trạng thái và có thể phản hồi với những thay đổi trên đầu vào của chúng để tạo ra đầu ra. Các tiến trình là các phần tử được lập lịch đồng thời, chẳng hạn như các thủ tục **initial**. Ví dụ về các tiến trình bao gồm, nhưng không giới hạn ở: **initial**, **always**, **always_comb**, **always_latch**, và **always_ff**; gán liên tục (continuous assignments); các task bất đồng bộ; và các câu lệnh gán thủ tục (procedural assignment statements).\r\n\r\nMỗi sự thay đổi trạng thái của một net hoặc biến trong hệ thống đang mô phỏng đều được coi là một *sự kiện cập nhật (update event)*.\r\n\r\nCác tiến trình có tính nhạy với các sự kiện cập nhật. Khi một sự kiện cập nhật được thực thi, tất cả các tiến trình nhạy với sự kiện đó sẽ được cân nhắc để đánh giá theo một thứ tự tùy ý. Việc đánh giá một tiến trình cũng là một sự kiện, được gọi là *sự kiện đánh giá (evaluation event)*.",
+      "grammar": [
+        {
+          "phrase": "what execution order is guaranteed to the user and what execution order is indeterminate",
+          "explain": "mệnh đề danh từ (noun clause) làm tân ngữ cho động từ \"understand\""
+        },
+        {
+          "phrase": "the semantics of the language is defined for simulation, and everything else is abstracted from this base definition",
+          "explain": "câu ghép chứa mệnh đề bị động (passive voice) thể hiện tính khách quan của chuẩn kỹ thuật"
+        },
+        {
+          "phrase": "provided the user-visible effect is consistent with the reference algorithm",
+          "explain": "mệnh đề điều kiện với \"provided (that)\" mang nghĩa \"miễn là / với điều kiện là\""
+        },
+        {
+          "phrase": "Processes sensitive to update events are evaluated in arbitrary order",
+          "explain": "mệnh đề quan hệ rút gọn dạng tính từ/bị động (\"Processes [that are] sensitive to...\"), bổ nghĩa cho danh từ \"Processes\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "semantics",
+          "explain": "(danh từ) ngữ nghĩa (quy tắc xác định ý nghĩa và cách vận hành mã nguồn trong ngôn ngữ lập trình)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stratified",
+          "explain": "(tính từ) phân tầng, được sắp xếp theo từng lớp/tầng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "determinism",
+          "explain": "(danh từ) tính định tính, tính xác định (luôn cho một kết quả duy nhất với cùng điều kiện đầu vào)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nondeterminism",
+          "explain": "(danh từ) tính phi định tính, tính không xác định (kết quả/thứ tự có thể biến đổi ngẫu nhiên)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "(cụm danh từ) điều kiện tranh chấp (lỗi lập trình song song khi kết quả phụ thuộc vào tiến trình nào chạy trước)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(cụm danh từ) phép gán liên tục (cấu trúc gán giá trị tự động cập nhật trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "discrete event simulation",
+          "explain": "(cụm danh từ) mô phỏng sự kiện rời rạc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "thread of execution",
+          "explain": "(cụm danh từ) luồng thực thi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "update event",
+          "explain": "(cụm danh từ) sự kiện cập nhật (sự biến đổi giá trị của net/biến)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "evaluation event",
+          "explain": "(cụm danh từ) sự kiện đánh giá (việc tính toán lại một tiến trình)"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "**Nội dung tổng quát:**\r\nTrang 63 nằm trong Chương 4 của chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog, trình bày về khái niệm thời gian mô phỏng (simulation time) và giới thiệu chi tiết về **Bộ lập lịch sự kiện phân tầng (Stratified Event Scheduler)**. Đây là cơ chế nền tảng giúp trình mô phỏng quản lý việc thực thi các sự kiện theo trình tự thời gian chính xác và có thể dự đoán được.\r\n\r\n**Các ý chính người đọc bắt buộc phải nắm:**\r\n1. **Khái niệm Thời gian mô phỏng (Simulation Time):** Trình mô phỏng duy trì một giá trị thời gian để mô phỏng khoảng thời gian thực tế mà hệ thống phần cứng cần để vận hành.\r\n2. **Khái niệm Khe thời gian (Time Slot):** Tập hợp tất cả các sự kiện được xếp lịch tại một mốc thời gian cụ thể sẽ tạo thành một khe thời gian (time slot). Quá trình mô phỏng luôn tiến về phía trước theo thứ tự thời gian và tuyệt đối không bao giờ quay ngược thời gian.\r\n3. **Cấu trúc Bộ lập lịch phân tầng (Stratified Event Scheduler):** Để tránh trạng thái đua dữ liệu (race conditions) và đảm bảo tính nhất quán giữa mã thiết kế (design) và mã kiểm thử (testbench), mỗi time slot được chia nhỏ thành 17 vùng (regions) theo thứ tự nghiêm ngặt (từ *Preponed*, *Pre-Active*, *Active*, ..., đến *Postponed*).\r\n4. **Mục đích của việc phân vùng:** Cho phép lấy mẫu dữ liệu (sample data) khi thiết kế ở trạng thái ổn định, đánh giá các biểu thức kiểm tra (property/checker), phản hồi không độ trễ (zero delay), cũng như kết hợp linh hoạt giữa các linh kiện có độ trễ phi 0 và mô tả chính xác theo chu kỳ (cycle-accurate descriptions).\r\n\r\n**Kiến thức nền cần tìm hiểu thêm:**\r\n- **PLI Callbacks (Programming Language Interface):** Cơ chế cho phép mã C/C++ ngoài gọi vào nhân mô phỏng SystemVerilog tại các thời điểm chỉ định.\r\n- **Race Condition (Trạng thái đua dữ liệu):** Lỗi xảy ra khi thứ tự thực thi các sự kiện trong cùng một mốc thời gian không xác định, dẫn đến kết quả mô phỏng không nhất quán. Nắm vững thứ tự các region sẽ giúp kỹ sư tránh được lỗi này.",
+      "translation": "Các sự kiện đánh giá cũng bao gồm các lời gọi lại PLI (PLI callbacks), đây là các điểm trong mô hình thực thi nơi các thủ tục ứng dụng PLI có thể được gọi từ nhân mô phỏng (simulation kernel).\r\n\r\nBên cạnh các sự kiện, một khía cạnh then chốt khác của trình mô phỏng là thời gian. Thuật ngữ *thời gian mô phỏng* (*simulation time*) được sử dụng để chỉ giá trị thời gian do trình mô phỏng duy trì nhằm mô hình hóa thời gian thực tế mà mô tả hệ thống đang mô phỏng sẽ trải qua. Thuật ngữ *thời gian* (*time*) được sử dụng thay thế cho *thời gian mô phỏng* trong điều khoản này.\r\n\r\nĐể hỗ trợ đầy đủ cho các tương tác rõ ràng và có thể dự đoán được, một khe thời gian (time slot) đơn lẻ được chia thành nhiều vùng (regions), nơi các sự kiện có thể được lập lịch nhằm cung cấp thứ tự thực thi cho các loại sự kiện cụ thể. Điều này cho phép các thuộc tính (properties) và bộ kiểm tra (checkers) lấy mẫu dữ liệu khi thiết kế đang kiểm thử ở trạng thái ổn định. Các biểu thức thuộc tính có thể được đánh giá một cách an toàn, và các môi trường kiểm thử (testbenches) có thể phản ứng với cả thuộc tính lẫn bộ kiểm tra với độ trễ bằng không, tất cả đều theo một cách thức có thể dự đoán được. Chính cơ chế này cũng cho phép các độ trễ khác không trong thiết kế, sự lan truyền xung nhịp, và/hoặc mã tạo kích thích và phản hồi được kết hợp một cách tự do và nhất quán với các mô tả chính xác theo chu kỳ xung nhịp.\r\n\r\n### 4.4 Bộ lập lịch sự kiện phân tầng (Stratified event scheduler)\r\n\r\nMột trình mô phỏng SystemVerilog tuân thủ chuẩn phải duy trì một dạng cấu trúc dữ liệu cho phép các sự kiện được lập lịch, thực thi và loại bỏ một cách động khi trình mô phỏng tịnh tiến theo thời gian. Cấu trúc dữ liệu này thường được triển khai dưới dạng một tập hợp các danh sách liên kết được sắp xếp theo thời gian, được chia và chia nhỏ tiếp theo một phương thức được xác định rõ ràng.\r\n\r\nPhép chia đầu tiên là theo thời gian. Mỗi sự kiện có một và chỉ một thời gian thực thi mô phỏng, tại bất kỳ thời điểm nào trong quá trình mô phỏng có thể là thời gian hiện tại hoặc một thời gian trong tương lai. Tất cả các sự kiện được lập lịch tại một mốc thời gian cụ thể sẽ xác định một khe thời gian (time slot). Quá trình mô phỏng tiến triển bằng cách thực thi và loại bỏ tất cả các sự kiện trong khe thời gian mô phỏng hiện tại trước khi chuyển sang khe thời gian không rỗng tiếp theo, theo thứ tự thời gian. Quy trình này đảm bảo rằng trình mô phỏng không bao giờ đi ngược thời gian.\r\n\r\nMột khe thời gian được chia thành một tập hợp các vùng có thứ tự:\r\na) Preponed\r\nb) Pre-Active\r\nc) Active\r\nd) Inactive\r\ne) Pre-NBA\r\nf) NBA\r\ng) Post-NBA\r\nh) Pre-Observed\r\ni) Observed\r\nj) Post-Observed\r\nk) Reactive\r\nl) Re-Inactive\r\nm) Pre-Re-NBA\r\nn) Re-NBA\r\no) Post-Re-NBA\r\np) Pre-Postponed\r\nq) Postponed\r\n\r\nMục đích của việc chia một khe thời gian thành các vùng có thứ tự này là để cung cấp các tương tác có thể dự đoán được giữa mã thiết kế và mã kiểm thử.",
+      "grammar": [
+        {
+          "phrase": "points in the execution model where PLI application routines can be called from the simulation kernel",
+          "explain": "mệnh đề quan hệ trạng từ chỉ nơi chốn (dùng \"where\") bổ nghĩa cho danh từ \"points\""
+        },
+        {
+          "phrase": "the time value maintained by the simulator to model the actual time it would take for the system description being simulated",
+          "explain": "mệnh đề rút gọn dùng quá khứ phân từ \"maintained\" bổ nghĩa cho \"time value\", kết hợp mệnh đề quan hệ ẩn \"it would take\" và hiện tại phân từ dạng bị động \"being simulated\""
+        },
+        {
+          "phrase": "multiple regions where events can be scheduled that provide for an ordering of particular types of execution",
+          "explain": "mệnh đề quan hệ tách rời (\"that provide...\") bổ nghĩa cho danh từ \"events\" đứng trước đó trong mệnh đề \"where\""
+        },
+        {
+          "phrase": "allows properties and checkers to sample data when the design under test is in a stable state",
+          "explain": "cấu trúc allow + tân ngữ + động từ nguyên mẫu có \"to\" (allow sb/sth to do sth), đi kèm mệnh đề trạng ngữ chỉ thời gian với \"when\""
+        },
+        {
+          "phrase": "data structure that allows events to be dynamically scheduled, executed, and removed as the simulator advances through time",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"data structure\", chứa cấu trúc bị động nguyên mẫu \"to be scheduled, executed, and removed\" và mệnh đề trạng ngữ chỉ phương thức/thời gian với \"as\""
+        },
+        {
+          "phrase": "executing and removing all events in the current simulation time slot before moving on to the next nonempty time slot",
+          "explain": "cấu trúc danh động từ (gerund) đứng sau giới từ \"by\" và \"before\" chỉ phương thức và trình tự hành động"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "interchangeably",
+          "explain": "(trạng từ) có thể thay thế cho nhau, dùng thay thế lẫn nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stratified",
+          "explain": "(tính từ) được phân tầng, chia thành nhiều lớp/vùng có thứ tự"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subdivide",
+          "explain": "(động từ) chia nhỏ tiếp các phần đã được chia"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nonempty",
+          "explain": "(tính từ) không rỗng, chứa ít nhất một phần tử/sự kiện"
+        },
+        {
+          "type": "collocation",
+          "phrase": "simulation kernel",
+          "explain": "(cụm từ chuyên ngành) nhân mô phỏng (bộ lõi xử lý mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(cụm từ chuyên ngành) khe thời gian, khoảng thời gian mô phỏng đơn lẻ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "design under test",
+          "explain": "(cụm từ chuyên ngành) khối thiết kế đang được kiểm thử (thường viết tắt là DUT)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "zero delay",
+          "explain": "(cụm từ chuyên ngành) độ trễ bằng không (sự kiện xảy ra tức thì trong cùng mốc thời gian)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "cycle-accurate descriptions",
+          "explain": "(cụm từ) các mô tả chính xác theo từng chu kỳ xung nhịp"
+        },
+        {
+          "type": "phrase",
+          "phrase": "time-ordered set of linked lists",
+          "explain": "(cụm từ chuyên ngành) tập hợp các danh sách liên kết được sắp xếp theo thứ tự thời gian"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "- **Nội dung tổng quát:** Trang 64 thuộc Tiêu chuẩn IEEE Std 1800-2023 cho ngôn ngữ SystemVerilog, trình bày kiến trúc phân chia và cơ chế hoạt động của các vùng sự kiện (event regions) trong một khe thời gian mô phỏng (simulation time slot). Nội dung đi sâu vào việc định nghĩa tập vùng chủ động (active region set), tập vùng phản ứng (reactive region set), các vùng lặp (iterative regions), vùng mô phỏng (simulation regions), cũng như chức năng cụ thể của 4 vùng: Preponed, Active, Inactive, và NBA (Nonblocking Assignment update).\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. *Tính tương thích ngược:* Các vùng sự kiện trong SystemVerilog bao hàm trọn vẹn mô hình tham chiếu Verilog cũ (IEEE Std 1364-2005) để đảm bảo mã nguồn legacy vẫn hoạt động đúng mà không cần thay đổi.\r\n  2. *Phân nhóm vùng sự kiện:* Sự kiện được phân thành hai nhóm tập chính là \"active region set\" (Active, Inactive, Pre-NBA, NBA, Post-NBA) và \"reactive region set\" (Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, Post-Re-NBA). Ngoài ra còn có các vùng lặp (iterative regions) và cách phân loại vùng thành vùng mô phỏng (simulation regions) hoặc vùng PLI (PLI regions).\r\n  3. *Vùng Preponed:* Chuyên dùng cho việc lấy mẫu dữ liệu ngay trước khi bước vào khe thời gian hiện tại (tương ứng với độ trễ lấy mẫu `#1step` và tương đương với vùng Postponed của khe thời gian ngay trước đó).\r\n  4. *Vùng Active:* Chứa các sự kiện chủ động đang được đánh giá, có thể thực thi theo bất kỳ thứ tự nào.\r\n  5. *Vùng Inactive:* Chứa các sự kiện sẽ được đánh giá sau khi xử lý xong tất cả sự kiện ở vùng Active. Việc dùng điều khiển độ trễ tường minh `#0` sẽ hoãn tiến trình hiện tại và đưa sự kiện vào vùng Inactive này.\r\n  6. *Vùng NBA:* Chứa các sự kiện cập nhật của phép gán phi hoãn (nonblocking assignment update), được thực thi sau khi hoàn thành các sự kiện Inactive.\r\n- **Khái niệm / Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Khe thời gian mô phỏng (Time Slot) & Trình lập lịch (Simulation Scheduler):* Cần hiểu cách trình mô phỏng quản lý thời gian mô phỏng rời rạc và cách chuyển giao giữa các khe thời gian.\r\n  - *Gán hoãn (Blocking Assignment `=`) vs Gán phi hoãn (Nonblocking Assignment `<=`):* Để hiểu lý do vì sao phép gán phi hoãn lại tạo sự kiện tách biệt rơi vào vùng NBA thay vì cập nhật ngay trong vùng Active.\r\n  - *PLI (Programming Language Interface):* Giao diện cho phép chương trình viết bằng C/C++ tương tác trực tiếp với trình mô phỏng SystemVerilog.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Tả thực và Kiểm tra Phần cứng Hợp nhất\r\n\r\nGHI CHÚ—Các vùng này về cơ bản bao hàm mô hình tham chiếu IEEE Std 1364-2005 dành cho mô phỏng, với mức độ xác định hoàn toàn tương đương. Nói cách khác, mã Verilog truyền thống vẫn sẽ tiếp tục chạy chính xác mà không cần sửa đổi trong cơ chế của SystemVerilog.\r\n\r\n4.4.1 Tập vùng chủ động và tập vùng phản ứng\r\n\r\nCó hai nhóm vùng sự kiện quan trọng được sử dụng để giúp xác định việc lập lịch cho các hoạt động trong SystemVerilog, đó là tập vùng chủ động (active region set) và tập vùng phản ứng (reactive region set). Các sự kiện được lập lịch trong các vùng Active, Inactive, Pre-NBA, NBA và Post-NBA là các sự kiện thuộc tập vùng chủ động. Các sự kiện được lập lịch trong các vùng Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA và Post-Re-NBA là các sự kiện thuộc tập vùng phản ứng.\r\n\r\nCác vùng Active, Inactive, Pre-NBA, NBA, Post-NBA, Pre-Observed, Observed, Post-Observed, Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, Post-Re-NBA và Pre-Postponed được gọi là các vùng lặp (iterative regions).\r\n\r\nNgoài tập vùng chủ động và tập vùng phản ứng, tất cả các vùng sự kiện của mỗi khe thời gian còn có thể được phân loại thành các vùng mô phỏng (xem 4.4.2) hoặc các vùng PLI (xem 4.4.3).\r\n\r\n4.4.2 Các vùng mô phỏng\r\n\r\nCác vùng mô phỏng của một khe thời gian là các vùng Preponed, Active, Inactive, NBA, Observed, Reactive, Re-Inactive, Re-NBA và Postponed. Luồng thực thi của các vùng sự kiện được quy định trong Hình 4-1.\r\n\r\n4.4.2.1 Vùng sự kiện Preponed\r\n\r\nĐộ trễ lấy mẫu #1step cung cấp khả năng lấy mẫu dữ liệu ngay trước khi bước vào khe thời gian hiện tại. Lấy mẫu #1step hoàn toàn giống với việc lấy mẫu dữ liệu trong vùng Preponed của khe thời gian hiện tại. Việc lấy mẫu trong vùng Preponed tương đương với việc lấy mẫu trong vùng Postponed của khe thời gian trước đó.\r\n\r\nCác sự kiện PLI thuộc vùng Preponed cũng được lập lịch trong vùng này (xem 4.4.3.1).\r\n\r\n4.4.2.2 Vùng sự kiện Active\r\n\r\nVùng Active chứa các sự kiện thuộc tập vùng chủ động hiện tại đang được đánh giá và có thể được xử lý theo bất kỳ thứ tự nào.\r\n\r\n4.4.2.3 Vùng sự kiện Inactive\r\n\r\nVùng Inactive chứa các sự kiện sẽ được đánh giá sau khi tất cả các sự kiện Active đã được xử lý.\r\n\r\nNếu các sự kiện đang được thực thi trong tập vùng chủ động, một điều khiển độ trễ tường minh #0 sẽ yêu cầu tiến trình bị tạm dừng và một sự kiện sẽ được lập lịch đưa vào vùng Inactive của khe thời gian hiện tại để tiến trình có thể được tiếp tục trong lần lặp từ Inactive sang Active tiếp theo.\r\n\r\n4.4.2.4 Vùng sự kiện NBA\r\n\r\nVùng NBA (cập nhật gán phi hoãn - nonblocking assignment update) chứa các sự kiện sẽ được đánh giá sau khi tất cả các sự kiện Inactive đã được xử lý.\r\n\r\nNếu các sự kiện đang được thực thi trong tập vùng chủ động, một phép gán phi hoãn sẽ tạo ra một sự kiện trong vùng NBA được lập lịch cho thời điểm mô phỏng hiện tại hoặc thời điểm muộn hơn.",
+      "grammar": [
+        {
+          "phrase": "There are two important groupings of event regions that are used to help define the scheduling of SystemVerilog activity",
+          "explain": "cấu trúc \"there are\", mệnh đề quan hệ với \"that\" bổ nghĩa cho \"groupings of event regions\", kết hợp động từ \"help + V_bare\""
+        },
+        {
+          "phrase": "Events scheduled in the Active, Inactive, Pre-NBA, NBA, and Post-NBA regions are active region set events",
+          "explain": "mệnh đề rút gọn dạng quá khứ phân tử \"scheduled in...\" bổ nghĩa cho danh từ làm chủ ngữ \"Events\""
+        },
+        {
+          "phrase": "The Active, Inactive, Pre-NBA, NBA, Post-NBA, Pre-Observed, Observed, Post-Observed, Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, Post-Re-NBA, and Pre-Postponed regions are known as the iterative regions",
+          "explain": "cấu trúc bị động \"are known as\" (được biết đến như/được gọi là)"
+        },
+        {
+          "phrase": "In addition to the active region set and reactive region set, all of the event regions of each time slot can be categorized as simulation regions",
+          "explain": "cụm giới từ \"In addition to\", kết hợp cấu trúc bị động với động từ khuyết thiếu \"can be categorized as\""
+        },
+        {
+          "phrase": "Sampling in the Preponed region is equivalent to sampling in the previous Postponed region",
+          "explain": "cấu trúc so sánh tương đương \"is equivalent to + danh từ/V-ing\""
+        },
+        {
+          "phrase": "The Active region holds the current active region set events being evaluated",
+          "explain": "mệnh đề rút gọn dạng hiện tại phân tử bị động \"being evaluated\" bổ nghĩa cho danh từ \"events\""
+        },
+        {
+          "phrase": "If events are being executed in the active region set, an explicit #0 delay control requires the process to be suspended and an event to be scheduled into the Inactive region of the current time slot so that the process can be resumed in the next Inactive to Active iteration",
+          "explain": "mệnh đề điều kiện \"If...\", thì hiện tại tiếp diễn dạng bị động \"are being executed\", cấu trúc \"require sth to be V3\", mệnh đề chỉ mục đích \"so that\" kết hợp thể bị động \"can be resumed\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "determinism",
+          "explain": "(danh từ) tính xác định (trong mô phỏng, cùng một đầu vào và thứ tự sẽ luôn cho ra đúng một kết quả duy nhất)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "encompass",
+          "explain": "(động từ) bao hàm, bao gồm toàn bộ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "iterative",
+          "explain": "(tính từ) mang tính lặp lại (chỉ các vùng sự kiện có thể chạy đi chạy lại trong cùng một mốc thời gian mô phỏng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "preponed",
+          "explain": "(tính từ/thuật ngữ) được đẩy lên trước, thực hiện trước khi vào khe thời gian (đối lập với postponed)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "suspended",
+          "explain": "(tính từ/động từ) bị tạm dừng, hoãn lại"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(danh từ) khe thời gian mô phỏng (khoảng thời gian chứa tất cả các vùng sự kiện diễn ra ở cùng một thời điểm)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(danh từ) phép gán phi hoãn (toán tử `<=`), trong đó giá trị cập nhật được đưa vào vùng NBA"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in other words",
+          "explain": "(thành ngữ/cụm từ nối) nói cách khác"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in addition to",
+          "explain": "(giới từ) bên cạnh, ngoài... ra"
+        },
+        {
+          "type": "phrase",
+          "phrase": "is equivalent to",
+          "explain": "(cụm tính từ) tương đương với"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang sách này thuộc chuẩn IEEE Std 1800-2023 dành cho ngôn ngữ SystemVerilog, trình bày chi tiết về các vùng sự kiện (event regions) nâng cao trong chu kỳ mô phỏng (time slot), cụ thể bao gồm các vùng trong tập vùng Phản kháng (Reactive region set: Observed, Reactive, Re-Inactive, Re-NBA), vùng Postponed và các vùng dành riêng cho giao diện ngôn ngữ lập trình (PLI regions).\r\n- **Những ý chính cần nắm vững:**\r\n  1. **Vùng Observed:** Nơi đánh giá các biểu thức thuộc tính (property expressions trong SystemVerilog Assertion - SVA). Kết quả pass/fail được đẩy sang vùng Reactive để xử lý. KHÔNG cho phép PLI callback ở đây.\r\n  2. **Vùng Reactive & các vùng Re- (Re-Inactive, Re-NBA):** Là các vùng \"đối ứng\" (dual) của tập vùng Active (Active, Inactive, NBA). Chúng dùng để thực thi mã trong checkers, program blocks và các khối hành động (action blocks) của assertion. Cấu trúc trễ `#0` hoặc phép gán phi chặn (nonblocking assignment) trong vùng Reactive sẽ đẩy sự kiện lần lượt vào vùng Re-Inactive và Re-NBA.\r\n  3. **Vùng Postponed:** Vùng cuối cùng của một slot thời gian, dùng để đọc/lấy dữ liệu ổn định tuyệt đối (như lệnh `$monitor`, `$strobe`). Tại đây, TUYỆT ĐỐI KHÔNG được phép ghi giá trị mới hay lên lịch cho sự kiện ở các vùng trước đó.\r\n  4. **Các vùng PLI (tiêu biểu là Preponed):** Cung cấp điểm can thiệp (callback) cho các công cụ/chương trình bên ngoài thông qua giao diện PLI. Vùng Preponed diễn ra ở đầu slot thời gian, trước khi bất kỳ tín hiệu hay biến nào thay đổi trạng thái, và cũng nghiêm cấm hành vi ghi dữ liệu hoặc đặt lịch sự kiện.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Mô phỏng sự kiện rời rạc (Discrete Event Simulation - DES) & Vòng đời Slot thời gian trong SystemVerilog:** Cần hiểu nguyên lý một thời điểm mô phỏng được chia thành nhiều \"vùng\" (region) nhỏ hơn để tránh tình trạng race condition (tranh chấp dữ liệu).\r\n  - **SystemVerilog Assertions (SVA) & Program Blocks:** Khái niệm về các khối kiểm tra độc lập với mã thiết kế phần cứng (RTL) giúp hiểu rõ tại sao cần phân tách giữa tập vùng Active và tập vùng Reactive.\r\n  - **PLI (Programming Language Interface):** Cơ chế kết nối ngôn ngữ C/C++ với trình mô phỏng Verilog/SystemVerilog.",
+      "translation": "**4.4.2.5 Vùng sự kiện Observed**\r\n\r\nVùng Observed dùng cho việc đánh giá các biểu thức thuộc tính khi chúng được kích hoạt. Trong quá trình đánh giá thuộc tính, mã xử lý pass/fail (đạt/không đạt) sẽ được lên lịch trong vùng Reactive của slot thời gian hiện tại. Các lời gọi lại (callback) PLI không được phép hoạt động trong vùng Observed.\r\n\r\n**4.4.2.6 Vùng sự kiện Reactive**\r\n\r\nVùng Reactive chứa tập hợp các sự kiện vùng phản kháng hiện tại đang được đánh giá và có thể được xử lý theo thứ tự bất kỳ.\r\n\r\nMã được quy định bởi các phép gán chặn trong checkers, các khối chương trình (program blocks) và mã trong các khối hành động (action blocks) của các assertion đồng thời (concurrent assertions) được lên lịch trong vùng Reactive. Vùng Reactive là vùng đối ứng phản kháng của vùng Active (xem 4.4.2.2).\r\n\r\n**4.4.2.7 Vùng sự kiện Re-Inactive**\r\n\r\nVùng Re-Inactive chứa các sự kiện cần được đánh giá sau khi tất cả các sự kiện trong vùng Reactive đã được xử lý.\r\n\r\nNếu các sự kiện đang được thực thi trong tập vùng reactive, một điều khiển độ trễ `#0` rõ ràng sẽ yêu cầu tiến trình tạm dừng và một sự kiện sẽ được lên lịch vào vùng Re-Inactive của slot thời gian hiện tại để tiến trình có thể được tiếp tục trong lần lặp tiếp theo từ Re-Inactive sang Reactive. Vùng Re-Inactive là vùng đối ứng phản kháng của vùng Inactive (xem 4.4.2.3).\r\n\r\n**4.4.2.8 Vùng sự kiện Re-NBA**\r\n\r\nVùng Re-NBA chứa các sự kiện cần được đánh giá sau khi tất cả các sự kiện trong vùng Re-Inactive đã được xử lý.\r\n\r\nNếu các sự kiện đang được thực thi trong tập vùng reactive, một phép gán phi chặn sẽ tạo ra một sự kiện trong vùng cập nhật Re-NBA được lên lịch cho slot thời gian hiện tại hoặc một thời điểm mô phỏng sau đó. Vùng Re-NBA là vùng đối ứng phản kháng của vùng NBA (xem 4.4.2.4).\r\n\r\n**4.4.2.9 Vùng sự kiện Postponed**\r\n\r\n`$monitor`, `$strobe` và các sự kiện tương tự khác được lên lịch trong vùng Postponed.\r\n\r\nKhông có sự thay đổi giá trị mới nào được phép diễn ra trong slot thời gian hiện tại một khi đã chạm đến vùng Postponed. Trong vùng này, việc ghi giá trị vào bất kỳ net hay biến nào hoặc lên lịch cho một sự kiện ở bất kỳ vùng nào trước đó trong slot thời gian hiện tại là không hợp lệ.\r\n\r\nCác sự kiện PLI vùng Postponed cũng được lên lịch trong vùng này (xem 4.4.3.10).\r\n\r\n**4.4.3 Các vùng PLI**\r\n\r\nBên cạnh các vùng mô phỏng nơi các callback PLI có thể được lên lịch, còn có thêm các vùng dành riêng cho PLI. Các vùng PLI của một slot thời gian bao gồm các vùng Preponed, Pre-Active, Pre-NBA, Post-NBA, Pre-Observed, Post-Observed, Pre-Re-NBA, Post-Re-NBA và Pre-Postponed. Luồng thực thi của các vùng PLI được thể hiện trong Hình 4-1.\r\n\r\n**4.4.3.1 Vùng PLI Preponed**\r\n\r\nVùng Preponed cung cấp một điểm kiểm soát callback PLI cho phép các thủ tục ứng dụng PLI truy cập dữ liệu ở slot thời gian hiện tại trước khi bất kỳ net hay biến nào thay đổi trạng thái. Trong vùng này, việc ghi giá trị vào bất kỳ net hay biến nào hoặc lên lịch cho một sự kiện ở bất kỳ vùng nào khác trong slot thời gian hiện tại là không hợp lệ.",
+      "grammar": [
+        {
+          "phrase": "The code specified by blocking assignments in checkers, program blocks and the code in action blocks of concurrent assertions are scheduled in the Reactive region",
+          "explain": "cấu trúc câu bị động (passive voice) với chủ ngữ dài gồm nhiều thành phần nối với nhau bằng liên từ \"and\""
+        },
+        {
+          "phrase": "an explicit #0 delay control requires the process to be suspended and an event to be scheduled into the Re-Inactive region of the current time slot so that the process can be resumed in the next Re-Inactive to Reactive iteration",
+          "explain": "cấu trúc động từ \"require + O + to-infinitive\" ở dạng bị động, kết hợp với mệnh đề chỉ mục đích \"so that + clause\""
+        },
+        {
+          "phrase": "No new value changes are allowed to happen in the current time slot once the Postponed region is reached",
+          "explain": "cấu trúc bị động phủ định đứng đầu câu (\"No ... are allowed to V\") đi kèm với mệnh đề phụ chỉ thời gian bắt đầu bằng liên từ \"once\""
+        },
+        {
+          "phrase": "allows PLI application routines to access data at the current time slot before any net or variable has changed state",
+          "explain": "cấu trúc \"allow someone/something to do something\", kết hợp với mệnh đề thời gian sử dụng thì hiện tại hoàn thành \"before + clause (present perfect)\" để nhấn mạnh điểm mốc trước khi sự việc diễn ra"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "concurrent assertion",
+          "explain": "(danh từ) kiểm tra khẳng định đồng thời — dạng assertion kiểm tra hành vi theo chuỗi thời gian/xung clock trong SystemVerilog"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nonblocking assignment",
+          "explain": "(danh từ) phép gán phi chặn — phép gán dữ liệu không làm dừng luồng thực thi, sử dụng toán tử <="
+        },
+        {
+          "type": "vocab",
+          "phrase": "callback",
+          "explain": "(danh từ) điểm gọi lại — cơ chế cho phép phần mềm ngoài (như C/C++) can thiệp vào một thời điểm nhất định của trình mô phỏng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ) khe thời gian / mốc thời gian mô phỏng đơn vị"
+        },
+        {
+          "type": "phrase",
+          "phrase": "property expression",
+          "explain": "(cụm danh từ) biểu thức thuộc tính — dùng trong SystemVerilog Assertions để định nghĩa quy tắc kiểm tra thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "reactive region set",
+          "explain": "(cụm danh từ) tập hợp các vùng phản kháng — nhóm các vùng sự kiện phục vụ cho việc kiểm thử và chạy program/assertion"
+        },
+        {
+          "type": "phrase",
+          "phrase": "action block",
+          "explain": "(cụm danh từ) khối hành động — đoạn mã được thực thi khi một câu lệnh assertion trả về kết quả thành công (pass) hoặc thất bại (fail)"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "- **Nội dung tổng quát:** Trang sách này trích từ chuẩn IEEE Std 1800-2023 dành cho ngôn ngữ SystemVerilog, tập trung định nghĩa chi tiết về chức năng và quy định hoạt động của các vùng PLI (Programming Language Interface - Giao diện ngôn ngữ lập trình) trong luồng xử lý khe thời gian (time slot) và sự kiện của trình mô phỏng.\r\n- **Những ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Khái niệm chung:** Mỗi vùng PLI đóng vai trò là một \"điểm kiểm soát gọi lại\" (callback control point), cho phép các chương trình/thủ tục bên ngoài (viết bằng C/C++) can thiệp vào quá trình mô phỏng bằng cách đọc/ghi dữ liệu hoặc tạo sự kiện mới.\r\n  2. **Các vùng cho phép Đọc/Ghi/Tạo sự kiện (Read, Write & Create events):** Bao gồm `Pre-Active`, `Pre-NBA`, `Post-NBA`, `Pre-Re-NBA`, `Post-Re-NBA`, và `Pre-Postponed`. Các vùng này cho phép ứng dụng PLI thao tác linh hoạt trước hoặc sau khi các vùng tương ứng (Active, NBA, Re-NBA, v.v.) được trình mô phỏng đánh giá/xử lý.\r\n  3. **Vùng Pre-Observed:** Chỉ cho phép **đọc** giá trị sau khi tập hợp vùng Active đã ổn định. Quy định nghiêm ngặt: **tuyệt đối không được phép ghi giá trị** vào bất kỳ biến/net nào hoặc lập lịch sự kiện mới trong time slot hiện tại.\r\n  4. **Vùng Post-Observed:** Cho phép đọc giá trị sau khi các thuộc tính (properties) được đánh giá. Tuy nhiên, tiêu chuẩn lưu ý rằng hiện tại PLI chưa hỗ trợ lập lịch callback trong vùng này (cũng như vùng Preponed).\r\n  5. **Vùng Postponed:** Cho phép tạo các sự kiện chỉ-đọc (read-only events) sau khi toàn bộ các vùng khác đã xử lý xong (ví dụ sự kiện `cbReadOnlySynch`).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **SystemVerilog Event Queue (Hàng chờ sự kiện SystemVerilog):** Cần nắm rõ thứ tự ưu tiên và quy trình chuyển đổi giữa các vùng Active, NBA (Nonblocking Assignment), Observed, Re-NBA, Postponed để hiểu lý do vì sao PLI lại chia nhỏ các vùng Pre- và Post- tương ứng.\r\n  - **PLI (Programming Language Interface):** Cơ chế giúp mã C/C++ giao tiếp với phần mềm mô phỏng Verilog/SystemVerilog.\r\n  - **Callback (Hàm gọi lại):** Cơ chế đăng ký hàm để trình mô phỏng tự động gọi khi luồng thực thi chạm đến một vùng sự kiện nhất định.",
+      "translation": "GHI CHÚ—Hiện tại PLI không lập lịch cho các hàm gọi lại (callbacks) trong vùng Preponed.\r\n\r\n**4.4.3.2 Vùng PLI Pre-Active**\r\nVùng Pre-Active cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện trước khi các sự kiện trong vùng Active được đánh giá (xem 4.5).\r\n\r\n**4.4.3.3 Vùng PLI Pre-NBA**\r\nVùng Pre-NBA cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện trước khi các sự kiện trong vùng NBA được đánh giá (xem 4.5).\r\n\r\n**4.4.3.4 Vùng PLI Post-NBA**\r\nVùng Post-NBA cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện sau khi các sự kiện trong vùng NBA được đánh giá (xem 4.5).\r\n\r\n**4.4.3.5 Vùng PLI Pre-Observed**\r\nVùng Pre-Observed cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc các giá trị sau khi tập hợp vùng active đã ổn định. Trong vùng này, việc ghi giá trị vào bất kỳ net hoặc biến nào, hoặc lập lịch cho một sự kiện trong khe thời gian (time slot) hiện tại đều là phi pháp (không được phép).\r\n\r\n**4.4.3.6 Vùng PLI Post-Observed**\r\nVùng Post-Observed cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc các giá trị sau khi các thuộc tính được đánh giá (trong vùng Observed hoặc một vùng trước đó).\r\nGHI CHÚ—Hiện tại PLI không lập lịch cho các hàm gọi lại trong vùng Post-Observed.\r\n\r\n**4.4.3.7 Vùng PLI Pre-Re-NBA**\r\nVùng Pre-Re-NBA cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện trước khi các sự kiện trong vùng Re-NBA được đánh giá (xem 4.5).\r\n\r\n**4.4.3.8 Vùng PLI Post-Re-NBA**\r\nVùng Post-Re-NBA cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện sau khi các sự kiện trong vùng Re-NBA được đánh giá (xem 4.5).\r\n\r\n**4.4.3.9 Vùng PLI Pre-Postponed**\r\nVùng Pre-Postponed cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI đọc và ghi các giá trị cũng như tạo ra các sự kiện sau khi đã xử lý tất cả các vùng khác ngoại trừ vùng Postponed.\r\n\r\n**4.4.3.10 Vùng PLI Postponed**\r\nVùng Postponed cung cấp một điểm kiểm soát gọi lại PLI, cho phép các thủ tục ứng dụng PLI tạo ra các sự kiện chỉ-đọc (read-only events) sau khi đã xử lý tất cả các vùng khác. Sự kiện PLI `cbReadOnlySynch` và các sự kiện tương tự khác được lập lịch trong vùng Postponed.\r\n\r\nLuồng xử lý các khe thời gian và các vùng sự kiện trong SystemVerilog được thể hiện trong Hình 4-1.",
+      "grammar": [
+        {
+          "phrase": "allows PLI application routines to read and write values and create events before events in the Active region are evaluated",
+          "explain": "Cấu trúc cho phép ai làm gì \"allow sb/sth to do sth\" kết hợp mệnh đề trạng ngữ chỉ thời gian \"before + S + V (bị động)\"."
+        },
+        {
+          "phrase": "Within this region, it is illegal to write values to any net or variable or to schedule an event within the current time slot",
+          "explain": "Cấu trúc chủ ngữ giả \"it is + adj + to-V\" (nó thì không hợp lệ để làm V1 hoặc V2) đặt sau cụm giới từ chỉ địa điểm/phạm vi \"Within this region\" nhằm tạo sự nhấn mạnh."
+        },
+        {
+          "phrase": "allows PLI application routines to create read-only events after processing all other regions",
+          "explain": "Cấu trúc \"allow sb to do sth\" đi cùng giới từ \"after\" kết hợp v-ing (\"after processing...\") để rút gọn mệnh đề cùng chủ ngữ."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "routine",
+          "explain": "(danh từ) thủ tục, chương trình con hoặc hàm xử lý trong phần mềm"
+        },
+        {
+          "type": "vocab",
+          "phrase": "callback",
+          "explain": "(danh từ) hàm gọi lại (hàm được thực thi khi một sự kiện cụ thể xảy ra trong hệ thống)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "stabilize",
+          "explain": "(động từ) ổn định, đạt trạng thái cân bằng không còn biến động"
+        },
+        {
+          "type": "collocation",
+          "phrase": "callback control point",
+          "explain": "điểm kiểm soát gọi lại (vị trí móc nối để đăng ký thực thi các hàm callback)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "current time slot",
+          "explain": "khe thời gian hiện tại (đơn vị chia nhỏ thời gian trong mô phỏng vi mạch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "read-only events",
+          "explain": "các sự kiện chỉ-đọc (sự kiện chỉ truy xuất thông tin chứ không làm thay đổi trạng thái dữ liệu)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "read and write values",
+          "explain": "đọc và ghi các giá trị (thao tác dữ liệu hai chiều)"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Trang này trình bày Hình 4-1 thuộc Chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog, chi tiết về các vùng lập lịch sự kiện (Event scheduling regions) diễn ra trong một khung thời gian mô phỏng (time slot).\r\n\r\nNhững điểm chính người đọc cần nắm vững bao gồm:\r\n1. Vòng đời của một khung thời gian mô phỏng (time slot): Bắt đầu từ sự kiện chuyển tiếp từ \"khung thời gian trước\" (from previous time slot) đi qua vùng `Preponed`, tiến qua một chuỗi các vùng xử lý nội tại, và kết thúc ở vùng `Postponed` trước khi chuyển sang \"khung thời gian tiếp theo\" (to next time slot).\r\n2. Sự phân chia các nhóm vùng (Regions):\r\n   - Nhóm các vùng mô phỏng thiết kế gốc (Design execution): Bao gồm `Pre-Active`, `Active`, `Inactive`, `Pre-NBA`, `NBA`, và `Post-NBA`. Vòng lặp giữa các vùng này đảm bảo các sự kiện cập nhật tín hiệu và phép gán không chặn (NBA - Non-blocking assignment) được giải quyết triệt để.\r\n   - Nhóm các vùng quan sát (Assertion & Verification reading): Bao gồm `Pre-Observed`, `Observed`, và `Post-Observed`, nơi các khẳng định (assertions) kiểm tra trạng thái tín hiệu đã ổn định.\r\n   - Nhóm các vùng phản ứng kiểm thử (Testbench Reactive execution): Bao gồm `Reactive`, `Re-Inactive`, `Pre-Re-NBA`, `Re-NBA`, và `Post-Re-NBA`, dành riêng cho mã kiểm thử (testbench code) để phản hồi lại trạng thái thiết kế mà không gây ra hiện tượng cạnh tranh (race condition).\r\n   - Nhóm kết thúc: `Pre-Postponed` và `Postponed`, nơi dữ liệu được lấy mẫu an toàn cho việc hiển thị hoặc ghi log.\r\n3. Ký hiệu chú giải (Legend): Phân biệt rõ giữa vùng xử lý thông thường (`region`) và vùng xử lý có sự tham gia của Giao diện Ngôn ngữ Lập trình (`PLI region`).\r\n\r\nKiến thức nền cần tìm hiểu thêm: Mô hình mô phỏng dựa trên sự kiện (Event-driven simulation architecture), khái niệm gán không chặn (NBA vs Blocking assignment) và cơ chế tránh cạnh tranh dữ liệu (race condition) giữa mã thiết kế (Design) và mã kiểm thử (Testbench) trong Verilog/SystemVerilog.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Thống số Kỹ thuật và Kiểm thử Phần cứng Hợp nhất\r\n\r\n[Mô tả sơ đồ:]\r\nkhung thời gian (time slot)\r\n\r\ntừ khung thời gian trước -> Preponed (Vùng chuẩn bị)\r\n-> Pre-Active (Tiền Active)\r\n-> Active (Hoạt động) <-> Inactive (Không hoạt động)\r\n-> Pre-NBA (Tiền NBA) -> NBA (Gán không chặn) -> Post-NBA (Hậu NBA)\r\n(Vòng lặp quay lại Active)\r\n\r\n-> Pre-Observed (Tiền Observed)\r\n-> Observed (Quan sát)\r\n-> Post-Observed (Hậu Observed)\r\n(Có nhánh quay lại Active)\r\n\r\n-> Reactive (Phản ứng) <-> Re-Inactive (Tái Inactive)\r\n-> Pre-Re-NBA (Tiền Re-NBA) -> Re-NBA (Tái NBA) -> Post-Re-NBA (Hậu Re-NBA)\r\n(Vòng lặp quay lại Reactive hoặc quay lại Active)\r\n\r\n-> Pre-Postponed (Tiền Postponed)\r\n-> Postponed (Trì hoãn/Hoàn tất) -> đến khung thời gian tiếp theo\r\n\r\nChú giải:\r\n- region: vùng sự kiện\r\n- PLI region: vùng sự kiện PLI (Giao diện Ngôn ngữ Lập trình)\r\n\r\nHình 4-1—Các vùng lập lịch sự kiện\r\n\r\nTrang 67\r\nQuyền sử dụng được cấp phép giới hạn cho: Hai Trac. Tải về ngày 28 tháng 8 năm 2023 lúc 10:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "Authorized licensed use limited to",
+          "explain": "Cấu trúc mệnh đề phân từ quá khứ rút gọn đóng vai trò tính từ bổ nghĩa cho danh từ \"use\" (dạng đầy đủ: \"Authorized licensed use which is limited to...\"), mang nghĩa \"Quyền sử dụng được cấp phép bị giới hạn cho...\"."
+        },
+        {
+          "phrase": "Downloaded on August 28, 2023 at 10:36:42 UTC from IEEE Xplore",
+          "explain": "Cụm phân từ quá khứ (past participle phrase) đóng vai trò trạng ngữ rút gọn chỉ thời gian và phương thức/nguồn tải dữ liệu."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "scheduling",
+          "explain": "(danh từ) sự lập lịch, việc sắp xếp thứ tự ưu tiên xử lý sự kiện trong trình mô phỏng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ) khung thời gian, khoảng thời gian đơn vị trong mô phỏng phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "preponed",
+          "explain": "(danh từ/tính từ chuyên ngành) giai đoạn bắt đầu của một time slot trước khi mọi sự kiện tính toán diễn ra"
+        },
+        {
+          "type": "vocab",
+          "phrase": "postponed",
+          "explain": "(danh từ/tính từ chuyên ngành) giai đoạn cuối cùng của một time slot khi mọi tính toán đã ổn định"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Non-Blocking Assignment (NBA)",
+          "explain": "(cụm danh từ chuyên ngành) phép gán không chặn, cơ chế gán giá trị tín hiệu được hoãn cập nhật đến cuối giai đoạn tính toán để tránh cạnh tranh tín hiệu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Programming Language Interface (PLI)",
+          "explain": "(cụm danh từ chuyên ngành) giao diện cho phép chương trình viết bằng C/C++ tương tác trực tiếp với trình mô phỏng Verilog/SystemVerilog"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "- **Nội dung tổng quát:** Trang sách trình bày Thuật toán tham chiếu mô phỏng SystemVerilog (SystemVerilog simulation reference algorithm) thuộc mục 4.5 của Tiêu chuẩn IEEE Std 1800-2023. Đây là thuật toán giả mã (pseudocode) quy định cách cơ chế mô phỏng (simulation engine) vận hành dòng thời gian, phân chia các khe thời gian (time slot), quản lý các vùng sự kiện (simulation regions) và xử lý hai loại sự kiện chính: sự kiện cập nhật (update event) và sự kiện đánh giá (evaluation event).\r\n- **Ý chính người đọc cần nắm:**\r\n  1. *Cấu trúc 3 cấp của thuật toán:* `execute_simulation` (vòng lặp chính điều khiển dòng thời gian mô phỏng), `execute_time_slot` (điều khiển thứ tự thực thi các vùng sự kiện trong cùng một thời điểm), và `execute_region` (vòng lặp xử lý từng sự kiện cụ thể trong một vùng).\r\n  2. *Quy trình lặp giữa các vùng (Iterative regions):* Thứ tự ưu tiên của các vùng lặp gồm Active, Inactive, Pre-NBA, NBA, Post-NBA, Pre-Observed, Observed, Post-Observed, Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, Post-Re-NBA, và Pre-Postponed.\r\n  3. *Quy tắc ưu tiên quan trọng:* Một khi các vùng Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA hoặc Post-Re-NBA có sự kiện và đang được xử lý, vòng lặp sẽ KHÔNG quay lại các vùng khác cho đến khi cả 5 vùng này trống hoàn toàn.\r\n  4. *Phân loại sự kiện:* Sự kiện cập nhật giá trị biến/net sẽ kích hoạt các sự kiện đánh giá cho các tiến trình (process) nhạy với đối tượng đó; sự kiện đánh giá sẽ thực thi tiến trình và có thể lên lịch cho các sự kiện tiếp theo.\r\n- **Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Mô phỏng dựa trên sự kiện rời rạc (Discrete Event Simulation - DES):* Để hiểu cách thời gian mô phỏng nhảy từ khe thời gian không rỗng này sang khe thời gian không rỗng khác.\r\n  - *Các vùng sự kiện trong SystemVerilog (Event Regions):* Cần hiểu sự khác biệt về chức năng giữa vùng thiết kế (Active, NBA), vùng kiểm thử (Reactive, Re-NBA) và vùng quan sát/in ấn (Observed, Postponed).",
+      "translation": "**IEEE Std 1800-2023**\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Mô tả, Thiết kế và Kiểm thử Phần cứng Hợp nhất\r\n\r\n---\r\n\r\n### 4.5 Thuật toán tham chiếu mô phỏng SystemVerilog\r\n\r\nexecute_simulation {\r\n    T = 0;\r\n    khởi tạo giá trị của tất cả các net và biến;\r\n    lên lịch cho tất cả các sự kiện khởi tạo vào khe thời gian 0;\r\n    while (vẫn còn khe thời gian không rỗng) {\r\n        chuyển đến khe thời gian không rỗng đầu tiên và đặt T bằng thời điểm đó;\r\n        execute_time_slot (T);\r\n    }\r\n}\r\n\r\nexecute_time_slot {\r\n    execute_region (Preponed);\r\n    execute_region (Pre-Active);\r\n    while (có bất kỳ vùng nào trong [Active ... Pre-Postponed] không rỗng) {\r\n        while (có bất kỳ vùng nào trong [Active ... Post-Observed] không rỗng) {\r\n            execute_region (Active);\r\n            R = vùng không rỗng đầu tiên trong [Active ... Post-Observed];\r\n            if (R không rỗng)\r\n                chuyển các sự kiện trong R sang vùng Active;\r\n        }\r\n        while (có bất kỳ vùng nào trong [Reactive ... Post-Re-NBA] không rỗng) {\r\n            execute_region (Reactive);\r\n            R = vùng không rỗng đầu tiên trong [Reactive ... Post-Re-NBA];\r\n            if (R không rỗng)\r\n                chuyển các sự kiện trong R sang vùng Reactive;\r\n        }\r\n        if (tất cả các vùng trong [Active ... Post-Re-NBA] đều rỗng)\r\n            execute_region (Pre-Postponed);\r\n    }\r\n    execute_region (Postponed);\r\n}\r\n\r\nexecute_region {\r\n    while (vùng hiện tại không rỗng) {\r\n        E = một sự kiện bất kỳ từ vùng này;\r\n        loại bỏ E khỏi vùng;\r\n        if (E là sự kiện cập nhật) {\r\n            cập nhật đối tượng được thay đổi;\r\n            lên lịch sự kiện đánh giá cho bất kỳ tiến trình nào nhạy với đối tượng đó;\r\n        } else { /* E là sự kiện đánh giá */\r\n            đánh giá tiến trình liên kết với sự kiện và có thể\r\n            lên lịch cho các sự kiện tiếp theo để thực thi;\r\n        }\r\n    }\r\n}\r\n\r\nCác vùng lặp và thứ tự của chúng là: Active, Inactive, Pre-NBA, NBA, Post-NBA, Pre-Observed, Observed, Post-Observed, Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, Post-Re-NBA, và Pre-Postponed. Như được thể hiện trong thuật toán, một khi các vùng Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, hoặc Post-Re-NBA được xử lý, việc lặp qua các vùng khác sẽ không tiếp tục lại cho đến khi cả năm vùng này trở nên rỗng.\r\n\r\n---\r\n*Trang 68*",
+      "grammar": [
+        {
+          "phrase": "once the Reactive, Re-Inactive, Pre-Re-NBA, Re-NBA, or Post-Re-NBA regions are processed",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian với từ nối \"once\" (một khi...) kết hợp thể bị động (are processed)"
+        },
+        {
+          "phrase": "iteration over the other regions does not resume until these five regions are empty",
+          "explain": "cấu trúc \"not ... until\" (không ... cho đến khi), diễn tả hành động chỉ tiếp tục khi điều kiện sau \"until\" được thỏa mãn"
+        },
+        {
+          "phrase": "schedule evaluation event for any process sensitive to the object",
+          "explain": "cụm tính từ \"sensitive to the object\" đứng sau bổ nghĩa trực tiếp cho danh từ \"process\" (tiến trình nhạy/nhạy cảm với đối tượng)"
+        },
+        {
+          "phrase": "evaluate the process associated with the event",
+          "explain": "quá khứ phân từ \"associated with the event\" đóng vai trò mệnh đề quan hệ rút gọn bổ nghĩa cho \"the process\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "reference algorithm",
+          "explain": "(cụm danh từ) thuật toán tham chiếu (thuật toán chuẩn dùng làm mốc so sánh cho các công cụ lập trình)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ) khe thời gian, khoảng thời gian mô phỏng (tại một thời điểm T cố định)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "resume",
+          "explain": "(động từ) tiếp tục lại, quay trở lại hoạt động sau khi tạm ngừng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "discrete event simulation",
+          "explain": "(cụm danh từ chuyên ngành) mô phỏng sự kiện rời rạc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "update event",
+          "explain": "(cụm danh từ) sự kiện cập nhật (sự kiện gán/thay đổi giá trị của dây nối hoặc biến trong mô phỏng)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "evaluation event",
+          "explain": "(cụm danh từ) sự kiện đánh giá/tính toán (sự kiện thực thi mã lệnh của tiến trình khi có tín hiệu thay đổi)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sensitive to",
+          "explain": "(cụm từ/tính từ đi kèm giới từ) nhạy với, phản ứng/kích hoạt dựa trên sự thay đổi của (tín hiệu/đối tượng)"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "Trang tài liệu này thuộc Tiêu chuẩn IEEE Std 1800-2023 dành cho ngôn ngữ SystemVerilog, tập trung trình bày ba khía cạnh cốt lõi trong cơ chế lập lịch thực thi của trình mô phỏng: Tính xác định (Determinism), Tính không xác định (Nondeterminism) và Điều kiện tranh chấp (Race conditions).\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n1. **Tính xác định (Determinism - Mục 4.6)**: Chuẩn quy định thứ tự lập lịch cố định cho các câu lệnh bên trong khối `begin-end` (thực thi đúng theo thứ tự xuất hiện trong mã nguồn) và quy định các phép gán không chặn (NBA - Nonblocking Assignments) phải được thực hiện đúng theo thứ tự mà câu lệnh đó được duyệt. Ví dụ minh họa cho thấy hai phép gán NBA liên tiếp (`a <= 0; a <= 1;`) sẽ luôn bảo đảm giá trị cuối cùng của `a` tại thời điểm mô phỏng 0 là 1.\r\n2. **Tính không xác định (Nondeterminism - Mục 4.7)**: Sự không xác định xuất hiện do các sự kiện trong vùng sự kiện Active hoặc Reactive có thể được trình mô phỏng lấy ra xử lý theo bất kỳ thứ tự nào. Ngoài ra, trình mô phỏng có quyền tạm dừng một tiến trình đang chạy tại bất kỳ điểm nào (nếu không có điều khiển thời gian `#` hoặc `@`) để xen kẽ thực thi tiến trình khác mà người dùng không thể can thiệp hay kiểm soát thứ tự này.\r\n3. **Điều kiện tranh chấp (Race conditions - Mục 4.8)**: Do việc tính toán giá trị biểu thức và việc cập nhật tín hiệu mạng (net update) có thể diễn ra xen kẽ, điều kiện tranh chấp sẽ phát sinh. Ví dụ minh họa thể hiện rằng khi `q` thay đổi từ 1 thành 0, lệnh `$display(p)` và việc cập nhật giá trị cho `p` (thông qua `assign p = q`) có thể diễn ra theo thứ tự bất kỳ, dẫn đến việc trình mô phỏng in ra kết quả 0 hoặc 1 đều đúng theo tiêu chuẩn.\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- **Vùng sự kiện (Event regions)** trong SystemVerilog (như Active, Reactive, NBA region) để hiểu rõ cách trình mô phỏng phân loại và xếp hàng các tác vụ.\r\n- **Phân biệt Phép gán gán chặn (Blocking assignment `=`) và Phép gán không chặn (Nonblocking assignment `<=`)** để hiểu lý do tại sao thời điểm cập nhật giá trị biến lại khác nhau.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm tra Phần cứng Hợp nhất\r\n\r\n4.6 Tính xác định\r\n\r\nTiêu chuẩn này đảm bảo một thứ tự lập lịch nhất định:\r\na) Các câu lệnh bên trong một khối begin-end phải được thực thi theo đúng thứ tự mà chúng xuất hiện trong khối begin-end đó. Việc thực thi các câu lệnh trong một khối begin-end cụ thể có thể bị tạm dừng để ưu tiên cho các tiến trình khác trong mô hình; tuy nhiên, trong mọi trường hợp, các câu lệnh trong một khối begin-end không bao giờ được thực thi theo bất kỳ thứ tự nào khác ngoài thứ tự chúng xuất hiện trong mã nguồn.\r\nb) Các phép gán NBA phải được thực hiện theo thứ tự mà các câu lệnh đó đã được thực thi (xem 10.4.2).\r\n\r\nXét ví dụ sau:\r\nmodule test;\r\n    logic a;\r\n    initial begin\r\n        a <= 0;\r\n        a <= 1;\r\n    end\r\nendmodule\r\n\r\nKhi khối lệnh này được thực thi, sẽ có hai sự kiện được thêm vào vùng NBA. Quy tắc trước đó yêu cầu chúng phải được đưa vào vùng sự kiện theo thứ tự thực thi, mà trong một khối begin-end tuần tự, đó chính là thứ tự trong mã nguồn. Quy tắc này yêu cầu chúng cũng phải được lấy ra khỏi vùng NBA và thực hiện theo thứ tự thực thi. Do đó, tại thời điểm kết thúc thời gian mô phỏng 0, biến a sẽ được gán giá trị 0 và sau đó là 1.\r\n\r\n4.7 Tính không xác định\r\n\r\nMột nguồn tạo ra tính không xác định là việc các sự kiện tích cực có thể được lấy ra khỏi vùng sự kiện Active hoặc Reactive và xử lý theo bất kỳ thứ tự nào. Một nguồn tính không xác định khác là các câu lệnh không có cấu trúc điều khiển thời gian không nhất thiết phải được thực thi như một sự kiện duy nhất. Các câu lệnh điều khiển thời gian là các cấu trúc biểu thức # và biểu thức @ (xem 9.4). Tại bất kỳ thời điểm nào trong khi đánh giá một câu lệnh thủ tục, trình mô phỏng có thể tạm dừng thực thi và đặt sự kiện chưa hoàn thành đó thành một sự kiện đang chờ xử lý trong vùng sự kiện. Tác động của việc này là cho phép sự thực thi đan xen giữa các tiến trình, mặc dù thứ tự thực thi đan xen là không xác định và không nằm dưới sự kiểm soát của người dùng.\r\n\r\n4.8 Điều kiện tranh chấp\r\n\r\nBởi vì việc thực thi đánh giá biểu thức và các sự kiện cập nhật tín hiệu mạng có thể diễn ra xen kẽ nhau, các điều kiện tranh chấp hoàn toàn có thể xảy ra: Ví dụ:\r\nassign p = q;\r\ninitial begin\r\n    q = 1;\r\n    #1 q = 0;\r\n    $display(p);\r\nend\r\n\r\nTrình mô phỏng hiển thị giá trị 1 hay 0 thì đều đúng. Phép gán giá trị 0 cho q kích hoạt một sự kiện cập nhật cho p. Trình mô phỏng có thể tiếp tục và thực thi tác vụ $display hoặc thực thi việc cập nhật cho p trước, sau đó mới đến tác vụ $display.\r\n\r\n69\r\nBản quyền thuộc về IEEE. Tất cả các quyền được bảo lưu.",
+      "grammar": [
+        {
+          "phrase": "in no case shall the statements in a begin-end block be executed in any order other than that in which they appear in the source",
+          "explain": "Cấu trúc đảo ngữ với cụm từ phủ định đứng đầu (\"in no case\" + trợ động từ \"shall\" + chủ ngữ), mang ý nghĩa nhấn mạnh tuyệt đối không xảy ra."
+        },
+        {
+          "phrase": "The previous rule requires that they be entered in the event region in execution order",
+          "explain": "Cấu trúc câu giả định (subjunctive mood) đứng sau động từ \"require\", mệnh đề \"that\" dùng động từ nguyên thể không \"to\" (\"be entered\")."
+        },
+        {
+          "phrase": "At any time while evaluating a procedural statement, the simulator may suspend execution",
+          "explain": "Mệnh đề trạng ngữ chỉ thời gian được rút gọn chủ ngữ (\"while evaluating\" thay cho \"while it is evaluating\")."
+        },
+        {
+          "phrase": "The simulator is correct in displaying either a 1 or a 0",
+          "explain": "Cấu trúc tính từ đi kèm giới từ \"in + V-ing\" thể hiện khía cạnh/hành động mà tính từ đó đúng, kết hợp với cặp từ nối \"either... or...\" (hoặc... hoặc...)."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "determinism",
+          "explain": "(danh từ) tính xác định — tính chất mà cùng một đầu vào và trạng thái sẽ luôn cho ra cùng một kết quả và thứ tự xử lý"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nondeterminism",
+          "explain": "(danh từ) tính không xác định — tính chất mà kết quả hoặc thứ tự xử lý có thể biến đổi ngẫu nhiên giữa các lần chạy"
+        },
+        {
+          "type": "vocab",
+          "phrase": "intermingle",
+          "explain": "(động từ) trộn lẫn, hòa lẫn, diễn ra xen kẽ vào nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "interleaving",
+          "explain": "(danh từ) sự thực thi đan xen/xen kẽ giữa nhiều tiến trình song song"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "(cụm danh từ) điều kiện tranh chấp — lỗi trong lập trình song song khi kết quả phụ thuộc vào thứ tự hoàn thành của các tiến trình"
+        },
+        {
+          "type": "phrase",
+          "phrase": "nonblocking assignment",
+          "explain": "(cụm danh từ chuyên ngành) phép gán không chặn (ký hiệu `<=\\`) — phép gán đánh giá giá trị ngay nhưng hoãn việc cập nhật giá trị tới vùng NBA"
+        },
+        {
+          "type": "phrase",
+          "phrase": "continuous assignment",
+          "explain": "(cụm danh từ chuyên ngành) phép gán liên tục (dùng từ khóa `assign`) — phép gán tự động cập nhật vế trái mỗi khi vế phải thay đổi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "time-control construct",
+          "explain": "(cụm danh từ) cấu trúc điều khiển thời gian — các ký hiệu như `#` (trễ thời gian) hoặc `@` (chờ sự kiện) trong Verilog/SystemVerilog"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "Nội dung trang 70 thuộc Tiêu chuẩn IEEE Std 1800-2023 dành cho SystemVerilog, tập trung trình bày chi tiết về **Hệ quả lập lịch của các phép gán (Scheduling implication of assignments)** trong quá trình mô phỏng vi mạch. Trang này giải thích cách thức trình mô phỏng phân tích, dịch các câu lệnh gán thành các tiến trình (processes) và sự kiện (events), cũng như cơ chế xếp lịch hoạt động cho từng loại phép gán cụ thể.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n1. **Phép gán liên tục (Continuous assignment - `assign`):** Tạo ra tiến trình nhạy với các phần tử nguồn. Khi giá trị nguồn thay đổi, một sự kiện cập nhật active (Active update event) được thêm vào vùng sự kiện để xác định giá trị vế trái. Phép gán này cũng được đánh giá tại thời điểm $t=0$ để lan truyền hằng số.\r\n2. **Phép gán liên tục trong thủ tục (Procedural continuous assignment - `assign`/`force`):** Nhạy với các phần tử nguồn tương tự gán liên tục, nhưng bị điều khiển trong khối thủ tục. Phép gán này được giải phóng/hủy kích hoạt bởi các câu lệnh `deassign` hoặc `release`.\r\n3. **Phép gán nghẽn (Blocking assignment - `=`):** Tính toán giá trị vế phải (RHS) ngay lập tức bằng giá trị hiện tại. Nếu có độ trễ nội phép gán (intra-assignment delay), tiến trình bị tạm dừng. Sự kiện trễ bằng 0 sẽ được xếp lịch là sự kiện Inactive (hoặc Re-Inactive nếu thực thi từ vùng Reactive). Sau khi nối lại, nó cập nhật vế trái (LHS) và kích hoạt các sự kiện tiếp theo.\r\n4. **Phép gán không nghẽn (Nonblocking assignment - NBA - `<=`)**: Luôn tính toán giá trị vế phải và lập lịch cập nhật dưới dạng sự kiện NBA (trong bước thời gian hiện tại nếu độ trễ bằng 0, hoặc ở thời điểm tương lai nếu độ trễ khác 0). Giá trị vế trái chỉ được cập nhật khi sự kiện NBA được xử lý.\r\n5. **Xử lý công tắc/transistor (Switch/transistor processing):** Sử dụng cho mô hình mức công tắc hai chiều (`tran`, `tranif0`, `tranif1`, v.v.). Trình mô phỏng phải xem xét toàn bộ các thiết bị kết nối mạng hai chiều trước khi xác định giá trị thích hợp cho bất kỳ nút mạng nào.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Các vùng sự kiện trong SystemVerilog (Event Regions):** Cần hiểu rõ tập hợp các vùng sự kiện (Active, Inactive, NBA, Reactive, Re-Inactive, Observed, v.v.) để nắm được thứ tự ưu tiên thực thi của trình mô phỏng khi xử lý các loại phép gán khác nhau.\r\n- **Sự khác biệt giữa luồng tín hiệu đơn hướng và hai chiều (Unidirectional vs Bidirectional signal flow):** Giúp hiểu lý do tại sao các thiết bị công tắc (switches) đòi hỏi thuật toán đánh giá toàn cục trên mạng lưới thay vì đánh giá độc lập từng sự kiện.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Thống nhất\r\n\r\n4.9 Hệ quả lập lịch của các phép gán\r\n\r\nCác phép gán được dịch thành các tiến trình và sự kiện như được chi tiết hóa từ 4.9.1 đến 4.9.7.\r\n\r\n4.9.1 Phép gán liên tục\r\n\r\nMột câu lệnh gán liên tục (xem 10.3) tương ứng với một tiến trình, nhạy với các phần tử nguồn trong biểu thức. Khi giá trị của phần tử nguồn thay đổi, nó khiến một sự kiện cập nhật active được thêm vào vùng sự kiện, sử dụng các giá trị hiện tại để xác định mục tiêu. Một tiến trình gán liên tục cũng được đánh giá tại thời điểm 0 để lan truyền các giá trị hằng số. Điều này bao gồm cả các phép gán liên tục ẩn được suy ra từ các kết nối cổng (xem 4.9.6).\r\n\r\n4.9.2 Phép gán liên tục trong thủ tục\r\n\r\nMột phép gán liên tục trong thủ tục (là câu lệnh assign hoặc force; xem 10.6) tương ứng với một tiến trình nhạy với các phần tử nguồn trong biểu thức. Khi giá trị của phần tử nguồn thay đổi, nó khiến một sự kiện cập nhật active được thêm vào vùng sự kiện, sử dụng các giá trị hiện tại để xác định mục tiêu.\r\n\r\nMột câu lệnh deassign hoặc release sẽ hủy kích hoạt (các) câu lệnh assign hoặc force tương ứng.\r\n\r\n4.9.3 Phép gán nghẽn\r\n\r\nMột câu lệnh gán nghẽn (xem 10.4.1) với một độ trễ nội phép gán sẽ tính toán giá trị vế phải bằng cách sử dụng các giá trị hiện tại, sau đó khiến tiến trình đang thực thi bị tạm dừng và được xếp lịch như một sự kiện trong tương lai. Nếu độ trễ bằng 0, tiến trình được xếp lịch như một sự kiện Inactive cho thời điểm hiện tại. Nếu một câu lệnh gán nghẽn với độ trễ bằng 0 được thực thi từ một vùng Reactive, tiến trình sẽ được xếp lịch như một sự kiện Re-Inactive.\r\n\r\nKhi tiến trình được quay trở lại (hoặc nếu nó quay trở lại ngay lập tức nếu không có độ trễ nào được chỉ định), tiến trình thực hiện phép gán cho vế trái và kích hoạt bất kỳ sự kiện nào dựa trên sự cập nhật của vế trái. Các giá trị tại thời điểm tiến trình tiếp tục được sử dụng để xác định (các) mục tiêu. Việc thực thi sau đó có thể tiếp tục với câu lệnh nối tiếp tiếp theo hoặc với các sự kiện Active hoặc Reactive khác.\r\n\r\n4.9.4 Phép gán không nghẽn\r\n\r\nMột câu lệnh gán không nghẽn (xem 10.4.2) luôn tính toán giá trị được cập nhật và xếp lịch cho việc cập nhật đó như một sự kiện cập nhật NBA, hoặc trong bước thời gian hiện tại nếu độ trễ bằng 0 hoặc là một sự kiện trong tương lai nếu độ trễ khác không. Các giá trị có hiệu lực tại thời điểm phép cập nhật được đưa vào vùng sự kiện sẽ được sử dụng để tính toán cả giá trị vế phải và mục tiêu vế trái.\r\n\r\n4.9.5 Xử lý công tắc (transistor)\r\n\r\nThuật toán mô phỏng hướng sự kiện được mô tả trong 4.5 phụ thuộc vào luồng tín hiệu đơn hướng và có thể xử lý từng sự kiện một cách độc lập. Các đầu vào được đọc, kết quả được tính toán và phép cập nhật được xếp lịch.\r\n\r\nSystemVerilog cung cấp mô hình hóa mức công tắc bên cạnh mô hình hóa hành vi và mức cổng. Các công tắc cung cấp luồng tín hiệu hai chiều của các dây nối thuộc cả kiểu mạng tích hợp sẵn và do người dùng định nghĩa (xem 6.6) và yêu cầu xử lý phối hợp giữa các nút được kết nối bởi các công tắc.\r\n\r\nCác phần tử nguồn mô hình hóa các công tắc là các dạng transistor khác nhau, được gọi là tran, tranif0, tranif1, rtran, rtranif0, và rtranif1 (xem 28.8).\r\n\r\nPhân tích xử lý công tắc sẽ xem xét tất cả các thiết bị trong một mạng kết nối công tắc hai chiều trước khi có thể xác định giá trị thích hợp cho bất kỳ nút nào trên mạng vì các đầu vào và đầu ra tương tác với nhau. Một trình mô phỏng...\r\n\r\n70\r\nĐược cấp phép sử dụng giới hạn cho: Hai Tran. Tải về ngày 28 tháng 08 năm 2023 lúc 18:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "Assignments are translated into processes and events as detailed in 4.9.1 through 4.9.7.",
+          "explain": "Cấu trúc bị động (passive voice) với động từ \"translated into\" dùng để diễn tả sự chuyển đổi từ dạng này sang dạng khác."
+        },
+        {
+          "phrase": "corresponds to a process, sensitive to the source elements in the expression",
+          "explain": "Cụm tính từ (adjective phrase) \"sensitive to...\" được rút gọn để bổ nghĩa trực tiếp cho danh từ \"process\"."
+        },
+        {
+          "phrase": "causes an active update event to be added to the event region",
+          "explain": "Cấu trúc \"cause + O + to V\" (khiến cái gì đó bị làm sao), kết hợp với dạng bị động \"to be added\"."
+        },
+        {
+          "phrase": "using current values to determine the target",
+          "explain": "Cụm phân từ hiện tại (present participle phrase) đứng ở đầu/giữa mệnh đề đóng vai trò trạng ngữ chỉ phương thức/cách thức."
+        },
+        {
+          "phrase": "When the process is returned (or if it returns immediately if no delay is specified)",
+          "explain": "Cấu trúc mệnh đề thời gian và điều kiện lồng nhau (nested clauses) diễn tả các trường hợp thực thi khác nhau của tiến trình."
+        },
+        {
+          "phrase": "The values in effect when the update is placed in the event region are used to compute",
+          "explain": "Cấu trúc câu phức với mệnh đề quan hệ rút gọn (\"in effect\") và mệnh đề thời gian (\"when...\"), trong đó chủ ngữ dài được nối với động từ chính ở dạng bị động (\"are used to compute\")."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "implication",
+          "explain": "(danh từ) hệ quả, ảnh hưởng kéo theo đằng sau một quy tắc/hành động"
+        },
+        {
+          "type": "vocab",
+          "phrase": "propagate",
+          "explain": "(động từ) lan truyền (tín hiệu, giá trị hằng số qua các cổng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "suspend",
+          "explain": "(động từ) tạm dừng, đình chỉ tiến trình thực thi"
+        },
+        {
+          "type": "vocab",
+          "phrase": "unidirectional",
+          "explain": "(tính từ) đơn hướng, chỉ di chuyển theo một chiều"
+        },
+        {
+          "type": "vocab",
+          "phrase": "bidirectional",
+          "explain": "(tính từ) song hướng, hai chiều"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(collocation) phép gán liên tục (trong ngôn ngữ mô tả phần cứng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "blocking assignment",
+          "explain": "(collocation) phép gán nghẽn (thực thi theo thứ tự tuần tự)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(collocation) phép gán không nghẽn (lập lịch cập nhật song song)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "intra-assignment delay",
+          "explain": "(collocation) độ trễ nội phép gán (độ trễ đặt bên trong câu lệnh gán)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "event-driven simulation algorithm",
+          "explain": "(phrase) thuật toán mô phỏng hướng sự kiện"
+        },
+        {
+          "type": "phrase",
+          "phrase": "right-hand side",
+          "explain": "(phrase) vế phải của phương trình/câu lệnh gán (thường viết tắt là RHS)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "left-hand side",
+          "explain": "(phrase) vế trái của phương trình/câu lệnh gán (thường viết tắt là LHS)"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "**Nội dung tổng quát:**\r\nTrang sách thuộc Tiêu chuẩn IEEE Std 1800-2023 dành cho ngôn ngữ SystemVerilog, tiếp tục làm rõ cách thức xử lý các công tắc hai chiều (bidirectional switches), quy tắc kết nối các cổng (Port connections), cách truyền tham số trong hàm/thủ tục (Subroutines), và các điểm kiểm soát gọi lại giao diện ngôn ngữ lập trình (PLI callback control points).\r\n\r\n**Những ý chính người đọc bắt buộc phải hiểu:**\r\n1. **Xử lý tín hiệu trên công tắc hai chiều:**\r\n   - Khi tín hiệu điều khiển của transistor kết nối các kiểu net mặc định (built-in net types) có giá trị không xác định **x**, trình mô phỏng sẽ giải mạng điện bằng cách thử tất cả kết hợp đóng/mở của các transistor. Nút nào giữ nguyên một mức logic trong mọi trường hợp sẽ có giá trị ổn định đó; nếu thay đổi, nó sẽ có đáp ứng bằng **x**.\r\n   - Đối với các kiểu net do người dùng tự định nghĩa (user-defined net types), nếu giá trị đầu vào điều khiển là **x** hoặc **z**, công tắc hai chiều sẽ được xử lý như ở trạng thái TẮT (*off*). Điều này khác hoàn toàn với net mặc định.\r\n2. **Quy tắc kết nối cổng (Port Connections):**\r\n   - Các cổng kết nối các tiến trình thông qua gán liên tục ẩn hoặc kết nối hai chiều ẩn (tương tự như kết nối `tran` luôn bật, không làm giảm độ mạnh tín hiệu ngoại trừ mức `supply` bị giảm xuống `strong`).\r\n   - Cổng Input: Gán liên tục từ biểu thức bên ngoài vào net/biến cục bộ.\r\n   - Cổng Output: Gán liên tục từ biểu thức đầu ra cục bộ tới net/biến bên ngoài.\r\n   - Cổng Inout: Dùng transistor không làm giảm độ mạnh tín hiệu kết nối net cục bộ với net bên ngoài.\r\n   - Đầu nối của các nguyên tố (Primitive/UDP terminals) phải kết nối trực tiếp với net 1-bit mà không qua tiến trình trung gian làm biến đổi độ mạnh tín hiệu.\r\n3. **Truyền tham số Subroutine:** \r\n   - Tham số được truyền theo dạng giá trị (pass-by-value) theo cơ chế sao chép vào khi gọi (copy-in) và sao chép ra khi hoàn thành (copy-out). Hành vi sao chép ra hoạt động giống như một phép gán chặn (blocking assignment).\r\n4. **Điểm kiểm soát gọi lại PLI (PLI callback control points):**\r\n   - Gồm hai loại: loại thực thi ngay lập tức khi một hoạt động cụ thể diễn ra, và loại được đăng ký rõ ràng dưới dạng sự kiện đánh giá một lần (one-shot evaluation event).\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Built-in net types vs. User-defined net types:** Sự khác biệt giữa các kiểu net có sẵn (`wire`, `tri`,...) và kiểu net tự định nghĩa trong SystemVerilog.\r\n- **Signal strength (Độ mạnh tín hiệu):** Các mức độ mạnh từ `supply`, `strong`, `pull`, `weak` đến `highz`.\r\n- **UDP (User Defined Primitive):** Nguyên tố do người dùng tự định nghĩa trong Verilog/SystemVerilog.\r\n- **PLI (Programming Language Interface):** Giao diện lập trình cho phép C/C++ tương tác với trình mô phỏng Verilog.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Mô tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\ncó thể thực hiện điều này bằng kỹ thuật nới lỏng (relaxation technique). Trình mô phỏng có thể xử lý các công tắc hai chiều tại bất kỳ thời điểm nào. Nó có thể xử lý một tập hợp con các sự kiện kết nối công tắc hai chiều tại một thời điểm cụ thể, xen kẽ với việc thực thi các sự kiện đang hoạt động khác.\r\n\r\nĐối với các công tắc hai chiều kết nối các kiểu net mặc định (built-in net types), cần phải tinh chỉnh thêm khi một số transistor có giá trị cổng là **x**. Một kỹ thuật đơn giản về mặt khái niệm là giải mạng điện nhiều lần với các transistor này được thiết lập ở tất cả các kết hợp có thể có của trạng thái dẫn hoàn toàn và không dẫn. Bất kỳ nút nào có mức logic duy nhất trong tất cả các trường hợp đều có đáp ứng trạng thái xác lập bằng mức logic này. Tất cả các nút khác đều có đáp ứng trạng thái xác lập là **x**.\r\n\r\nKhi kết nối các kiểu net do người dùng định nghĩa, sự lan truyền của tín hiệu từ cực này sang cực khác tuân theo các quy tắc tương tự như trong sự lan truyền của các kiểu net mặc định. Nếu đầu vào điều khiển bị tắt, mỗi net sẽ được giải quyết riêng biệt; nếu không, chúng sẽ được giải quyết như thể là một net duy nhất. Công tắc hai chiều sẽ được xử lý là *tắt* đối với giá trị đầu vào điều khiển là **x** hoặc **z**. Điều này khác với hành vi của công tắc hai chiều kết nối các kiểu net mặc định, vốn đã được mô tả trong đoạn văn trước.\r\n\r\n**4.9.6 Kết nối cổng**\r\n\r\nCác cổng kết nối các tiến trình thông qua các câu lệnh gán liên tục ẩn hoặc các kết nối hai chiều ẩn. Các kết nối hai chiều tương tự như một kết nối **tran** luôn được bật giữa hai net, nhưng không có bất kỳ sự giảm độ mạnh tín hiệu nào (Một kết nối **tran** không làm ảnh hưởng đến độ mạnh tín hiệu qua các cực hai chiều, ngoại trừ việc độ mạnh **supply** bị giảm xuống thành **strong**. Xem 28.13).\r\n\r\nCác cổng luôn có thể được biểu diễn dưới dạng các đối tượng được khai báo kết nối như sau:\r\n— Nếu là cổng input, thì đó là một phép gán liên tục từ một biểu thức bên ngoài vào một net hoặc biến cục bộ (input).\r\n— Nếu là cổng output, thì đó là một phép gán liên tục từ một biểu thức đầu ra cục bộ đến một net hoặc biến bên ngoài.\r\n— Nếu là cổng inout, thì đó là một transistor không làm giảm độ mạnh tín hiệu kết nối net cục bộ với một net bên ngoài.\r\n\r\nCác đầu nối nguyên tố, bao gồm cả các đầu nối UDP, khác với các cổng của module. Các đầu nối output và inout của nguyên tố phải được kết nối trực tiếp với các net 1-bit hoặc các biểu thức net cấu trúc 1-bit (xem 23.3.3), không có tiến trình trung gian nào có thể làm thay đổi độ mạnh tín hiệu. Các thay đổi từ các đánh giá nguyên tố được lên lịch như các sự kiện cập nhật tích cực trong các net được kết nối. Các đầu nối input được kết nối với các net 1-bit hoặc các biểu thức net cấu trúc 1-bit cũng được kết nối trực tiếp, không có tiến trình trung gian nào có thể ảnh hưởng đến độ mạnh tín hiệu. Các đầu nối input được kết nối với các loại biểu thức khác được biểu diễn dưới dạng các phép gán liên tục ẩn từ biểu thức đến một net ẩn được kết nối với đầu nối input đó.\r\n\r\n**4.9.7 Các thủ tục/hàm phụ (Subroutines)**\r\n\r\nVấn đề truyền tham số cho thủ tục/hàm phụ được thực hiện theo giá trị (by value), và nó sẽ sao chép vào khi được gọi và sao chép ra khi kết thúc. Hàm sao chép ra khi kết thúc hoạt động theo cùng một cách thức giống như bất kỳ phép gán chặn (blocking assignment) nào.\r\n\r\n**4.10 Các điểm kiểm soát gọi lại PLI**\r\n\r\nCó hai loại gọi lại PLI (PLI callbacks): những loại được thực thi ngay lập tức khi một hoạt động cụ thể xảy ra, và những loại được đăng ký rõ ràng như một sự kiện đánh giá một lần (one-shot evaluation event).",
+      "grammar": [
+        {
+          "phrase": "A conceptually simple technique is to solve the network repeatedly with these transistors set to all possible combinations of fully conducting and nonconducting transistors.",
+          "explain": "cấu trúc sử dụng động từ nguyên mẫu \"is to solve\" làm bổ ngữ cho chủ ngữ, kết hợp mệnh đề quá khứ phân từ rút gọn \"set to...\" bổ nghĩa cho \"these transistors\"."
+        },
+        {
+          "phrase": "The bidirectional switch shall be treated as off for an x or z control input value.",
+          "explain": "cấu trúc bị động với động từ khuyết thiếu \"shall be treated as\" dùng trong các văn bản tiêu chuẩn để quy định bắt buộc."
+        },
+        {
+          "phrase": "Input terminals connected to 1-bit nets or 1-bit structural net expressions are also connected directly, with no intervening process that could affect the strength.",
+          "explain": "mệnh đề phân từ quá khứ rút gọn \"connected to...\" bổ nghĩa cho chủ ngữ, kết hợp mệnh đề quan hệ \"that could affect...\" bổ nghĩa cho \"no intervening process\"."
+        },
+        {
+          "phrase": "The copy-out-on-the-return function behaves in the same manner as does any blocking assignment.",
+          "explain": "cấu trúc so sánh tương đồng \"in the same manner as...\", có hiện tượng đảo ngữ của trợ động từ \"does\" đặt trước chủ ngữ \"any blocking assignment\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "intermingle",
+          "explain": "(động từ) trộn lẫn, hòa lẫn vào nhau trong quá trình thực thi"
+        },
+        {
+          "type": "vocab",
+          "phrase": "refinement",
+          "explain": "(danh từ) sự tinh chỉnh, sự làm cho chi tiết/chính xác hơn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "invocation",
+          "explain": "(danh từ) sự kích hoạt, sự gọi (hàm/thủ tục trong lập trình)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "steady-state response",
+          "explain": "đáp ứng trạng thái xác lập, phản ứng ở trạng thái ổn định"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "phép gán liên tục (cú pháp assign trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "strength reduction",
+          "explain": "sự giảm độ mạnh của tín hiệu logic"
+        },
+        {
+          "type": "phrase",
+          "phrase": "pass by value",
+          "explain": "truyền theo giá trị (phương thức truyền dữ liệu vào hàm)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "copy-in / copy-out",
+          "explain": "cơ chế sao chép dữ liệu vào khi gọi và chép ra khi kết thúc"
+        },
+        {
+          "type": "phrase",
+          "phrase": "one-shot evaluation event",
+          "explain": "sự kiện đánh giá một lần duy nhất rồi hủy"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "Trang 72 thuộc tiêu chuẩn IEEE Std 1800-2023 (ngôn ngữ SystemVerilog) trình bày Bảng 4-1 (Table 4-1), nhằm cung cấp sự đối chiếu và ánh xạ giữa các lời gọi lại (callbacks) thuộc giao diện lập trình PLI (Programming Language Interface) và các vùng sự kiện (Event regions) tương ứng trong trình lập lịch mô phỏng (simulation scheduler).\r\n\r\nÝ chính người đọc bắt buộc phải hiểu:\r\n1. Mỗi PLI callback được liên kết trực tiếp với một hoặc nhiều vùng sự kiện cụ thể trong chu trình mô phỏng của SystemVerilog.\r\n2. Chi tiết sự ánh xạ:\r\n   - `cbAfterDelay`, `cbNextSimTime`, `cbAtStartOfSimTime` được kích hoạt ở vùng **Pre-Active**.\r\n   - `cbReadWriteSynch` kích hoạt ở vùng **Pre-NBA** hoặc **Post-NBA**.\r\n   - `cbNBASynch` kích hoạt ở vùng **Pre-NBA**.\r\n   - `cbAtEndOfSimTime` kích hoạt ở vùng **Pre-Postponed**.\r\n   - `cbReadOnlySynch` kích hoạt ở vùng **Postponed**.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **PLI / VPI (Programming Language Interface / Verilog Procedural Interface):** Giao diện C cho phép mã phần mềm bên ngoài tương tác và can thiệp vào quá trình chạy mô phỏng phần cứng.\r\n- **SystemVerilog Event Regions (Các vùng sự kiện):** Thuật toán lập lịch mô phỏng của SystemVerilog chia mỗi bước thời gian (time step) thành nhiều vùng sự kiện (Pre-Active, Active, Inactive, Pre-NBA, NBA, Post-NBA, Pre-Postponed, Postponed). Việc nắm rõ các vùng này giúp lập trình viên biết chính xác thời điểm các hàm C (callback) được trình mô phỏng gọi thi hành.",
+      "translation": "IEEE Std 1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Biên soạn, Mô tả Thiết kế và Xác minh Phần cứng Thống nhất\r\n\r\nBảng 4-1 cung cấp sự ánh xạ từ các lời gọi lại PLI (PLI callbacks) khác nhau.\r\n\r\nBảng 4-1—Các lời gọi lại PLI\r\n\r\n| Callback (Lời gọi lại) | Event region (Vùng sự kiện) |\r\n| --- | --- |\r\n| cbAfterDelay | Pre-Active |\r\n| cbNextSimTime | Pre-Active |\r\n| cbReadWriteSynch | Pre-NBA hoặc Post-NBA |\r\n| cbAtStartOfSimTime | Pre-Active |\r\n| cbNBASynch | Pre-NBA |\r\n| cbAtEndOfSimTime | Pre-Postponed |\r\n| cbReadOnlySynch | Postponed |\r\n\r\n72\r\nQuyền sử dụng được cấp phép giới hạn cho: Hai Trac. Tải về ngày 29 tháng 08 năm 2024 lúc 10:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "provides the mapping from the various PLI callbacks",
+          "explain": "cấu trúc động từ \"provide the mapping from...\" (cung cấp sự ánh xạ/đối chiếu từ các danh mục...)"
+        },
+        {
+          "phrase": "Authorized licensed use limited to",
+          "explain": "mệnh đề phân từ quá khứ (past participle clause) rút gọn dạng bị động bổ nghĩa cho quyền sử dụng được cấp phép"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "PLI callback",
+          "explain": "(cụm danh từ) lời gọi lại PLI — cơ chế cho phép trình mô phỏng gọi một hàm C được đăng ký trước khi xảy ra sự kiện mô phỏng cụ thể"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Event region",
+          "explain": "(cụm danh từ) vùng sự kiện — giai đoạn phân tách thời gian trong trình lập lịch mô phỏng SystemVerilog"
+        },
+        {
+          "type": "vocab",
+          "phrase": "mapping",
+          "explain": "(danh từ) sự ánh xạ, sự đối chiếu tương ứng giữa hai tập hợp khái niệm"
+        },
+        {
+          "type": "vocab",
+          "phrase": "Pre-Active",
+          "explain": "(danh từ/tính từ) vùng Pre-Active — vùng sự kiện diễn ra ngay trước khi các sự kiện Active được xử lý"
+        },
+        {
+          "type": "vocab",
+          "phrase": "Postponed",
+          "explain": "(danh từ/tính từ) vùng Postponed — vùng sự kiện cuối cùng trong một bước thời gian mô phỏng, nơi dữ liệu chỉ được đọc mà không làm thay đổi trạng thái thiết kế"
+        }
+      ]
+    }
+  ]
+}
