@@ -1,0 +1,1874 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "chp4",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "Nội dung trang này mở đầu cho Chương 4, giới thiệu về bức tranh tổng quan và nguyên lý cốt lõi của việc kết nối môi trường kiểm thử (Testbench) với Thiết kế đang được kiểm thử (Design Under Test - DUT) trong xác minh vi mạch bằng SystemVerilog.\r\n\r\nNhững ý chính người đọc bắt buộc phải nắm được:\r\n- Mục tiêu cơ bản của việc kiểm thử gồm 4 bước: tạo tín hiệu kích thích (stimulus), thu thập phản hồi (capture responses), kiểm tra tính đúng đắn (determine correctness) và đo lường tiến độ (measure progress).\r\n- Bản chất của Testbench là tạo ra \"thế giới thực\" mô phỏng toàn bộ môi trường xung quanh thiết kế (ví dụ: các mô hình bus, luồng dữ liệu mạng, mô hình bộ nhớ,...), giúp mô phỏng mọi thành phần ngoài thiết kế đang kiểm thử.\r\n- Hạn chế của Verilog truyền thống: Kết nối cổng (ports) dễ mắc lỗi khi quy mô thiết kế lớn và dễ bị lỗi tranh chấp thời gian (race conditions).\r\n- Nhu cầu thực tế: Cần một cơ chế giao tiếp cấp cao hơn và một cách quản lý thời gian vững chắc (robust timing) để đảm bảo việc kích tạo (drive) và lấy mẫu (sample) các tín hiệu đồng bộ diễn ra chính xác.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Design Under Test (DUT): Khái niệm mạch phần cứng cần được kiểm tra.\r\n- Race condition (Tình trạng tranh chấp): Lỗi mô phỏng trong Verilog khi thứ tự gán giá trị và đọc giá trị của các tín hiệu diễn ra không xác định trong cùng một bước thời gian.\r\n- Bus Functional Model (BFM): Mô hình hành vi mô phỏng cách thức hoạt động của các chuẩn bus giao tiếp.",
+      "translation": "Chương 4\r\nKết nối Môi trường kiểm thử và Thiết kế\r\n\r\nCó một vài bước cần thiết để kiểm thử một thiết kế: tạo tín hiệu kích thích, thu thập phản hồi, xác định tính đúng đắn và đo lường tiến độ. Tuy nhiên, trước tiên bạn cần có một môi trường kiểm thử (testbench) phù hợp được kết nối với thiết kế, như được thể hiện trong Hình 4.1.\r\n\r\nMôi trường kiểm thử của bạn bao bọc xung quanh thiết kế, gửi vào các tín hiệu kích thích và thu thập phản hồi của thiết kế. Testbench tạo thành \"thế giới thực\" xung quanh thiết kế, mô phỏng lại toàn bộ môi trường hoạt động. Ví dụ, một mô hình vi xử lý cần kết nối với nhiều bus và thiết bị khác nhau, vốn được mô hình hóa trong testbench dưới dạng các mô hình chức năng bus (bus functional models). Một thiết bị mạng kết nối với nhiều luồng dữ liệu vào và ra được mô hình hóa dựa trên các giao thức chuẩn. Một chip xử lý video kết nối với các bus để nhận câu lệnh, sau đó tạo ra các hình ảnh được ghi vào các mô hình bộ nhớ. Khái niệm cốt lõi ở đây là testbench sẽ mô phỏng mọi thứ nằm ngoài thiết kế đang được kiểm thử.\r\n\r\nMôi trường kiểm thử của bạn cần một phương thức giao tiếp cấp cao hơn với thiết kế so với các cổng (ports) của Verilog và những trang danh sách kết nối vốn rất dễ mắc lỗi. Bạn cần một phương thái vững chắc để mô tả thời gian sao cho các tín hiệu đồng bộ luôn được kích hoạt và lấy mẫu đúng thời điểm, đồng thời mọi tương tác đều không gặp phải tình trạng tranh chấp (race conditions) vốn rất phổ biến trong các mô hình Verilog.\r\n\r\nTestbench [ Môi trường kiểm thử ]\r\ninputs [ Đầu vào ]\r\noutputs [ Đầu ra ]\r\nDesign Under Test [ Thiết kế đang được kiểm thử ]\r\n\r\nFig. 4.1 The testbench – design environment\r\nHình 4.1 Môi trường kiểm thử – môi trường thiết kế",
+      "grammar": [
+        {
+          "phrase": "There are several steps needed to verify a design",
+          "explain": "Mệnh đề rút gọn dùng quá khứ phân tử (past participle clause) \"needed to verify...\" bổ nghĩa cho \"several steps\""
+        },
+        {
+          "phrase": "which are modeled in the testbench as bus functional models",
+          "explain": "Mệnh đề quan hệ không xác định (non-defining relative clause) bổ nghĩa cho \"various buses and devices\""
+        },
+        {
+          "phrase": "multiple input and output data streams that are modeled based on standard protocols",
+          "explain": "Mệnh đề quan hệ xác định (defining relative clause) bổ nghĩa cho \"data streams\""
+        },
+        {
+          "phrase": "a higher-level way to communicate with the design than Verilog’s ports",
+          "explain": "Cấu trúc so sánh hơn với tính từ ngắn/dài \"a higher-level way... than...\""
+        },
+        {
+          "phrase": "so that synchronous signals are always driven and sampled at the correct time",
+          "explain": "Mệnh đề chỉ mục đích (clause of purpose) dùng \"so that\" kết hợp với thể bị động \"are always driven and sampled\""
+        },
+        {
+          "phrase": "race conditions so common to Verilog models",
+          "explain": "Mệnh đề tính từ rút gọn (reduced adjective clause) bổ nghĩa cho \"race conditions\" ([that are] so common to...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "stimulus",
+          "explain": "(danh từ) tín hiệu kích thích đầu vào dùng để kiểm thử phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "mimic",
+          "explain": "(động từ) bắt chước, mô phỏng lại hành vi của đối tượng/môi trường khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "robust",
+          "explain": "(tính từ) vững chắc, tin cậy, ít phát sinh lỗi trong thiết kế/lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synchronous",
+          "explain": "(tính từ) đồng bộ (hoạt động phụ thuộc vào tín hiệu xung nhịp clock)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Design Under Test",
+          "explain": "(phrase) thiết kế đang được kiểm thử (thường viết tắt là DUT trong ngành vi mạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "bus functional model",
+          "explain": "(phrase) mô hình chức năng bus (mô hình phần mềm mô phỏng các giao thức bus)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "race condition",
+          "explain": "(phrase) tình trạng tranh chấp thời gian (lỗi sai lệch thứ tự thực thi trong mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "error-prone",
+          "explain": "(collocation) dễ xảy ra lỗi, dễ mắc sai sót"
+        },
+        {
+          "type": "collocation",
+          "phrase": "driven and sampled",
+          "explain": "(collocation) được kích tạo (áp giá trị) và lấy mẫu (đọc giá trị) — thuật ngữ chuyên ngành kiểm thử vi mạch"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "Nội dung trang 88 mở đầu Chương 4 (\"Kết nối Testbench và Thiết kế\"), tập trung vào nguyên lý tách biệt giữa khối kiểm thử (testbench) và khối thiết kế (design/DUT) trong SystemVerilog. Trang sách phân tích bức tranh tổng quan từ quy trình làm việc thực tế cho đến các giải pháp ngôn ngữ mới nhằm tối ưu hóa kết nối vi mạch.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm:\r\n1. **Sự khác biệt về tư duy công việc:** Kỹ sư thiết kế có nhiệm vụ viết mã RTL (có thể tổng hợp) đáp ứng bản tả kỹ thuật (specification), trong khi kỹ sư kiểm thử phải tạo ra các kịch bản để \"bắt lỗi\" nơi thiết kế hoạt động sai so với bản tả.\r\n2. **Khối `program` trong SystemVerilog:** Trong Verilog truyền thống, việc dùng `module` chứa testbench dễ gây lỗi tranh chấp thời gian (timing race) khi kích hoạt (driving) và lấy mẫu (sampling) tín hiệu. SystemVerilog giải quyết bằng khối `program` giúp tách biệt testbench cả về mặt logic lẫn thời gian execution.\r\n3. **Giải pháp `interface` cho kết nối phức tạp:** Việc nối từng tín hiệu thủ công giữa các khối RTL rất vất vả và dễ sinh lỗi (lỗi chập chờn, gõ sai tên). `Interface` ra đời như một bó dây đóng gói các tín hiệu, hỗ trợ định thời, hướng tín hiệu và chứa mã chức năng, giúp giảm thiểu sai sót kết nối.\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- **RTL synthesizable code:** Mã tả phần cứng mức chuyển thanh ghi có thể tổng hợp thành mạch logic thực tế.\r\n- **Timing problems (driving/sampling race conditions):** Hiện tượng tranh chấp thời gian khi testbench đọc/ghi dữ liệu trùng thời điểm cạnh xung clock với thiết kế.\r\n- **Interface & Program block:** Hai thành phần cốt lõi của SystemVerilog phân biệt với Verilog cổ điển.",
+      "translation": "88\r\n4 Kết nối Testbench và Thiết kế\r\n\r\n4.1 Tách biệt Testbench và Thiết kế\r\n\r\nTrong một thế giới lý tưởng, mọi dự án đều có hai nhóm riêng biệt: một nhóm tạo ra thiết kế và một nhóm xác minh (kiểm thử) nó. Trong thực tế, ngân sách hạn chế có thể đòi hỏi bạn phải gánh vác cả hai vai trò. Mỗi đội ngũ có một tập hợp kỹ năng chuyên môn riêng, chẳng hạn như tạo mã RTL có thể tổng hợp được, hoặc tìm ra những cách mới để phát hiện lỗi trong thiết kế. Mỗi nhóm trong hai nhóm này đều đọc bản mô tả kỹ thuật ban đầu và đưa ra cách hiểu của riêng mình. Kỹ sư thiết kế phải tạo ra mã đáp ứng bản mô tả đó, trong khi công việc của bạn với tư cách là kỹ sư kiểm thử là tạo ra các kịch bản mà ở đó thiết kế không khớp với bản mô tả của nó.\r\n\r\nTương tự như vậy, mã testbench của bạn nằm trong một khối riêng biệt so với mã thiết kế. Trong Verilog truyền thống, mỗi khối nằm trong một module riêng. Tuy nhiên, việc sử dụng module để chứa testbench thường gây ra các vấn đề về thời gian xung quanh việc kích hoạt và lấy mẫu tín hiệu, vì vậy SystemVerilog giới thiệu khối program để tách biệt testbench, cả về mặt logic lẫn thời gian. Để biết thêm chi tiết, xem Mục 4.3.\r\n\r\nKhi các thiết kế ngày càng phát triển về độ phức tạp, các kết nối giữa các khối cũng tăng lên. Hai khối RTL có thể chia sẻ hàng chục tín hiệu, những tín hiệu này phải được liệt kê theo đúng thứ tự để chúng truyền thông chính xác. Chỉ cần một kết nối bị lệch hoặc đặt sai vị trí thì thiết kế sẽ không hoạt động. Bạn có thể giảm thiểu lỗi bằng cách sử dụng cú pháp kết nối theo tên (connect-by-name), nhưng điều này làm tăng hơn gấp đôi khối lượng gõ phím của bạn. Nếu đó là một lỗi tinh vi, chẳng hạn như đảo ngược các chân chỉ thỉnh thoảng mới đảo trạng thái, bạn có thể không nhận ra vấn đề trong một thời gian dài. Đáng sợ hơn nữa là khi bạn thêm một tín hiệu mới giữa hai khối. Bạn phải chỉnh sửa không chỉ các khối để thêm cổng mới mà còn cả các module cấp cao hơn dùng để nối dây các thiết bị. Một lần nữa, chỉ cần một kết nối sai ở bất kỳ cấp nào thì thiết kế sẽ ngừng hoạt động. Hoặc tệ hơn, hệ thống chỉ hỏng một cách chập chờn!\r\n\r\nGiải pháp ở đây là interface, một cấu trúc trong SystemVerilog đại diện cho một bó dây dẫn. Ngoài ra, bạn có thể quy định thời gian, hướng tín hiệu và thậm chí thêm cả mã chức năng. Một interface được khởi tạo giống như một module nhưng được kết nối với các cổng giống như một tín hiệu.\r\n\r\n4.1.1 Truyền thông giữa Testbench và DUT\r\n\r\nMột vài phần tiếp theo sẽ trình bày một testbench được kết nối với một bộ trọng tài (arbiter), sử dụng các tín hiệu riêng lẻ và sau đó sử dụng các interface. Hình 4.2 là sơ đồ của thiết kế cấp cao nhất bao gồm một testbench, bộ trọng tài, bộ tạo xung clock và các tín hiệu kết nối chúng. DUT (Thiết kế đang được kiểm thử) này là một thiết kế đơn giản, vì vậy bạn có thể tập trung vào các khái niệm SystemVerilog mà không bị sa lầy vào chi tiết thiết kế. Ở cuối chương, một bộ tuyến đường ATM sẽ được giới thiệu.",
+      "grammar": [
+        {
+          "phrase": "to create scenarios where the design does not match its description",
+          "explain": "mệnh đề quan hệ dùng \"where\" để bổ nghĩa cho \"scenarios\" (thay cho \"in which\")"
+        },
+        {
+          "phrase": "using a module to hold the testbench often causes timing problems",
+          "explain": "cụm danh động từ (gerund phrase) đóng vai trò làm chủ ngữ của câu"
+        },
+        {
+          "phrase": "One mismatched or misplaced connection and the design will not work",
+          "explain": "cấu trúc câu điều kiện rút gọn dạng [Danh từ/Cụm danh từ + and + Mệnh đề] (tương đương với \"If there is one mismatched..., the design will not work\")"
+        },
+        {
+          "phrase": "Worse yet is when you add a new signal between two blocks",
+          "explain": "cấu trúc nhấn mạnh/đảo ngữ với tính từ so sánh hơn \"Worse yet\" đứng đầu câu làm vị ngữ"
+        },
+        {
+          "phrase": "so you can concentrate on the SystemVerilog concepts and not get bogged down in the design",
+          "explain": "mệnh đề chỉ mục đích với \"so (that)\", động từ nguyên mẫu không \"to\" sau động từ khuyết thiếu \"can\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "idiom",
+          "phrase": "wear both hats",
+          "explain": "gánh vác cả hai vai trò/nhiệm vụ cùng lúc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synthesizable",
+          "explain": "(tính từ) có thể tổng hợp được thành mạch phần cứng logic từ mã RTL"
+        },
+        {
+          "type": "collocation",
+          "phrase": "design specification",
+          "explain": "bản mô tả đặc tính kỹ thuật của thiết kế"
+        },
+        {
+          "type": "vocab",
+          "phrase": "temporally",
+          "explain": "(trạng từ) về mặt thời gian, theo thứ tự thời gian"
+        },
+        {
+          "type": "collocation",
+          "phrase": "connect-by-name",
+          "explain": "cú pháp kết nối theo tên cổng trong Verilog/SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "toggle occasionally",
+          "explain": "thỉnh thoảng mới đảo trạng thái logic (0 sang 1 hoặc ngược lại)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "intermittently",
+          "explain": "(trạng từ) một cách chập chờn, lúc được lúc không"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) khởi tạo một thể hiện (instance) của module/interface trong thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "get bogged down in",
+          "explain": "bị sa lầy, bị cuốn vào/mất quá nhiều thời gian vào chi tiết nhỏ nhặt"
+        },
+        {
+          "type": "vocab",
+          "phrase": "arbiter",
+          "explain": "(danh từ) bộ trọng tài / bộ phân xử (khối logic điều phối quyền truy cập tài nguyên dùng chung trong vi mạch)"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm ở Mục 4.1.2 thuộc Chương 4, hướng dẫn cách kết nối một thiết kế RTL (ở đây là bộ phân xử - Arbiter) với một khối kiểm thử (Testbench) thông qua các cổng (Ports) truyền thống trong SystemVerilog. Trang giới thiệu cú pháp khai báo cổng style Verilog-2001, nguyên lý sử dụng kiểu dữ liệu `logic` thay cho `reg`/`wire`, và đoạn mã ví dụ về một Arbiter ưu tiên.\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Cú pháp khai báo cổng Verilog-2001:* Cho phép khai báo hướng cổng (`input`/`output`), kiểu dữ liệu (`logic`/`bit`) và tên biến ngay trong phần tiêu đề (header) của module.\r\n  2. *Bản chất kiểu dữ liệu `logic`:* SystemVerilog mở rộng kiểu `reg` thành `logic`. `logic` có thể dùng như `wire` hoặc `reg` trong hầu hết các trường hợp, NGOẠI TRỪ các tín hiệu có nhiều nguồn lái đồng thời (multiple structural drivers - ví dụ: bus 3 trạng thái / tri-state bus), khi đó bắt buộc phải dùng kiểu `wire`.\r\n  3. *Mô hình bộ phân xử (Arbiter):* Đoạn mã ví dụ minh họa cơ chế phân xử tín hiệu theo thứ tự ưu tiên (`request[0]` có độ ưu tiên cao hơn `request[1]`).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Structural Driver (Nguồn lái cấu trúc) & Tri-state Bus:* Cần hiểu cơ chế phần cứng khi nhiều cổng ra cùng nối vào một đường dây để biết lý do tại sao `logic` không dùng được cho đa nguồn lái mà phải dùng `wire` (net).\r\n  - *Sự khác biệt giữa `bit` và `logic`:* `bit` là kiểu dữ liệu 2 trạng thái (0, 1), trong khi `logic` là kiểu 4 trạng thái (0, 1, X, Z). Trong ví dụ, `rst` và `clk` dùng kiểu `bit`.",
+      "translation": "4.1 Tách biệt Testbench và Thiết kế\r\n\r\n[Hình 4.2: Testbench – Bộ phân xử (Arbiter) không sử dụng giao diện (interface)]\r\n\r\n4.1.2 Giao tiếp bằng Cổng (Ports)\r\n\r\nĐoạn mã dưới đây trình bày các bước cần thiết để kết nối một khối RTL với một testbench. Đầu tiên là phần tiêu đề cho mô hình bộ phân xử (arbiter), được thể hiện trong Ví dụ 4.1. Mã này sử dụng kiểu khai báo cổng theo phong cách Verilog-2001, trong đó kiểu dữ liệu và hướng của cổng được đặt ngay trong tiêu đề. Một số đoạn mã đã được lược bỏ để đảm bảo tính rõ ràng.\r\n\r\nNhư đã thảo luận ở Mục 2.1.1, SystemVerilog đã mở rộng kiểu `reg` cổ điển để bạn có thể sử dụng nó tương tự như một `wire` khi kết nối các khối. Để ghi nhận các khả năng mới này, kiểu `reg` đã được đặt tên mới là `logic`. Nơi duy nhất mà bạn không thể sử dụng biến kiểu `logic` là một net có nhiều nguồn lái cấu trúc (multiple structural drivers), khi đó bạn bắt buộc phải sử dụng một net như `wire`.\r\n\r\nVí dụ 4.1: Mô hình bộ phân xử sử dụng các cổng\r\n\r\nmodule arb_with_port (output logic [1:0] grant,\r\n                      input  logic [1:0] request,\r\n                      input  bit        rst, clk);\r\n\r\n  always @(posedge clk or posedge rst) begin\r\n    if (rst)\r\n      grant <= 2'b00;\r\n    else if (request[0])   // Ưu tiên cao\r\n      grant <= 2'b01;\r\n    else if (request[1])   // Ưu tiên thấp\r\n      grant <= 2'b10;\r\n    else\r\n      grant <= '0;\r\n  end\r\nendmodule\r\n\r\nTestbench trong Ví dụ 4.2 được giữ bên trong một module để tách biệt nó khỏi khối thiết kế. Thông thường, nó kết nối với thiết kế thông qua các cổng.",
+      "grammar": [
+        {
+          "phrase": "Verilog-2001 style port declarations where the type and direction are in the header",
+          "explain": "mệnh đề quan hệ sử dụng trạng từ quan hệ \"where\" để bổ nghĩa cho phương thức khai báo cổng"
+        },
+        {
+          "phrase": "so that you can use it like a wire to connect blocks",
+          "explain": "mệnh đề chỉ mục đích (\"so that\") diễn tả lý do SystemVerilog mở rộng kiểu `reg`"
+        },
+        {
+          "phrase": "The only place where you cannot use a logic variable is a net with multiple structural drivers",
+          "explain": "mệnh đề quan hệ \"where you cannot...\" bổ nghĩa cho danh từ \"place\", kết hợp cấu trúc bổ ngữ chủ ngữ"
+        },
+        {
+          "phrase": "is kept in a module to separate it from the design",
+          "explain": "cấu trúc câu bị động \"is kept\" kết hợp với động từ nguyên mẫu chỉ mục đích \"to separate\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "arbiter",
+          "explain": "(danh từ) bộ phân xử / mạch trọng tài — khối logic phần cứng quyết định thiết bị nào được quyền truy cập tài nguyên dùng chung"
+        },
+        {
+          "type": "vocab",
+          "phrase": "net",
+          "explain": "(danh từ) đường kết nối / dây dẫn phần cứng (như `wire`), không có khả năng lưu trữ giá trị mà chỉ truyền tải tín hiệu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "port declaration",
+          "explain": "(cụm danh từ) sự khai báo cổng / chân giao tiếp của module"
+        },
+        {
+          "type": "collocation",
+          "phrase": "structural driver",
+          "explain": "(cụm danh từ) nguồn lái cấu trúc — cổng ra hoặc khối logic gán/lái giá trị cho một đường tín hiệu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "leave out",
+          "explain": "(cụm động từ) bỏ qua, lược bỏ (để nội dung ngắn gọn, dễ hiểu hơn)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in recognition of",
+          "explain": "(cụm giới từ) để ghi nhận / công nhận (một tính năng hay đặc điểm mới)"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang 90 thuộc Chương 4 (\"Kết nối Testbench và Thiết kế\"), trình bày cách kết nối một testbench cơ bản với mô-đun thiết kế (DUT) thông qua cổng kết nối (ports) truyền thống (Mẫu 4.2 và 4.3). Qua đó, tác giả chỉ ra những hạn chế lớn của phương pháp nối cổng này trong các thiết kế thực tế và bắt đầu giới thiệu cú pháp `interface` trong SystemVerilog như một giải pháp tối ưu hơn.\r\n\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. **Kết nối truyền thống bằng Port:** Testbench truyền tín hiệu (như `request`, `rst`) và nhận tín hiệu (như `grant`) từ DUT thông qua danh sách các port được khai báo trong module top.\r\n  2. **Nhược điểm của Port trong thiết kế phức tạp:**\r\n     - Thiết kế thực tế có hàng trăm chân (pins), đòi hỏi phải khai báo và đấu nối hàng trang mã nguồn.\r\n     - Dễ xảy ra sai sót (error-prone) khi nối dây thủ công qua nhiều cấp phân cấp (hierarchy).\r\n     - Khó bảo trì: Mỗi khi thêm/bớt tín hiệu mới, người lập trình phải chỉnh sửa thủ công ở nhiều tệp mã nguồn khác nhau.\r\n  3. **Khái niệm Interface:** Mở đầu phần 4.2 giới thiệu khái niệm `interface` — được ví như một \"bó dây thông minh\" (intelligent bundle of wires) giúp đóng gói toàn bộ tín hiệu giao tiếp giữa các khối thiết kế thành một thực thể độc lập.\r\n\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Cấu trúc Phân cấp (Hierarchy) trong Verilog/SystemVerilog:* Cần hiểu cách các module con được lồng vào module cha (như module `top` chứa `arb_with_port` và `test_with_port`) để hình dung tại sao việc dẫn tín hiệu qua nhiều tầng lại phức tạp.\r\n  - *Design Under Test (DUT):* Mô-đun phần cứng thực tế cần được kiểm thử.\r\n  - *Non-blocking assignment (`<=`):* Phép gán phi định thời dùng trong khối `initial`/`always` để mô phỏng chính xác hành vi của mạch đồng bộ.",
+      "translation": "90\r\n4 Kết nối Testbench và Thiết kế\r\n\r\nMẫu 4.2 Module testbench sử dụng cổng (ports)\r\n\r\nmodule test_with_port (input logic [1:0] grant,\r\n                       output logic [1:0] request,\r\n                       output bit rst,\r\n                       input bit clk);\r\n\r\n  initial begin\r\n    @(posedge clk);\r\n    request <= 2'b01;\r\n    $display(\"@%0t: Drove req=01\", $time);\r\n    repeat (2) @(posedge clk);\r\n    if (grant == 2'b01)\r\n      $display(\"@%0t: Success: grant == 2'b01\", $time);\r\n    else\r\n      $display(\"@%0t: Error: grant != 2'b01\", $time);\r\n    $finish;\r\n  end\r\nendmodule\r\n\r\nModule cấp đỉnh (top module) kết nối testbench và thiết kế cần kiểm thử (DUT), đồng thời chứa một bộ tạo xung clock đơn giản.\r\n\r\nMẫu 4.3 Module cấp đỉnh sử dụng cổng (ports)\r\n\r\nmodule top;\r\n  logic [1:0] grant, request;\r\n  bit clk;\r\n  always #50 clk = ~clk;\r\n\r\n  arb_with_port a1 (grant, request, rst, clk); // Mẫu 4-1\r\n  test_with_port t1 (grant, request, rst, clk); // Mẫu 4-2\r\nendmodule\r\n\r\nTrong Mẫu 4.3, các module rất đơn giản, nhưng các thiết kế thực tế với hàng trăm chân đòi hỏi phải khai báo tín hiệu và cổng dài hàng trang giấy. Tất cả các kết nối này đều rất dễ phát sinh lỗi. Khi một tín hiệu đi qua nhiều tầng phân cấp, nó phải được khai báo và kết nối lặp đi lặp lại. Tệ nhất là, nếu bạn chỉ muốn thêm một tín hiệu mới, tín hiệu đó sẽ phải được khai báo và kết nối trong rất nhiều tệp khác nhau. Khái niệm interface trong SystemVerilog có thể giải quyết tốt từng trường hợp này.\r\n\r\n4.2 Cú pháp Interface (Giao diện)\r\n\r\nCác thiết kế đã trở nên phức tạp đến mức ngay cả việc truyền thông giữa các khối cũng cần phải được tách riêng thành các thực thể độc lập. Để mô hình hóa điều này, SystemVerilog sử dụng cấu trúc interface mà bạn có thể coi như một bó dây thông minh. Nó bao...",
+      "grammar": [
+        {
+          "phrase": "As a signal moves through several layers of hierarchy, it has to be declared and connected over and over",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian/nguyên nhân với \"As\", kết hợp động từ khuyết thể \"has to be + V3\" (bị động bắt buộc)"
+        },
+        {
+          "phrase": "if you just want to add a new signal, it has to be declared and connected in multiple files",
+          "explain": "câu điều kiện loại 1 (Conditional type 1) thể hiện một tình huống thực tế và hậu quả/yêu cầu đi kèm"
+        },
+        {
+          "phrase": "Designs have become so complex that even the communication between blocks may need to be separated out into separate entities",
+          "explain": "cấu trúc \"so + adj + that + clause\" (quá... đến mức mà...) diễn tả mối quan hệ nguyên nhân - kết quả"
+        },
+        {
+          "phrase": "the interface construct that you can think of as an intelligent bundle of wires",
+          "explain": "mệnh đề quan hệ (relative clause) mở đầu bằng \"that\" bổ nghĩa cho danh từ \"the interface construct\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "error-prone",
+          "explain": "(tính từ) dễ mắc lỗi, dễ phát sinh lỗi trong quá trình thực hiện"
+        },
+        {
+          "type": "vocab",
+          "phrase": "hierarchy",
+          "explain": "(danh từ) cấu trúc phân cấp, thứ bậc trong thiết kế mạch tích hợp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "entity",
+          "explain": "(danh từ) thực thể, một đối tượng độc lập có sự tồn tại riêng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "top-level module",
+          "explain": "(cụm danh từ) module cấp cao nhất/module đỉnh trong cấu trúc phân cấp Verilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "over and over",
+          "explain": "(trạng từ/cụm từ) lặp đi lặp lại nhiều lần"
+        },
+        {
+          "type": "phrase",
+          "phrase": "intelligent bundle of wires",
+          "explain": "(cụm danh từ) bó dây thông minh (khái niệm ẩn dụ chỉ interface trong SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "separated out",
+          "explain": "(phrasal verb) được tách riêng ra, phân lập khỏi phần còn lại"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "- **Nội dung tổng quát:** Trang 91 thuộc Mục 4.2 (Cấu trúc Interface) và bắt đầu Mục 4.2.1 \"Sử dụng Interface để đơn giản hóa các kết nối\" trong tài liệu kiểm thử SystemVerilog. Trang sách giải thích lý do và cách thức gom nhóm các tín hiệu đường dây riêng lẻ thành một `interface` nhằm đơn giản hóa việc kết nối giữa Testbench (môi trường kiểm thử) và DUT (Device Under Test - thiết bị đang được kiểm thử, cụ thể ở đây là mạch phân xử Arbiter).\r\n\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Khái niệm Interface:** Interface không chỉ đóng vai trò là dây nối vật lý mà còn duy trì kết nối, sự đồng bộ hóa, chức năng giao tiếp và khả năng kiểm tra lỗi giữa các khối thiết kế hoặc giữa Testbench và DUT.\r\n  2. **Phạm vi mô tả:** Cuốn sách tập trung vào việc dùng interface để nối Testbench với khối thiết kế (DUT).\r\n  3. **Mô hình kết nối (Hình 4.3):** Interface hoạt động như một cầu nối (straddle) kéo dài vào bên trong cả hai phía (Testbench và DUT), chứa cả các thành phần lái tín hiệu (drivers) và nhận tín hiệu (receivers). Xung nhịp (clock) có thể tích hợp bên trong interface hoặc đi theo cổng riêng.\r\n  4. **Kiểu dữ liệu `logic` trong Interface:** Nên sử dụng kiểu dữ liệu `logic` thay vì kiểu dây (`wire`) truyền thống để có thể gán giá trị cho tín hiệu từ các câu lệnh thủ tục (procedural statements) trong SystemVerilog.\r\n  5. **Cú pháp khai báo cơ bản:** Cú pháp tạo một `interface` đơn giản thông qua từ khóa `interface ... endinterface` (Mẫu 4.4).\r\n\r\n- **Khái niệm/Thuật ngữ/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *SystemVerilog Interface:* Cấu trúc dữ liệu đặc biệt giúp đóng gói nhiều đường tín hiệu và phương thức giao tiếp thành một khối, tránh tình trạng khai báo hàng chục cổng (ports) thủ công gây lỗi khi kết nối.\r\n  - *Kiểu dữ liệu `logic` trong SystemVerilog:* Cần hiểu rõ sự khác biệt giữa `logic`, `bit`, `reg` và `wire` để biết tại sao `logic` lại cho phép lái tín hiệu từ các khối thủ tục (`initial`, `always`).\r\n  - *DUT (Device Under Test) & Arbiter:* Khái niệm thiết bị cần kiểm thử và mạch phân xử (Arbiter - mạch phần cứng quản lý việc cấp quyền truy cập tài nguyên dùng chung cho nhiều thiết bị).",
+      "translation": "...Duy trì kết nối, sự đồng bộ hóa, và tùy chọn là cả chức năng giao tiếp giữa hai hoặc nhiều khối, cùng với việc kiểm tra lỗi (tùy chọn). Chúng kết nối các khối thiết kế và/hoặc các môi trường kiểm thử (testbench).\r\n  Các giao diện ở cấp độ thiết kế được trình bày trong tài liệu của Sutherland (2006). Cuốn sách này tập trung vào các giao diện kết nối giữa các khối thiết kế và các testbench.\r\n\r\n4.2.1 Sử dụng Interface để đơn giản hóa các kết nối\r\n\r\nCải tiến đầu tiên đối với ví dụ về bộ phân xử (arbiter) là gom các đường dây tín hiệu lại với nhau thành một interface. Hình 4.3 hiển thị testbench và bộ phân xử giao tiếp với nhau thông qua một interface. Hãy chú ý cách interface mở rộng vào bên trong cả hai khối, đại diện cho các bộ lái tín hiệu (drivers) và bộ nhận tín hiệu (receivers) - những phần mang tính chức năng nằm ở cả testbench và DUT. Tín hiệu xung nhịp (clock) có thể là một phần của interface hoặc là một cổng tách biệt.\r\n\r\n[Hình 4.3: Một giao diện bắc cầu nối giữa hai module]\r\n(Sơ đồ gồm: Testbench <-> Interface [kèm biểu tượng xung nhịp] <-> Arbiter)\r\n\r\nDạng interface đơn giản nhất chỉ là một nhóm các tín hiệu hai chiều như được trình bày trong Mẫu 4.4. Hãy sử dụng kiểu dữ liệu `logic` để bạn có thể gán giá trị cho các tín hiệu từ các câu lệnh thủ tục (procedural statements).\r\n\r\nMẫu 4.4 Interface đơn giản cho bộ phân xử\r\ninterface arb_if(input bit clk);\r\n  logic [1:0] grant, request;\r\n  bit rst;\r\nendinterface\r\n\r\nMẫu 4.5 là thiết bị đang được kiểm thử (DUT), bộ phân xử, thiết bị này sử dụng một interface thay vì dùng các cổng (ports).",
+      "grammar": [
+        {
+          "phrase": "communicating using an interface",
+          "explain": "mệnh đề hiện tại phân tử (participle clause) bổ nghĩa cho cụm danh từ \"the testbench and arbiter\""
+        },
+        {
+          "phrase": "representing the drivers and receivers that are functionally part of both the test and the DUT",
+          "explain": "mệnh đề hiện tại phân tử \"representing...\" kết hợp với mệnh đề quan hệ \"that are...\" bổ nghĩa cho \"drivers and receivers\""
+        },
+        {
+          "phrase": "Use the logic data type so you can drive the signals",
+          "explain": "cấu trúc chỉ mục đích \"so + [mệnh đề]\" (nghĩa là \"để bạn có thể...\")"
+        },
+        {
+          "phrase": "that uses an interface instead of ports",
+          "explain": "mệnh đề quan hệ (relative clause) dùng \"that\" bổ nghĩa cho cụm danh từ \"the arbiter\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "arbiter",
+          "explain": "(danh từ) bộ phân xử (mạch logic quyết định thiết bị nào được quyền sử dụng tài nguyên dùng chung)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "straddle",
+          "explain": "(động từ) bắc qua, trải dài đè lên hai phía/hai phần khác nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "device under test",
+          "explain": "(cụm danh từ) thiết bị/mạch đang được kiểm thử (thường viết tắt là DUT)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bundle wires together",
+          "explain": "(cụm từ) gom các đường dây tín hiệu lại với nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "procedural statement",
+          "explain": "(cụm danh từ chuyên ngành) câu lệnh thủ tục (các câu lệnh nằm trong khối initial, always, task, function của Verilog/SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "drive signals",
+          "explain": "(cụm từ chuyên ngành) gán giá trị / phát/lái tín hiệu điện trên đường dây"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm trong Chương 4 (\"Kết nối Bộ kiểm thử và Thiết kế\"), minh họa cách sử dụng giao tiếp đơn giản (`interface`) trong SystemVerilog để kết nối khối thiết kế bộ phân xử (Arbiter design), khối kiểm thử (Testbench), và lắp ráp tất cả lại ở module đỉnh (Top module).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Thiết kế phần cứng dùng interface (Sample 4.5):** Khối `arb_with_ifc` nhận trực tiếp cổng giao tiếp `arbif`. Việc kiểm tra tín hiệu yêu cầu (`arbif.request`) và trả về quyền (`arbif.grant`) được thực hiện theo thứ tự ưu tiên (bit 0 có ưu tiên cao hơn bit 1).\r\n  2. **Cách truy cập và lái tín hiệu interface từ Testbench (Sample 4.6):** Để thao tác với tín hiệu bên trong interface, ta dùng tham chiếu phân cấp dạng `<tên_thể_hiện>.<tên_tín_hiệu>` (ví dụ: `arbif.request`). Quy tắc quan trọng là luôn phải dùng phép gán không chặn (nonblocking assignment `<=`) khi lái các tín hiệu giao tiếp này.\r\n  3. **Kết nối hệ thống ở module đỉnh (Sample 4.7):** Module `top` đóng vai trò môi trường tổng hợp, tạo ra xung nhịp `clk`, khởi tạo thể hiện interface `arbif(clk)`, sau đó truyền `arbif` làm tham số đầu vào cho cả thiết kế `a1` và bộ kiểm thử `t1`.\r\n- **Khái niệm/thuật ngữ cần tìm hiểu thêm:**\r\n  - *Interface (SystemVerilog):* Cấu trúc gom nhóm các tín hiệu kết nối để đơn giản hóa giao diện nối giữa Testbench và DUT, tránh việc khai báo hàng loạt cổng đơn lẻ.\r\n  - *Hierarchical reference (Tham chiếu phân cấp):* Cách truy xuất đến một phần tử con thông qua dấu chấm (`.`).\r\n  - *Nonblocking assignment (`<=`):* Phép gán không chặn, được dùng để tránh hiện tượng xung đột dữ liệu (race conditions) theo bờ xung nhịp.",
+      "translation": "Mẫu 4.5 Bộ phân xử sử dụng một giao tiếp đơn giản\r\n\r\nmodule arb_with_ifc (arb_if arbif);\r\n  always @(posedge arbif.clk or posedge arbif.rst)\r\n    begin\r\n      if (arbif.rst)\r\n        arbif.grant <= '0;\r\n      else if (arbif.request[0])    // Ưu tiên cao\r\n        arbif.grant <= 2'b01;\r\n      else if (arbif.request[1])    // Ưu tiên thấp\r\n        arbif.grant <= 2'b10;\r\n      else\r\n        arbif.grant <= '0;\r\n    end\r\nendmodule\r\n\r\nMẫu 4.6 thể hiện bộ kiểm thử. Bạn tham chiếu đến một tín hiệu trong một giao tiếp bằng cách tạo một tham chiếu phân cấp sử dụng tên của thể hiện: `arbif.request`. Các tín hiệu giao tiếp luôn phải được lái bằng việc sử dụng các phép gán không chặn. Điều này được giải thích chi tiết hơn trong Mục 4.4.3 và 4.4.4.\r\n\r\nMẫu 4.6 Bộ kiểm thử sử dụng giao tiếp bộ phân xử đơn giản\r\n\r\nmodule test_with_ifc (arb_if arbif);\r\n  initial begin\r\n    @(posedge arbif.clk);\r\n    arbif.request <= 2'b01;\r\n    $display(\"@%0t: Drove req=01\", $time);\r\n    repeat (2) @(posedge arbif.clk);\r\n    if (arbif.grant != 2'b01)\r\n      $display(\"@%0t: Error: grant != 2'b01\", $time);\r\n    $finish;\r\n  end\r\nendmodule\r\n\r\nTất cả các khối này được thể hiện hóa và kết nối trong module `top` như được thể hiện trong Mẫu 4.7.\r\n\r\nMẫu 4.7 Module đỉnh với giao tiếp bộ phân xử đơn giản\r\n\r\nmodule top;\r\n  bit clk;\r\n  always #50 clk = ~clk;\r\n\r\n  arb_if          arbif(clk);     // Từ Mẫu 4-4\r\n  arb_with_ifc    a1(arbif);      // Từ Mẫu 4-5\r\n  test_with_ifc   t1(arbif);      // Từ Mẫu 4-6\r\nendmodule : top",
+      "grammar": [
+        {
+          "phrase": "You refer to a signal in an interface by making a hierarchical reference using the instance name",
+          "explain": "cấu trúc diễn đạt phương thức \"by + V-ing\" kết hợp với mệnh đề rút gọn chỉ phương tiện \"using + N\""
+        },
+        {
+          "phrase": "Interface signals should always be driven using nonblocking assignments",
+          "explain": "dạng câu bị động với động từ khuyết thiếu (modal passive: \"should always be + V3/V-ed\")"
+        },
+        {
+          "phrase": "All these blocks are instantiated and connected in the top module as shown in Sample 4.7",
+          "explain": "dạng bị động kết hợp với mệnh đề rút gọn \"as shown in...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "arbiter",
+          "explain": "(danh từ) bộ phân xử / bộ điều phối quyền truy cập tài nguyên (bus, bộ nhớ) trong thiết kế vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "hierarchical reference",
+          "explain": "(cụm danh từ) tham chiếu phân cấp, cách định danh và truy cập tín hiệu bên trong một thể hiện bằng dấu chấm (.)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(cụm danh từ) phép gán không chặn (ký hiệu `<=`), dùng trong SystemVerilog để cập nhật giá trị theo chu kỳ xung nhịp và tránh race condition"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) thể hiện hóa, tạo một bản sao/thể hiện (instance) của một module hoặc interface trong mã HDL"
+        },
+        {
+          "type": "collocation",
+          "phrase": "top module",
+          "explain": "(cụm danh từ) module đỉnh, module cấp cao nhất chứa và liên kết tất cả các khối linh kiện trong thiết kế"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "Trang 93 thuộc Mục 4.2 \"The Interface Construct\" (Cấu trúc Interface) và Mục 4.2.2 \"Connecting Interfaces and Ports\" (Kết nối Interface và Port) trong tài liệu SystemVerilog. Trang này tiếp tục phân tích lợi ích của việc dùng interface, nêu bật các quy tắc quan trọng về vị trí khai báo interface để tránh lỗi biên dịch, đồng thời hướng dẫn cách tích hợp interface hiện đại với các module Verilog truyền thống (legacy designs).\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n- **Lợi ích về kết nối:** Interface giúp giản lược các kết nối dây, giảm thiểu sai sót (wiring errors). Khi thêm tín hiệu mới vào thiết kế, lập trình viên chỉ cần khai báo trong interface và các module trực tiếp dùng tín hiệu đó; các module trung gian (như module `top`) không cần phải sửa đổi.\r\n- **Quy tắc vị trí khai báo Interface:** Bắt buộc phải khai báo hoặc bao hàm tệp (`include`) interface bên ngoài các khối `module` hoặc `program`. Nếu đưa câu lệnh `include` vào bên trong `module`, interface đó sẽ bị giới hạn phạm vi cục bộ (local), khiến phần còn lại của hệ thống không thể truy cập và dẫn đến lỗi biên dịch.\r\n- **Tích hợp với thiết kế cũ (Legacy Design):** Khi làm việc với mã Verilog-2001 legacy không sử dụng interface, ta có thể kết nối trực tiếp từng tín hiệu thành phần của interface (ví dụ `arbif.grant`) vào từng port rời rạc của module theo cú pháp kết nối chỉ định tên cổng (`.port(ifc.signal)`).\r\n\r\nKhái niệm / kiến thức nền cần tìm hiểu thêm:\r\n- **Interface trong SystemVerilog:** Khái niệm đóng gói nhóm tín hiệu giao tiếp thành một đơn vị duy nhất nhằm đơn giản hóa việc kết nối giữa bộ kiểm thử (testbench) và thiết kế phần cứng (DUT).\r\n- **RTL Code (Register-Transfer Level):** Mức mô tả phần cứng thông qua sự dịch chuyển dữ liệu giữa các thanh ghi.\r\n- **Transaction-based Verification (Kiểm thử dựa trên giao dịch):** Cấp độ mô tả và kiểm thử trừu tượng hơn so với mô hình theo chu kỳ xung nhịp (cycle-based).\r\n- **Verilog-2001 Port Mapping:** Cách kết nối cổng trong ngôn ngữ Verilog bằng tên cờ định danh (`.port_name(signal_name)`).",
+      "translation": "4.2 Cấu trúc Interface                                                        93\r\n\r\nBạn có thể thấy ngay lợi ích, ngay cả trên thiết bị nhỏ này: các kết nối trở nên gọn gàng hơn và ít dẫn đến sai sót hơn. Nếu bạn muốn thêm một tín hiệu mới vào một interface, bạn chỉ cần thêm nó vào định nghĩa interface và các module thực sự sử dụng nó. Bạn sẽ không phải thay đổi bất kỳ module nào như `top` vốn chỉ đóng vai trò truyền interface qua. Tính năng ngôn ngữ này giảm đáng kể nguy cơ mắc lỗi nối dây.\r\n\r\nCuốn sách này chỉ trình bày các interface với một xung clock duy nhất được kết nối với một bộ tạo xung ở cấp cao nhất (top level). Nếu interface của bạn yêu cầu nhiều xung clock, hãy xử lý chúng giống như các tín hiệu khác bên trong interface và kết nối interface đó với một bộ tạo xung clock. Bạn sẽ đạt hiệu suất làm việc cao hơn nếu làm việc ở cấp độ cao và xem interface như một cấu trúc dựa trên chu kỳ (cycle-based). Cấp độ tiếp theo là dựa trên giao dịch (transaction-based), vốn vượt ngoài phạm vi của mã RTL thông thường.\r\n\r\n[Hình minh họa: Con bọ / Lỗi phần mềm]\r\nHãy đảm bảo bạn khai báo các interface của mình bên ngoài các module và khối chương trình (program block). Nếu bạn quên, hãy chuẩn bị tinh thần cho đủ loại rắc rối. Một số trình biên dịch có thể không hỗ trợ việc định nghĩa một interface bên trong một module. Nếu được cho phép, interface đó sẽ trở thành cục bộ đối với module đó và do đó không thể nhìn thấy đối với phần còn lại của thiết kế. Ví dụ 4.8 cho thấy lỗi phổ biến khi đưa định nghĩa interface vào ngay sau các câu lệnh `include khác.\r\n\r\nVí dụ 4.8 Module kiểm thử không tốt bao hàm (include) interface\r\nmodule bad_test(arb_if arbif);\r\n`include \"MyTest.sv\"   // Bao hàm hợp lệ\r\n`include \"arb_if.sv\"   // XẤU: Interface bị ẩn bên trong module\r\n...\r\n\r\n4.2.2 Kết nối Interface và Port\r\n\r\nNếu bạn có một thiết kế kế thừa từ Verilog-2001 với các port không thể thay đổi để sử dụng interface, bạn chỉ cần kết nối các tín hiệu của interface với từng port riêng lẻ. Ví dụ 4.9 kết nối bộ trọng tài (arbiter) ban đầu từ Ví dụ 4.1 với interface trong Ví dụ 4.4.\r\n\r\nVí dụ 4.9 Kết nối interface với một module sử dụng port\r\nmodule top;\r\n  bit clk;\r\n  always #50 clk = ~clk;\r\n\r\n  arb_if arbif(clk);\r\n  arb_with_port a1 (.grant  (arbif.grant), // .port (ifc.signal)\r\n                    .request(arbif.request),\r\n                    .rst    (arbif.rst),\r\n                    .clk    (arbif.clk));\r\n  test_with_ifc t1(arbif);   // Từ Ví dụ 4-6\r\nendmodule : top",
+      "grammar": [
+        {
+          "phrase": "If you wanted to put a new signal in an interface, you would just have to add it",
+          "explain": "câu điều kiện loại 2 (Unreal conditional), diễn tả giả định không có thật ở hiện tại hoặc tương lai"
+        },
+        {
+          "phrase": "modules that actually used it",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"modules\", dùng đại từ \"that\""
+        },
+        {
+          "phrase": "module such as top that just passes the interface through",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"module such as top\""
+        },
+        {
+          "phrase": "a single clock that is connected to a generator at the top level",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"a single clock\", chứa cấu trúc bị động \"is connected\""
+        },
+        {
+          "phrase": "If allowed, the interface would be local to the module",
+          "explain": "mệnh đề điều kiện rút gọn dạng bị động (shortened passive conditional clause) từ \"If it were allowed\""
+        },
+        {
+          "phrase": "Verilog-2001 legacy design with ports that cannot be changed",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho \"ports\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "prone to mistakes",
+          "explain": "(cụm từ) dễ mắc sai sót, dễ bị lỗi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "pass the interface through",
+          "explain": "(cụm động từ) chuyển tiếp interface qua (không can thiệp/chỉnh sửa)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "wiring error",
+          "explain": "(cụm từ) lỗi nối dây / lỗi kết nối tín hiệu"
+        },
+        {
+          "type": "vocab",
+          "phrase": "cycle-based",
+          "explain": "(tính từ) dựa trên chu kỳ xung nhịp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "transaction-based",
+          "explain": "(tính từ) dựa trên giao dịch (mức trừu tượng hóa dữ liệu cao)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "RTL code",
+          "explain": "(cụm từ) mã RTL (Register-Transfer Level - mức chuyển giao thanh ghi)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "program block",
+          "explain": "(cụm từ) khối chương trình trong SystemVerilog (dùng cho testbench)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "local to",
+          "explain": "(cụm từ) mang tính cục bộ đối với (chỉ có phạm vi truy cập trong một khối nhất định)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "legacy design",
+          "explain": "(cụm từ) thiết kế cũ / thiết kế kế thừa (mã nguồn Verilog đời trước)"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc Chương 4 (\"Connecting the Testbench and Design\"), trình bày chi tiết về mục 4.2.3: Sử dụng cấu trúc `modport` (viết tắt của *module port*) bên trong một `interface` của SystemVerilog để nhóm các tín hiệu và quy định hướng truyền tín hiệu (input, output) cho từng khối module kết nối tới interface đó.\r\n- **Những ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Mục đích của `modport`:** Giúp trình biên dịch (compiler) kiểm tra và phát hiện các lỗi đấu nối sai tín hiệu (wiring mistakes) — điều mà nếu chỉ dùng interface thông thường không quy định hướng tín hiệu sẽ bị bỏ qua.\r\n  2. **Cách khai báo `modport` trong Interface:** Trong cùng một interface, ta có thể định nghĩa nhiều `modport` khác nhau cho các đối tượng khác nhau (ví dụ: `TEST` cho môi trường kiểm thử, `DUT` cho thiết bị cần kiểm thử, và `MONITOR` cho khối giám sát). Mỗi `modport` sẽ chỉ định rõ hướng `input` hay `output` cho các tín hiệu tương ứng với góc nhìn của khối đó.\r\n  3. **Cú pháp sử dụng `modport` tại cổng module:** Khi khai báo module, tên modport được chỉ định ngay sau tên interface bằng dấu chấm, theo cú pháp: `tên_interface.tên_modport tên_biến` (ví dụ: `arb_if.DUT arbif` hoặc `arb_if.TEST arbif`).\r\n  4. **Lợi ích thực tế:** Dù không làm thay đổi nhiều cấu trúc kết nối tổng thể, việc dùng `modport` giúp interface phản ánh chính xác hơn bản chất phần cứng và hướng tín hiệu của thiết kế thực tế.\r\n- **Khái niệm/kiến thức nền cần tìm hiểu thêm:**\r\n  - **SystemVerilog Interface:** Cấu trúc gom nhóm các tín hiệu kết nối giữa Testbench và DUT.\r\n  - **DUT (Device Under Test) & Testbench:** Khái niệm cơ bản trong kiểm thử phần cứng (thiết bị được kiểm thử và môi trường tạo kịch bản kiểm thử).\r\n  - **Arbiter (Bộ điều phối):** Mạch phần cứng cấp phát quyền truy cập tài nguyên (grant) dựa trên các yêu cầu (request).",
+      "translation": "94 | 4 Kết nối Môi trường Kiểm thử và Thiết kế\r\n\r\n4.2.3 Nhóm các Tín hiệu trong một Interface bằng cách Sử dụng Modport\r\n\r\nMẫu 4.5 sử dụng sơ đồ kết nối điểm-đối-điểm không chỉ định hướng tín hiệu bên trong interface. Các module nguyên bản sử dụng cổng (port) vốn chứa thông tin này để trình biên dịch dùng kiểm tra các lỗi đấu nối sai. Cấu trúc `modport` trong một interface cho phép bạn gom nhóm các tín hiệu và chỉ định hướng cho chúng. Modport `MONITOR` trong Mẫu 4.10 cho phép bạn kết nối một module giám sát (monitor) vào interface.\r\n\r\nMẫu 4.10 Interface sử dụng các modport\r\ninterface arb_if(input bit clk);\r\n  logic [1:0] grant, request;\r\n  bit rst;\r\n\r\n  modport TEST (output request, rst,\r\n                input  grant, clk);\r\n\r\n  modport DUT (input request, rst, clk,\r\n               output grant);\r\n\r\n  modport MONITOR (input request, grant, rst, clk);\r\n\r\nendinterface\r\n\r\nMẫu 4.11 cho thấy mô hình bộ điều phối (arbiter) và môi trường kiểm thử (testbench), với modport nằm trong danh sách kết nối cổng của chúng. Lưu ý rằng bạn đặt tên modport, `DUT` hoặc `TEST`, ngay sau tên interface, `arb_if`. Ngoại trừ tên modport, các phần còn lại hoàn toàn giống với các ví dụ trước.\r\n\r\nMẫu 4.11 Mô hình bộ điều phối sử dụng interface có modport\r\nmodule arb_with_mp (arb_if.DUT arbif);\r\n  ...\r\nendmodule\r\n\r\nMẫu 4.12 Môi trường kiểm thử sử dụng interface có modport\r\nmodule test_with_mp (arb_if.TEST arbif);\r\n  ...\r\nendmodule\r\n\r\nDù mã nguồn không thay đổi nhiều (ngoại trừ việc interface trở nên lớn hơn), interface này thể hiện chính xác hơn thiết kế thực tế, đặc biệt là về hướng của tín hiệu.\r\n\r\nCó hai cách để sử dụng các tên modport này trong thiết kế của bạn. Bạn có thể chỉ định chúng ngay trong các module kết nối với các tín hiệu interface. Trong trường hợp này, mô hình cấp cao nhất (top model) không thay đổi so với Mẫu 4.7, ngoại trừ tên của các module. Cuốn sách này",
+      "grammar": [
+        {
+          "phrase": "The original modules using ports had this information that the compiler uses to check for wiring mistakes",
+          "explain": "mệnh đề quan hệ rút gọn dạng hiện tại phân từ (\"using ports\" bổ nghĩa cho \"modules\") kết hợp mệnh đề quan hệ \"that the compiler uses...\" bổ nghĩa cho \"information\""
+        },
+        {
+          "phrase": "The modport construct in an interface lets you group signals and specify directions",
+          "explain": "cấu trúc \"let + O + bare infinitive\" (cho phép ai làm gì) với hai động từ nguyên mẫu \"group\" và \"specify\""
+        },
+        {
+          "phrase": "Note that you put the modport name, DUT or TEST, after the interface name, arb_if",
+          "explain": "câu mệnh lệnh với động từ \"Note\", theo sau là mệnh đề danh từ bổ nghĩa cho hành động chú ý"
+        },
+        {
+          "phrase": "Even though the code didn’t change much (except that the interface grew larger), this interface more accurately represents the real design",
+          "explain": "mệnh đề trạng ngữ chỉ sự nhượng bộ \"Even though...\" kết hợp với cụm giới từ \"except that...\" (ngoại trừ việc)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "modport",
+          "explain": "(danh từ) cấu trúc trong SystemVerilog (viết tắt của module port) dùng để định nghĩa hướng tín hiệu (input/output/inout) cho các module kết nối qua interface"
+        },
+        {
+          "type": "vocab",
+          "phrase": "arbiter",
+          "explain": "(danh từ) bộ điều phối, mạch logic quyết định cấp quyền sử dụng tài nguyên dùng chung khi có nhiều yêu cầu đồng thời"
+        },
+        {
+          "type": "collocation",
+          "phrase": "point-to-point connection scheme",
+          "explain": "(cụm danh từ) sơ đồ kết nối điểm-đối-điểm (kết nối trực tiếp hai thành phần với nhau)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "wiring mistakes",
+          "explain": "(cụm danh từ) các lỗi đấu nối/nối dây tín hiệu sai trong thiết kế vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "accurately represents",
+          "explain": "(cụm trạng từ + động từ) mô tả/phản ánh một cách chính xác"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "Nội dung trang 95 tập trung vào việc áp dụng cấu trúc **Modport** trong SystemVerilog Interface, cụ thể là cách chỉ định modport khi khởi tạo module, các quy tắc đặt tên tín hiệu, và ứng dụng của modport trong thiết kế hệ thống Bus cũng như tạo Interface Monitor.\r\n\r\nCác ý chính người đọc cần nắm vững:\r\n1. **Khởi tạo Module gắn liền với Modport**: Thay vì cố định modport bên trong định nghĩa module, ta có thể chỉ định modport tại thời điểm khởi tạo module (ví dụ: `arb_with_mp a1 (arbif.DUT);`). Cách làm này giúp tăng tính linh hoạt, cho phép một module được khởi tạo nhiều lần với các modport (tập tín hiệu) khác nhau (ví dụ: 4 bản sao RAM 8-bit nối vào 4 vị trí của bus 32-bit).\r\n2. **Quy tắc cú pháp**: Modport được định nghĩa trong interface và chỉ định trong danh sách port của module, tuyệt đối **không** được ghi trực tiếp vào tên tín hiệu (ví dụ: truy cập `arb_if.TEST.grant` là vi phạm cú pháp).\r\n3. **Ứng dụng Modport trong thiết kế Bus**: Các thành phần trên bus có vai trò khác nhau nên chỉ cần truy cập vào tập tín hiệu tương ứng:\r\n   - *Master (CPU)*: Điều khiển `request`, `command`, `address`; đọc `ready`; đọc/ghi `data`.\r\n   - *Slave (Memory)*: Nhận `request`, `command`, `address`; điều khiển `ready`; đọc/ghi `data`.\r\n   - *Arbiter (Bộ trọng tài)*: Chỉ quan sát `request` và điều khiển `grant`, bỏ qua các tín hiệu khác.\r\n4. **Tạo Interface Monitor**: Dùng modport kiểu `MONITOR` (thường chỉ gồm các port `input`) để giám sát các hoạt động trên bus, giải mã câu lệnh và in trạng thái hoạt động (thành công, thất bại, v.v.) phục vụ công tác kiểm tra/mô phỏng (verification).\r\n\r\nKhái niệm/Kiến thức nền cần biết thêm:\r\n- **SystemVerilog Interface & Modport**: Hiểu khái niệm modport giúp quy định hướng tín hiệu (input/output) cho từng thành phần kết nối vào interface.\r\n- **Bus Architecture (Master/Slave/Arbiter/Monitor)**: Nắm rõ nguyên lý hoạt động của kiến trúc bus phần cứng để hiểu vì sao mỗi thành phần lại cần một tập tín hiệu (modport) riêng biệt.",
+      "translation": "...khuyến nghị phong cách này, vì modport là một chi tiết triển khai không nên làm rối rắm module cấp cao nhất (top-level module).\r\n\r\nPhương án thay thế là chỉ định modport khi bạn khởi tạo (instantiate) module như thể hiện trong Ví dụ 4.13.\r\n\r\n**Ví dụ 4.13 Module cấp cao nhất sử dụng các modport**\r\nmodule top;\r\n  logic [1:0] grant, request;\r\n  bit   clk;\r\n  always #50 clk = ~clk;\r\n\r\n  arb_if          arbif(clk);           // Ví dụ 4-10\r\n  arb_with_mp  a1 (arbif.DUT);       // Ví dụ 4-11\r\n  test_with_mp t1 (arbif.TEST);      // Ví dụ 4-12\r\nendmodule\r\n\r\nVới phong cách này, bạn có sự linh hoạt để khởi tạo một module nhiều lần, trong đó mỗi thể hiện (instance) được kết nối với một modport khác nhau, tức là một tập hợp con các tín hiệu interface khác nhau. Ví dụ, một mô hình RAM rộng 1 byte có thể kết nối với một trong bốn vị trí (slot) trên một bus 32-bit. Trong trường hợp này, bạn sẽ cần chỉ định modport khi khởi tạo module, chứ không phải bên trong bản thân module đó.\r\n\r\nLưu ý rằng các modport được định nghĩa trong interface và được chỉ định trong danh sách port của module, nhưng không bao giờ xuất hiện trong tên tín hiệu. Tên `arb_if.TEST.grant` là không hợp lệ!\r\n\r\n**4.2.4 Sử dụng Modport với Thiết kế Bus**\r\n\r\nKhông phải mọi tín hiệu đều cần phải nằm trong mọi modport. Hãy xét một bus CPU – bộ nhớ được mô hình hóa bằng một interface. CPU là bus master và điều khiển một tập hợp con các tín hiệu, chẳng hạn như `request`, `command`, và `address`. Bộ nhớ là slave; nó nhận các tín hiệu đó và điều khiển `ready`. Cả master và slave đều điều khiển `data`. Bộ trọng tài bus (bus arbiter) chỉ quan sát `request` và `grant`, đồng thời bỏ qua tất cả các tín hiệu khác. Do đó, interface của bạn sẽ có ba modport dành cho master, slave, và arbiter, cộng thêm một modport monitor tùy chọn.\r\n\r\n**4.2.5 Tạo một Interface Monitor**\r\n\r\nBạn có thể tạo một bộ giám sát bus (bus monitor) bằng cách sử dụng modport `MONITOR`. Ví dụ 4.14 thể hiện một bộ giám sát đơn giản dành cho arbiter. Đối với một bus thực tế, bạn có thể giải mã các lệnh và in ra trạng thái: hoàn tất, thất bại, v.v.",
+      "grammar": [
+        {
+          "phrase": "the modport is an implementation detail that should not clutter the top level module",
+          "explain": "mệnh đề quan hệ (relative clause) dùng \"that\" bổ nghĩa cho cụm danh từ \"an implementation detail\""
+        },
+        {
+          "phrase": "specify the modport when you instantiate the module as shown in Sample 4.13",
+          "explain": "mệnh đề chỉ thời gian với \"when\" kết hợp với mệnh đề rút gọn dạng bị động \"as shown in...\""
+        },
+        {
+          "phrase": "you have the flexibility to instantiate a module more than once, with each instance connected to a different modport",
+          "explain": "cấu trúc \"with + danh từ + quá khứ phân từ (connected)\" diễn tả một trạng thái/điều kiện kèm theo"
+        },
+        {
+          "phrase": "Note that modports are defined in the interface, and specified in the module port list",
+          "explain": "mệnh đề lưu ý (\"Note that...\") chứa chuỗi động từ ở thể bị động (\"are defined..., and specified...\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) khởi tạo một thể hiện/đối tượng (instance) từ một module hoặc lớp trong thiết kế phần cứng/lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "clutter",
+          "explain": "(động từ) làm rối rắm, làm lộn xộn (không gian hoặc mã nguồn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "top level module",
+          "explain": "(cụm danh từ) module cấp cao nhất trong thiết kế phần cứng, chứa và kết nối các module con"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bus master",
+          "explain": "(cụm danh từ) thiết bị chủ trên bus, có quyền chủ động khởi tạo các chu kỳ truyền dữ liệu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bus arbiter",
+          "explain": "(cụm danh từ) bộ trọng tài bus, chịu trách nhiệm phân xử và cấp quyền truy cập bus cho các thiết bị"
+        },
+        {
+          "type": "phrase",
+          "phrase": "byte-wide RAM model",
+          "explain": "(cụm danh từ) mô hình bộ nhớ RAM có độ rộng dữ liệu là 1 byte (8-bit)"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "Trang sách này trình bày ví dụ minh họa về một bộ giám sát (Arbiter monitor - Mẫu 4.14) sử dụng interface kết hợp modport, đồng thời phân tích chi tiết Mục 4.2.6: Các sự đánh đổi (Trade-Offs) khi sử dụng Interface trong ngôn ngữ SystemVerilog so với cách nối tín hiệu/cổng truyền thống.\r\n\r\nNgười đọc bắt buộc phải hiểu các ý chính sau:\r\n- **Ưu điểm của Interface:** \r\n  1. Tối ưu cho việc tái sử dụng thiết kế (design reuse), đặc biệt khi hai khối giao tiếp qua các giao thức nhiều tín hiệu. Kết hợp với virtual interface khi các nhóm tín hiệu xuất hiện lặp lại.\r\n  2. Gom toàn bộ tín hiệu về một nơi khai báo trung tâm, tránh tình trạng đấu sai dây/tín hiệu rải rác.\r\n  3. Dễ dàng bảo trì: Khi thêm tín hiệu mới, chỉ cần khai báo một lần trong interface thay vì sửa ở nhiều cấp module.\r\n  4. Cho phép dùng Modport để trích xuất tập hợp con tín hiệu và quy định hướng tín hiệu (input/output) nhằm tăng cường kiểm tra lỗi.\r\n- **Nhược điểm của Interface:**\r\n  1. Đối với kết nối đơn giản (point-to-point), việc dùng interface kèm modport có thể dài dòng không kém gì khai báo cổng thông thường.\r\n  2. Mã nguồn có thể trở nên dài hơn do phải viết kèm tên interface trước tên tín hiệu (tuy nhiên giúp dễ đọc hơn khi debug).\r\n  3. Tốn công thiết lập ban đầu nếu giao thức kết nối là duy nhất và không có nhu cầu tái sử dụng.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Modport & Virtual Interface trong SystemVerilog:** Cần hiểu modport phân quyền truy cập tín hiệu như thế nào và tại sao virtual interface lại cần thiết trong môi trường kiểm thử hướng đối tượng (OOP testbench - sẽ học ở Chương 10).",
+      "translation": "96 | 4 Kết nối Testbench và Thiết kế\r\n\r\nMẫu 4.14: Bộ giám sát bộ trọng tài (arbiter monitor) sử dụng interface kết hợp modport\r\n\r\nmodule monitor (arb_if.MONITOR arbif);\r\n\r\n  always @(posedge arbif.request[0]) begin\r\n    $display(\"@%0t: request[0] asserted\", $time);\r\n    @(posedge arbif.grant[0]);\r\n    $display(\"@%0t: grant[0] asserted\", $time);\r\n  end\r\n\r\n  always @(posedge arbif.request[1]) begin\r\n    $display(\"@%0t: request[1] asserted\", $time);\r\n    @(posedge arbif.grant[1]);\r\n    $display(\"@%0t: grant[1] asserted\", $time);\r\n  end\r\nendmodule\r\n\r\n\r\n4.2.6 Những sự đánh đổi khi sử dụng Interface\r\n\r\nMột interface không thể chứa các instance của module, mà chỉ có thể chứa các instance của các interface khác. Có những sự đánh đổi giữa việc sử dụng interface kết hợp với modport so với việc sử dụng các cổng truyền thống được kết nối bằng tín hiệu.\r\n\r\nCác ưu điểm của việc sử dụng interface bao gồm:\r\n\r\n• Interface là giải pháp lý tưởng cho việc tái sử dụng thiết kế. Khi hai khối giao tiếp với nhau bằng một giao thức xác định sử dụng nhiều hơn hai tín hiệu, hãy cân nhắc sử dụng interface. Nếu các nhóm tín hiệu được lặp đi lặp lại nhiều lần, chẳng hạn như trong một bộ chuyển mạch mạng (networking switch), bạn nên sử dụng thêm các virtual interface (interface ảo), như được mô tả trong Chương 10.\r\n• Interface gom tập hợp các tín hiệu hỗn loạn mà bạn phải khai báo đi khai báo lại trong mọi module hoặc chương trình vào một vị trí trung tâm, giúp giảm khả năng kết nối sai tín hiệu.\r\n• Để thêm một tín hiệu mới, bạn chỉ cần khai báo một lần duy nhất trong interface chứ không phải trong các module cấp cao hơn, một lần nữa giúp giảm thiểu lỗi.\r\n• Modport cho phép một module dễ dàng trích xuất một tập hợp con các tín hiệu từ interface. Bạn có thể quy định hướng tín hiệu để tăng cường kiểm tra lỗi.\r\n\r\nCác nhược điểm của việc sử dụng interface bao gồm:\r\n\r\n• Đối với các kết nối điểm-tới-điểm (point-to-point), việc dùng interface kết hợp modport gần như dài dòng tương đương với việc dùng cổng kèm danh sách tín hiệu. Dù vậy, interface vẫn có lợi thế là tất cả khai báo đều nằm ở một vị trí trung tâm, giảm nguy cơ mắc lỗi.\r\n• Hiện tại bạn phải sử dụng tên interface đi kèm với tên tín hiệu, điều này có thể làm cho các module trở nên dài dòng hơn, nhưng lại dễ đọc hơn cho việc gỡ lỗi (debugging).\r\n• Nếu bạn đang kết nối hai khối thiết kế bằng một giao thức độc nhất không được tái sử dụng, việc dùng interface có thể tốn nhiều công sức hơn so với việc chỉ đơn thuần nối các cổng lại với nhau.",
+      "grammar": [
+        {
+          "phrase": "over and over, as in a networking switch, you should additionally use virtual interfaces, as described in Chapter 10",
+          "explain": "mệnh đề so sánh/ví dụ (\"as in...\") đi kèm mệnh đề bị động rút gọn (\"as described in...\")"
+        },
+        {
+          "phrase": "The interface takes the jumble of signals that you declare over and over in every module or program and puts it in a central location",
+          "explain": "mệnh đề quan hệ \"that you declare...\" bổ nghĩa cho cụm danh từ \"the jumble of signals\", kết hợp cấu trúc động từ song song \"takes ... and puts ...\""
+        },
+        {
+          "phrase": "If you are connecting two design blocks with a unique protocol that will not be reused, interfaces may be more work than just wiring together the ports",
+          "explain": "câu điều kiện loại 1 chứa mệnh đề quan hệ \"that will not be reused\" và cấu trúc so sánh hơn \"more work than...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "trade-off",
+          "explain": "(danh từ) sự đánh đổi, sự cân nhắc giữa ưu và nhược điểm"
+        },
+        {
+          "type": "vocab",
+          "phrase": "verbose",
+          "explain": "(tính từ) dài dòng, chứa nhiều ký tự/mã nguồn không cần thiết"
+        },
+        {
+          "type": "collocation",
+          "phrase": "design reuse",
+          "explain": "(cụm danh từ) sự tái sử dụng thiết kế trong kỹ thuật vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "point-to-point connection",
+          "explain": "(cụm danh từ) kết nối điểm-tới-điểm (kết nối trực tiếp giữa 2 khối)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "over and over",
+          "explain": "(cụm từ) lặp đi lặp lại nhiều lần"
+        },
+        {
+          "type": "phrase",
+          "phrase": "tap a subset of signals",
+          "explain": "(cụm từ) trích xuất/trích lấy một tập hợp con các tín hiệu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "wiring together the ports",
+          "explain": "(cụm từ) nối các cổng lại với nhau bằng dây dẫn/tín hiệu"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "- **Nội dung tổng quát**: Trang sách này thuộc Mục 4.2 (Cấu trúc Interface), thảo luận về cách kết nối các interface khác biệt, giới thiệu tài liệu tham khảo LRM, và tập trung phân tích sự khác biệt giữa việc sử dụng kiểu dữ liệu `logic` và `wire` trong việc khai báo tín hiệu interface.\r\n- **Các ý chính người đọc bắt buộc phải hiểu**:\r\n  1. *Thách thức kết nối interface*: Một interface mở rộng chứa các tín hiệu cũ và mới đòi hỏi phải tách riêng (break out) các tín hiệu cá nhân để điều khiển phù hợp.\r\n  2. *So sánh `logic` vs `wire` trong Interface*:\r\n     - *Tính tiện dụng (`logic`)*: Dễ viết code hơn. Tín hiệu bất đồng bộ (asynchronous signal) có thể được gán/điều khiển trực tiếp bằng lệnh gán thủ tục (`procedural assignment`, ví dụ nằm trong khối `initial`). Ngoài ra, trình biên dịch sẽ cảnh báo lỗi nếu vô tình gán tín hiệu từ nhiều nguồn (multiple structural drivers).\r\n     - *Khả năng tái sử dụng (`wire`)*: Tuân theo quy chuẩn VMM (Verification Methodology Manual). Tín hiệu `wire` chỉ có thể được điều khiển thông qua lệnh gán liên tục (`continuous assignment` - từ khóa `assign`), đòi hỏi phải khai báo thêm biến trung gian.\r\n     - *Tín hiệu đồng bộ*: Trong khối xung nhịp (`clocking block`), tín hiệu luôn là đồng bộ nên có thể dùng cả kiểu `logic` lẫn `wire`.\r\n- **Khái niệm/kiến thức nền cần tìm hiểu thêm**:\r\n  - *Procedural assignment vs Continuous assignment*: Lệnh gán thủ tục (dùng trong `initial`/`always` với các toán tử `=`, `<=`) và lệnh gán liên tục (dùng từ khóa `assign`).\r\n  - *Clocking block*: Khối đồng bộ hóa tín hiệu theo xung nhịp trong SystemVerilog Testbench.\r\n  - *VMM (Verification Methodology Manual)*: Quy chuẩn phương pháp kiểm thử phần cứng của Synopsys.",
+      "translation": "4.2 Cấu trúc Interface | 97\r\n\r\n• Việc kết nối hai interface khác nhau là khá khó khăn. Một interface mới (`bus_if`) có thể chứa tất cả các tín hiệu của một interface đã có (`arb_if`), cộng thêm các tín hiệu mới (địa chỉ, dữ liệu, v.v.). Bạn có thể phải tách riêng từng tín hiệu cá nhân ra và điều khiển chúng một cách thích hợp.\r\n\r\n4.2.7 Thêm thông tin và các ví dụ\r\n\r\nTài liệu LRM của SystemVerilog quy định nhiều cách khác để bạn sử dụng interface. Tham khảo Sutherland (2006) để biết thêm các ví dụ về việc sử dụng interface cho thiết kế.\r\n\r\n4.2.8 Kiểu Logic so với Wire trong một Interface\r\n\r\nCuốn sách này đề xuất khai báo các tín hiệu trong interface của bạn dưới dạng `logic`, trong khi VMM có quy tắc khuyên nên dùng `wire`. Sự khác biệt nằm ở sự tiện lợi khi sử dụng so với khả năng tái sử dụng.\r\nNếu môi trường kiểm thử của bạn điều khiển một tín hiệu bất đồng bộ trong interface bằng lệnh gán thủ tục, tín hiệu đó phải thuộc kiểu `logic`. Tín hiệu kiểu `wire` chỉ có thể được điều khiển bằng một lệnh gán liên tục. Các tín hiệu trong một khối xung nhịp luôn luôn đồng bộ và có thể được khai báo dưới dạng `logic` hoặc `wire`. Ví dụ 4.15 cho thấy tín hiệu `logic` có thể được điều khiển trực tiếp như thế nào, trong khi tín hiệu `wire` đòi hỏi phải có thêm mã lệnh.\r\n\r\nVí dụ 4.15 Điều khiển logic và wire trong một interface\r\n\r\ninterface asynch_if();\r\n  logic l;\r\n  wire w;\r\nendinterface\r\n\r\nmodule test(asynch_if ifc);\r\n  logic local_wire;\r\n  assign ifc.w = local_wire;\r\n\r\n  initial begin\r\n    ifc.l <= 0;          // Điều khiển trực tiếp logic bất đồng bộ ...\r\n    local_wire <= 1; // nhưng điều khiển wire thông qua lệnh assign ...\r\n  end\r\nendmodule\r\n\r\nMột lý do khác để sử dụng `logic` cho các tín hiệu interface là trình biên dịch sẽ báo lỗi nếu bạn vô tình sử dụng nhiều nguồn lái cấu trúc (multiple structural drivers).\r\nVMM tiếp cận theo hướng dài hạn hơn. Xét trường hợp bạn đã tạo mã kiểm thử hoạt động tốt trên dự án hiện tại và sau đó được tái sử dụng trong một thiết kế mới.",
+      "grammar": [
+        {
+          "phrase": "This book recommends declaring the signals in your interface as logic while the VMM has a rule that says to use a wire.",
+          "explain": "liên từ \"while\" nối hai mệnh đề thể hiện sự đối lập, so sánh giữa quan điểm của sách và quy chuẩn VMM"
+        },
+        {
+          "phrase": "If your testbench drives an asynchronous signal in an interface with a procedural assignment, the signal must be a logic type.",
+          "explain": "câu điều kiện loại 1 (real conditional) diễn tả quy tắc bắt buộc trong ngôn ngữ lập trình"
+        },
+        {
+          "phrase": "Sample 4.15 shows how the logic signal can be driven directly, whereas the wire requires additional code.",
+          "explain": "cụm nghi vấn từ \"how + mệnh đề bị động\" làm tân ngữ cho \"shows\", kết hợp liên từ \"whereas\" chỉ sự tương phản"
+        },
+        {
+          "phrase": "Take the case where you have created test code that works well on the current project and is later used in a new design.",
+          "explain": "\"where\" là trạng từ quan hệ đại diện cho danh từ bối cảnh \"the case\", kết hợp mệnh đề quan hệ với đại từ \"that\" bổ nghĩa cho \"test code\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "asynchronous",
+          "explain": "(tính từ) bất đồng bộ, không dựa trên tín hiệu xung nhịp clock"
+        },
+        {
+          "type": "vocab",
+          "phrase": "procedural",
+          "explain": "(tính từ) thuộc về thủ tục (trong HDL, dùng để chỉ các khối lệnh thực thi theo thứ tự như initial hay always)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "reusability",
+          "explain": "(danh từ) khả năng tái sử dụng (mã nguồn/mô-đun)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(cụm từ chuyên ngành) lệnh gán liên tục (sử dụng từ khóa `assign` trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(cụm từ chuyên ngành) khối xung nhịp (cấu trúc dùng để đồng bộ hóa tín hiệu với clock trong SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "multiple structural drivers",
+          "explain": "(cụm từ chuyên ngành) nhiều nguồn lái cấu trúc (lỗi xảy ra khi có hơn một nguồn phần cứng cùng điều khiển một tín hiệu)"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "summary": "- **Nội dung tổng quát:** Trang sách tiếp tục thảo luận về những hạn chế khi dùng kiểu dữ liệu `logic` trong giao diện (interface) khi có nhiều nguồn lái (driver), đồng thời mở đầu Mục 4.3 về Đột thì Kích thích (Stimulus Timing). Trọng tâm chính là phương pháp kiểm soát thời gian của các tín hiệu đồng bộ thông qua việc sử dụng khối định thì xung nhịp (`clocking block`) trong SystemVerilog.\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Hạn chế của `logic` khi có nhiều nguồn lái:** Khi tín hiệu giao diện có nhiều nguồn lái cấu trúc, phải đổi `logic` thành `wire` và sửa các phép gán thủ tục, điều này tạo ra hai phiên bản interface và làm vi phạm nguyên tắc VMM (không nên sửa mã nguồn tốt đã chạy ổn định).\r\n  2. **Tầm quan trọng của định thì kích thích (Stimulus Timing):** Lệch chu kỳ (off-a-cycle) hoặc xảy ra điều kiện tranh chấp (race condition - vừa đọc vừa ghi cùng lúc trong một lát cắt thời gian) sẽ làm sai lệch kết quả kiểm thử.\r\n  3. **Vai trò của `clocking block`:** Giúp định nghĩa chính xác thời điểm lấy mẫu (sample) và phát tín hiệu (drive) đồng bộ theo xung nhịp; gom toàn bộ thông tin định thì vào interface giúp môi trường kiểm thử (testbench) gọn gàng; không hỗ trợ tổng hợp RTL (chỉ dùng cho mô phỏng).\r\n  4. **Cấu hình xung nhịp và độ lệch (clock skew):** Một interface có thể chứa nhiều `clocking block` (mỗi block cho một miền xung nhịp). Giá trị mặc định là lấy mẫu ngay trước khi thiết kế chạy và phát tín hiệu lại vào thiết kế trong lát cắt thời gian hiện tại.\r\n  5. **Tính linh hoạt:** Testbench có thể đợi sự kiện `@arbif.cb` thay vì chỉ định chi tiết xung nhịp và cạnh xung, giúp testbench không bị ảnh hưởng khi thiết kế thay đổi xung nhịp.\r\n- **Kiến thức nền cần tìm hiểu thêm:**\r\n  - Cú pháp và sự khác biệt giữa `logic` và `wire` trong SystemVerilog.\r\n  - Các nguyên lý VMM (Verification Methodology Manual).\r\n  - Lát cắt thời gian mô phỏng (Simulation time slots) và khái niệm Điều kiện tranh chấp (Race condition).\r\n  - Khái niệm Độ lệch xung nhịp (Clock skew) trong mô phỏng vi mạch.",
+      "translation": "[Trang 98]\r\n\r\nĐiều gì xảy ra nếu giao diện của bạn với tất cả các tín hiệu kiểu `logic` được kết nối sao cho hiện tại một tín hiệu lại có nhiều nguồn lái cấu trúc (structural drivers)? Các kỹ sư sẽ phải chuyển kiểu `logic` đó thành `wire`, và nếu tín hiệu đó không đi qua một khối clocking block, họ phải thay đổi cả các câu lệnh gán thủ tục (procedural assignments). Lúc này sẽ tồn tại hai phiên bản của giao diện, và các bài kiểm thử hiện có phải bị chỉnh sửa trước khi có thể tái sử dụng. Việc viết lại mã nguồn tốt là đi ngược lại các nguyên tắc của VMM.\r\n\r\n4.3 Định thì Kích thích (Stimulus Timing)\r\n\r\nThời gian giữa môi trường kiểm thử (testbench) và thiết kế phải được phối hợp một cách cẩn thận. Ở cấp độ chu kỳ, bạn cần phát tín hiệu và nhận các tín hiệu đồng bộ vào đúng thời điểm so với xung nhịp. Nếu phát tín hiệu quá trễ hoặc lấy mẫu quá sớm, testbench của bạn sẽ bị lệch mất một chu kỳ. Ngay cả trong cùng một lát cắt thời gian (ví dụ: tất cả những gì xảy ra tại thời điểm 100ns), việc trộn lẫn các sự kiện của thiết kế và testbench có thể gây ra điều kiện tranh chấp (race condition), chẳng hạn như khi một tín hiệu vừa được đọc vừa được ghi cùng một lúc. Bạn sẽ đọc giá trị cũ, hay giá trị vừa mới được ghi? Trong Verilog, các phép gán không chặn (nonblocking assignments) giúp ích khi một mô-đun kiểm thử lái mạch DUT, nhưng bài kiểm thử không phải lúc nào cũng chắc chắn rằng nó đã lấy mẫu giá trị cuối cùng được lái bởi thiết kế. SystemVerilog cung cấp một số cấu trúc giúp bạn kiểm soát thời gian truyền thông này.\r\n\r\n4.3.1 Điều khiển Định thì của Tín hiệu Đồng bộ bằng Clocking Block\r\n\r\nMột giao diện nên chứa một khối định thì (clocking block) để xác định thời gian của các tín hiệu đồng bộ so với các xung nhịp. Các khối clocking block chủ yếu được sử dụng bởi testbench nhưng cũng cho phép bạn tạo ra các mô hình đồng bộ trừu tượng. Các tín hiệu trong một clocking block được lái hoặc lấy mẫu một cách đồng bộ, đảm bảo testbench tương tác với các tín hiệu vào đúng thời điểm. Các công cụ tổng hợp (synthesis tools) không hỗ trợ clocking block, do đó mã RTL của bạn không thể lợi dụng chúng. Lợi ích chính của clocking block là bạn có thể đưa tất cả thông tin định thì chi tiết vào đây, mà không làm rườm rà testbench của bạn.\r\n\r\nMột giao diện có thể chứa nhiều clocking block, mỗi miền xung nhịp một block, vì chỉ có một biểu thức xung nhịp duy nhất trong mỗi block. Các biểu thức xung nhịp điển hình là `@(posedge clk)` cho xung nhịp cạnh đơn và `@(clk)` cho xung nhịp DDR (tốc độ dữ liệu kép).\r\n\r\nBạn có thể chỉ định độ lệch xung nhịp (clock skew) trong clocking block bằng câu lệnh `default`, nhưng hành vi mặc định là các tín hiệu đầu vào được lấy mẫu ngay trước khi thiết kế thực thi, và các đầu ra được lái ngược trở lại thiết kế trong lát cắt thời gian hiện tại. Phần tiếp theo sẽ cung cấp thêm chi tiết về định thì giữa thiết kế và testbench.\r\n\r\nKhi bạn đã định nghĩa một clocking block, testbench của bạn có thể chờ biểu thức clocking với `@arbif.cb` thay vì phải chỉ ra chính xác xung nhịp và cạnh xung. Giờ đây nếu bạn thay đổi xung nhịp hoặc cạnh xung trong clocking block, bạn không cần phải thay đổi testbench của mình nữa.",
+      "grammar": [
+        {
+          "phrase": "if the signal does not go through a clocking block, change the procedural assignment statements",
+          "explain": "câu điều kiện loại 1 (first conditional) dạng mệnh lệnh, dùng để chỉ ra hành động kỹ thuật cần thực hiện khi điều kiện xảy ra"
+        },
+        {
+          "phrase": "existing tests must be modified before they can be reused",
+          "explain": "cấu trúc bị động (passive voice) với động từ khuyết thiếu \"must be modified\" kết hợp mệnh đề thời gian \"before they can be reused\""
+        },
+        {
+          "phrase": "mixing design and testbench events can cause a race condition, such as when a signal is both read and written at the same time",
+          "explain": "danh động từ (gerund phrase) \"mixing...\" làm chủ ngữ kết hợp với mệnh đề quan hệ chỉ thời gian \"when a signal is both read and written...\""
+        },
+        {
+          "phrase": "sampled the last value driven by the design",
+          "explain": "mệnh đề phân từ quá khứ (past participial clause) \"driven by the design\" rút gọn từ mệnh đề quan hệ \"which was driven by the design\" bổ nghĩa cho danh từ \"value\""
+        },
+        {
+          "phrase": "rather than having to spell out the exact clock and edge",
+          "explain": "cấu trúc \"rather than + V-ing\" dùng để thể hiện sự thay thế/sự loại trừ một hành động phức tạp không cần thiết"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "structural drivers",
+          "explain": "các nguồn lái dạng cấu trúc phần cứng (như cổng logic, assign statement)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "orchestrated",
+          "explain": "(động từ) được phối hợp, điều phối một cách nhịp nhàng/ăn khớp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "điều kiện tranh chấp / tranh giành dữ liệu (lỗi xung đột thời gian trong mô phỏng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignments",
+          "explain": "các phép gán không chặn (ký hiệu <= trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "khối định thì xung nhịp (cấu trúc trong SystemVerilog dùng để đồng bộ hóa tín hiệu)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "clutter",
+          "explain": "(động từ) làm rườm rà, làm lộn xộn (mã nguồn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock skew",
+          "explain": "độ lệch xung nhịp (khoảng thời gian trễ dịch chuyển so với cạnh xung nhịp)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "phr: spell out",
+          "explain": "(cụm động từ) chỉ ra/kê khai một cách rõ ràng và chi tiết"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "summary": "- **Nội dung tổng quát:** Trang này giải thích cách sử dụng khối định thời nhịp (`clocking block`) bên trong giao diện (`interface`) SystemVerilog để quản lý thời gian kích thích (stimulus timing) cho các tín hiệu đồng bộ giữa mô-đun kiểm thử (testbench) và thiết kế được kiểm thử (DUT). Đồng thời, trang sách bắt đầu mở ra Mục 4.3.2 để bàn về các vấn đề thời gian (timing problems) trong Verilog nguyên bản.\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. **Tích hợp `clocking block` vào `modport`:** Việc đưa `clocking block` vào `modport TEST` giúp tự động coi các tín hiệu bên trong nó là tín hiệu đồng bộ với cạnh lên của xung nhịp (`posedge clk`).\r\n  2. **Hướng tín hiệu quy chiếu theo Testbench:** Tín hiệu `request` là đầu ra đồng bộ (`synchronous output`), `grant` là đầu vào đồng bộ (`synchronous input`), trong khi `rst` là tín hiệu bất đồng bộ (`asynchronous output`).\r\n  3. **Cú pháp truy cập tín hiệu đồng bộ:** Khi viết testbench, việc gán hoặc đọc tín hiệu đồng bộ bắt buộc phải thông qua tên của clocking block (ví dụ: `@arbif.cb`, `arbif.cb.request <= 2'b01`).\r\n  4. **Sự phân tách về mặt thời gian:** Testbench không chỉ cần tách biệt với DUT về mặt cấu trúc logic mà còn phải tách biệt về mặt thời gian (temporally) để mô phỏng chính xác cách một bộ kiểm thử phần cứng thực tế tương tác với vi mạch.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Clocking block & Modport trong SystemVerilog:* Cần nắm rõ cách SystemVerilog giải quyết vấn đề đua thời gian (race condition) bằng việc tự động tạo thời gian chờ (skew/setup/hold time) cho tín hiệu.\r\n  - *Đám mây logic (logic cloud) và Phần tử lưu trữ (storage element/Flip-Flop):* Hiểu sơ đồ đường truyền dữ liệu trong phần cứng RTL (Register-Transfer Level) để nắm được tại sao dữ liệu cần một khoảng thời gian lan truyền (propagation delay) trước cạnh xung nhịp tiếp theo.",
+      "translation": "4.3 Thời gian kích thích (Stimulus Timing)\r\n\r\nVí dụ 4.16 tương tự như Ví dụ 4.10, ngoại trừ việc modport `TEST` hiện xử lý các tín hiệu `request` và `grant` như các tín hiệu đồng bộ. Khối clocking `cb` khai báo rằng các tín hiệu sẽ có hiệu lực tại cạnh lên của xung nhịp. Hướng của các tín hiệu được quy chiếu tương đối so với modport nơi chúng được sử dụng. Vì vậy, `request` là một đầu ra đồng bộ trong modport `TEST`, và `grant` là một đầu vào đồng bộ. Tín hiệu `rst` là tín hiệu bất đồng bộ trong modport `TEST`.\r\n\r\nVí dụ 4.16: Giao diện kết hợp với khối clocking\r\n\r\ninterface arb_if(input bit clk);\r\n  logic [1:0] grant, request;\r\n  bit rst;\r\n\r\n  clocking cb @(posedge clk);  // Khai báo cb\r\n    output request;\r\n    input grant;\r\n  endclocking\r\n\r\n  modport TEST (clocking cb,   // Sử dụng cb\r\n                output rst);\r\n\r\n  modport DUT (input request, rst, clk,\r\n               output grant);\r\nendinterface\r\n\r\n// Bài kiểm tra đơn giản, xem Ví dụ 4-21 để có bài tốt hơn\r\nmodule test_with_cb(arb_if.TEST arbif);\r\n  initial begin\r\n    @arbif.cb;\r\n    arbif.cb.request <= 2'b01;\r\n    @arbif.cb;\r\n    $display(\"@%0t: Grant = %b\", $time, arbif.cb.grant);\r\n    @arbif.cb;\r\n    $display(\"@%0t: Grant = %b\", $time, arbif.cb.grant);\r\n    $finish;\r\n  end\r\nendmodule\r\n\r\n4.3.2 Các vấn đề về thời gian trong Verilog\r\n\r\nMôi trường kiểm thử (testbench) của bạn cần phải tách biệt với bản thiết kế, không chỉ về mặt logic mà còn về mặt thời gian. Hãy xem xét cách một thiết bị kiểm thử phần cứng tương tác với một con chip đối với các tín hiệu đồng bộ. Trong một thiết kế phần cứng thực tế, các phần tử lưu trữ của DUT sẽ chốt (latch) các tín hiệu đầu vào từ thiết bị kiểm thử tại cạnh xung nhịp có hiệu lực. Các giá trị này sau đó lan truyền qua đầu ra của phần tử lưu trữ, rồi đi qua các đám mây logic để đến đầu vào của phần tử lưu trữ tiếp theo. Khoảng thời gian từ đầu vào của phần tử lưu trữ đầu tiên đến phần tử lưu trữ tiếp theo phải nhỏ hơn một chu kỳ xung nhịp.",
+      "grammar": [
+        {
+          "phrase": "Sample 4.16 is similar to Sample 4.10 except that the TEST modport now treats request and grant as synchronous signals.",
+          "explain": "cấu trúc \"except that + clause\" dùng để chỉ định một sự ngoại lệ/điều chỉnh đối với mệnh đề phía trước"
+        },
+        {
+          "phrase": "The clocking block cb declares that the signals are active on the positive edge of the clock.",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò làm tân ngữ trực tiếp cho động từ \"declares\""
+        },
+        {
+          "phrase": "The signal directions are relative to the modport where they are used.",
+          "explain": "mệnh đề quan hệ rút gọn hoặc mệnh đề trạng ngữ chỉ nơi chốn \"where they are used\" bổ nghĩa cho danh từ \"modport\""
+        },
+        {
+          "phrase": "Your testbench needs to be separate from the design, not just logically but also temporally.",
+          "explain": "cấu trúc song song \"not just ... but also ...\" (không chỉ ... mà còn ...) kết hợp với trạng từ"
+        },
+        {
+          "phrase": "Consider how a hardware tester interacts with a chip for synchronous signals.",
+          "explain": "câu mệnh lệnh bắt đầu bằng \"Consider\" chứa mệnh đề danh từ làm tân ngữ trả lời cho câu hỏi \"how...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "asynchronous",
+          "explain": "(tính từ) bất đồng bộ, không phụ thuộc hay đồng bộ theo xung nhịp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "latch",
+          "explain": "(động từ) chốt, lưu giữ giá trị dữ liệu tại một thời điểm kích hoạt"
+        },
+        {
+          "type": "vocab",
+          "phrase": "propagate",
+          "explain": "(động từ) lan truyền (tín hiệu điện đi qua mạch logic)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "temporally",
+          "explain": "(trạng từ) về mặt thời gian, theo khía cạnh thời gian"
+        },
+        {
+          "type": "collocation",
+          "phrase": "synchronous signals",
+          "explain": "(cụm danh từ) các tín hiệu đồng bộ (được lấy mẫu và thay đổi theo chu kỳ xung nhịp)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(cụm danh từ) khối định thời nhịp (cấu trúc trong SystemVerilog giúp quản lý thời gian đua tín hiệu)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "active clock edge",
+          "explain": "(cụm danh từ) cạnh xung nhịp kích hoạt (cạnh lên posedge hoặc cạnh xuống negedge)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "storage element",
+          "explain": "(cụm danh từ) phần tử lưu trữ phần cứng (như Flip-Flop hoặc Latch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic cloud",
+          "explain": "(cụm danh từ) đám mây logic (tổ hợp các cổng logic kết hợp giữa hai tầng lưu trữ)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "propagation delay",
+          "explain": "(cụm danh từ) độ trễ lan truyền tín hiệu trong mạch phần cứng"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "summary": "- **Nội dung tổng quát:** Trang sách giải thích thách thức về định thời (timing) và điều kiện đua (race condition) khi kết nối giữa Testbench (môi trường kiểm thử) và DUT (Design Under Test - thiết kế cần kiểm thử) nếu cả hai đều viết bằng các module Verilog thuần túy, đồng thời phân tích lý do tại sao các giải pháp khắc phục tạm thời như dùng độ trễ `#0` hay `#1` lại gây nguy hiểm và không nên dùng.\r\n- **Những ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Hành vi lý tưởng:* Testbench phải mô phỏng máy đo phần cứng thực tế: đưa dữ liệu vào (drive) ngay tại/sau sườn xung nhịp tích cực và lấy mẫu đầu ra (sample) ngay trước sườn xung nhịp tiếp theo.\r\n  2. *Vấn đề với Verilog thuần:* Khi Testbench và DUT cùng chạy ở sườn xung nhịp, thứ tự xử lý trong trình mô phỏng không cố định, dẫn đến race condition (tín hiệu cập nhật trước/sau không đồng nhất).\r\n  3. *Tác hại của độ trễ `#0`:* Dùng `#0` để đẩy luồng xử lý xuống cuối hàng chờ tạo ra hành vi không xác định (indeterminate) và không di động (non-portable) vì khi có nhiều luồng cùng dùng `#0`, trình mô phỏng không thể quyết định luồng nào chạy cuối cùng.\r\n  4. *Tác hại của độ trễ `#1`:* Dùng `#1` phụ thuộc vào độ phân giải thời gian (`timescale` precision) của từng module (ví dụ 1ns vs 10ps) và gây lỗi nếu thiết kế trộn lẫn mã RTL với mã mức cổng (gate-level).\r\n  5. *Vấn đề race condition trong thiết kế (Mục 4.3.3):* Việc gán các tín hiệu (`start`, `write`, `addr`, `data`) hoặc lấy mẫu tín hiệu ngay tại sườn xung nhịp vẫn có thể tạo ra race condition dù có dùng phép gán phi chắn (nonblocking assignment). Giải pháp lấy mẫu đúng là phải lấy mẫu trước sườn xung một khoảng thời gian thiết lập `Tsetup`.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Verilog Event Scheduler / Stratified Event Queue (LRM):* Cơ chế xếp lịch sự kiện của Verilog (Active, Inactive, NBA region) để hiểu tại sao `#0` bị đẩy sang Inactive region.\r\n  - *Race Condition trong Verilog:* Tình trạng kết quả mô phỏng thay đổi tùy thuộc vào thứ tự thực thi ngẫu nhiên của các đoạn mã chạy song song.\r\n  - *`timescale` directive:* Cú pháp quy định đơn vị thời gian và độ phân giải thời gian trong Verilog.\r\n  - *Setup Time ($t_{setup}$):* Khoảng thời gian tín hiệu đầu vào phải giữ ổn định trước khi sườn xung nhịp tích cực xuất hiện.",
+      "translation": "Do đó, một thiết bị kiểm thử phần cứng cần phải kích thích các đầu vào của chip tại sườn xung nhịp, và đọc các đầu ra ngay trước sườn xung nhịp tiếp theo.\r\n\r\nMột testbench phải mô phỏng lại hành vi của thiết bị kiểm thử này. Nó nên kích thích tín hiệu tại hoặc sau sườn xung nhịp tích cực, và nên lấy mẫu càng muộn càng tốt trong phạm vi cho phép của đặc tả thời gian giao thức, ngay trước sườn xung nhịp tích cực.\r\n\r\nNếu DUT và testbench đều chỉ được tạo thành từ các module Verilog, kết quả này gần như không thể đạt được. Nếu testbench kích thích DUT ngay tại sườn xung nhịp, điều kiện đua (race condition) có thể xảy ra. Điều gì sẽ xảy ra nếu xung nhịp lan truyền đến một số đầu vào của DUT trước tín hiệu kích thích từ testbench, nhưng lại đến muộn hơn một chút so với các đầu vào khác? Từ bên ngoài nhìn vào, tất cả các sườn xung nhịp đều xuất hiện ở cùng một thời điểm mô phỏng, nhưng trong thiết kế, một số đầu vào nhận giá trị được tạo ra từ chu kỳ trước, trong khi các đầu vào khác lại nhận giá trị từ chu kỳ hiện tại.\r\n\r\nMột cách để giải quyết vấn đề này là thêm các độ trễ nhỏ vào hệ thống, chẳng hạn như `#0`. Điều này buộc luồng mã Verilog phải dừng lại và được xếp lịch lại sau tất cả các đoạn mã khác. Tuy nhiên, một thiết kế lớn luôn có nhiều phần cùng muốn thực thi cuối cùng. Liệu `#0` của phần nào sẽ thắng? Điều này có thể thay đổi tùy theo mỗi lần chạy và không thể dự đoán được giữa các trình mô phỏng khác nhau. Việc nhiều luồng cùng sử dụng độ trễ `#0` sẽ gây ra hành vi không xác định. Hãy tránh sử dụng `#0` vì nó sẽ làm cho mã của bạn không ổn định và không có tính di động.\r\n\r\nGiải pháp tiếp theo là sử dụng độ trễ lớn hơn, `#1`. Mã RTL không có định thời, ngoại trừ các sườn xung nhịp, vì vậy một đơn vị thời gian sau xung nhịp, mạch logic đã ổn định. Tuy nhiên, điều gì xảy ra nếu một module sử dụng độ phân giải thời gian là 1ns, trong khi module khác lại sử dụng độ phân giải chỉ 10ps? Liệu `#1` đó có nghĩa là 1ns, 10ps, hay một giá trị nào khác? Bạn muốn kích thích tín hiệu càng sớm càng tốt sau chu kỳ xung nhịp với sườn xung tích cực, nhưng không phải trong khoảng thời gian đó, và trước khi bất kỳ điều gì khác có thể xảy ra. Tệ hơn nữa, DUT của bạn có thể chứa sự kết hợp giữa mã RTL không có độ trễ và mã mức cổng (gate code) có độ trễ. Tương tự như việc nên tránh dùng `#0`, hãy tránh xa các độ trễ `#1` để sửa các vấn đề về định thời. Xem Cummings (2000) và các bài báo khác của ông để biết thêm các hướng dẫn bổ sung.\r\n\r\n4.3.3 Tình trạng đua giữa Testbench và Thiết kế\r\n\r\nVí dụ 4.17 hiển thị một điều kiện đua tiềm ẩn giữa testbench và thiết kế. Điều kiện đua xảy ra khi bài kiểm tra kích thích tín hiệu `start` và sau đó là các cổng khác. Bộ nhớ đang chờ tín hiệu `start` và có thể hoạt động ngay lập tức, trong khi tín hiệu `write` vẫn giữ giá trị cũ, còn `addr` và `data` lại có giá trị mới. Hành vi này hoàn toàn hợp lệ theo LRM. Bạn có thể trì hoãn nhẹ tất cả các tín hiệu này bằng cách sử dụng các phép gán phi chắn (nonblocking assignments), như khuyến nghị của Cummings (2000), nhưng hãy nhớ rằng testbench và thiết kế đều đang sử dụng các phép gán này. Tình trạng đua giữa testbench và thiết kế vẫn có thể xảy ra.\r\n\r\nViệc lấy mẫu các đầu ra của thiết kế cũng gặp vấn đề tương tự. Bạn muốn bắt các giá trị tại thời điểm muộn nhất có thể, ngay trước sườn xung nhịp tích cực. Có thể bạn biết sườn xung nhịp tiếp theo là ở thời điểm 100ns. Bạn không thể lấy mẫu ngay tại sườn xung nhịp ở thời điểm 100ns, vì một số giá trị trong thiết kế có thể đã thay đổi. Bạn nên lấy mẫu ở thời điểm `Tsetup` ngay trước sườn xung nhịp.",
+      "grammar": [
+        {
+          "phrase": "sample as late as possible as allowed by the protocol timing specification",
+          "explain": "cấu trúc so sánh bằng lặp lại kết hợp với mệnh đề bị động rút gọn \"as allowed by...\""
+        },
+        {
+          "phrase": "If the DUT and testbench are made of Verilog modules only, this outcome is nearly impossible to achieve",
+          "explain": "câu điều kiện loại 1 kết hợp với cấu trúc tính từ + động từ nguyên mẫu \"impossible to achieve\""
+        },
+        {
+          "phrase": "some inputs get the value driven during the last cycle, whereas other inputs get values from the current cycle",
+          "explain": "mệnh đề liên kết tương phản dùng \"whereas\" kết hợp với phân từ hai \"driven\" rút gọn từ mệnh đề quan hệ \"which is driven\""
+        },
+        {
+          "phrase": "Avoid using #0 as it will make your code unstable and not portable",
+          "explain": "câu mệnh lệnh phủ định/khuyên bảo kết hợp mệnh đề chỉ nguyên nhân \"as\" và cấu trúc \"make + tân ngữ + tính từ\""
+        },
+        {
+          "phrase": "Just as you should avoid using #0, stay away from #1 delays to fix timing problems",
+          "explain": "cấu trúc so sánh tương đồng \"Just as..., [mệnh đề chính]\" dùng để đưa ra lời khuyên tương tự nhau"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "mimic",
+          "explain": "(động từ) bắt chước, mô phỏng lại hành vi của một đối tượng khác"
+        },
+        {
+          "type": "vocab",
+          "phrase": "portable",
+          "explain": "(tính từ) có tính di động; trong lập trình chỉ mã nguồn có thể chạy đúng trên nhiều công cụ/trình mô phỏng khác nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "indeterminate",
+          "explain": "(tính từ) không xác định, không thể đoán trước được kết quả"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "(cụm danh từ) điều kiện đua / tình trạng đua thời gian (lỗi xảy ra khi thứ tự thực thi của các sự kiện ảnh hưởng đến kết quả)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "active clock edge",
+          "explain": "(cụm danh từ) sườn xung nhịp tích cực (sườn lên hoặc sườn xuống kích hoạt chuyển trạng thái)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(cụm danh từ) phép gán phi chắn (ký hiệu `<=`), cập nhật giá trị ở cuối bước mô phỏng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "win out",
+          "explain": "(động từ ngắn / cụm động từ) giành chiến thắng, vượt lên trên các đối thủ khác sau một cuộc cạnh tranh"
+        },
+        {
+          "type": "phrase",
+          "phrase": "stay away from",
+          "explain": "(cụm động từ) tránh xa, không sử dụng hoặc tiếp xúc với cái gì"
+        },
+        {
+          "type": "vocab",
+          "phrase": "LRM",
+          "explain": "(viết tắt) Language Reference Manual - tài liệu chuẩn tham chiếu định nghĩa cú pháp và quy tắc của ngôn ngữ lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "Tsetup",
+          "explain": "(danh từ kỹ thuật) Setup time - thời gian thiết lập tối thiểu mà tín hiệu đầu vào phải duy trì ổn định trước sườn xung nhịp"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "summary": "- **Nội dung tổng quát:** Trang sách giải thích nguyên nhân gây ra điều kiện tranh chấp (race condition) giữa môi trường kiểm thử (testbench) và thiết kế RTL thông qua ví dụ code minh họa (Sample 4.17). Đồng thời, trang này bắt đầu giới thiệu giải pháp của SystemVerilog thông qua khối `program` (program block) và việc phân chia các vùng thời gian (timing regions) trong một khe thời gian mô phỏng (time slot).\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. *Nguyên nhân gây ra race condition:* Các sự kiện của testbench và RTL diễn ra trong cùng một khe thời gian mà không được phân định thứ tự thực thi rõ ràng (thường do dùng phép gán gán chặn `=` không đúng cách).\r\n  2. *Vấn đề trong Sample 4.17:* Khối `initial` trong testbench sử dụng phép gán gán chặn (`=`) cập nhật `start`, `write`, `addr`, `data` ở thời điểm `#10`, cùng lúc khối `always @(posedge start)` trong thiết kế kích hoạt. Tùy thuộc vào trình lập lịch (scheduler), thiết kế có thể lấy mẫu giá trị `addr`/`data` mới hoặc cũ.\r\n  3. *Giải pháp khối Program:* SystemVerilog giải quyết vấn đề này bằng cách tách biệt việc lập lịch sự kiện thiết kế và testbench. Mã testbench đặt trong `program` block sẽ được thực thi ở các vùng thời gian khác (Reactive region) so với vùng thời gian dành cho RTL (Active region).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Race Condition (Điều kiện tranh chấp):* Tình huống kết quả mô phỏng phụ thuộc vào thứ tự thực thi không xác định của các sự kiện xảy ra đồng thời.\r\n  - *SystemVerilog Event Scheduler & Timing Regions:* Mô hình lập lịch sự kiện trong SystemVerilog chia một time slot thành nhiều vùng (Active, Observed, Reactive, Postponed, v.v.) để điều phối chính xác thứ tự cập nhật và lấy mẫu tín hiệu.",
+      "translation": "4.3 Thời điểm kích thích (Stimulus Timing)\r\n\r\nVí dụ 4.17 Điều kiện tranh chấp giữa testbench và thiết kế\r\n\r\nmodule memory(input wire start, write,\r\n              input wire [7:0] addr,\r\n              inout wire [7:0] data);\r\n  logic [7:0] mem[256];\r\n  always @(posedge start) begin\r\n    if (write)\r\n      mem[addr] <= data;\r\n    ...\r\n  end\r\nendmodule\r\n\r\nmodule test(output logic start, write,\r\n            output logic [7:0] addr, data);\r\n  initial begin\r\n    start = 0;           // Khởi tạo các tín hiệu\r\n    write = 0;\r\n    #10;                 // Trễ ngắn\r\n    addr = 8'h42;        // Bắt đầu lệnh đầu tiên\r\n    data = 8'h5a;\r\n    start = 1;\r\n    write = 1;\r\n    ...\r\n  end\r\nendmodule\r\n\r\n4.3.4 Khối Program và các Vùng Thời gian (Timing Regions)\r\n\r\nGốc rễ của vấn đề là sự trộn lẫn giữa các sự kiện của thiết kế và testbench trong cùng một khe thời gian (time slot), mặc dù ngay cả trong RTL thuần túy thì vấn đề tương tự vẫn có thể xảy ra. Các hướng dẫn viết code tốt như sử dụng hợp lý các phép gán không chặn (nonblocking assignments) có thể làm giảm các điều kiện tranh chấp này, nhưng các phép gán viết không đúng cách vẫn thường vô tình xuất hiện. Liệu có cách nào để bạn có thể tách biệt các sự kiện này theo thời gian, giống như cách bạn đã tách biệt mã nguồn hay không? Tại thời điểm 100ns, testbench của bạn có thể lấy mẫu các đầu ra của thiết kế trước khi xung clock có cơ hội thay đổi và trước khi bất kỳ hoạt động nào của thiết kế diễn ra. Theo định nghĩa, những giá trị này sẽ là những giá trị cuối cùng có thể có từ khe thời gian trước đó. Sau đó, sau khi tất cả các sự kiện thiết kế đã hoàn tất, testbench của bạn mới bắt đầu chạy.\r\n\r\nLàm thế nào SystemVerilog biết để lập lịch cho các sự kiện testbench riêng biệt khỏi các sự kiện thiết kế? Trong SystemVerilog, mã testbench của bạn nằm trong một khối `program`, khối này tương tự như một `module` ở chỗ nó có thể chứa mã lệnh và biến, đồng thời được khởi tạo trong các module khác. Tuy nhiên, một `program` không thể chứa bất kỳ phân cấp nào như các thể hiện của module, interface, hoặc các program khác.\r\n\r\nMột vùng mới của khe thời gian đã được đưa vào SystemVerilog như thể hiện trong Hình 4.4. Trong Verilog, hầu hết các sự kiện được thực thi trong vùng Active. Có hàng chục vùng khác dành cho các phép gán không chặn, thực thi PLI, v.v., nhưng chúng có thể...",
+      "grammar": [
+        {
+          "phrase": "improperly coded assignments have the habit of creeping in",
+          "explain": "cấu trúc \"have the habit of + V-ing\" biểu thị một xu hướng/thói quen xấu thường vô tình xuất hiện"
+        },
+        {
+          "phrase": "What if there were a way you could separate these events temporally, just as you separated the code?",
+          "explain": "câu hỏi giả định với \"What if + S + were...\", dùng thể giả định (subjunctive) để đặt ra một tình huống giả định trong thiết kế"
+        },
+        {
+          "phrase": "which is similar to a module in that it can contain code and variables",
+          "explain": "mệnh đề quan hệ không xác định sử dụng liên từ \"in that\" (ở chỗ / bởi vì) để giải thích khía cạnh tương đồng"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "race condition",
+          "explain": "(danh từ) điều kiện tranh chấp, tình trạng đua dữ liệu trong thiết kế phần cứng/mô phỏng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "temporally",
+          "explain": "(trạng từ) về mặt thời gian, theo thứ tự thời gian"
+        },
+        {
+          "type": "phrase",
+          "phrase": "root of the problem",
+          "explain": "(cụm danh từ) gốc rễ của vấn đề, nguyên nhân cốt lõi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "creep in",
+          "explain": "(động từ ghép) từ từ lẻn vào, vô tình xuất hiện/xâm nhập ngoài ý muốn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ) khe thời gian trong bộ lập lịch mô phỏng (event scheduler)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "sample the design outputs",
+          "explain": "(cụm động từ) lấy mẫu / đọc giá trị tín hiệu đầu ra của thiết kế"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "summary": "Trang này trình bày về các vùng lập lịch sự kiện (event scheduling regions) chính trong một bước thời gian mô phỏng (time step/time slot) của SystemVerilog, thuộc Chương 4 với chủ đề kết nối môi trường kiểm thử (testbench) và thiết kế (design).\r\n\r\nCác ý chính người đọc cần nắm vững:\r\n1. Thứ tự thực thi của 4 vùng sự kiện chính trong một time slot:\r\n   - Active region: Chạy các sự kiện thiết kế RTL, gate code và bộ tạo xung nhịp (clock generator).\r\n   - Observed region: Đánh giá các câu lệnh khẳng định (SystemVerilog Assertions - SVA).\r\n   - Reactive region: Thực thi mã testbench viết bên trong các chương trình (`program`).\r\n   - Postponed region: Lấy mẫu (sample) các tín hiệu ở cuối time slot (giai đoạn chỉ đọc - read-only) khi thiết kế đã hoàn tất hoạt động.\r\n2. Cơ chế vòng lặp (Loop back): Luồng thời gian trong một time slot không chỉ đi một chiều từ trên xuống dưới. Các hoạt động ở vùng Observed hoặc Reactive có thể kích hoạt (trigger) các sự kiện thiết kế mới quay trở lại vùng Active ngay trong chu kỳ/ time slot đó.\r\n3. Mục đích của việc phân chia vùng: Đảm bảo tránh hiện tượng tranh chấp dữ liệu (race conditions) giữa mã thiết kế và mã testbench, giúp việc lấy mẫu dữ liệu ổn định và chính xác.\r\n\r\nKhái niệm/kiến thức nền cần tìm hiểu thêm:\r\n- Delta cycle / Time step trong mô phỏng Verilog/SystemVerilog: Để hiểu rõ cách trình mô phỏng xử lý tính đồng thời.\r\n- Sự khác biệt giữa `module` và `program` trong SystemVerilog: Giải thích tại sao mã testbench chạy ở vùng Reactive còn thiết kế chạy ở vùng Active.\r\n- SystemVerilog Assertions (SVA) và Clocking Block: Các tính năng giúp đồng bộ và kiểm tra ràng buộc thiết kế.",
+      "translation": "Hình 4.4 Các vùng chính bên trong một bước thời gian (time step) SystemVerilog\r\n\r\n[Sơ đồ Hình 4.4]\r\n- From previous time slot: Từ khoảng thời gian (time slot) trước\r\n- Active (design): Active (thiết kế)\r\n- Observed (assertions): Observed (khẳng định)\r\n- Reactive (testbench): Reactive (môi trường kiểm thử)\r\n- Postponed (sample): Postponed (lấy mẫu)\r\n- Loop back if more events: Trở lại vòng lặp nếu có thêm sự kiện\r\n- To next time slot: Đến khoảng thời gian tiếp theo\r\n\r\n...bị bỏ qua đối với mục đích của cuốn sách này. Xem Bảng 4.1, tài liệu LRM, và Cummings (2006) để biết thêm chi tiết về các vùng sự kiện trong SystemVerilog.\r\n\r\nVùng đầu tiên được thực thi trong một khoảng thời gian (time slot) là vùng Active, nơi các sự kiện thiết kế chạy. Chúng bao gồm mã RTL và mã cổng (gate code) truyền thống của bạn cùng với bộ tạo xung nhịp. Vùng thứ hai là vùng Observed, nơi các Khẳng định SystemVerilog (SystemVerilog Assertions) được đánh giá. Tiếp theo đó là vùng Reactive, nơi mã testbench trong một chương trình (`program`) được thực thi. Lưu ý rằng thời gian không chảy hoàn toàn về phía trước một cách nghiêm ngặt — các sự kiện trong vùng Observed và Reactive có thể kích hoạt thêm các sự kiện thiết kế khác trong vùng Active ở chu kỳ hiện tại. Cuối cùng là vùng Postponed, vùng này lấy mẫu các tín hiệu tại thời điểm kết thúc time slot, trong khoảng thời gian chỉ đọc (readonly period), sau khi hoạt động của thiết kế đã hoàn tất.\r\n\r\nBảng 4.1 Các vùng lập lịch chính trong SystemVerilog\r\n- Active :: Mô phỏng mã thiết kế trong các module\r\n- Observed :: Đánh giá các Khẳng định SystemVerilog (SystemVerilog Assertions)\r\n- Reactive :: Thực thi mã testbench trong các chương trình (`program`)\r\n- Postponed :: Lấy mẫu các tín hiệu thiết kế làm đầu vào cho testbench\r\n\r\nVí dụ 4.18 trình bày một phần mã testbench cho bộ trọng tài (arbiter). Lưu ý rằng câu lệnh `@arbif.cb` chờ cạnh tích cực của khối xung nhịp (clocking block), `@(posedge clk)`, như được trình bày trong Ví dụ 4.16. Ví dụ này cho thấy rằng mã testbench của bạn...",
+      "grammar": [
+        {
+          "phrase": "First to execute during a time slot is the Active region, where design events run",
+          "explain": "cấu trúc đảo ngữ đưa cụm từ chỉ thứ tự \"First to execute...\" lên đầu làm chủ ngữ phối hợp với mệnh đề quan hệ bổ nghĩa chỉ nơi chốn \"where design events run\""
+        },
+        {
+          "phrase": "Note that time does not strictly flow forwards",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò tân ngữ đứng sau động từ mệnh lệnh \"Note\""
+        },
+        {
+          "phrase": "events in the Observed and Reactive regions can trigger further design events in the Active region in the current cycle",
+          "explain": "câu đơn phức hợp sử dụng động từ khuyết thiếu \"can\" chỉ khả năng kết hợp với danh từ ghép và giới từ chỉ vị trí/thời gian"
+        },
+        {
+          "phrase": "which samples signals at the end of the time slot, in the readonly period, after design activity has completed",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) bổ nghĩa cho \"Postponed region\", kết hợp mệnh đề trạng ngữ chỉ thời gian dùng thì hiện tại hoàn thành \"after design activity has completed\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(danh từ) khoảng thời gian/bước thời gian mô phỏng đơn vị trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "scheduling region",
+          "explain": "(danh từ) vùng lập lịch trong trình mô phỏng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "assertion",
+          "explain": "(danh từ) câu lệnh khẳng định/kiểm tra điều kiện đúng sai trong kiểm thử vi mạch"
+        },
+        {
+          "type": "phrase",
+          "phrase": "loop back",
+          "explain": "(động từ/danh từ) quay ngược trở lại, lặp lại quy trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "trigger",
+          "explain": "(động từ) kích hoạt, làm nảy sinh một sự kiện khác"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock generator",
+          "explain": "(danh từ) bộ tạo tín hiệu xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "readonly period",
+          "explain": "(danh từ) giai đoạn chỉ đọc, không được phép ghi hay thay đổi giá trị biến"
+        },
+        {
+          "type": "phrase",
+          "phrase": "clocking block",
+          "explain": "(danh từ) khối xung nhịp, cấu trúc dùng để đồng bộ tín hiệu giữa testbench và RTL"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "summary": "- **Nội dung tổng quát**: Trang 103 thuộc Phần 4.3 (Stimulus Timing) của sách kỹ thuật về SystemVerilog. Trang này minh họa cách dùng `clocking block` trong một testbench thực tế (`program block`), đồng thời nêu các quy tắc thiết kế cấu trúc testbench chuẩn và đi vào Mục 4.3.5 để giải thích cơ chế định thời/độ trễ (`#1step` và `#0`) giữa khối kiểm thử (Testbench) và khối thiết kế (Design/DUT).\r\n\r\n- **Những ý chính người đọc bắt buộc phải hiểu**:\r\n  1. **Cách điều khiển và kiểm tra tín hiệu trong Testbench**: Ví dụ 4.18 chỉ ra cách dùng `arbif.cb` để gán tín hiệu (`drive`) và kiểm tra tín hiệu (`sample`) theo từng chu kỳ xung nhịp (`cycle-by-cycle`) thay vì phải canh chính xác từng cạnh xung nhịp.\r\n  2. **Quy tắc thiết kế Testbench với `program`**:\r\n     - Nên gói gọn toàn bộ testbench trong một khối `program` duy nhất và dùng lập trình hướng đối tượng (OOP) để tạo môi trường kiểm thử động, linh hoạt.\r\n     - Luôn khai báo `program automatic` để các biến/ngăn xếp hoạt động theo cơ chế quản lý bộ nhớ dạng stack giống các ngôn ngữ như C, tránh lỗi tranh chấp dữ liệu static.\r\n  3. **Cơ chế định thời lệch chuẩn (Skew/Delay) giữa Testbench và Design (Mục 4.3.5)**:\r\n     - Mặc định, `clocking block` lấy mẫu đầu vào với độ trễ `#1step` (lấy giá trị tín hiệu ở vùng `Postponed` ngay trước khi xung nhịp đổi trạng thái) nhằm phản ánh đúng giá trị ổn định nhất.\r\n     - Tín hiệu đầu ra được lái (drive) từ testbench tới thiết kế với độ trễ `#0` trong vùng `Reactive` để đảm bảo đồng bộ hoàn toàn với thiết kế.\r\n\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm**:\r\n  - **Simulation Event Regions trong SystemVerilog**: Cần tìm hiểu các vùng sự kiện mô phỏng như `Active`, `Observed`, `Reactive`, và `Postponed` để hiểu rõ tại sao cơ chế `#1step` và `#0` giúp ngăn ngừa hiện tượng tranh chấp thời gian (race conditions) giữa Testbench và Design.\r\n  - **Từ khóa `automatic`**: Hiểu sự khác biệt giữa lưu trữ tĩnh (`static`) và lưu trữ động trên stack (`automatic`) trong SystemVerilog.",
+      "translation": "...được viết ở cấp độ trừu tượng cao hơn một chút, sử dụng định thời theo từng chu kỳ thay vì phải bận tâm về từng cạnh xung nhịp riêng lẻ.\r\nSection 4.4 sẽ giải thích rõ hơn về việc lái (driving) và lấy mẫu (sampling) các tín hiệu giao tiếp.\r\n\r\n**Mẫu 4.18 Testbench sử dụng interface kết hợp với clocking block**\r\n\r\nprogram automatic test (arb_if.TEST arbif);\r\n  initial begin\r\n    @arbif.cb;\r\n    arbif.cb.request <= 2'b01;\r\n    $display(\"@%0t: Drove req=01\", $time);\r\n    repeat (2) @arbif.cb;\r\n    if (arbif.cb.grant == 2'b01)\r\n      $display(\"@%0t: Success: grant == 2'b01\", $time);\r\n    else\r\n      $display(\"@%0t: Error: grant != 2'b01\", $time);\r\n  end\r\nendprogram : test\r\n\r\nBài kiểm tra (test) của bạn nên được chứa bên trong một khối `program` duy nhất. Bạn nên sử dụng Lập trình hướng đối tượng (OOP) để xây dựng một testbench động, có tính phân cấp từ các đối tượng thay vì từ các module. Một quá trình mô phỏng có thể có nhiều khối `program` nếu bạn đang sử dụng mã nguồn từ người khác hoặc kết hợp nhiều bài test lại với nhau.\r\n\r\nNhư đã thảo luận ở Mục 3.6.1, bạn nên luôn khai báo khối `program` của mình là `automatic` để nó hoạt động giống hơn với các hàm/thủ tục trong các ngôn ngữ dựa trên ngăn xếp (stack-based) mà bạn có thể đã từng làm việc, chẳng hạn như C.\r\n\r\n*Lưu ý rằng không phải tất cả các nhà cung cấp công cụ (vendor) đều coi khối `program` như nhau. Xem Rich (2009) để biết thêm một ý kiến khác.*\r\n\r\n### 4.3.5 Khai báo độ trễ giữa Design và Testbench\r\n\r\nĐịnh thời mặc định của `clocking block` là lấy mẫu các đầu vào với độ lệch (skew) là `#1step` và lái các đầu ra với độ trễ là `#0`. Độ trễ `1step` chỉ định rằng các tín hiệu được lấy mẫu trong vùng `Postponed` của khoảng thời gian (time slot) trước đó, trước khi diễn ra bất kỳ hoạt động nào của phần thiết kế (design). Nhờ đó, bạn sẽ nhận được các giá trị đầu ra ngay trước khi xung nhịp thay đổi. Các đầu ra của testbench có tính đồng bộ nhờ vào `clocking block`, vì vậy chúng truyền trực tiếp vào phần thiết kế. Khối `program`, hoạt động trong vùng `Reactive`, sẽ tạo ra tác động (stimulus)...",
+      "grammar": [
+        {
+          "phrase": "written at a slightly higher level of abstraction, using cycle-by-cycle timing instead of worrying about individual clock edges",
+          "explain": "Mệnh đề rút gọn dạng quá khứ phân từ (`written...`) bổ nghĩa cho chủ ngữ ở câu trước, kết hợp mệnh đề phân từ hiện tại (`using...`) chỉ cách thức thực hiện và cấu trúc `instead of + V-ing`."
+        },
+        {
+          "phrase": "so that it behaves more like the routines in stack-based languages you may have worked with, such as C",
+          "explain": "Mệnh đề chỉ mục đích (`so that`), chứa mệnh đề quan hệ rút gọn (`languages [that/which] you may have worked with`) kết hợp động từ khuyết thiếu dạng quá khứ (`may have worked`)."
+        },
+        {
+          "phrase": "sampled in the Postponed region of the previous time slot, before any design activity",
+          "explain": "Mệnh đề quan hệ rút gọn dạng bị động (`sampled...` thay cho `which are sampled...`) bổ nghĩa cho danh từ \"signals\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "abstraction",
+          "explain": "(danh từ) sự trừu tượng hóa, mức độ trừu tượng trong mô tả thiết kế/kiểm thử"
+        },
+        {
+          "type": "vocab",
+          "phrase": "hierarchical",
+          "explain": "(tính từ) có tính phân cấp, theo cấu trúc thứ bậc"
+        },
+        {
+          "type": "vocab",
+          "phrase": "skew",
+          "explain": "(danh từ) độ lệch thời gian, khoảng thời gian dịch chuyển tín hiệu so với cạnh xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "cycle-by-cycle timing",
+          "explain": "định thời theo từng chu kỳ xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "stack-based languages",
+          "explain": "các ngôn ngữ lập trình dựa trên ngăn xếp (như C, C++)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Postponed region",
+          "explain": "vùng hoãn lại / vùng Postponed (vùng sự kiện mô phỏng cuối cùng trong một time slot của SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Reactive region",
+          "explain": "vùng Reactive (vùng thời gian dành riêng cho các khối program/testbench thực thi)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "by virtue of",
+          "explain": "nhờ vào, nhờ có, dựa trên tác động của"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "summary": "- **Nội dung tổng quát:** Trang sách giải thích cơ chế làm việc của khối xung nhịp (clocking block) trong việc đồng bộ hóa truyền nhận dữ liệu giữa Testbench và Thiết kế cần kiểm thử (DUT) trong SystemVerilog, thuộc Chương 4 \"Kết nối Testbench và Thiết kế\".\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. **Quy trình xử lý tín hiệu trong một time slot:** Tín hiệu tác động vào DUT được tính toán ở vùng `Active`, DUT cập nhật đầu ra; đầu ra này được testbench lấy mẫu ở vùng `Postponed` thông qua clocking block, sau đó chu kỳ lặp lại.\r\n  2. **Bản chất phần cứng của clocking block:** Có thể hình dung clocking block giống như việc chèn một bộ đồng bộ (D flip-flop) vào giữa testbench và DUT, giúp triệt tiêu gần như hoàn toàn tình trạng tranh chấp dữ liệu (race conditions).\r\n  3. **Xử lý tín hiệu bất đồng bộ:** Các tín hiệu bất đồng bộ (như tín hiệu reset `rst`) sẽ truyền trực tiếp qua interface mà không bị trễ, trong khi các tín hiệu thuộc clocking block sẽ được đồng bộ hóa tự động.\r\n  4. **Cú pháp đồng bộ hóa:** Có thể dùng cú pháp `@` và `wait` trong Verilog/SystemVerilog để thực hiện đồng bộ hóa tín hiệu trong testbench.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  * *SystemVerilog Simulation Regions (vùng mô phỏng):* Cần tìm hiểu về các vùng sự kiện như `Active`, `Observed`, `Reactive`, `Postponed` để hiểu chính xác thứ tự trình mô phỏng xử lý dữ liệu trong từng thời điểm.\r\n  * *Race condition (Tranh chấp dữ liệu):* Hiện tượng lỗi mô phỏng xảy ra khi thứ tự thực thi giữa testbench và DUT không xác định rõ ràng, dẫn đến kết quả đọc/ghi tín hiệu bị sai lệch.",
+      "translation": "...được áp dụng cho DUT, sau đó tín hiệu này được đánh giá trong vùng Active thuộc cùng time slot đó. DUT sẽ tính toán logic và lái các đầu ra của mình, các đầu ra này chính là đầu vào của testbench thông qua các khối xung nhịp (clocking blocks). Sau đó, các tín hiệu này được lấy mẫu trong vùng Postponed và chu kỳ lại lặp lại. Nếu bạn có nền tảng về thiết kế vi mạch, bạn có thể dễ nhớ điều này bằng cách hình dung rằng khối xung nhịp sẽ chèn một bộ đồng bộ vào giữa thiết kế và testbench, như minh họa trong Hình 4.5. Nhờ việc sử dụng hợp lý khối chương trình (program block) và khối xung nhịp, các tình trạng tranh chấp dữ liệu (race conditions) giữa testbench và DUT gần như có thể được triệt tiêu hoàn toàn.\r\n\r\n[Hình 4.5: Khối xung nhịp đồng bộ hóa DUT và testbench]\r\n\r\n4.4 Lái và Lấy mẫu Tín hiệu qua Interface\r\n\r\nTestbench của bạn cần lái (drive) và lấy mẫu (sample) các tín hiệu từ thiết kế, chủ yếu thông qua các giao tiếp (interface) có chứa khối xung nhịp. Phần tiếp theo sẽ sử dụng giao tiếp bộ trọng tài (arbiter interface) từ Ví dụ 4.16 và module cấp cao nhất (top-level module) từ Ví dụ 4.9.\r\n\r\nCác tín hiệu bất đồng bộ như `rst` sẽ truyền qua interface mà không có độ trễ. Các tín hiệu nằm trong khối xung nhịp sẽ được đồng bộ hóa như được mô tả ở các phần dưới đây.\r\n\r\n4.4.1 Đồng bộ hóa Interface\r\n\r\nBạn có thể sử dụng các cấu trúc `@` và `wait` của Verilog để đồng bộ hóa các tín hiệu trong một testbench. Ví dụ 4.19 minh họa các cấu trúc khác nhau này.",
+      "grammar": [
+        {
+          "phrase": "that is applied to the DUT, which is then evaluated in the Active region during the same time slot",
+          "explain": "mệnh đề quan hệ nối tiếp (non-defining relative clause) dùng \"which\" để bổ nghĩa cho cả mệnh đề phía trước"
+        },
+        {
+          "phrase": "which are the inputs to the testbench through the clocking blocks",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho danh từ số nhiều \"outputs\""
+        },
+        {
+          "phrase": "These are then sampled in the Postponed region",
+          "explain": "thể bị động (passive voice) ở thì hiện tại đơn diễn tả quy trình tự động lấy mẫu dữ liệu"
+        },
+        {
+          "phrase": "by imagining that the clocking block inserts a synchronizer between the design and testbench",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò làm tân ngữ cho danh từ/động từ dạng V-ing \"imagining\""
+        },
+        {
+          "phrase": "race conditions between the testbench and DUT can be all but eliminated",
+          "explain": "thể bị động (passive voice) với động từ khuyết thiếu \"can be\" kết hợp cụm trạng từ \"all but\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "evaluated",
+          "explain": "(động từ) được đánh giá, được tính toán giá trị logic trong mô phỏng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "sampled",
+          "explain": "(động từ) được lấy mẫu, ghi nhận giá trị tín hiệu tại thời điểm kích xung"
+        },
+        {
+          "type": "vocab",
+          "phrase": "synchronizer",
+          "explain": "(danh từ) bộ đồng bộ (mạch phần cứng dùng flip-flop để tránh hiện tượng bất định)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "asynchronous",
+          "explain": "(tính từ) bất đồng bộ, không phụ thuộc vào xung nhịp clock"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Design Under Test",
+          "explain": "(cụm danh từ chuyên ngành) khối thiết kế đang được kiểm thử (viết tắt là DUT)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ chuyên ngành) khoảng thời gian mô phỏng đơn vị trong trình mô phỏng EDA"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(cụm danh từ chuyên ngành) khối định nghĩa xung nhịp và thời điểm lấy mẫu/lái tín hiệu trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "(cụm danh từ chuyên ngành) tình trạng tranh chấp dữ liệu (lỗi khi thứ tự thực thi không xác định)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "all but",
+          "explain": "(thành ngữ/phó từ) gần như, hầu như hoàn toàn (all but eliminated = gần như đã bị xóa bỏ hoàn toàn)"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc Phần 4.4 \"Lái và lấy mẫu giao tiếp\" (Interface Driving and Sampling), tập trung trình bày các kỹ thuật đồng bộ hóa tín hiệu (Signal Synchronization) và cơ chế lấy mẫu tín hiệu giao tiếp (Interface Signal Sampling) thông qua khối định thì (`clocking block`) trong ngôn ngữ SystemVerilog.\r\n- **Các ý chính người đọc BẮT BUỘC phải hiểu:**\r\n  1. **Các cách đồng bộ hóa tín hiệu:** Có nhiều cú pháp để chờ hoặc đồng bộ tín hiệu với `clocking block`, như chờ cạnh tích cực tiếp theo (`@bus.cb`), chờ qua nhiều chu kỳ (`repeat (3) @bus.cb`), chờ cạnh lên/xuống của một tín hiệu cụ thể, hoặc chờ một biểu thức điều kiện logic (`wait`).\r\n  2. **Cơ chế lấy mẫu tín hiệu:** Khi đọc một tín hiệu qua `clocking block`, giá trị thu được là giá trị được lấy mẫu *ngay trước* cạnh xung nhịp gần nhất, thuộc vùng thời gian `Postponed` trong chu trình mô phỏng của SystemVerilog.\r\n  3. **Hiện tượng trễ lấy mẫu khi thay đổi đúng cạnh clock:** Nếu tín hiệu đầu vào của giao diện thay đổi đúng tại thời điểm cạnh clock (ví dụ thời điểm 250ns), giá trị mới đó sẽ không cập nhật ngay cho testbench ở chu kỳ hiện tại mà chỉ lan truyền và được ghi nhận ở chu kỳ xung nhịp tiếp theo (bắt đầu từ 350ns).\r\n- **Khái niệm/thuật ngữ cần tìm hiểu thêm:**\r\n  - `Clocking block` (Khối định thì): Một tính năng quan trọng trong SystemVerilog giúp ngăn ngừa hiện tượng tranh chấp dữ liệu (race conditions) giữa Testbench và Thiết kế cần kiểm thử (DUT).\r\n  - `Postponed region` (Vùng trì hoãn): Một vùng thời gian trong bộ lập trình sự kiện (Event Scheduler) của SystemVerilog, nơi các tín hiệu đã ổn định hoàn toàn và sẵn sàng để ghi nhận/lấy mẫu an toàn.",
+      "translation": "**4.4 Lái và lấy mẫu giao tiếp** (tiếp theo)\r\n\r\n**Mẫu 4.19** *Đồng bộ hóa tín hiệu*\r\nprogram automatic test(bus_if.TB bus);\r\n  initial begin\r\n    @bus.cb;                  // Tiếp tục tại cạnh tích cực\r\n                              // trong clocking block\r\n    repeat (3) @bus.cb;       // Chờ 3 cạnh tích cực\r\n    @bus.cb.grant;            // Tiếp tục tại bất kỳ cạnh nào\r\n    @(posedge bus.cb.grant);  // Tiếp tục tại cạnh lên\r\n    @(negedge bus.cb.grant);  // Tiếp tục tại cạnh xuống\r\n    wait (bus.cb.grant==1);   // Chờ biểu thức thỏa mãn\r\n                              // Không hoãn nếu đã đúng sẵn\r\n    @(posedge bus.cb.grant or\r\n      negedge bus.rst);       // Chờ một trong nhiều tín hiệu\r\n  end\r\nendprogram\r\n\r\n### 4.4.2 Lấy mẫu tín hiệu giao tiếp\r\n\r\nKhi bạn đọc một tín hiệu từ một `clocking block`, bạn sẽ nhận được giá trị được lấy mẫu ngay trước cạnh clock gần nhất, nghĩa là từ vùng `Postponed`. Mẫu 4.20 minh họa một khối program đọc tín hiệu đồng bộ `grant` từ DUT. Module `arb` lái tín hiệu `grant` thành 1 & 2 ở giữa chu kỳ 100ns, và sau đó thành 3 ngay chính xác tại cạnh clock. Đoạn mã này chỉ mang tính minh họa và không phải là RTL thực tế có thể tổng hợp được.\r\n\r\n**Mẫu 4.20** *Mẫu giao diện đồng bộ và driving từ module*\r\nprogram automatic test(arb_if.TEST arbif);\r\n  initial begin\r\n    $monitor(\"@%0t: grant=%h\", $time, arbif.cb.grant);\r\n    #500ns $display(\"End of test\");\r\n  end\r\nendprogram\r\n\r\nmodule arb_dummy(arb_if.DUT arbif);\r\n  initial\r\n    fork\r\n      # 70ns arbif.grant = 1;\r\n      #170ns arbif.grant = 2;\r\n      #250ns arbif.grant = 3;\r\n    join\r\nendmodule\r\n\r\nCác dạng sóng trong Hình 4.6 cho thấy trong chương trình, `arbif.cb.grant` nhận giá trị ngay trước cạnh clock. Khi đầu vào giao diện thay đổi ngay tại cạnh clock, chẳng hạn như tại thời điểm 250ns, giá trị đó không truyền đến testbench cho đến chu kỳ tiếp theo, vốn bắt đầu tại 350ns.",
+      "grammar": [
+        {
+          "phrase": "sampled from just before the last clock edge",
+          "explain": "mệnh đề quá khứ phân từ rút gọn (past participle clause) bổ nghĩa cho \"the value\" (viết đầy đủ là \"which is sampled from...\")"
+        },
+        {
+          "phrase": "The arb module drives grant to 1 & 2 in the middle of the 100ns cycle, and then to 3 exactly at the clock edge",
+          "explain": "cấu trúc câu ghép song song liệt kê chuỗi hành động gán giá trị theo mốc thời gian"
+        },
+        {
+          "phrase": "When the interface input changes right at a clock edge, such as 250ns, the value does not propagate to the testbench until the next cycle",
+          "explain": "cấu trúc \"not ... until ...\" (không ... cho đến tận khi ...) kết hợp mệnh đề thời gian \"When\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "synthesizable",
+          "explain": "(tính từ) có thể tổng hợp được (thành mạch phần cứng RTL thực tế)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(cụm danh từ) khối định thì / khối quản lý xung nhịp trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock edge",
+          "explain": "(cụm danh từ) cạnh xung nhịp / sườn clock (posedge hoặc negedge)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "program block",
+          "explain": "(cụm danh từ) khối chương trình testbench trong SystemVerilog"
+        },
+        {
+          "type": "phrase",
+          "phrase": "just before",
+          "explain": "(cụm từ) ngay trước thời điểm"
+        },
+        {
+          "type": "phrase",
+          "phrase": "right at",
+          "explain": "(cụm từ) ngay tại thời điểm/vị trí cụ thể"
+        },
+        {
+          "type": "phrase",
+          "phrase": "propagate to",
+          "explain": "(cụm động từ) lan truyền đến / truyền tới"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "summary": "Trang sách này thuộc Chương 4: \"Connecting the Testbench and Design\" (Kết nối Testbench và Thiết kế), tập trung hướng dẫn cách truy xuất và điều khiển (drive) tín hiệu giao diện (interface signals) thông qua khối xung nhịp (clocking block) và cổng mô hình (modport) trong SystemVerilog.\r\n\r\nCác ý chính người đọc bắt buộc phải hiểu:\r\n1. **Cú pháp truy xuất tín hiệu đúng**: Khi sử dụng modport chứa khối xung nhịp (clocking block), muốn truy cập một tín hiệu đồng bộ, ta BẮT BUỘC phải ghi đầy đủ tên tham chiếu giao diện, tên clocking block rồi mới đến tên tín hiệu (ví dụ: `arbif.cb.request`). Việc bỏ qua tên clocking block (như `arbif.request`) là lỗi lập trình phổ biến nhất.\r\n2. **Cách phát/điều khiển tín hiệu (Signal Driving)**: Tín hiệu đồng bộ trong clocking block phải luôn được gán bằng phép gán không chặn (nonblocking assignment `<=`). Lý do là tín hiệu phía thiết kế (DUT) sẽ không đổi trạng thái ngay lập tức mà cần tuân theo chu kỳ đồng bộ của clocking block.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **SystemVerilog Interface, Modport, Clocking Block**: Cần hiểu rõ vai trò của từng thành phần để biết cách đóng gói tín hiệu, quy định hướng tín hiệu (input/output) và đồng bộ thời gian lấy mẫu/phát tín hiệu trong kiểm thử thiết kế vi mạch.\r\n- **Phép gán Chặn (Blocking `=`) vs. Không chặn (Nonblocking `<=`)**: Cần nắm vững cơ chế hoạt động của 2 phép gán này trong Verilog/SystemVerilog để tránh gây ra hiện tượng đua tín hiệu (race condition) giữa testbench và thiết kế DUT.",
+      "translation": "106 | 4 Kết nối Testbench và Thiết kế\r\n\r\n[Hình 4.6: Lấy mẫu một giao diện đồng bộ]\r\n\r\n4.4.3 Điều khiển Tín hiệu Giao diện\r\n\r\nVí dụ 4.21 là phiên bản rút gọn của chương trình kiểm thử bộ trọng tài (arbiter test program), chương trình này sử dụng giao diện arbiter đã được định nghĩa trong Ví dụ 4.16.\r\n\r\nVí dụ 4.21 Testbench sử dụng giao diện có khối xung nhịp (clocking block)\r\n\r\nprogram automatic test_with_cb (arb_if.TEST arbif);\r\n\r\n  initial begin\r\n    @arbif.cb;\r\n    arbif.cb.request <= 2'b01;\r\n    $display(\"@%0t: Drove req=01\", $time);\r\n    repeat (2) @arbif.cb;\r\n    if (arbif.cb.grant == 2'b01)\r\n      $display(\"@%0t: Success: grant == 2'b01\", $time);\r\n    else\r\n      $display(\"@%0t: Error: grant != 2'b01\", $time);\r\n  end\r\n\r\nendprogram : test_with_cb\r\n\r\n[Mẹo/Lưu ý]: Khi sử dụng các modport có khối xung nhịp (clocking blocks), một tín hiệu giao diện đồng bộ như `request` phải được gắn tiền tố bao gồm cả tên giao diện, `arbif`, và tên khối xung nhịp, `cb`. Do đó trong Ví dụ 4.21, `arbif.cb.request` là hợp lệ, nhưng `arbif.request` thì không. Đây là lỗi lập trình phổ biến nhất khi làm việc với giao diện và khối xung nhịp.\r\n\r\n4.4.4 Điều khiển các Tín hiệu Giao diện Thông qua Khối Xung nhịp\r\n\r\nBạn nên luôn luôn điều khiển các tín hiệu giao diện trong một khối xung nhịp bằng cách điều khiển đồng bộ sử dụng phép gán không chặn (nonblocking assignment). Điều này là do tín hiệu thiết kế không thay đổi ngay lập tức sau phép gán của bạn – hãy nhớ rằng testbench của bạn thực thi...",
+      "grammar": [
+        {
+          "phrase": "a synchronous interface signal such as request must be prefixed with both the interface name, arbif, and the clocking block name, cb",
+          "explain": "câu bị động (passive voice) với động từ khuyết thiếu \"must be\", kết hợp với cấu trúc liệt kê \"both ... and ...\""
+        },
+        {
+          "phrase": "This is the most common coding mistake with interfaces and clocking blocks",
+          "explain": "cấu trúc so sánh nhất (superlative structure) sử dụng \"the most common\""
+        },
+        {
+          "phrase": "You should always drive interface signals in a clocking block with a synchronous drive using a nonblocking assignment",
+          "explain": "cấu trúc lời khuyên/hướng dẫn dùng \"should\", kết hợp danh động từ/phân từ \"using\" để chỉ phương cách thực hiện"
+        },
+        {
+          "phrase": "This is because the design signal does not change immediately after your assignment",
+          "explain": "mệnh đề giải thích nguyên nhân bắt đầu bằng \"This is because...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "synchronous",
+          "explain": "(tính từ) đồng bộ (xảy ra cùng nhịp/xung nhịp)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "prefixed",
+          "explain": "(động từ/dạng quá khứ phân từ) được thêm tiền tố phía trước"
+        },
+        {
+          "type": "vocab",
+          "phrase": "abbreviated",
+          "explain": "(tính từ) rút gọn, viết tắt"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(phrases) khối xung nhịp (khái niệm trong SystemVerilog giúp đồng bộ thời gian tín hiệu)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(collocation) phép gán không chặn (sử dụng toán tử `<=` trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "drive interface signals",
+          "explain": "(phrase) điều khiển/phát tín hiệu trên giao diện"
+        },
+        {
+          "type": "phrase",
+          "phrase": "coding mistake",
+          "explain": "(phrase) lỗi lập trình, lỗi viết mã"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm trong Mục 4.4 \"Interface Driving and Sampling\" (Gán tín hiệu và Lấy mẫu trên Giao diện), giải thích nguyên lý hoạt động của việc gán tín hiệu đồng bộ (synchronous driving) thông qua khối xung nhịp (Clocking Block) trong SystemVerilog giữa Testbench và Thiết kế (DUT).\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. Khi Testbench gán tín hiệu qua clocking block (`arbif.cb.request`) đúng tại sườn xung nhịp (ví dụ 100ns), giá trị sẽ được truyền ngay lập tức tới DUT ở mốc 100ns nhờ độ trễ đầu ra mặc định (default output delay) là `#0`.\r\n  2. Nếu Testbench gán tín hiệu ở khoảng thời gian giữa hai sườn xung nhịp (ví dụ 101ns hay 70ns), sự thay đổi này sẽ bị giữ lại và chỉ chính thức truyền tới DUT ở sườn xung nhịp kế tiếp.\r\n  3. Khi nhiều giá trị được gán liên tiếp cho cùng một tín hiệu trong cùng một chu kỳ xung nhịp, chỉ giá trị gán cuối cùng trước sườn xung nhịp mới được DUT ghi nhận; các giá trị gán trung gian sẽ bị ghi đè và DUT hoàn toàn không thấy.\r\n- **Khái niệm / Kiến thức nền cần tìm hiểu thêm:**\r\n  - *SystemVerilog Simulation Event Regions (Vùng sự kiện mô phỏng):* Cần tìm hiểu về các vùng sự kiện như Active, Reactive, NBA để hiểu lý do tại sao Testbench (ở vùng Reactive) không bị race-condition với Design (ở vùng Active).\r\n  - *Clocking Block Skew (Output delay / Input setup):* Cần hiểu cơ chế skew trong clocking block (mặc định output delay `#0`) quy định thời điểm cập nhật tín hiệu ra sao.",
+      "translation": "trong vùng Reactive trong khi mã thiết kế nằm ở vùng Active. Nếu testbench của bạn gán tín hiệu `arbif.cb.request` tại mốc 100ns, cùng thời điểm với `arbif.cb` (được định nghĩa là `@(posedge clk)` theo clocking block), tín hiệu `request` trong thiết kế sẽ thay đổi ngay tại mốc 100ns. Tuy nhiên, nếu testbench của bạn cố gắng gán `arbif.cb.request` tại mốc thời gian 101ns, thời điểm giữa hai sườn xung nhịp, sự thay đổi này sẽ không lan truyền cho đến tận sườn xung nhịp tiếp theo. Bằng cách này, các thao tác gán tín hiệu của bạn luôn mang tính đồng bộ. Trong Ví dụ 4.20, tín hiệu `arbif.grant` được gán bởi một module và có thể sử dụng phép gán chặn (blocking assignment).\r\n\r\nNếu testbench gán tín hiệu giao tiếp đồng bộ tại sườn tích cực của xung nhịp, như thể hiện trong Ví dụ 4.22, giá trị đó sẽ truyền ngay lập tức tới thiết kế. Điều này là do độ trễ đầu ra mặc định (default output delay) của một clocking block là `#0`. Nếu testbench gán tín hiệu đầu ra ngay sau sườn tích cực, thiết kế sẽ không nhìn thấy giá trị đó cho đến tận sườn tích cực tiếp theo của xung nhịp.\r\n\r\n**Ví dụ 4.22** Gán tín hiệu giao tiếp\r\n\r\nbusif.cb.request <= 1;       // Gán đồng bộ\r\nbusif.cb.cmd <= cmd_buf;     // Gán đồng bộ\r\n\r\nVí dụ 4.23 cho thấy điều gì xảy ra nếu bạn gán một tín hiệu giao tiếp đồng bộ tại nhiều thời điểm khác nhau trong một chu kỳ xung nhịp. Ví dụ này sử dụng interface từ Ví dụ 4.16 cùng với top module và bộ tạo xung nhịp (clock generator) từ Ví dụ 4.9.\r\n\r\n**Ví dụ 4.23** Gán một giao tiếp đồng bộ\r\n\r\nprogram automatic test_with_cb(arb_if.TEST arbif);\r\n  initial fork\r\n    # 70ns arbif.cb.request <= 3;\r\n    #170ns arbif.cb.request <= 2;\r\n    #250ns arbif.cb.request <= 1;\r\n    #500ns finish;\r\n  join\r\nendprogram\r\n\r\nmodule arb(arb_if.DUT arbif);\r\n  initial\r\n    $monitor(\"@%0t: req=%h\", $time, arbif.request);\r\nendmodule\r\n\r\nLưu ý rằng trong Hình 4.7, giá trị 3, được gán ở giữa chu kỳ đầu tiên, sẽ được DUT ghi nhận tại thời điểm bắt đầu chu kỳ thứ hai. Giá trị 2 được gán ở giữa chu kỳ thứ hai nhưng DUT sẽ không bao giờ nhìn thấy giá trị này, vì testbench đã gán tiếp giá trị 1 ở cuối chu kỳ thứ hai.",
+      "grammar": [
+        {
+          "phrase": "If your testbench tries to drive arbif.cb.request at time 101ns, between clock edges, the change does not propagate until the next clock edge",
+          "explain": "câu điều kiện loại 0 (Zero conditional) dùng để diễn tả sự thật kỹ thuật mang tính quy luật cố định"
+        },
+        {
+          "phrase": "the value 3, driven in the middle of the first cycle, is seen by the DUT at the start of the second cycle",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân tử (\"driven...\") bổ nghĩa cho danh từ \"the value 3\" kết hợp cấu trúc bị động \"is seen\""
+        },
+        {
+          "phrase": "It is never seen by the DUT as the testbench drives a 1 at the end of the second cycle",
+          "explain": "thể bị động (\"is never seen\") kết hợp mệnh đề chỉ lý do dùng từ nối \"as\" (vì/do bởi)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "Reactive region",
+          "explain": "vùng sự kiện Reactive trong trình mô phỏng SystemVerilog, nơi các câu lệnh của testbench (program block) được thực thi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "Active region",
+          "explain": "vùng sự kiện Active trong trình mô phỏng SystemVerilog, nơi mã RTL/Design được thực thi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "khối đồng bộ hóa tín hiệu theo xung nhịp trong SystemVerilog"
+        },
+        {
+          "type": "vocab",
+          "phrase": "propagate",
+          "explain": "(động từ) lan truyền, truyền (tín hiệu/giá trị logic từ điểm này sang điểm khác)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "blocking assignment",
+          "explain": "phép gán chặn (sử dụng toán tử `=`), thực thi tức thì theo thứ tự dòng lệnh"
+        },
+        {
+          "type": "collocation",
+          "phrase": "output delay",
+          "explain": "độ trễ đầu ra của tín hiệu khi drive qua clocking block"
+        },
+        {
+          "type": "collocation",
+          "phrase": "active edge",
+          "explain": "sườn tích cực của xung nhịp (thường là sườn lên - posedge)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "DUT",
+          "explain": "Design Under Test - khối thiết kế phần cứng đang được kiểm thử"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "summary": "Nội dung trang 108 thuộc Chương 4 (\"Kết nối Testbench và Thiết kế\"), tập trung vào hai chủ đề kỹ thuật quan trọng trong kiểm thử thiết kế vi mạch bằng SystemVerilog:\r\n1. **Điều khiển tín hiệu đồng bộ bằng độ trễ chu kỳ (Cycle Delay):** Trang sách giải thích tác hại của việc drive tín hiệu bất đồng bộ (có thể làm thất lạc giá trị) và hướng dẫn cách gán tín hiệu đồng bộ theo cạnh xung nhịp bằng cú pháp độ trễ chu kỳ `##n`. Trang phân biệt rõ sự khác nhau về hành vi giữa `##0` (gán ngay nếu xung nhịp vừa tích cực, hoặc chờ cạnh tích cực tiếp theo) và `##1` (luôn chờ cạnh tích cực tiếp theo). Trang cũng khuyến cáo không nên dùng các câu lệnh trễ đứng độc lập (\"naked\" cycle delay như `##3;`) nếu chưa có `default clocking block`.\r\n2. **Xử lý tín hiệu hai chiều (Bidirectional Signals) trong Interface (Mục 4.4.5):** So sánh cơ chế xử lý tín hiệu hai chiều giữa Verilog-1995 truyền thống và SystemVerilog. Trong SystemVerilog, việc thao tác trên các cổng/đường dây hai chiều (`inout`/`net`) trong interface trở nên đơn giản hơn nhiều do ngôn ngữ tự động chèn phép gán liên tục (continuous assignment) thông qua biến tạm thời, giúp testbench đọc trực tiếp giá trị đã tổng hợp (resolved) từ tất cả các nguồn drive mà không cần viết lệnh `assign` thủ công như khối RTL design.\r\n\r\nCác kiến thức nền người đọc cần tìm hiểu thêm:\r\n- Khái niệm **Clocking Block** và các khe thời gian mô phỏng (simulation time slots/Phases) trong SystemVerilog.\r\n- Cơ chế giải quyết giá trị nét (**Net Resolution**) trên các đường dây có nhiều nguồn drive (multi-driver nets/wire).\r\n- Phân biệt **Procedural Assignment** (`<=`, `=`) và **Continuous Assignment** (`assign`).",
+      "translation": "108\r\n4 Kết nối Testbench và Thiết kế\r\n\r\n[Hình 4.7: Điều khiển một giao diện đồng bộ]\r\nclk\r\nTEST arb.cb.request   X | 3 | 2 | 1\r\nDUT  arbif.request    X | 3 | 1 | 1\r\n                     50ns 150ns 250ns 350ns\r\n\r\nHình 4.7 Điều khiển một giao diện đồng bộ\r\n\r\nViệc điều khiển các tín hiệu của clocking block một cách bất đồng bộ có thể dẫn đến việc bị mất/bỏ sót giá trị. Thay vào đó, hãy điều khiển tại cạnh xung nhịp bằng cách sử dụng tiền tố độ trễ chu kỳ (cycle delay prefix) cho các phép điều khiển của bạn như hiển thị trong Mẫu 4.24.\r\n\r\nMẫu 4.24 Điều khiển tín hiệu giao diện\r\n##2 arbif.cb.request <= 0; // Chờ 2 chu kỳ rồi gán giá trị\r\n##3;                       // Không hợp lệ - phải được dùng kèm một phép gán\r\n\r\nNếu bạn muốn chờ hai chu kỳ xung nhịp trước khi điều khiển một tín hiệu, bạn có thể sử dụng câu lệnh “repeat (2) @arbif.cb;” hoặc sử dụng độ trễ chu kỳ ##2. Cú pháp độ trễ phía sau này chỉ hoạt động như một tiền tố cho phép điều khiển tín hiệu trong một clocking block, vì nó cần biết xung nhịp nào được sử dụng làm căn cứ tính độ trễ.\r\n\r\nĐộ trễ chu kỳ ##0 trong một phép gán sẽ điều khiển giá trị ngay lập tức nếu xung nhịp vừa được tích cực trong khe thời gian (time slot) hiện tại, theo đúng clocking block đó. Nếu xung nhịp không phải vừa được tích cực, tín hiệu sẽ được điều khiển tại cạnh tích cực tiếp theo của xung nhịp. Độ trễ chu kỳ ##1 luôn luôn chờ đến cạnh tích cực tiếp theo của xung nhịp, ngay cả khi xung nhịp đã được tích cực trong khe thời gian hiện tại.\r\n\r\nCâu lệnh độ trễ chu kỳ đứng độc lập ##3; hoạt động nếu bạn có một default clocking block cho program hoặc module của mình. Cuốn sách này chỉ khuyến nghị đặt clocking block bên trong một interface và không nên tạo default clocking block. Bạn luôn nên chỉ rõ xung nhịp nào đang được tham chiếu.\r\n\r\n4.4.5 Tín hiệu hai chiều trong Giao diện\r\n\r\nTrong chuẩn Verilog-1995, nếu bạn muốn điều khiển một tín hiệu hai chiều (như một cổng inout) từ mã lệnh thủ tục (procedural code), bạn cần một phép gán liên tục (continuous assignment) để kết nối kiểu reg với kiểu wire. Trong SystemVerilog, các tín hiệu hai chiều đồng bộ trong giao diện dễ sử dụng hơn vì phép gán liên tục đã được tự động thêm cho bạn, như thể hiện trong Mẫu 4.25. Khi bạn ghi vào đường dây (net) từ một program, SystemVerilog thực chất sẽ ghi vào một biến tạm thời, biến này sau đó sẽ điều khiển đường dây. Program của bạn đọc trực tiếp từ đường dây wire, nhìn thấy giá trị được phân giải/tổng hợp từ tất cả các nguồn điều khiển. Mã thiết kế (design code) trong một module thì vẫn sử dụng cấu trúc đăng ký truyền thống reg cộng với câu lệnh gán liên tục.",
+      "grammar": [
+        {
+          "phrase": "Driving clocking block signals asynchronously can lead to dropped values",
+          "explain": "danh động từ (gerund) đóng vai trò làm chủ ngữ trong câu"
+        },
+        {
+          "phrase": "as shown in Sample 4.24",
+          "explain": "cấu trúc mệnh đề trạng ngữ rút gọn dạng bị động (as it is shown)"
+        },
+        {
+          "phrase": "This latter delay only works as a prefix to a drive of a signal in a clocking block, as it needs to know which clock to use for the delay",
+          "explain": "mệnh đề chỉ nguyên nhân sử dụng \"as\" kết hợp mệnh đề danh từ làm tân ngữ \"which clock to use\""
+        },
+        {
+          "phrase": "if the clock was asserted in this time slot, according to the clocking block",
+          "explain": "câu điều kiện dạng quá khứ thực tế với thể bị động \"was asserted\""
+        },
+        {
+          "phrase": "as the continuous assignment is added for you, as shown in Sample 4.25",
+          "explain": "mệnh đề giải thích nguyên nhân dùng \"as\" đi kèm câu bị động"
+        },
+        {
+          "phrase": "seeing the value that is resolved from all the drivers",
+          "explain": "cụm phân tử hiện tại (present participle clause) chỉ hành động diễn ra đồng thời, kết hợp mệnh đề quan hệ bị động \"that is resolved\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "drive",
+          "explain": "(động từ) tác động/đưa giá trị logic lên đường dây tín hiệu"
+        },
+        {
+          "type": "vocab",
+          "phrase": "asserted",
+          "explain": "(tính từ) được kích hoạt / chuyển sang trạng thái tích cực (thường là mức 1)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "naked",
+          "explain": "(tính từ) đơn độc, đứng một mình không đi kèm thành phần bắt buộc khác (cú pháp)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "resolved",
+          "explain": "(tính từ/động từ) được phân giải / tổng hợp giá trị logic từ nhiều nguồn tác động"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(danh từ ghép) khối đồng bộ hóa tín hiệu theo xung nhịp trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "cycle delay",
+          "explain": "(danh từ ghép) độ trễ tính bằng số chu kỳ xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "active edge",
+          "explain": "(danh từ ghép) cạnh tích cực của tín hiệu xung nhịp (cạnh lên hoặc cạnh xuống)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "continuous assignment",
+          "explain": "(danh từ ghép) phép gán liên tục (lệnh assign)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bidirectional signal",
+          "explain": "(danh từ ghép) tín hiệu hai chiều (vừa truyền vừa nhận)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "time slot",
+          "explain": "(cụm danh từ) khe thời gian mô phỏng trong công cụ mô phỏng EDA"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "summary": "Nội dung trang 109 thuộc Chương 4 (Interface Driving and Sampling), tập trung vào hai chủ đề kỹ thuật quan trọng trong kiểm thử thiết kế vi mạch bằng SystemVerilog:\r\n1. **Xử lý tín hiệu hai chiều (Bidirectional signals):** Hướng dẫn cách điều khiển bus hai chiều (`inout`) bằng clocking block, nhấn mạnh tầm quan trọng của việc giải phóng bus (đưa về trạng thái trở kháng cao `'z`) để tránh xung đột dữ liệu (bus contention). Trang sách cũng lưu ý hạn chế của SystemVerilog LRM đối với tín hiệu bất đồng bộ và gợi ý hai hướng xử lý (tham chiếu chéo module hoặc interface ảo).\r\n2. **Khai báo độ trễ (Skew/Delays) trong Clocking Block:** Giải thích cơ chế định thời cho việc lấy mẫu (sampling) tín hiệu đầu vào và kích phát (driving) tín hiệu đầu ra so với cạnh xung nhịp. Việc đặt độ lệch thời gian (skew) thông qua từ khóa `default` hoặc chỉ định riêng cho từng tín hiệu giúp mô phỏng chính xác hành vi mô hình phần cứng thực tế (chẳng hạn như mô phỏng netlist sau khi tổng hợp).\r\n\r\nNhững kiến thức nền cần tìm hiểu thêm:\r\n- **Tri-state / High-impedance ('z):** Trạng thái trở kháng cao trong kỹ thuật số, giúp cách ly thiết bị khỏi bus dữ liệu chung.\r\n- **Input/Output Skew (Setup/Hold time):** Khái niệm thời gian thiết lập và thời gian giữ trong thiết kế vi mạch để hiểu tại sao tín hiệu cần được lấy mẫu trước cạnh clock (`#15ns`) hoặc phát ra sau cạnh clock (`#10ns`).\r\n- **Virtual Interface (Chương 10):** Phương pháp kết nối động giữa môi trường kiểm thử hướng đối tượng (OOP) và giao tiếp phần cứng tĩnh.",
+      "translation": "**Ví dụ 4.25** Tín hiệu hai chiều trong một program và interface\r\n\r\ninterface bidir_if (input bit clk);\r\n  wire [7:0] data; // Tín hiệu hai chiều\r\n  clocking cb @(posedge clk);\r\n    inout data;\r\n  endclocking\r\n  modport TEST (clocking cb);\r\nendinterface\r\n\r\nprogram automatic test(bidir_if.TEST mif);\r\n  initial begin\r\n    mif.cb.data <= 'z;           // Đưa bus về trạng thái trở kháng cao (Tri-state)\r\n    @mif.cb;\r\n    $displayh(mif.cb.data);     // Đọc dữ liệu từ bus\r\n    @mif.cb;\r\n    mif.cb.data <= 7'h5a;        // Điều khiển/ghi dữ liệu lên bus\r\n    @mif.cb;\r\n    $displayh(mif.cb.data);     // Đọc dữ liệu từ bus\r\n    mif.cb.data <= 'z;           // Giải phóng bus\r\n  end\r\nendprogram\r\n\r\nTài liệu Tham chiếu Ngôn ngữ (LRM) SystemVerilog chưa quy định rõ ràng về việc điều khiển tín hiệu hai chiều bất đồng bộ khi sử dụng interface. Hai giải pháp khả thi là sử dụng tham chiếu chéo module (cross-module reference) kết hợp câu lệnh gán liên tục (continuous assignment), hoặc sử dụng giao tiếp ảo (virtual interface) như mô tả ở Chương 10.\r\n\r\n### 4.4.6 Khai báo Độ trễ trong Clocking Block\r\n\r\nMột clocking block đảm bảo rằng các tín hiệu của bạn được điều khiển và lấy mẫu chính xác tại cạnh xung nhịp đã quy định. Bạn có thể thay đổi các khoảng thời gian này (độ lệch/skew) bằng câu lệnh `default`, hoặc bằng cách quy định chi tiết độ trễ cho từng tín hiệu riêng biệt. Điều này rất hữu ích khi mô phỏng netlist có độ trễ thực tế. Ví dụ 4.26 minh họa một clocking block sử dụng câu lệnh `default` để thiết lập độ lệch cho toàn bộ tín hiệu. Trong ví dụ này, các tín hiệu đầu vào được lấy mẫu trước 15ns so với cạnh lên xung nhịp, và các tín hiệu đầu ra được kích phát sau 10ns so với cạnh lên xung nhịp.\r\n\r\n**Ví dụ 4.26** Clocking block với câu lệnh default\r\n\r\nclocking cb @(posedge clk);\r\n  default input #15ns output #10ns;\r\n  output request;\r\n  input grant;\r\nendclocking\r\n\r\nVí dụ 4.27 thể hiện một clocking block tương đương, nhưng các khoảng độ trễ được chỉ định riêng trực tiếp trên từng tín hiệu.",
+      "grammar": [
+        {
+          "phrase": "Two possible solutions are to use a cross-module reference and continuous assignment or to use a virtual interface as shown in Chapter 10",
+          "explain": "Cấu trúc bổ ngữ động từ nguyên mẫu \"to use... or to use...\" làm vị ngữ kết hợp dạng rút gọn mệnh đề bị động \"as shown in Chapter 10\""
+        },
+        {
+          "phrase": "Sample 4.26 shows a clocking block with a default statement that has the skews for all signals",
+          "explain": "Mệnh đề quan hệ \"that has the skews...\" bổ nghĩa cho danh từ \"a default statement\""
+        },
+        {
+          "phrase": "This can be useful when simulating netlists with real delays",
+          "explain": "Cấu trúc câu bị động khả năng \"can be + adj\" kết hợp mệnh đề trạng ngữ thời gian rút gọn \"when simulating\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "bidirectional",
+          "explain": "(tính từ) hai chiều (truyền và nhận dữ liệu trên cùng một đường tín hiệu)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "asynchronous",
+          "explain": "(tính từ) bất đồng bộ (không phụ thuộc vào tín hiệu xung nhịp chung)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "skew",
+          "explain": "(danh từ) độ lệch thời gian lấy mẫu hoặc kích phát tín hiệu so với cạnh xung nhịp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "netlist",
+          "explain": "(danh từ) danh sách kết nối cổng logic/linh kiện chi tiết sau bước tổng hợp mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "tri-state the bus",
+          "explain": "(cụm từ) đưa đường bus về trạng thái trở kháng cao (High-Z)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "cross-module reference",
+          "explain": "(cụm từ) tham chiếu chéo giữa các khối/module trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "virtual interface",
+          "explain": "(cụm từ) giao tiếp ảo (con trỏ đại diện cho interface vật lý trong môi trường OOP)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(cụm từ) khối xung nhịp (cấu trúc quản lý thời gian định thời tín hiệu trong SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "release the bus",
+          "explain": "(cụm từ) giải phóng bus (ngừng điều khiển bus, trả về trạng thái thả nổi/'z)"
+        }
+      ]
+    },
+    {
+      "page": 24,
+      "summary": "Nội dung trang 110 tập trung vào hai chủ đề chính trong SystemVerilog: ví dụ bổ sung về việc thiết lập độ trễ tín hiệu riêng lẻ trong khối xung nhịp (Clocking Block), và phân tích chuyên sâu về chủ đề \"Cân nhắc khi dùng Khối Program\" (Program Block Considerations), cụ thể là cơ chế \"Thời điểm Kết thúc Mô phỏng\" (The End of Simulation).\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n1. **Khái niệm tự động kết thúc mô phỏng trong SystemVerilog**: Khác với Verilog truyền thống (mô phỏng chạy cho đến khi hết sự kiện được lên lịch hoặc gặp lệnh `$finish`), SystemVerilog coi khối `program` là nơi chứa kịch bản kiểm thử (test). Mô phỏng sẽ tự động kết thúc ngay khi câu lệnh cuối cùng trong tất cả các khối `initial` thuộc khối `program` chạy xong.\r\n2. **Quản lý luồng thực thi (Threads)**: Khi các khối `program` kết thúc, mô phỏng sẽ ngừng ngay lập tức, bất chấp việc các luồng thực thi (threads) trong khối `module` hay các thành phần như driver, monitor vẫn đang chạy ngầm. Điều này giúp người lập trình không cần tốn công vô hiệu hóa thủ công từng driver/monitor.\r\n3. **Các phương thức kết thúc khác**: Lệnh `$exit` dùng để kết thúc sớm một khối `program` cụ thể (khi có nhiều khối program). Lệnh `$finish` vẫn có thể dùng nhưng nó dừng toàn bộ trình mô phỏng ngay lập tức, đôi khi gây bất lợi nếu có nhiều chương trình chạy song song.\r\n4. **Khối `final`**: Là khối mã đặc biệt được thực thi ngay trước khi trình mô phỏng đóng hoàn toàn. Khối này được dùng để giải quyết công việc dọn dẹp như đóng file ghi logs, in báo cáo tổng hợp lỗi/cảnh báo. Đặc điểm cực kỳ quan trọng là khối `final` KHÔNG ĐƯỢC phép chứa độ trễ (`#delay`) hay bất kỳ sự kiện làm hoãn thời gian nào (không tốn thời gian mô phỏng).\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Phân biệt `program` và `module` trong SystemVerilog**: Cần hiểu rõ sự khác biệt về ngữ nghĩa và Vùng thời gian (Reactive region vs Active region) để tránh hiện tượng chạy đua dữ liệu (race conditions).\r\n- **Vòng đời của khối `final`**: Cần phân biệt khối `final` (chạy 0ns thời gian mô phỏng lúc dừng) với khối `initial` (chạy lúc bắt đầu 0ns) và hàm `function` (không tốn thời gian mô phỏng).",
+      "translation": "Sample 4.27 Khối xung nhịp với độ trễ trên các tín hiệu riêng lẻ\r\n\r\nclocking cb @(posedge clk);\r\n  output #10ns request;\r\n  input  #15ns grant;\r\nendclocking\r\n\r\n4.5 Cân nhắc khi dùng Khối Program\r\n\r\n4.5.1 Thời điểm Kết thúc Mô phỏng\r\n\r\nTrong Verilog, quá trình mô phỏng tiếp tục chạy chừng nào còn các sự kiện được lên lịch, hoặc cho đến khi lệnh `$finish` được thực thi. SystemVerilog bổ sung thêm một cách để kết thúc mô phỏng. Một khối `program` được xử lý như thể nó chứa một kịch bản kiểm thử (test). Nếu chỉ có một `program` duy nhất, mô phỏng sẽ kết thúc khi bạn hoàn thành câu lệnh cuối cùng trong mọi khối `initial` của program đó, vì điều này được coi là thời điểm kết thúc của test. Mô phỏng vẫn sẽ kết thúc ngay cả khi vẫn còn các luồng (threads) đang chạy trong program hoặc các module. Nhờ đó, bạn không cần phải tắt thủ công từng khối monitor và driver khi test đã hoàn thành.\r\n\r\nNếu có nhiều khối `program`, mô phỏng sẽ kết thúc khi khối `program` cuối cùng hoàn tất. Bằng cách này, mô phỏng sẽ kết thúc khi test cuối cùng chạy xong. Bạn có thể kết thúc sớm bất kỳ khối `program` nào bằng cách thực thi lệnh `$exit`. Tất nhiên bạn vẫn có thể gọi `$finish` một cách trực tiếp để dừng mô phỏng, nhưng điều này có thể gây ra sự cố nếu bạn có nhiều program cùng chạy.\r\n\r\nTuy nhiên, quá trình mô phỏng vẫn chưa hoàn toàn kết thúc. Một module hoặc program có thể chứa một khối `final` chứa mã lệnh sẽ được chạy ngay trước khi trình mô phỏng chấm dứt, như được hiển thị trong Sample 4.28. Đây là nơi tuyệt vời để thực hiện công việc dọn dẹp như đóng các file, và in báo cáo về số lượng lỗi cũng như cảnh báo bắt gặp. Bạn không thể lên lịch cho bất kỳ sự kiện nào, hoặc đặt bất kỳ độ trễ nào bên trong khối `final` mà có thể làm thời gian trôi qua. Bạn không phải lo lắng về việc giải phóng bộ nhớ đã được cấp phát vì việc này sẽ được thực hiện tự động.\r\n\r\nSample 4.28 Khối final\r\n\r\nprogram automatic test;\r\n  int errors, warnings;\r\n\r\n  initial begin\r\n    ... // Hoạt động chính của program\r\n  end\r\n\r\n  final\r\n    $display(\"Test completed with %0d errors and %0d warnings\",\r\n             errors, warnings);\r\n\r\nendprogram",
+      "grammar": [
+        {
+          "phrase": "is treated as if it contains a test",
+          "explain": "cấu trúc \"as if\" (như thể là) dùng để mô tả một giả định hay cách xử lý tương đương"
+        },
+        {
+          "phrase": "even if there are threads still running in the program or modules",
+          "explain": "mệnh đề nhượng bộ với \"even if\" (ngay cả khi) kết hợp với mệnh đề quan hệ rút gọn danh từ \"threads [which are] still running\""
+        },
+        {
+          "phrase": "a final block that contains code to be run just before the simulator terminates",
+          "explain": "mệnh đề quan hệ với đại từ \"that\", chứa cấu trúc bị động chỉ mục đích \"to be run\" và mệnh đề chỉ thời gian \"before...\""
+        },
+        {
+          "phrase": "any delays in a final block that could cause time to elapse",
+          "explain": "mệnh đề quan hệ với đại từ \"that\" bổ nghĩa cho danh từ \"any delays\" đứng trước đó"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "clocking block",
+          "explain": "(khái niệm SystemVerilog) khối xung nhịp, dùng để đồng bộ hóa tín hiệu kiểm thử với xung nhịp thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as if",
+          "explain": "(liên từ) như thể là, giống như là"
+        },
+        {
+          "type": "phrase",
+          "phrase": "shut down",
+          "explain": "(cụm động từ) tắt hoàn toàn, dừng hoạt động (của thiết bị hoặc tiến trình)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "early exit",
+          "explain": "(cụm từ) thoát sớm, kết thúc trước thời hạn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "terminate",
+          "explain": "(động từ) chấm dứt, kết thúc hoàn toàn một tiến trình/chương trình"
+        },
+        {
+          "type": "phrase",
+          "phrase": "clean up work",
+          "explain": "(cụm danh từ) công việc dọn dẹp, hoàn tất sau khi kết thúc chương trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "elapse",
+          "explain": "(động từ) (thời gian) trôi qua"
+        },
+        {
+          "type": "vocab",
+          "phrase": "automatic",
+          "explain": "(tính từ/từ khóa) tự động (trong SystemVerilog: cấp phát bộ nhớ động cho biến nội bộ)"
+        }
+      ]
+    },
+    {
+      "page": 25,
+      "summary": "**Nội dung tổng quát:**\r\nTrang sách nằm trong Mục 4.5 (\"Các lưu ý về khối Program\"), giải thích hai quy tắc quan trọng khi xây dựng môi trường kiểm thử (testbench) trong SystemVerilog:\r\n1. Lý do tại sao khối `always` bị cấm trong khối `program` và giải pháp thay thế.\r\n2. Lý do tại sao bộ tạo xung nhịp (Clock Generator) phải được đặt trong `module` chứ tuyệt đối không được đặt trong `program`.\r\n\r\n**Những ý chính người đọc BẮT BUỘC phải hiểu:**\r\n- **Triết lý của khối `program`:** Khối `program` mang tư tưởng của lập trình phần mềm (tương tự C) có điểm khởi đầu và kết thúc xác định. Khi tất cả các khối `initial` bên trong `program` chạy xong, quá trình mô phỏng sẽ tự động kết thúc (tương đương gọi lệnh `$finish`).\r\n- **Khối `always` không được dùng trong `program`:** Vì khối `always` chạy liên tục không bao giờ dừng, nó sẽ làm mất đi khả năng tự động kết thúc mô phỏng của `program`. Nếu cần một vòng lặp chạy suốt quá trình kiểm thử, giải pháp chuẩn là dùng khối `initial forever`.\r\n- **Vị trí đúng của Bộ tạo xung nhịp (Clock Generator):** Xung nhịp gắn liền với thiết kế phần cứng (DUT), chịu ảnh hưởng của lệch pha (clock skew) và cây xung nhịp (clock tree). Do đó, bộ tạo xung nhịp phải nằm trong một `module` (cấp ngang hàng với DUT).\r\n- **Nguy cơ Tranh chấp thời gian (Race Condition):** Nếu đặt bộ tạo xung nhịp trong khối `program`, các tín hiệu sẽ phát xuất từ vùng thời gian Reactive chuyển sang vùng Active của thiết kế, gây ra lỗi tranh chấp thời gian không dự đoán được tùy thuộc vào việc xung nhịp hay dữ liệu tới trước.\r\n\r\n**Khái niệm / Thuật ngữ cần tìm hiểu thêm:**\r\n- **SystemVerilog Event Regions (Vùng sự kiện trong SystemVerilog):** Cần hiểu rõ sự khác biệt giữa vùng *Active Region* (dành cho module/thiết kế phần cứng) và *Reactive Region* (dành cho program/testbench) để giải thích tại sao sự dịch chuyển tín hiệu giữa hai vùng này gây ra lỗi tranh chấp thời gian (race condition).\r\n- **Clock Tree & Clock Skew (Cây xung nhịp & Độ lệch xung nhịp):** Các yếu tố phần cứng vật lý giải thích tại sao việc định thời xung nhịp thuộc về bản chất của phần cứng (`module`) chứ không phải kịch bản testbench (`program`).",
+      "translation": "**4.5 Các lưu ý về khối Program**\r\n\r\n**4.5.2 Tại sao khối Always không được phép trong một Program?**\r\n\r\nTrong SystemVerilog, bạn có thể đặt các khối `initial` trong một program, nhưng không được dùng các khối `always`. Điều này có vẻ lạ nếu bạn đã quen thuộc với các module trong Verilog, nhưng có nhiều lý do cho việc này. Các chương trình SystemVerilog gần với một chương trình trong ngôn ngữ C — với một (hoặc nhiều) điểm bắt đầu — hơn là các khối phần cứng thực thi đồng thời của Verilog. Trong một thiết kế phần cứng, một khối `always` có thể kích hoạt trên mọi cạnh lên của xung nhịp ngay từ khi bắt đầu mô phỏng. Ngược lại, một testbench trải qua các bước khởi tạo, tạo tín hiệu kích thích và phản hồi lại thiết kế, rồi sau đó gói gọn kết thúc mô phỏng. Một khối `always` chạy liên tục sẽ không phù hợp với cách hoạt động này.\r\n\r\nKhi khối `initial` cuối cùng trong program hoàn thành, quá trình mô phỏng sẽ tự động kết thúc giống như khi bạn đã thực thi lệnh `$finish`. Nếu bạn có một khối `always`, nó sẽ chạy mãi mãi, do đó bạn sẽ phải gọi lệnh `$exit` một cách thủ công để phát tín hiệu rằng chương trình đã hoàn tất. Nhưng đừng thất vọng: Nếu bạn thực sự cần một khối `always`, bạn có thể sử dụng `initial forever` để đạt được điều tương tự.\r\n\r\n**4.5.3 Bộ tạo xung nhịp (The Clock Generator)**\r\n\r\nGiờ đây khi bạn đã thấy khối program hoạt động ra sao, bạn có thể thắc mắc liệu bộ tạo xung nhịp có nên nằm trong một module hay không. Xung nhịp gắn liền với thiết kế nhiều hơn là với testbench, và vì vậy bộ tạo xung nhịp nên ở lại trong một module. Bộ tạo xung nhịp nên được khởi tạo ở cùng cấp với DUT để nó có thể lái (drive) cả DUT lẫn testbench. Khi bạn tối ưu hóa thiết kế, bạn tạo ra các cây xung nhịp (clock trees), và bạn phải kiểm soát cẩn thận độ lệch pha (skews) khi các xung nhịp đi vào hệ thống và lan truyền qua các khối.\r\n\r\nTestbench ít khắt khe hơn nhiều. Nó chỉ cần một cạnh xung nhịp để biết khi nào cần lái và lấy mẫu tín hiệu. Xác minh chức năng (Functional verification) chỉ quan tâm đến việc cung cấp đúng giá trị ở đúng chu kỳ, chứ không phải các khoảng trễ phần nghìn nanosecond hay độ lệch xung tương đối.\r\n\r\nKhối program không phải là nơi để đặt một bộ tạo xung nhịp. Mẫu 4.29 cố gắng đặt bộ tạo xung nhịp trong một khối program nhưng điều này chỉ gây ra tình trạng tranh chấp thời gian (race condition). Cả tín hiệu `clk` và `data` đều lan truyền từ vùng thời gian Reactive sang thiết kế nằm ở vùng Active và có thể gây ra tranh chấp thời gian tùy thuộc vào tín hiệu nào đến trước.\r\n\r\n**Mẫu 4.29** Bộ tạo xung nhịp không tốt trong khối program\r\n\r\nprogram automatic bad_generator (output bit clk, data);\r\n  initial\r\n    forever #5 clk <= ~clk ;\r\n\r\n  initial\r\n    forever @(posedge clk)\r\n      data <= ~data;\r\nendprogram",
+      "grammar": [
+        {
+          "phrase": "if you are used to Verilog modules",
+          "explain": "cấu trúc \"be used to + N/V-ing\" thể hiện sự quen thuộc với một chủ đề/hành vi nào đó"
+        },
+        {
+          "phrase": "closer to a program in C ... than Verilog's many small blocks",
+          "explain": "cấu trúc so sánh hơn \"closer to... than...\" dùng để so sánh tính chất giữa hai đối tượng"
+        },
+        {
+          "phrase": "ends just as if you had executed $finish",
+          "explain": "mệnh đề giả định đi với \"as if\" kết hợp thì quá khứ hoàn thành (had executed) để diễn tả một hành động trái thực tế ở quá khứ/giả định"
+        },
+        {
+          "phrase": "instantiated at the same level as the DUT so it can drive both the DUT and testbench",
+          "explain": "mệnh đề phân từ rút gọn dạng bị động (instantiated...) kết hợp với mệnh đề chỉ mục đích (so [that] it can...)"
+        },
+        {
+          "phrase": "depending on which one arrived first",
+          "explain": "cụm giới từ \"depending on\" đi kèm mệnh đề danh từ dạng câu hỏi gián tiếp \"which one arrived first\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "wrap up",
+          "explain": "(động từ) hoàn thành, gói gọn, kết thúc một công việc hoặc quy trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "paradigm",
+          "explain": "(danh từ) mô hình, kiểu mẫu tư duy hoặc phương pháp luận"
+        },
+        {
+          "type": "phrase",
+          "phrase": "tied to",
+          "explain": "(tính từ/cụm từ) gắn liền với, có mối liên quan chặt chẽ với"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) khởi tạo một thực thể (instance) từ một khuôn mẫu/module trong lập trình hoặc thiết kế phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "skew",
+          "explain": "(danh từ) độ lệch thời gian/lệch pha của tín hiệu (đặc biệt là tín hiệu xung nhịp clock skew)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "functional verification",
+          "explain": "(danh từ) quá trình xác minh chức năng của thiết kế vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race condition",
+          "explain": "(danh từ) tình trạng tranh chấp thời gian giữa các tín hiệu, dẫn đến kết quả không định trước"
+        },
+        {
+          "type": "vocab",
+          "phrase": "propagate",
+          "explain": "(động từ) lan truyền (tín hiệu điện, xung nhịp hoặc dữ liệu qua các tầng mạch)"
+        }
+      ]
+    },
+    {
+      "page": 26,
+      "summary": "- **Nội dung tổng quát:** Trang 112 hướng dẫn kỹ thuật tạo bộ phát xung clock (clock generator) chuẩn trong SystemVerilog để tránh lỗi đua tín hiệu (race conditions), làm rõ phạm vi của kiểm tra tính năng (functional verification) so với phân tích định thời (timing analysis), và bắt đầu Mục 4.6 tổng kết cách kết nối các thành phần (DUT, Testbench, Interface) trong module cấp cao nhất (top-level module).\r\n- **Các ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Thiết kế Clock Generator an toàn:* Luôn đặt bộ tạo clock trong một module; tránh tạo cạnh xung clock đúng thời điểm $t = 0$. Nếu cần thiết lập giá trị ban đầu tại $t = 0$, phải dùng phép gán phi định thời (nonblocking assignment) để đảm bảo các khối nhạy xung clock khởi chạy trước. Nếu muốn biến đổi ngẫu nhiên tần số/độ lệch xung (skew), nên đóng gói tính chất này vào một class (học ở Chương 6).\r\n  2. *Phân định phạm vi kiểm tra:* Testbench mô phỏng tính năng chỉ tập trung kiểm tra logic hành vi của DUT, không kiểm tra định thời mức thấp (low-level timing). Định thời nên được kiểm tra bằng công cụ Phân tích định thời tĩnh (STA). Testbench cần linh hoạt để chạy được mô phỏng mức cổng (gate-level simulation) có kèm định thời gán ngược (back-annotated timing).\r\n  3. *Tích hợp hệ thống (Top-level Integration):* Module cấp cao nhất (`module top`) đóng vai trò là vỏ bọc ngoài cùng, khởi tạo và kết nối DUT, khối chương trình testbench (`program`), và các giao diện (`interface`) lại với nhau. SystemVerilog hỗ trợ cú pháp kết nối cổng ngầm định (`.*`) giúp code gọn gàng.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - *Race Conditions & Simulation Regions trong SystemVerilog:* Cần hiểu cơ chế vùng thời gian mô phỏng (Active, Inactive, NBA region) để biết tại sao phép gán blocking/nonblocking lại gây ra hoặc khắc phục được lỗi đua tín hiệu ở thời điểm $t = 0$.\r\n  - *Static Timing Analysis (STA) & Back-annotated Timing (SDF):* Kiến thức về kiểm tra định thời phần cứng để hiểu lý do không nên dùng testbench mô phỏng chức năng để bắt lỗi timing.\r\n  - *Implicit Port Connection (`.*`):* Cú pháp kết nối ngầm định theo tên biến trùng tên cổng trong SystemVerilog.",
+      "translation": "Tránh các điều kiện đua tín hiệu (race conditions) bằng cách luôn đặt bộ tạo xung clock bên trong một module. Nếu bạn muốn ngẫu nhiên hóa các đặc tính của bộ tạo xung clock, hãy tạo một class chứa các biến ngẫu nhiên đại diện cho độ lệch (skew), tần số và các đặc tính khác, như được trình bày ở Chương 6. Bạn có thể sử dụng class này trong module tạo xung clock hoặc trong testbench.\r\n\r\nMẫu 4.30 trình bày một bộ tạo xung clock tốt bên trong một module. Mẫu này cố ý tránh tạo cạnh xung tại thời điểm t = 0 để ngăn ngừa các điều kiện đua tín hiệu. Tất cả các cạnh xung clock đều được tạo bằng phép gán định thời (blocking assignment) nhằm kích hoạt các sự kiện trong vùng Active. Nếu bắt buộc phải tạo một cạnh xung clock tại thời điểm t = 0, hãy sử dụng phép gán phi định thời (nonblocking assignment) để thiết lập giá trị ban đầu, nhờ đó tất cả logic nhạy với xung clock như các khối `always` sẽ được khởi chạy trước khi xung clock thay đổi giá trị.\r\n\r\nMẫu 4.30: Bộ tạo xung clock tốt trong module\r\nmodule clock_generator (output bit clk);\r\n    bit local_clk = 0;\r\n    assign clk = local_clk; // Đẩy tín hiệu ra cổng từ tín hiệu nội bộ\r\n    always #50 local_clk = ~local_clk;\r\nendmodule\r\n\r\nCuối cùng, đừng cố gắng kiểm tra định thời mức thấp (low-level timing) bằng phương pháp kiểm tra tính năng (functional verification). Các testbench được mô tả trong cuốn sách này kiểm tra hành vi của DUT chứ không kiểm tra định thời; việc kiểm tra định thời sẽ tốt hơn nếu được thực hiện bằng công cụ phân tích định thời tĩnh (static timing analysis tool). Testbench của bạn nên đủ linh hoạt để tương thích với các mô mô phỏng mức cổng (gate-level simulations) được chạy kèm với định thời gán ngược (back-annotated timing).\r\n\r\n4.6 Kết Nối Tất Cả Lại Với Nhau\r\n\r\nBây giờ bạn đã có một thiết kế được mô tả trong một module, một testbench trong một khối program, và các interface kết nối chúng lại với nhau. Mẫu 4.31 thể hiện module cấp cao nhất (top-level module) khởi tạo và kết nối tất cả các thành phần này.\r\n\r\nMẫu 4.31: Module cấp cao nhất với các kết nối cổng ngầm định\r\nmodule top;\r\n    bit clk;\r\n    always #50 clk = ~clk;\r\n\r\n    arb_if arbif(.*);         // ... arbif(clk)   Từ Mẫu 4-4\r\n    arb_with_if a1(.*);       // ... a1(arbif)    Từ Mẫu 4-5\r\n    test_with_if t1(.*);      // ... t1(arbif)    Từ Mẫu 4-6\r\nendmodule : top",
+      "grammar": [
+        {
+          "phrase": "Avoid race conditions by always putting the clock generator in a module",
+          "explain": "danh động từ (gerund phrase \"putting...\") đứng sau giới từ \"by\" để chỉ phương thức/cách thức thực hiện hành động"
+        },
+        {
+          "phrase": "If you want to randomize the generator’s properties, create a class with random variables",
+          "explain": "câu điều kiện dạng giả định/hướng dẫn (conditional clause + imperative clause) đưa ra chỉ dẫn kỹ thuật"
+        },
+        {
+          "phrase": "use a nonblocking assignment to set the initial value so all clock sensitive logic such as always blocks will have started before the clock changes value",
+          "explain": "cấu trúc chỉ mục đích \"so (that)\" đi kèm thì Tương lai hoàn thành \"will have started\" thể hiện một hành động sẽ hoàn tất trước một sự kiện khác trong tương lai (\"before the clock changes value\")"
+        },
+        {
+          "phrase": "Your testbenches should be flexible enough to be compatible with gate-level simulations",
+          "explain": "cấu trúc \"adj + enough + to V\" (đủ như thế nào để làm gì)"
+        },
+        {
+          "phrase": "Sample 4.31 has the top-level module that instantiates and connects all the pieces",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho danh từ \"the top-level module\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "skew",
+          "explain": "(danh từ) độ lệch thời gian / độ lệch pha giữa các tín hiệu xung clock"
+        },
+        {
+          "type": "collocation",
+          "phrase": "race conditions",
+          "explain": "(danh từ) điều kiện đua tín hiệu — hiện tượng lỗi tranh chấp thời gian thực thi trong mô phỏng vi mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock generator",
+          "explain": "(danh từ) bộ phát xung clock / mạch tạo xung nhịp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "blocking assignment",
+          "explain": "(danh từ) phép gán định thời (phép gán chắn, dấu `=` trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "nonblocking assignment",
+          "explain": "(danh từ) phép gán phi định thời (phép gán không chắn, dấu `<=` trong Verilog/SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "functional verification",
+          "explain": "(danh từ) kiểm tra tính năng / kiểm chứng chức năng của thiết kế phần cứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "static timing analysis",
+          "explain": "(danh từ) phân tích định thời tĩnh (STA) — kỹ thuật kiểm tra thời gian trễ của đường mạch mà không cần chạy mô phỏng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "gate-level simulation",
+          "explain": "(danh từ) mô phỏng mức cổng — mô phỏng thiết kế sau khi đã tổng hợp thành các cổng logic thực tế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "back-annotated timing",
+          "explain": "(danh từ) định thời gán ngược — việc đưa thông tin trễ thực tế từ khâu Place & Route vào lại mô phỏng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "implicit port connections",
+          "explain": "(danh từ) kết nối cổng ngầm định — tính năng nối cổng tự động dựa trên trùng tên tín hiệu bằng cú pháp `.*`"
+        }
+      ]
+    },
+    {
+      "page": 27,
+      "summary": "Trang này thuộc Chương 4 (kết nối các thành phần trong SystemVerilog), tập trung vào quy tắc quan trọng khi biên dịch thiết kế sử dụng giao tiếp (Interface): Một Interface xuất hiện trong danh sách cổng (Port List) bắt buộc phải được kết nối với một thể hiện (instance) cụ thể của Interface đó mới có thể biên dịch thành công.\r\n\r\nNhững ý chính người đọc BẮT BUỘC phải nắm được:\r\n1. Mô-đun hoặc chương trình thông thường chỉ sử dụng các tín hiệu riêng lẻ (như bit, logic, inout) ở danh sách cổng có thể biên dịch độc lập mà không cần khởi tạo (instantiate), vì trình biên dịch sẽ tự động tạo ra các dây dẫn (wires) nối vào các cổng lơ lửng đó.\r\n2. Trình biên dịch SystemVerilog KHÔNG THỂ tự động tạo ra một cấu trúc Interface (hoặc modport/clocking block) nếu mô-đun sử dụng Interface ở danh sách cổng. Do đó, việc biên dịch một mô-đun chứa giao tiếp mà không có khai báo/khởi tạo thể hiện thực tế sẽ báo lỗi.\r\n3. Ngay cả khi bạn chỉ muốn kiểm tra lỗi cú pháp (syntax bugs), bạn vẫn phải tạo một mô-đun cấp cao nhất (top module), khởi tạo Interface và nối Interface đó vào mô-đun cần kiểm tra.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Interface & Modport trong SystemVerilog: Cấu trúc đóng gói các tín hiệu giao tiếp và quy định hướng tín hiệu cho từng thành phần (DUT, Testbench).\r\n- Implicit Port Connection (`.*`): Ký hiệu viết tắt giúp tự động nối các cổng có cùng tên và kiểu dữ liệu ở cấp hiện tại.",
+      "translation": "4.6 Kết nối tất cả lại với nhau                                                               113\r\n\r\nVí dụ này gần như giống hệt với Mẫu 4.7. Nó sử dụng ký hiệu viết tắt .* (kết nối cổng ngầm định) để tự động kết nối các cổng của thể hiện mô-đun với các tín hiệu ở cấp hiện tại nếu chúng có cùng tên và kiểu dữ liệu.\r\n\r\n4.6.1 Một Interface trong danh sách cổng phải được kết nối\r\n\r\nTrình biên dịch SystemVerilog sẽ không cho phép bạn biên dịch một mô-đun hoặc chương trình đơn lẻ có sử dụng một interface trong danh sách cổng. Tại sao lại như vậy? Dù sao thì một mô-đun hoặc chương trình có các cổng làm từ các tín hiệu riêng lẻ vẫn có thể được biên dịch mà không cần phải khởi tạo thể hiện, như được hiển thị trong Mẫu 4.32.\r\n\r\nMẫu 4.32 Mô-đun chỉ có các kết nối cổng\r\nmodule uses_a_port(inout bit not_connected);\r\n  ...\r\nendmodule\r\n\r\nTrình biên dịch sẽ tạo ra các dây dẫn và kết nối chúng với các tín hiệu lơ lửng. Tuy nhiên, một mô-đun hoặc chương trình có interface trong danh sách cổng của nó phải được kết nối với một thể hiện của interface đó.\r\n\r\nMẫu 4.33 Mô-đun sử dụng một interface\r\n// Code này sẽ không biên dịch được nếu không có khai báo interface\r\nmodule uses_an_interface(arb_if.DUT arbif);\r\n  initial arbif.grant = 0;\r\nendmodule\r\n\r\nĐối với Mẫu 4.33, trình biên dịch thậm chí không thể tự dựng nên một interface đơn giản. Nếu bạn có các modport hoặc một khối program sử dụng các clocking block bên trong một interface, trình biên dịch còn gặp khó khăn hơn nữa. Ngay cả khi bạn chỉ đang muốn lọc sạch các lỗi cú pháp, bạn vẫn phải hoàn tất các kết nối. Điều này có thể được thực hiện như trong Mẫu 4.34.\r\n\r\nMẫu 4.34 Mô-đun cấp cao nhất kết nối DUT và interface\r\nmodule top;\r\n  bit clk;\r\n  always #5 clk = !clk;\r\n\r\n  arb_if arbif(clk);           // Interface với modport\r\n  uses_an_interface u1(arbif); //        cần thiết để biên dịch code này\r\nendmodule",
+      "grammar": [
+        {
+          "phrase": "automatically connects module instance ports to signals at the current level if they have the same name and data type",
+          "explain": "mệnh đề điều kiện hiện tại (if-clause) dùng để mô tả một quy tắc/sự thật hiển nhiên trong trình biên dịch"
+        },
+        {
+          "phrase": "a module or program with ports made of individual signals can be compiled without being instantiated",
+          "explain": "bị động khả năng \"can be compiled\" kết hợp danh động từ bị động \"without being instantiated\" (mà không bị/được khởi tạo)"
+        },
+        {
+          "phrase": "The compiler creates wires and connects them to the dangling signals",
+          "explain": "cấu trúc câu đơn có động từ ghép (creates ... and connects ...) nối bằng liên từ \"and\""
+        },
+        {
+          "phrase": "Even if you are just looking to wring out syntax bugs, you must complete the connections",
+          "explain": "mệnh đề nhượng bộ \"Even if\" (ngay cả khi) kết hợp động từ khuyết thiếu chỉ nghĩa bắt buộc \"must\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "implicit port connection",
+          "explain": "kết nối cổng ẩn / ngầm định (tự động nối các cổng trùng tên)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiate",
+          "explain": "(động từ) khởi tạo một thể hiện (instance) của module/interface trong ngôn ngữ mô tả phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "dangling",
+          "explain": "(tính từ) lơ lửng, chưa được kết nối vào đâu"
+        },
+        {
+          "type": "idiom",
+          "phrase": "wring out",
+          "explain": "(thành ngữ) vắt kiệt, loại bỏ triệt để (ở đây là tìm và sửa sạch lỗi cú pháp)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "look to do something",
+          "explain": "(cụm động từ) có ý định, hướng tới làm việc gì đó"
+        }
+      ]
+    },
+    {
+      "page": 28,
+      "summary": "Nội dung trang này thuộc Mục 4.7 \"Top-Level Scope\" (Phạm vi cấp cao nhất) trong Chương 4 của cuốn sách, bàn về việc khai báo các hằng số, biến, kiểu dữ liệu và hàm nằm ngoài ranh giới của các khối lệnh (module, program, interface...) trong SystemVerilog để dùng chung cho toàn bộ hệ thống mô phỏng.\r\n\r\nNhững ý chính người đọc BẮT BUỘC phải hiểu:\r\n1. **Khái niệm Compilation-unit Scope (`$unit`)**: Là phạm vi bên ngoài ranh giới của các phần tử như module, program, interface, package... Bất kỳ khai báo nào nằm trong phạm vi này có thể được truy cập bởi tất cả các khối ở cấp thấp hơn được biên dịch cùng lúc.\r\n2. **Vấn đề về tính di động (Portability) của `$unit`**: Mỗi trình mô phỏng/tổng hợp mạch xử lý biên dịch khác nhau (biên dịch tất cả tệp cùng lúc hoặc biên dịch từng tệp/nhóm tệp riêng lẻ). Điều này khiến `$unit` không thể hoạt động đồng nhất giữa các công cụ khác nhau.\r\n3. **Giải pháp thay thế**: Sử dụng `package` thay vì `$unit` giúp đưa mã nguồn ra ngoài module/program mà vẫn đảm bảo tính di động, không bắt buộc phải biên dịch tất cả các module cùng một thời điểm.\r\n4. **Phân biệt hằng số cấp đỉnh**: Có thể khai báo bằng `parameter` hoặc `const string` ở phạm vi cấp đỉnh (top-level scope).\r\n5. **Khái niệm `$root`**: Là tên thể hiện giúp truy xuất đường dẫn tuyệt đối đến các phần tử trong hệ thống tính từ đỉnh (tương tự thư mục gốc `/` trong hệ điều hành Unix), giải quyết vấn đề định danh trong Verilog truyền thống.\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- Kiến thức về quy trình biên dịch (compilation process) trong các trình mô phỏng Verilog/SystemVerilog (như VCS, ModelSim, QuestaSim).\r\n- Khái niệm về `package` trong SystemVerilog để hiểu tại sao `package` lại tối ưu và an toàn hơn so với `$unit`.",
+      "translation": "114  4 Kết nối Testbench và Thiết kế\r\n\r\n4.7 Phạm vi cấp cao nhất (Top-Level Scope)\r\n\r\nĐôi khi bạn cần tạo ra các đối tượng trong quá trình mô phỏng nằm bên ngoài một chương trình (program) hoặc module để tất cả các khối đều nhìn thấy được chúng. Trong Verilog, chỉ có các macro mới mở rộng qua được ranh giới của module, và do đó được dùng để tạo các hằng số toàn cục. SystemVerilog giới thiệu *đơn vị biên dịch* (compilation unit), tức là một nhóm các tệp nguồn được biên dịch cùng với nhau. Phạm vi nằm ngoài ranh giới của bất kỳ `module`, `macromodule`, `interface`, `program`, `package`, hay `primitive` nào được gọi là *phạm vi đơn vị biên dịch* (compilation-unit scope), còn được tham chiếu là `$unit`. Bất kỳ thứ gì chẳng hạn như một tham số (parameter) được định nghĩa trong phạm vi này đều tương tự như một biến toàn cục vì nó có thể được nhìn thấy bởi tất cả các khối ở cấp thấp hơn. Tuy nhiên, nó không thực sự mang tính toàn cục hoàn toàn vì `parameter` đó không thể được nhìn thấy trong quá trình biên dịch các tệp khác.\r\n\r\nĐiều này dẫn đến một số sự nhầm lẫn. Một số trình mô phỏng biên dịch tất cả mã SystemVerilog cùng nhau, do đó `$unit` mang tính toàn cục. Các trình mô phỏng và công cụ tổng hợp khác lại biên dịch từng module hoặc một nhóm module tại một thời điểm, do đó `$unit` có thể chỉ là nội dung của một hoặc một vài tệp. Kết quả là, `$unit` không có tính di động (không dùng chung dễ dàng giữa các công cụ). Các Package (gói) cho phép bạn đặt mã nguồn bên ngoài một program hoặc module trong khi vẫn loại bỏ được yêu cầu phải biên dịch tất cả các module cùng một lúc.\r\n\r\nCuốn sách này gọi phạm vi bên ngoài các khối là \"phạm vi cấp cao nhất\" (top-level scope). Bạn có thể định nghĩa các biến, tham số, kiểu dữ liệu và thậm chí cả các hàm/thủ tục (routine) trong không gian này. Ví dụ 4.35 khai báo một tham số cấp đỉnh, `TIMEOUT`, tham số này có thể được sử dụng ở bất kỳ đâu trong cây phân cấp. Ví dụ này cũng có một chuỗi hằng `const string` chứa một thông báo lỗi. Bạn có thể khai báo các hằng số cấp đỉnh theo một trong hai cách đó.\r\n\r\nVí dụ 4.35 Phạm vi cấp cao nhất cho thiết kế bộ trọng tài (arbiter design)\r\n\r\n// root.sv\r\n`timescale 1ns/1ns\r\nparameter int TIMEOUT = 1_000_000;\r\nconst string time_out_msg = \"ERROR: Time out\";\r\nmodule top;\r\n  test t1();\r\nendmodule\r\n\r\nprogram automatic test;\r\n  ...\r\n  initial begin\r\n    #TIMEOUT;\r\n    $display(\"%s\", time_out_msg);\r\n    $finish;\r\n  end\r\nendprogram\r\n\r\nTên thể hiện `$root` cho phép bạn tham chiếu một cách rõ ràng tuyệt đối đến các tên trong hệ thống, bắt đầu từ phạm vi cấp cao nhất. Ở khía cạnh này, `$root` tương tự như ký tự `/` trong hệ thống tệp của Unix. Đối với các công cụ như VCS thực hiện biên dịch tất cả các tệp cùng một lúc, `$root` và `$unit` là tương đương nhau. Tên gọi `$root` cũng giải quyết một vấn đề đã tồn tại từ lâu trong Verilog.",
+      "grammar": [
+        {
+          "phrase": "so that they are seen by all blocks",
+          "explain": "mệnh đề chỉ mục đích (clause of purpose) sử dụng \"so that\" kết hợp thể bị động \"are seen\""
+        },
+        {
+          "phrase": "The scope outside the boundaries of any module, macromodule, interface, program, package, or primitive is known as the compilation-unit scope",
+          "explain": "cấu trúc bị động \"is known as\" với chủ ngữ là danh từ được mở rộng bởi cụm giới từ \"outside the boundaries of...\""
+        },
+        {
+          "phrase": "Packages allow you to have code outside of a program or module while eliminating the requirement of compiling all the modules at the same time",
+          "explain": "cấu trúc \"allow someone to do something\" đi kèm mệnh đề rút gọn tiền tố \"while + V-ing\""
+        },
+        {
+          "phrase": "The instance name $root allows you to unambiguously refer to names in the system, starting with the top-level scope",
+          "explain": "cấu trúc \"allow someone to do something\" kết hợp mệnh đề phân từ hiện tại (participial phrase) \"starting with...\" bổ nghĩa cho toàn bộ hành động phía trước"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "scope",
+          "explain": "(danh từ) phạm vi hoạt động/truy cập của biến hoặc khai báo trong lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "boundary",
+          "explain": "(danh từ) ranh giới, giới hạn phân định giữa các vùng/khối"
+        },
+        {
+          "type": "vocab",
+          "phrase": "portable",
+          "explain": "(tính từ) có tính di động, có thể chạy/biên dịch nhất quán trên nhiều công cụ hoặc nền tảng khác nhau"
+        },
+        {
+          "type": "vocab",
+          "phrase": "unambiguously",
+          "explain": "(trạng từ) một cách rõ ràng, không gây mơ hồ hay nhầm lẫn"
+        },
+        {
+          "type": "phrase",
+          "phrase": "top-level scope",
+          "explain": "(cụm danh từ) phạm vi cấp cao nhất (nằm ngoài tất cả các khối module/program)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(cụm danh từ) đơn vị biên dịch (nhóm các tệp nguồn được dịch cùng một lúc)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "compilation-unit scope",
+          "explain": "(cụm danh từ) phạm vi thuộc về đơn vị biên dịch (ký hiệu là $unit)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "at the same time",
+          "explain": "(trạng từ/cụm từ) cùng một lúc, đồng thời"
+        }
+      ]
+    },
+    {
+      "page": 29,
+      "summary": "- **Nội dung tổng quát**: Trang sách thảo luận về cơ chế tham chiếu chéo (Cross-Module Reference - XMR) giữa các khối trong SystemVerilog sử dụng từ khóa `$root`, đồng thời phân tích nguyên tắc tương tác một chiều giữa khối kiểm thử (`program`) và khối thiết kế phần cứng (`module`).\r\n- **Các ý chính bắt buộc phải hiểu**:\r\n  1. **Cơ chế tìm kiếm phạm vi (Scope Search)**: Khi một tên biến/tín hiệu được gọi, trình biên dịch sẽ tìm kiếm từ phạm vi cục bộ (local scope) ngược dần lên các cấp cao hơn cho đến cấp cao nhất. Việc các thể hiện trung gian có cùng tên biến có thể dẫn đến việc trình biên dịch lấy nhầm biến.\r\n  2. **Giải pháp dùng `$root`**: Từ khóa `$root` giúp tạo đường dẫn tuyệt đối bắt đầu từ đỉnh của cây phân cấp thiết kế, loại bỏ hoàn toàn sự mơ hồ khi tham chiếu chéo.\r\n  3. **Tối ưu bằng Macro**: Sử dụng macro (ví dụ: `` `define TOP $root.top ``) để đại diện cho đường dẫn tuyệt đối giúp mã nguồn linh hoạt hơn; khi phân cấp thay đổi, chỉ cần cập nhật vị trí khai báo macro.\r\n  4. **Quy tắc bất đối xứng (Program–Module Interaction)**: Khối `program` (testbench) có quyền đọc/ghi toàn bộ tín hiệu và gọi các hàm/tác vụ (routines) trong `module` (design). Tuy nhiên, `module` hoàn toàn không có tầm nhìn (visibility) vào bên trong `program` để đảm bảo phần cứng thiết kế độc lập hoàn toàn với môi trường kiểm thử.\r\n  5. **Kỹ thuật \"Backdoor Load\" và Force tín hiệu**: `program` có thể gọi routine trong `module` để gán giá trị nội bộ (backdoor load) hoặc thực hiện thao tác ép giá trị (`force`) tín hiệu mà chuẩn SystemVerilog không cho phép làm trực tiếp từ khối program.\r\n- **Khái niệm/thuật ngữ cần tìm hiểu thêm**:\r\n  - **$root**: Khái niệm về gốc phân cấp trong SystemVerilog LRM (Language Reference Manual).\r\n  - **Backdoor load / Frontdoor access**: Hai phương pháp can thiệp tín hiệu/thanh ghi trong kiểm thử phần cứng (Backdoor gán trực tiếp không qua chu kỳ xung nhịp, Frontdoor đi qua giao thức bus).\r\n  - **Scope hierarchy (Cấu trúc phân cấp phạm vi)**: Hiểu cách sắp xếp các module/program lồng nhau để nắm được thứ tự tìm kiếm biến của trình biên dịch.",
+      "translation": "4.8 Tương tác giữa Program và Module\r\n\r\nKhi mã nguồn của bạn tham chiếu đến một tên nằm trong một module khác, chẳng hạn như `i1.var`, trước tiên trình biên dịch sẽ tìm kiếm trong phạm vi cục bộ, sau đó tìm ngược lên phạm vi cấp cao hơn, và cứ tiếp tục như vậy cho đến khi đạt tới cấp cao nhất. Có thể bạn muốn sử dụng `i1.var` ở module trên cùng (top module), nhưng một thể hiện (instance) có tên `i1` nằm ở phạm vi trung gian có thể làm chệch hướng tìm kiếm, khiến bạn nhận sai biến. Bạn có thể sử dụng `$root` để tạo các tham chiếu chéo module không bị mơ hồ bằng cách chỉ định đường dẫn tuyệt đối.\r\n\r\nMẫu 4.36 minh họa một chương trình (program) được khởi tạo bên trong module `top` - module vốn được khởi tạo ngầm định ở phạm vi cấp cao nhất. Chương trình có thể sử dụng đường dẫn tương đối hoặc tuyệt đối để tham chiếu đến tín hiệu `clk` trong module. Bạn có thể dùng một macro để lưu giữ đường dẫn phân cấp này sao cho khi đường dẫn thay đổi, bạn chỉ cần sửa đổi một vị trí trong mã nguồn. Chuẩn LRM không cho phép các module được khởi tạo một cách tường minh bên trong phạm vi cấp cao nhất của chương trình.\r\n\r\nMẫu 4.36 Tham chiếu chéo giữa các module bằng `$root`\r\n\r\nmodule top;\r\n  bit clk;\r\n  test t1(.*);\r\nendmodule\r\n\r\n`define TOP $root.top\r\nprogram automatic test;\r\n  initial begin\r\n    // Tham chiếu tuyệt đối\r\n    $display(\"clk=%b\", $root.top.clk);\r\n    $display(\"clk=%b\", `TOP.clk); // Dùng macro\r\n\r\n    // Tham chiếu tương đối\r\n    $display(\"clk=%b\", top.clk);\r\n  end\r\nendprogram\r\n\r\n4.8 Tương tác giữa Program và Module\r\n\r\nKhối program có thể đọc và ghi tất cả các tín hiệu trong các module, đồng thời có thể gọi các hàm/tác vụ (routine) bên trong module, nhưng một module lại không có tầm nhìn vào bên trong một program. Điều này là do môi trường kiểm thử (testbench) của bạn cần phải quan sát và điều khiển thiết kế, nhưng bản thân thiết kế thì không được phụ thuộc vào bất kỳ thành phần nào trong testbench.\r\n\r\n[Biểu tượng bánh xe gốm / la bàn kỹ thuật]\r\nMột program có thể gọi một routine trong module để thực hiện các thao tác khác nhau. Routine này có thể thiết lập giá trị cho các tín hiệu nội bộ, còn được gọi là \"backdoor load\" (nạp cửa sau). Tiếp theo, vì tiêu chuẩn SystemVerilog hiện tại không định nghĩa cách ép giá trị tín hiệu (force signals) trực tiếp từ một khối program, bạn cần phải viết một task bên trong thiết kế để thực hiện việc force đó, rồi sau đó gọi task này từ program.",
+      "grammar": [
+        {
+          "phrase": "an instance named i1 in an intermediate scope may have sidetracked the search, giving you the wrong variable",
+          "explain": "mệnh đề phân từ hiện tại (present participle clause \"giving...\") đóng vai trò chỉ kết quả của hành động dự đoán trong quá khứ \"may have sidetracked\""
+        },
+        {
+          "phrase": "so that when the path changes, you only have to change one piece of code",
+          "explain": "mệnh đề chỉ mục đích (so that) kết hợp với mệnh đề điều kiện thời gian (when)"
+        },
+        {
+          "phrase": "The LRM does not allow modules to be explicitly instantiated in the top-level scope",
+          "explain": "cấu trúc bị động dạng động từ nguyên mẫu (to be + V3) đi kèm động từ \"allow\" (allow sth to be done)"
+        },
+        {
+          "phrase": "This is because your testbench needs to see and control the design, but the design should not depend on anything in the testbench",
+          "explain": "cấu trúc giải thích nguyên do \"This is because + clause\", kết hợp hai mệnh đề đối lập nối bằng \"but\""
+        },
+        {
+          "phrase": "you need to write a task in the design to do the force, and then call it from the program",
+          "explain": "chuỗi động từ chỉ mục đích và trình tự hành động (need to write ... to do ..., and then call ...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "sidetrack",
+          "explain": "(động từ) làm đánh hướng, làm chệch hướng sự chú ý hoặc tiến trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "unambiguous",
+          "explain": "(tính từ) rõ ràng, minh bạch, không gây mơ hồ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiated",
+          "explain": "(động từ dạng quá khứ/phân từ) được tạo thể hiện, được khởi tạo trong cấu trúc phân cấp phần cứng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "cross module reference",
+          "explain": "(cụm danh từ chuyên ngành) tham chiếu chéo giữa các module khác nhau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "top-level scope",
+          "explain": "(cụm danh từ) phạm vi cấp cao nhất trong sơ đồ phân cấp thiết kế"
+        },
+        {
+          "type": "phrase",
+          "phrase": "backdoor load",
+          "explain": "(thuật ngữ chuyên ngành) việc can thiệp/ghi giá trị trực tiếp vào biến nội bộ phần cứng mà không thông qua luồng tín hiệu/giao thức chuẩn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "relative reference",
+          "explain": "(cụm danh từ) tham chiếu tương đối (dựa theo vị trí hiện tại)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "absolute reference",
+          "explain": "(cụm danh từ) tham chiếu tuyệt đối (đi từ gốc $root)"
+        }
+      ]
+    }
+  ]
+}
