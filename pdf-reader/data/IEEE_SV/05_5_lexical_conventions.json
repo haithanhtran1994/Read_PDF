@@ -1,0 +1,1017 @@
+{
+  "book": "SV_IEEE",
+  "chapter": "05_5_lexical_conventions",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "Nội dung trang 73 thuộc Tiêu chuẩn IEEE 1800-2023 cho ngôn ngữ SystemVerilog, mở đầu Chương 5 với chủ đề \"Quy ước từ vựng\" (Lexical conventions). Trang sách này tập trung thiết lập các quy tắc nền tảng về cách phân tích từ vựng (lexical parsing) mà các công cụ tổng hợp và mô phỏng phần cứng phải tuân theo khi đọc tệp mã nguồn SystemVerilog.\r\n\r\nNhững ý chính mà người đọc bắt buộc phải hiểu được sau khi đọc trang này bao gồm:\r\n1. **Phạm vi của Chương 5 (Mục 5.1)**: Giới thiệu khái quát các thành phần từ vựng sẽ được quy định bao gồm: các token từ vựng, các loại hằng số/hằng văn bản (literals: số nguyên, số thực, chuỗi, mảng, cấu trúc, thời gian), các lời gọi phương thức dựng sẵn (built-in methods) và thuộc tính (attributes).\r\n2. **Khái niệm và Phân loại Token từ vựng (Mục 5.2)**: Mã nguồn SystemVerilog được trình biên dịch hiểu là một \"dòng chảy các token\" (stream of lexical tokens). Ngôn ngữ có định dạng tự do (free format) — nghĩa là dấu cách và xuống dòng không có ý nghĩa cú pháp ngoại trừ việc phân tách token (trừ trường hợp của \"escaped identifiers\"). Có 7 loại token cơ bản: Khoảng trắng (White space), Chú thích (Comment), Toán tử (Operator), Số (Number), Chuỗi ký tự (String literal), Tên định danh (Identifier) và Từ khóa (Keyword).\r\n3. **Quy tắc về Khoảng trắng (Mục 5.3)**: Gồm dấu cách (space), tab, dòng mới (newline), sang trang (formfeed) và ký tự kết thúc tệp (EOF). Chúng bị công cụ biên dịch bỏ qua, trừ khi đóng vai trò phân tách token hoặc nằm bên trong hằng chuỗi ký tự.\r\n4. **Cú pháp và Quy tắc Chú thích (Mục 5.4)**: Có 2 loại chú thích là chú thích một dòng (`//`, kết thúc bằng dòng mới) và chú thích khối (`/* ... */`). Quy tắc quan trọng là các chú thích khối không được phép lồng nhau (not nested), và các ký tự chú thích của loại này không có hiệu lực khi nằm bên trong loại kia.\r\n5. **Đặc điểm của Toán tử (Mục 5.5)**: Toán tử gồm các chuỗi ký tự đơn, kép hoặc ba ký tự. Được chia làm toán tử một ngôi (unary - đứng trước toán hạng), toán tử hai ngôi (binary - đứng giữa hai toán hạng) và toán tử điều kiện (conditional - gồm 2 ký tự phân tách 3 toán hạng).\r\n\r\nNhững khái niệm/thuật ngữ cần tìm hiểu thêm:\r\n- **Escaped identifiers (Tên định danh có ký tự thoát)** (Mục 5.6.1): Cần tìm hiểu thêm để biết cách SystemVerilog cho phép sử dụng các ký tự đặc biệt hoặc từ khóa làm tên biến/tín hiệu bằng cách bắt đầu bằng dấu gạch chéo ngược `\\`.\r\n- **Clause 11 (Điều khoản 11 - Operators and expressions)**: Cần đọc thêm điều khoản này để nắm chi tiết về độ ưu tiên toán tử (operator precedence) và cách áp dụng toán tử trong các biểu thức tính toán logic/đại số Boole.",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thống nhất cho Thiết kế, Đặc tả và Kiểm thử Phần cứng\r\n\r\n5. Quy ước từ vựng\r\n\r\n5.1 Tổng quan\r\n\r\nĐiều khoản này mô tả các nội dung sau:\r\n— Các token từ vựng (khoảng trắng, chú thích, toán tử)\r\n— Hằng số nguyên, số thực, chuỗi, mảng, cấu trúc và thời gian (literals)\r\n— Các lời gọi phương thức dựng sẵn\r\n— Thuộc tính\r\n\r\n5.2 Các token từ vựng\r\n\r\nCác tệp văn bản mã nguồn SystemVerilog phải là một dòng chảy các token từ vựng. Một *token từ vựng* sẽ bao gồm một hoặc nhiều ký tự. Bố cục của các token trong tệp mã nguồn sẽ ở dạng tự do; nghĩa là, các ký tự khoảng trắng và dòng mới sẽ không có ý nghĩa về mặt cú pháp ngoại trừ vai trò là các phần phân tách token, ngoại trừ các tên định danh escaped (xem 5.6.1).\r\n\r\nCác loại token từ vựng trong ngôn ngữ như sau:\r\n— Khoảng trắng\r\n— Chú thích\r\n— Toán tử\r\n— Số\r\n— Chuỗi ký tự\r\n— Tên định danh\r\n— Từ khóa\r\n\r\n5.3 Khoảng trắng\r\n\r\nKhoảng trắng sẽ bao gồm các ký tự dành cho dấu cách, tab, dòng mới, sang trang và kết thúc tệp. Các ký tự này sẽ bị bỏ qua ngoại trừ khi chúng phục vụ cho việc phân tách các token từ vựng khác. Tuy nhiên, dấu cách và tab sẽ được coi là các ký tự có ý nghĩa bên trong các chuỗi ký tự (xem 5.9).\r\n\r\n5.4 Chú thích\r\n\r\nSystemVerilog có hai dạng để đưa vào các chú thích. Một *chú thích một dòng* sẽ bắt đầu bằng hai ký tự // và kết thúc bằng một ký tự dòng mới. Một *chú thích khối* sẽ bắt đầu bằng /* và kết thúc bằng */. Các chú thích khối sẽ không được lồng nhau. Token chú thích một dòng // sẽ không có ý nghĩa đặc biệt nào bên trong một chú thích khối, và các token chú thích khối /* và */ sẽ không có ý nghĩa đặc biệt nào bên trong một chú thích một dòng.\r\n\r\n5.5 Toán tử\r\n\r\nCác toán tử là các chuỗi ký tự đơn, kép hoặc ba ký tự và được sử dụng trong các biểu thức. Điều khoản 11 thảo luận về việc sử dụng các toán tử trong biểu thức.\r\n\r\n*Toán tử một ngôi* sẽ xuất hiện ở bên trái toán hạng của chúng. *Toán tử hai ngôi* sẽ xuất hiện ở giữa các toán hạng của chúng. Một *toán tử điều kiện* sẽ có hai ký tự toán tử phân tách ba toán hạng.",
+      "grammar": [
+        {
+          "phrase": "SystemVerilog source text files shall be a stream of lexical tokens",
+          "explain": "cấu trúc thể hiện yêu cầu bắt buộc (normative requirement) trong văn bản tiêu chuẩn kỹ thuật bằng động từ khuyết thiếu \"shall be\""
+        },
+        {
+          "phrase": "spaces and newline characters shall not be syntactically significant other than being token separators, except for escaped identifiers",
+          "explain": "cấu trúc loại trừ phức hợp kết hợp \"other than + V-ing\" (ngoại trừ việc làm gì) và \"except for + N\" (ngoại trừ cái gì)"
+        },
+        {
+          "phrase": "ignored except when they serve to separate other lexical tokens",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian dạng rút gọn dạng bị động (ignored except when...)"
+        },
+        {
+          "phrase": "A conditional operator shall have two operator characters that separate three operands",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"two operator characters\", xác định chức năng phân tách ba toán hạng"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "lexical",
+          "explain": "(tính từ) thuộc về từ vựng, thuộc về cấu trúc từ ngữ trong trình biên dịch"
+        },
+        {
+          "type": "vocab",
+          "phrase": "token",
+          "explain": "(danh từ) đơn vị từ vựng cơ bản nhỏ nhất có nghĩa trong ngôn ngữ lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ) hằng văn bản, giá trị cố định được viết trực tiếp vào mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "operand",
+          "explain": "(danh từ) toán hạng, đối tượng nhận tác động của toán tử"
+        },
+        {
+          "type": "collocation",
+          "phrase": "lexical token",
+          "explain": "(cụm danh từ) token từ vựng, phần tử từ vựng cơ bản của mã nguồn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "free format",
+          "explain": "(cụm danh từ) định dạng tự do, cho phép xuống dòng/dùng khoảng trắng tùy ý"
+        },
+        {
+          "type": "collocation",
+          "phrase": "escaped identifier",
+          "explain": "(cụm danh từ) tên định danh có ký tự thoát (bắt đầu bằng dấu `\\`)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "block comment",
+          "explain": "(cụm danh từ) chú thích khối / chú thích nhiều dòng (`/* ... */`)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "unary operator",
+          "explain": "(cụm danh từ) toán tử một ngôi, tác động lên một toán hạng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary operator",
+          "explain": "(cụm danh từ) toán tử hai ngôi, tác động lên hai toán hạng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "conditional operator",
+          "explain": "(cụm danh từ) toán tử điều kiện (dạng `? :`)"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "Trang 74 của tiêu chuẩn IEEE 1800-2023 trình bày các quy tắc nền tảng về tên định danh (identifiers), từ khóa (keywords) và các tác vụ/hàm hệ thống (system tasks and functions) trong ngôn ngữ SystemVerilog.\r\n\r\nCác nội dung chính người đọc bắt buộc phải nắm vững bao gồm:\r\n1. **Định danh đơn giản (Simple identifiers):** Đặt tên cho các đối tượng bằng chuỗi chữ cái, chữ số, dấu gạch dưới (`_`) và dấu đô-la (`$`). Ký tự đầu tiên bắt buộc phải là chữ cái hoặc dấu gạch dưới (không được bắt đầu bằng chữ số hoặc `$`). Phân biệt chữ hoa và chữ thường. Công cụ biên dịch phải hỗ trợ độ dài tên định danh tối thiểu là 1024 ký tự.\r\n2. **Định danh thoát (Escaped identifiers):** Bắt đầu bằng dấu gạch chéo ngược (`\\`) và kết thúc bằng một khoảng trắng. Cho phép chứa bất kỳ ký tự ASCII in được nào (từ mã decimal 33 đến 126). Dấu `\\` đầu tiên và khoảng trắng kết thúc không được tính là một phần của tên định danh. Đặc biệt, nếu một từ khóa được đặt sau dấu `\\`, nó sẽ được coi là một định danh do người dùng tự định nghĩa chứ không còn là từ khóa của ngôn ngữ.\r\n3. **Từ khóa (Keywords):** Là các tên định danh không thoát được ngôn ngữ quy định sẵn (viết hoàn toàn bằng chữ thường). Không thể dùng từ khóa làm tên định danh đơn giản do người dùng đặt.\r\n4. **Tác vụ và hàm hệ thống (System tasks / System functions):** Luôn bắt đầu bằng dấu đô-la (`$`). Đây là các lệnh phục vụ cho tính năng mô phỏng (simulator functionality) chứ không đại diện cho ngữ nghĩa thiết kế phần cứng (design semantics).\r\n\r\nKiến thức nền cần tìm hiểu thêm:\r\n- **Bảng mã ASCII và Hexadecimal:** Để hiểu phạm vi ký tự từ 33 đến 126 (hoặc 21H đến 7EH) được phép sử dụng trong định danh thoát.\r\n- **Phân biệt \"Design Semantics\" và \"Simulator Functionality\":** Cần hiểu rằng các câu lệnh thiết kế sẽ được tổng hợp thành mạch phần cứng thực tế (RTL synthesis), trong khi các hàm hệ thống (`$display`, `$finish`,...) chỉ dùng để điều khiển quá trình chạy mô phỏng trên phần mềm.",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Mô tả, Quy chuẩn và Kiểm tra Thiết kế Phần cứng Thống nhất\r\n\r\n5.6 Tên định danh, từ khóa và tên hệ thống\r\n\r\nMột *tên định danh* (identifier) được sử dụng để gán cho một đối tượng một tên duy nhất để có thể tham chiếu đến đối tượng đó. Tên định danh có thể là *định danh đơn giản* (simple identifier) hoặc *định danh thoát* (escaped identifier) (xem 5.6.1). Một *từ khóa* (keyword) (xem 5.6.2) không thể được sử dụng làm định danh do người dùng tự định nghĩa.\r\n\r\nKý tự đầu tiên của một định danh đơn giản không được là chữ số hoặc dấu $; nó có thể là một chữ cái hoặc dấu gạch dưới. Tên định danh có phân biệt chữ hoa và chữ thường.\r\n\r\nVí dụ:\r\n`shiftreg_a`\r\n`busa_index`\r\n`error_condition`\r\n`merge_ab`\r\n`_bus3`\r\n`n$657`\r\n\r\nCác bản cài đặt (trình biên dịch) có thể giới hạn độ dài tối đa của tên định danh, nhưng giới hạn này phải đạt ít nhất 1024 ký tự. Nếu tên định danh vượt quá giới hạn độ dài đặc thù của bản cài đặt, một lỗi phải được báo cáo.\r\n\r\n5.6.1 Định danh thoát\r\n\r\n*Định danh thoát* (escaped identifiers) bắt đầu bằng ký tự gạch chéo ngược (`\\`) và kết thúc bằng khoảng trắng. Chúng cung cấp một giải pháp để đưa bất kỳ ký tự ASCII in được nào vào trong tên định danh (ngoại trừ khoảng trắng) (các giá trị thập phân từ 33 đến 126, hoặc 21 đến 7E trong hệ lục thập phân).\r\n\r\nCả ký tự gạch chéo ngược ở đầu lẫn khoảng trắng ở cuối đều không được coi là một phần của tên định danh. Do đó, một định danh thoát `\\cpu3` được xử lý giống hệt như một định danh không thoát `cpu3`. Việc thoát một từ khóa là một ngoại lệ. Một từ khóa được thoát sẽ được xử lý như một định danh do người dùng tự định nghĩa.\r\n\r\nVí dụ:\r\n`\\busa+index`\r\n`\\-clock`\r\n`\\***error-condition***`\r\n`\\net1/\\net2`\r\n`\\{a,b}`\r\n`\\a*(b+c)`\r\n`\\net` // \"net\" là một từ khóa. \"\\net \" là một định danh do người dùng tự định nghĩa.\r\n\r\n5.6.2 Từ khóa\r\n\r\n*Từ khóa* (keywords) là các tên định danh không thoát được định nghĩa trước, dùng để xác định các cấu trúc ngôn ngữ. Một từ khóa chuẩn của SystemVerilog khi đứng sau một ký tự thoát (gạch chéo ngược) sẽ không được diễn giải là một từ khóa.\r\n\r\nTất cả các từ khóa đều được viết bằng chữ thường. Phụ lục B cung cấp danh sách tất cả các từ khóa được định nghĩa. Tiểu mục 22.14 thảo luận về tính tương thích của các từ khóa dự phòng với các phiên bản trước của IEEE Std 1364 và IEEE Std 1800.\r\n\r\n5.6.3 Tác vụ hệ thống và hàm hệ thống\r\n\r\nDấu đô-la (`$`) khởi đầu cho một cấu trúc ngôn ngữ cho phép phát triển các tác vụ hệ thống và hàm hệ thống do người dùng tự định nghĩa. Các cấu trúc hệ thống không thể hiện ngữ nghĩa thiết kế, mà tham chiếu đến chức năng của trình mô phỏng. Tên đi liền sau dấu `$` được diễn giải là một *tác vụ hệ thống* hoặc *hàm hệ thống*.",
+      "grammar": [
+        {
+          "phrase": "An identifier is used to give an object a unique name so that it can be referenced",
+          "explain": "cấu trúc chỉ mục đích \"so that + clause\" đi kèm thể bị động \"is used to give\""
+        },
+        {
+          "phrase": "If an identifier exceeds the implementation-specific length limit, an error shall be reported",
+          "explain": "câu điều kiện loại 1 (điều kiện thực tế) kết hợp với thể bị động \"shall be reported\" thể hiện tính bắt buộc trong văn bản quy chuẩn"
+        },
+        {
+          "phrase": "escaped identifier \\cpu3 is treated the same as a nonescaped identifier cpu3",
+          "explain": "cấu trúc so sánh bằng \"be treated the same as\" (được xử lý/coi giống hệt như)"
+        },
+        {
+          "phrase": "System constructs are not design semantics, but refer to simulator functionality",
+          "explain": "cấu trúc nối song song phủ định/khẳng định \"not A, but B\" (không phải A, mà là B)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "identifier",
+          "explain": "(danh từ) tên định danh, tên dùng để chỉ một đối tượng cụ thể trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "escaped",
+          "explain": "(tính từ) được thoát, sử dụng ký tự đặc biệt (gạch chéo ngược) để bỏ qua ý nghĩa cú pháp thông thường"
+        },
+        {
+          "type": "vocab",
+          "phrase": "keyword",
+          "explain": "(danh từ) từ khóa, từ dành riêng của ngôn ngữ lập trình có ý nghĩa cố định"
+        },
+        {
+          "type": "vocab",
+          "phrase": "whitespace",
+          "explain": "(danh từ) khoảng trắng (bao gồm dấu cách, phím tab, xuống dòng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "construct",
+          "explain": "(danh từ) cấu trúc ngôn ngữ, câu lệnh hoặc thành phần cú pháp trong lập trình"
+        },
+        {
+          "type": "phrase",
+          "phrase": "case sensitive",
+          "explain": "(tính từ) phân biệt chữ hoa và chữ thường"
+        },
+        {
+          "type": "phrase",
+          "phrase": "printable ASCII characters",
+          "explain": "(cụm danh từ) các ký tự ASCII in được (hiển thị được ra màn hình)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "user-defined identifier",
+          "explain": "(cụm danh từ) tên định danh do người lập trình tự đặt"
+        },
+        {
+          "type": "phrase",
+          "phrase": "implementation-specific",
+          "explain": "(tính từ ghép) đặc thù hoặc phụ thuộc vào từng công cụ/trình biên dịch cụ thể"
+        },
+        {
+          "type": "phrase",
+          "phrase": "design semantics",
+          "explain": "(cụm danh từ) ngữ nghĩa thiết kế (mô tả mạch phần cứng thực tế)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "simulator functionality",
+          "explain": "(cụm danh từ) tính năng của trình mô phỏng (phục vụ việc chạy thử nghiệm và kiểm tra)"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "- **Nội dung tổng quát**: Trang này thuộc Tiêu chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog, quy định về cú pháp và quy tắc sử dụng của các nhiệm vụ/hàm hệ thống (System tasks and system functions - Mục 5.6.3), các chỉ thị biên dịch (Compiler directives - Mục 5.6.4), và bắt đầu giới thiệu về định dạng biểu diễn số (Numbers - Mục 5.7).\r\n- **Những ý chính người đọc BẮT BUỘC phải hiểu**:\r\n  1. *Nhiệm vụ và hàm hệ thống (System tasks/functions)*: Bắt đầu bằng ký tự `$`. Ký tự `$` này không được theo sau bởi khoảng trắng và không được dùng dạng escaped identifier. Khác với task thông thường, các task hệ thống chuẩn không tiêu tốn thời gian mô phỏng (do không tiêu tốn thời gian, chúng có thể được dùng ở bất kỳ vị trí nào cho phép hàm void). Người dùng có thể tự định nghĩa thêm qua giao diện PLI hoặc các công cụ hỗ trợ.\r\n  2. *Chỉ thị biên dịch (Compiler directives)*: Bắt đầu bằng dấu nháy huyền (grave accent - ký tự `` ` `` có mã ASCII 0x60). Có hiệu lực ngay khi trình biên dịch đọc được và kéo dài cho đến hết đơn vị biên dịch (compilation unit) đó (ảnh hưởng qua nhiều file trong cùng đơn vị biên dịch), nhưng không ảnh hưởng sang các đơn vị biên dịch khác.\r\n  3. *Biểu diễn số (Numbers)*: Hằng số có thể được khai báo dưới dạng số nguyên (integer constants) hoặc số thực (real constants).\r\n- **Khái niệm/kiến thức nền CẦN tìm hiểu thêm**:\r\n  - *Compilation unit (Đơn vị biên dịch)*: Cần hiểu phạm vi tác động của một đơn vị biên dịch để kiểm soát phạm vi ảnh hưởng của các chỉ thị như `` `define `` hay `` `timescale ``.\r\n  - *PLI (Programming Language Interface)*: Giao diện kết nối giữa mã C/C++ với SystemVerilog để mở rộng các nhiệm vụ/hàm hệ thống tự định nghĩa.\r\n  - *Void function vs. Task*: Khái niệm tiêu tốn thời gian mô phỏng (consume time) trong kiểm thử phần cứng để biết khi nào được gọi nhiệm vụ hệ thống.",
+      "translation": "IEEE Standard for SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Thống nhất\r\n\r\nCú pháp cho các nhiệm vụ hệ thống và hàm hệ thống được đưa ra trong Cú pháp 5-1.\r\n\r\nsystem_tf_call ::=\r\n    system_tf_identifier [ ( list_of_arguments ) ]\r\n  | system_tf_identifier ( data_type [ , expression ] )\r\n  | system_tf_identifier ( expression { , [ expression ] } [ , [ clocking_event ] ] )\r\n\r\nsystem_tf_identifier55 ::= $ [ a-zA-Z0-9_$ ] { [ a-zA-Z0-9_$ ] }\r\n\r\n55) Ký tự $ trong một system_tf_identifier không được theo sau bởi khoảng trắng (white_space). Một system_tf_identifier không được phép ở dạng thoát (escaped).\r\n\r\nCú pháp 5-1—Cú pháp cho các nhiệm vụ hệ thống và hàm hệ thống (trích từ Phụ lục A)\r\n\r\nSystemVerilog định nghĩa một tập hợp chuẩn các nhiệm vụ hệ thống và hàm hệ thống trong tài liệu này (xem Điều 20 và Điều 21). Không giống như các task trong SystemVerilog (xem 13.3), các task hệ thống chuẩn này không tiêu tốn thời gian và có thể được sử dụng ở cùng những vị trí mà các hàm void (xem 13.4) có thể sử dụng.\r\n\r\nCác nhiệm vụ hệ thống và hàm hệ thống bổ sung do người dùng định nghĩa có thể được định nghĩa bằng PLI, như được mô tả trong Điều 36. Các bản cài đặt phần mềm cũng có thể xác định các nhiệm vụ hệ thống và hàm hệ thống bổ sung, có thể mang tính đặc thù của công cụ (xem Phụ lục D để biết một số nhiệm vụ hệ thống và hàm hệ thống bổ sung phổ biến). Các nhiệm vụ hệ thống và hàm hệ thống bổ sung không phải là một phần của tiêu chuẩn này.\r\n\r\nVí dụ:\r\n\r\n$display (\"display a message\");\r\n\r\n$finish;\r\n\r\n5.6.4 Các chỉ thị biên dịch (Compiler directives)\r\n\r\nKý tự ` (giá trị ASCII 0x60, gọi là dấu nháy huyền - grave accent) giới thiệu một cấu trúc ngôn ngữ được sử dụng để thực thi các chỉ thị biên dịch. Hành vi của trình biên dịch được quy định bởi một chỉ thị biên dịch sẽ có hiệu lực ngay khi trình biên dịch đọc chỉ thị đó. Chỉ thị sẽ giữ nguyên hiệu lực cho phần còn lại của đơn vị biên dịch (xem 3.12.1) trừ khi một chỉ thị biên dịch khác quy định khác. Do đó, một chỉ thị biên dịch trong một tệp mô tả có thể kiểm soát hành vi biên dịch trong nhiều tệp mô tả. Một chỉ thị biên dịch sẽ không ảnh hưởng đến các đơn vị biên dịch khác.\r\n\r\nVí dụ:\r\n\r\n`define wordsize\r\n\r\nSystemVerilog định nghĩa một tập hợp chuẩn các chỉ thị biên dịch trong tài liệu này (xem Điều 22). Các bản cài đặt phần mềm cũng có thể xác định các chỉ thị biên dịch bổ sung, có thể mang tính đặc thù của công cụ (xem Phụ lục E để biết một số chỉ thị biên dịch bổ sung phổ biến). Các chỉ thị biên dịch bổ sung không phải là một phần của tiêu chuẩn này.\r\n\r\n5.7 Các số (Numbers)\r\n\r\nCác số hằng có thể được xác định dạng hằng số nguyên (xem 5.7.1) hoặc hằng số thực (xem 5.7.2). Cú pháp chính thức cho các số được liệt kê trong Cú pháp 5-2.",
+      "grammar": [
+        {
+          "phrase": "shall not be followed by white_space",
+          "explain": "câu bị động chứa động từ khuyết thiếu (modal passive verb) \"shall not be\", diễn tả quy định/yêu cầu bắt buộc mang tính tiêu chuẩn kỹ thuật"
+        },
+        {
+          "phrase": "can be used in the same places void functions (see 13.4) can be used",
+          "explain": "mệnh đề so sánh vị trí, trong đó có mệnh đề quan hệ ẩn trạng từ \"where/that\" sau \"places\" (in the same places [where] void functions can be used)"
+        },
+        {
+          "phrase": "Software implementations can also specify additional system tasks and system functions, which may be tool-specific",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"which\" bổ nghĩa cho toàn bộ cụm danh từ phía trước"
+        },
+        {
+          "phrase": "dictated by a compiler directive",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân từ (past participle clause) bổ nghĩa cho danh từ \"The compiler behavior\""
+        },
+        {
+          "phrase": "unless a different compiler directive specifies otherwise",
+          "explain": "mệnh đề điều kiện với \"unless\" (trừ khi), diễn tả trường hợp ngoại lệ làm thay đổi quy tắc áp dụng chỉ thị biên dịch"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "system task",
+          "explain": "(danh từ) nhiệm vụ hệ thống trong Verilog/SystemVerilog, thực hiện các thao tác xử lý của trình mô phỏng (bắt đầu bằng dấu $)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "system function",
+          "explain": "(danh từ) hàm hệ thống, trả về giá trị sau khi thực thi (bắt đầu bằng dấu $)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directive",
+          "explain": "(danh từ) chỉ thị biên dịch, điều hướng quá trình dịch mã nguồn (bắt đầu bằng dấu `)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compilation unit",
+          "explain": "(danh từ) đơn vị biên dịch, tập hợp một hoặc nhiều file mã nguồn được biên dịch cùng nhau"
+        },
+        {
+          "type": "phrase",
+          "phrase": "grave accent",
+          "explain": "(danh từ) dấu nháy huyền (ký tự ` trong bảng mã ASCII 0x60)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "take effect",
+          "explain": "(động từ) có hiệu lực, bắt đầu phát huy tác dụng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "escaped",
+          "explain": "(tính từ) dạng thoát (dùng ký tự \\ để biến một chuỗi thành định danh hợp lệ trong Verilog)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "tool-specific",
+          "explain": "(tính từ) đặc thù cho từng công cụ/phần mềm cụ thể, không thuộc chuẩn chung"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "- **Nội dung tổng quát:** Trang sách này nằm trong Mục 5.7.1 của Chuẩn IEEE Standard 1800-2023 cho SystemVerilog, trình bày quy tắc chi tiết về việc khai báo và biểu diễn các \"Integer literal constants\" (hằng số nguyên dạng chữ số/văn bản). Nội dung bao gồm các dạng cơ số, cú pháp khai báo, quy tắc gán dấu (signed/unsigned), cách xử lý các bit đặc biệt (`x` - không xác định, `z` - trở kháng cao), cũng như cơ chế đệm bit (padding) và cắt ngắn bit (truncation).\r\n\r\n- **Những ý chính BẮT BUỘC phải hiểu:**\r\n  1. **Hai hình thức biểu diễn:** \r\n     + *Hằng số thập phân đơn giản:* Không có kích thước hay chỉ định cơ số (mặc định là số có dấu `signed`, độ rộng tối thiểu 32 bit).\r\n     + *Hằng số có cơ số (based literal constant):* Gồm tối đa 3 thành phần (token): `[kích thước]'[s][cơ số] [giá trị]`.\r\n  2. **Cơ số và Ký hiệu có dấu:** Các cơ số hợp lệ gồm Thập phân (`d`), Thập lục phân (`h`), Bát phân (`o`), và Nhị phân (`b`). Ký tự `s` hoặc `S` đứng trước ký tự cơ số để chỉ định số có dấu (signed). Các ký tự cơ số và chữ số hex (a-f) không phân biệt chữ hoa/thường.\r\n  3. **Vị trí của dấu cộng/trừ:** Toán tử `+` hoặc `-` đứng trước hằng số là toán tử một ngôi. Đặt `+` hoặc `-` giữa phần cơ số và dãy chữ số là lỗi cú pháp. Số âm biểu diễn ở dạng mã bù hai (two's-complement).\r\n  4. **Ký tự `x` và `z`:** Đại diện cho giá trị chưa biết (`x`) và trở kháng cao (`z`). Ký tự `x`/`z` biểu thị 4 bit trong hệ hex, 3 bit trong hệ octal và 1 bit trong hệ binary.\r\n  5. **Quy tắc đệm và cắt bit (Padding & Truncation):** \r\n     + Nếu độ rộng thực tế nhỏ hơn kích thước khai báo: đệm thêm `0` vào bên trái (hoặc đệm `x`/`z` nếu bit ngoài cùng bên trái là `x`/`z`).\r\n     + Nếu độ rộng thực tế lớn hơn kích thước khai báo: bị cắt bỏ bớt các bit thừa ở bên trái.\r\n  6. **Hằng số không khai báo kích thước (Unsized numbers):** Có độ rộng tối thiểu 32 bit, hoặc đủ số bit nhỏ nhất cần thiết để đại diện cho giá trị đó (bao gồm bit dấu nếu là số signed).\r\n\r\n- **Những khái niệm/kiến thức nền CẦN tìm hiểu thêm:**\r\n  - *Mã bù hai (Two's-complement):* Cần hiểu cách máy tính lưu trữ và tính toán số nguyên âm dưới dạng bit để nắm được cách SystemVerilog biểu diễn giá trị âm.\r\n  - *Hệ logic 4 giá trị (4-value logic standard: 0, 1, X, Z):* Cần hiểu bản chất của trạng thái không xác định (`x`) và trở kháng cao (`z`) trong mô phỏng phần cứng vi mạch để áp dụng đúng quy tắc đệm bit mở rộng.",
+      "translation": "**1800-2023**\r\nIEEE Standard for SystemVerilog—Unified Hardware Design, Specification, and Verification Language\r\n\r\n**5.7.1 Hằng số nguyên dạng chữ (Integer literal constants)**\r\n\r\n*Integer literal constants* (Các hằng số nguyên dạng chữ) có thể được chỉ định ở định dạng thập phân (decimal), thập lục phân (hexadecimal), bát phân (octal), hoặc nhị phân (binary).\r\n\r\nCó hai dạng để biểu diễn hằng số nguyên. Dạng thứ nhất là một số thập phân đơn giản, được chỉ định như một chuỗi các chữ số từ `0` đến `9`, có thể tùy chọn bắt đầu bằng một toán tử một ngôi cộng hoặc trừ. Dạng thứ hai chỉ định một *hằng số nguyên dựa trên cơ số* (based literal constant), được cấu thành từ tối đa ba phần (token)—một hằng số kích thước tùy chọn, một ký tự dấu nháy đơn (`'`, ASCII 0x27) được theo sau bởi một ký tự định dạng cơ số, và các chữ số biểu diễn giá trị của số đó. Việc thay thế macro cho các phần này là hợp lệ.\r\n\r\nPhần đầu tiên, hằng số kích thước, sẽ chỉ định kích thước của hằng số nguyên tính theo số bit chính xác của nó. Nó phải được chỉ định dưới dạng một số thập phân không dấu khác 0. Ví dụ, chỉ định kích thước cho hai chữ số thập lục phân là 8 vì một chữ số thập lục phân yêu cầu 4 bit.\r\n\r\nPhần thứ hai, định dạng cơ số, sẽ bao gồm một chữ cái không phân biệt chữ hoa chữ thường để chỉ định cơ số cho số đó, tùy chọn đứng trước là ký tự đơn `s` (hoặc `S`) để chỉ định một lượng có dấu, đứng trước bởi ký tự dấu nháy đơn. Các chỉ định cơ số hợp lệ là `d`, `D`, `h`, `H`, `o`, `O`, `b`, hoặc `B` tương ứng cho các cơ số thập phân, thập lục phân, bát phân, và nhị phân.\r\n\r\nKý tự dấu nháy đơn và ký tự định dạng cơ số không được tách nhau bởi bất kỳ khoảng trắng nào.\r\n\r\nPhần thứ ba, một số không dấu, sẽ bao gồm các chữ số hợp lệ đối với định dạng cơ số đã chỉ định. Phần số không dấu phải đi liền sau định dạng cơ số, tùy chọn có thể đứng trước bởi khoảng trắng. Các chữ số thập lục phân từ `a` đến `f` sẽ không phân biệt chữ hoa chữ thường.\r\n\r\nCác số thập phân đơn giản không có kích thước và định dạng cơ số sẽ được xử lý như các *số nguyên có dấu* (signed integers), trong khi các số được chỉ định với định dạng cơ số sẽ được xử lý như các số nguyên có dấu nếu ký hiệu `s` được bao gồm, hoặc là *số nguyên không dấu* (unsigned integers) nếu chỉ sử dụng định dạng cơ số. Ký hiệu `s` không làm ảnh hưởng đến mẫu bit được chỉ định, mà chỉ ảnh hưởng đến cách diễn giải mẫu bit đó.\r\n\r\nMột toán tử cộng hoặc trừ đứng trước hằng số kích thước là một toán tử cộng hoặc trừ một ngôi. Một toán tử cộng hoặc trừ nằm giữa định dạng cơ số và số là cú pháp không hợp lệ.\r\n\r\n*Số âm* (Negative numbers) sẽ được biểu diễn ở dạng mã bù hai.\r\n\r\nMột ký tự `x` đại diện cho *giá trị không xác định* (unknown value) trong các hằng số nhị phân, bát phân và thập lục phân. Một ký tự `z` đại diện cho *giá trị trở kháng cao* (high-impedance value). Xem 6.3 để biết thêm thảo luận về tập giá trị của SystemVerilog. Một ký tự `x` sẽ đặt 4 bit thành không xác định trong cơ số thập lục phân, 3 bit trong cơ số bát phân, và 1 bit trong cơ số nhị phân. Tương tự, một ký tự `z` sẽ đặt 4 bit, 3 bit, và 1 bit tương ứng thành giá trị trở kháng cao.\r\n\r\nNếu kích thước của số không dấu nhỏ hơn kích thước được chỉ định cho hằng số, số không dấu đó sẽ được đệm thêm các số 0 vào bên trái. Nếu bit ngoài cùng bên trái trong số không dấu là một ký tự `x` hoặc `z`, thì ký tự `x` hoặc `z` tương ứng sẽ được sử dụng để đệm vào bên trái. Nếu kích thước của số không dấu lớn hơn kích thước được chỉ định cho hằng số, số không dấu đó sẽ bị cắt bỏ bớt từ bên trái.\r\n\r\nSố lượng bit tạo nên một số không chỉ định kích thước (là một số thập phân đơn giản hoặc một số có chỉ định cơ số nhưng không có chỉ định kích thước) phải có ít nhất 32 bit. Một số không chỉ định kích thước yêu cầu nhiều hơn 32 bit phải có ít nhất độ rộng tối thiểu cần thiết để biểu diễn chính xác giá trị, bao gồm cả bit dấu nếu số đó là số có dấu. Ví dụ, `'h7_0000_0000`, một hằng số thập lục phân *không dấu*, sẽ có ít nhất 35 bit. `4294967296` ($2^{32}$), một số nguyên *có dấu* dương, sẽ được biểu diễn bằng ít nhất 34 bit.\r\n\r\nCác hằng số không chỉ định kích thước và không dấu mà trong đó bit bậc cao là không xác định (`x` hoặc `X`) hoặc trở kháng cao (`z` hoặc `Z`) sẽ được mở rộng bằng kích thước của biểu thức chứa hằng số đó.",
+      "grammar": [
+        {
+          "phrase": "The first form is a simple decimal number, which shall be specified as a sequence of digits 0 through 9, optionally starting with a plus or minus unary operator",
+          "explain": "Mệnh đề quan hệ không xác định \"which shall be specified...\" bổ nghĩa cho \"a simple decimal number\", lồng ghép cụm hiện tại phân từ \"optionally starting with...\" đóng vai trò bổ ngữ giảm lược."
+        },
+        {
+          "phrase": "The second form specifies a based literal constant, which shall be composed of up to three tokens—an optional size constant, an apostrophe character (', ASCII 0x27) followed by a base format character, and the digits representing the value of the number",
+          "explain": "Mệnh đề quan hệ giải thích cho \"based literal constant\", sử dụng dạng bị động \"shall be composed of\", kết hợp phân từ quá khứ \"followed by\" bổ nghĩa cho cụm danh từ đằng trước."
+        },
+        {
+          "phrase": "Simple decimal numbers without the size and the base format shall be treated as signed integers, whereas the numbers specified with the base format shall be treated as signed integers if the s designator is included or as unsigned integers if the base format only is used",
+          "explain": "Cấu trúc câu phức nối bằng liên từ đối lập \"whereas\", sử dụng thể bị động quy chuẩn IEEE (\"shall be treated as\") và mệnh đề điều kiện \"if\" để phân tách các trường hợp xử lý cú pháp."
+        },
+        {
+          "phrase": "If the size of the unsigned number is smaller than the size specified for the literal constant, the unsigned number shall be padded to the left with zeros",
+          "explain": "Cấu trúc câu điều kiện loại 1 (Conditional Type 1) mô tả quy tắc xử lý dữ liệu logic trong chuẩn kỹ thuật."
+        },
+        {
+          "phrase": "Unsized unsigned literal constants where the high-order bit is unknown (x or X) or high-impedance (z or Z) shall be extended to the size of the expression containing the literal constant",
+          "explain": "Mệnh đề quan hệ trạng từ \"where...\" bổ nghĩa cho cụm danh từ đóng vai trò chủ ngữ, kèm câu bị động \"shall be extended\" và phân từ \"containing\" bổ nghĩa cho \"expression\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ/tính từ) dạng chữ/nguyên văn; trong lập trình nghĩa là hằng số được viết trực tiếp dưới dạng giá trị cụ thể trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "apostrophe",
+          "explain": "(danh từ) dấu nháy đơn (')"
+        },
+        {
+          "type": "vocab",
+          "phrase": "truncation",
+          "explain": "(danh từ) sự cắt ngắn, việc bỏ bớt các bit hoặc chữ số ngoài cùng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "impedance",
+          "explain": "(danh từ) trở kháng (trong kỹ thuật điện/điện tử)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "integer literal constants",
+          "explain": "các hằng số nguyên dạng chữ / biểu diễn số nguyên dạng văn bản"
+        },
+        {
+          "type": "collocation",
+          "phrase": "based literal constant",
+          "explain": "hằng số biểu diễn theo cơ số (nhị phân, hex, bát phân...)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "case insensitive",
+          "explain": "không phân biệt chữ hoa chữ thường"
+        },
+        {
+          "type": "collocation",
+          "phrase": "two's-complement form",
+          "explain": "dạng biểu diễn mã bù hai (dùng cho số nguyên âm)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "high-impedance value",
+          "explain": "giá trị trở kháng cao (trạng thái Z trong thiết kế mạch bán dẫn)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "macro-substitute",
+          "explain": "thay thế đại hình / thay thế macro (trước khi biên dịch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "high-order bit",
+          "explain": "bit bậc cao (bit nằm ở vị trí trọng số lớn hơn / bên trái)"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Trang này thuộc Tiêu chuẩn IEEE 1800-2023 cho ngôn ngữ SystemVerilog, chi tiết hóa các quy tắc cú pháp và ngữ nghĩa khi biểu diễn các hằng số số nguyên (literal integer numbers).\r\n\r\nNội dung trọng tâm mà người đọc cần nắm vững bao gồm:\r\n1. Quy tắc giá trị 1-bit không kích thước (Unsized single-bit values): Khi sử dụng dấu nháy đơn `'` phía trước các giá trị `0`, `1`, `X`, `x`, `Z`, `z` mà không có ký tự chỉ hệ cơ số, tất cả các bit của biến nhận sẽ được gán bằng giá trị đó. Trong ngữ cảnh tự xác định (self-determined context), nó mặc định có độ rộng 1 bit.\r\n2. Ý nghĩa của ký tự dấu hỏi (`?`): Ký tự `?` là một cách viết thay thế cho trạng thái trở kháng cao `z` trong SystemVerilog nhằm tăng tính dễ đọc cho các điều kiện \"không quan tâm\" (do-not-care). Một ký tự `?` đại diện cho 4 bit `z` ở hệ 16 (hex), 3 bit `z` ở hệ 8 (octal) và 1 bit `z` ở hệ nhị phân.\r\n3. Quy tắc đối với hằng số thập phân: Trong số thập phân không được chứa các ký tự `x`, `z`, hay `?`, trừ trường hợp đặc biệt token đó chỉ chứa duy nhất 1 chữ số (ví dụ 'd x) để biểu thị toàn bộ các bit là `x` hoặc `z`.\r\n4. Ký tự gạch dưới (`_`): Được phép đặt ở bất kỳ vị trí nào trong chuỗi số để tăng tính dễ đọc (trừ vị trí đầu tiên) và sẽ bị trình biên dịch bỏ qua.\r\n5. Cú pháp số có dấu (Signed) & đệm trái tự động (Left padding): Minh họa các ví dụ về cách ghi số không kích thước, có kích thước, số bù 2 (two's-complement) và cơ chế tự động đệm bit 0 hoặc bit mở rộng dấu (sign-extension/x/z) vào bên trái khi gán giá trị cho một biến có độ rộng lớn hơn.\r\n\r\nKiến thức nền cần tìm hiểu thêm: Các hệ cơ số (Hexadecimal, Octal, Binary, Decimal), khái niệm 4 trạng thái logic trong thiết kế vi mạch (0, 1, X - Unknown, Z - High Impedance), biểu diễn số bù 2 (Two's-complement), và các ngữ cảnh xác định độ rộng bit (Self-determined context) trong Verilog/SystemVerilog.",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Biểu diễn, Mô tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nMột giá trị 1-bit không dấu và không kích thước có thể được xác định bằng cách đặt một dấu nháy đơn ( ' ) phía trước giá trị 1-bit đó, nhưng không có ký tự chỉ hệ cơ số. Tất cả các bit của giá trị không kích thước sẽ được thiết lập bằng giá trị của bit đã chỉ định. Trong một ngữ cảnh tự xác định, nó sẽ có độ rộng là 1 bit.\r\n\r\n'0, '1, 'X, 'x, 'Z, 'z // gán tất cả các bit thành giá trị được chỉ định\r\n\r\nViệc sử dụng x và z trong việc xác định giá trị của một số là không phân biệt chữ hoa chữ thường.\r\n\r\nKhi được sử dụng trong một số, ký tự dấu hỏi (?) là một hình thức thay thế trong SystemVerilog cho ký tự z. Nó thiết lập 4 bit thành giá trị trở kháng cao trong các số thập lục phân, 3 bit trong các số bát phân, và 1 bit trong các số nhị phân. Ký tự dấu hỏi có thể được sử dụng để tăng tính dễ đọc trong các trường hợp mà giá trị trở kháng cao là một điều kiện không quan tâm (do-not-care). Xem phần thảo luận về casez và casex trong 12.5.1. Ký tự dấu hỏi cũng được sử dụng trong các bảng trạng thái UDP. Xem Bảng 29-1 trong 29.3.6.\r\n\r\nTrong một hằng số thập phân, token số không dấu sẽ không được chứa bất kỳ chữ số x, z, hoặc ? nào, trừ khi có chính xác một chữ số trong token đó, điều này chỉ ra rằng mọi bit trong hằng số thập phân đó đều là x hoặc z.\r\n\r\nKý tự dấu gạch dưới (_) là hợp lệ ở bất kỳ đâu trong một số ngoại trừ vị trí ký tự đầu tiên. Ký tự dấu gạch dưới sẽ bị bỏ qua. Tính năng này có thể được sử dụng để phân tách các số dài nhằm mục đích dễ đọc.\r\n\r\nMột số ví dụ về việc chỉ định các hằng số số nguyên như sau:\r\n\r\nVí dụ 1: Các hằng số không có kích thước\r\n659 // là một số thập phân\r\n'h 837FF // là một số thập lục phân\r\n'o7460 // là một số bát phân\r\n4af // là không hợp lệ (định dạng thập lục phân yêu cầu 'h)\r\n\r\nVí dụ 2: Các hằng số có kích thước\r\n4'b1001 // là một số nhị phân 4-bit\r\n5 'D 3 // là một số thập phân 5-bit\r\n3'b01x // là một số 3-bit với bit có ý nghĩa thấp nhất không xác định\r\n// bit có ý nghĩa không xác định\r\n12'hx // là một số không xác định 12-bit\r\n16'hz // là một số trở kháng cao 16-bit\r\n\r\nVí dụ 3: Sử dụng dấu với các hằng số\r\n8 'd -6 // đây là cú pháp không hợp lệ\r\n-8 'd 6 // điều này xác định mã bù 2 của 6, lưu trữ trong 8 bit—tương đương với -(8'd 6)\r\n4 'shf // điều này biểu thị số 4-bit '1111', được hiểu là số bù 2, hoặc '-1'. Điều này tương đương với -4'h 1\r\n-4 'sd15 // điều này tương đương với -(-4'd 1), hoặc '0001'\r\n16'sd? // giống như 16'sbz\r\n\r\nVí dụ 4: Tự động đệm trái các hằng số\r\nlogic [11:0] a, b, c, d;\r\nlogic [84:0] e, f, g;\r\ninitial begin\r\n    a = 'h x; // tạo ra xxx\r\n    b = 'h 3x; // tạo ra 03x\r\n\r\n78\r\nSử dụng có bản quyền được cấp phép giới hạn cho: Hai Tra. Tải về vào ... từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "preceding the single-bit value with an apostrophe ( ' ), but without the base specifier",
+          "explain": "cấu trúc danh động từ (gerund phrase) làm tân ngữ cho giới từ \"by\", chỉ phương thức thực hiện hành động"
+        },
+        {
+          "phrase": "The question mark can be used to enhance readability in cases where the high-impedance value is a do-not-care condition",
+          "explain": "câu bị động với động từ khuyết thiếu (can be used) kết hợp với mệnh đề quan hệ chỉ hoàn cảnh (in cases where...)"
+        },
+        {
+          "phrase": "shall not contain any x, z, or ? digits, unless there is exactly one digit in the token, indicating that every bit in the decimal literal constant is x or z",
+          "explain": "cấu trúc câu điều kiện với \"unless\" kết hợp mệnh đề phân từ hiện tại (\"indicating that...\") dùng để giải thích ý nghĩa của trường hợp ngoại lệ"
+        },
+        {
+          "phrase": "The underscore character (_) shall be legal anywhere in a number except as the first character",
+          "explain": "cấu trúc chỉ sự ngoại lệ sử dụng \"except as\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(tính từ/danh từ) dạng hằng số ghi trực tiếp giá trị trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "unsized",
+          "explain": "(tính từ) không khai báo độ rộng (kích thước bit) cố định"
+        },
+        {
+          "type": "vocab",
+          "phrase": "padded",
+          "explain": "(động từ/tính từ) được đệm thêm (bit) vào cho đủ độ rộng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "two's-complement",
+          "explain": "(danh từ) mã bù 2 (phương pháp biểu diễn số nguyên có dấu trong máy tính)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "self-determined context",
+          "explain": "ngữ cảnh tự xác định (ngữ cảnh mà độ rộng bit của biểu thức được quyết định bởi chính biểu thức đó)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "high-impedance value",
+          "explain": "giá trị trở kháng cao (trạng thái Z trong điện tử/logic)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "do-not-care condition",
+          "explain": "điều kiện không quan tâm (trạng thái Don't Care X/Z trong bảng sự thật)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "least significant bit",
+          "explain": "bit có ý nghĩa thấp nhất (bit LSB, bit ở vị trí phải cùng)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "automatic left padding",
+          "explain": "sự tự động đệm bit vào phía bên trái (khi gán giá trị số có kích thước nhỏ hơn vào biến có kích thước lớn hơn)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "case insensitive",
+          "explain": "không phân biệt chữ hoa chữ thường (hoa hay thường đều có giá trị như nhau)"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "Trang 79 của tài liệu chuẩn IEEE Std 1800-2023 (ngôn ngữ SystemVerilog) tiếp tục trình bày về cú pháp biểu diễn các hằng số (literal constants) trong thiết kế phần cứng, tập trung vào số nguyên và giới thiệu quy tắc cho số thực.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n1. **Tự động đệm trái bằng giá trị đơn bit (Automatic left padding):** Trong SystemVerilog, các cú pháp `'0`, `'1`, `'x`, `'z` cho phép tự động lấp đầy tất cả các bit của biến vector (ví dụ kiểu `logic [15:0]`) bằng giá trị tương ứng mà không cần khai báo rõ độ dài.\r\n2. **Sử dụng dấu gạch dưới (`_`):** Dấu gạch dưới được phép chèn vào giữa các chữ số trong hằng số (nguyên hoặc thực) để tăng tính dễ đọc và sẽ hoàn toàn bị trình biên dịch bỏ qua.\r\n3. **Đặc tính và hành vi mở rộng dấu của hằng số nguyên:** Hằng số nguyên là một vector kiểu `logic` phạm vi `[n-1:0]`. Các hằng số có dấu hoặc hằng số âm có kích thước xác định sẽ tự động được mở rộng dấu (sign-extended) khi gán cho một đối tượng kiểu `logic`, bất kể kiểu của đối tượng đó có khai báo `signed` hay không.\r\n4. **Hằng số thực (Real literal constants - Mục 5.7.2):** Biểu diễn theo chuẩn số thực phẩy động độ chính xác kép IEEE Std 754.\r\n5. **Cú pháp hợp lệ của số thực:** Số thực có thể viết ở dạng thập phân hoặc dạng khoa học (dùng `e` hoặc `E`). Quy tắc bắt buộc là khi dùng dấu chấm thập phân (`.`), BẮT BỘC phải có ít nhất một chữ số nằm ở mỗi bên của dấu chấm. Các dạng viết thiếu chữ số như `.12`, `9.` hay `4.E3` đều bị coi là không hợp lệ.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Chuẩn IEEE 754 (Double-precision floating-point):** Cần nắm cách máy tính biểu diễn số thực 64-bit để hiểu chính xác độ chính xác và giới hạn của kiểu `real`.\r\n- **Mở rộng dấu (Sign-extension):** Nguyên lý sao chép bit dấu (MSB) khi chuyển đổi một số có dấu từ độ rộng bit nhỏ sang độ rộng bit lớn hơn trong thiết kế vi mạch.",
+      "translation": "c = 'h z3;     // tạo ra zz3\r\nd = 'h 0z3;    // tạo ra 0z3\r\n\r\ne = 'h5;       // tạo ra {82{1'b0},3'b101}\r\nf = 'hx;       // tạo ra {85{1'hx}}\r\ng = 'hz;       // tạo ra {85{1'hz}}\r\nend\r\n\r\nVí dụ 5: Tự động đệm bên trái của các hằng số bằng một giá trị đơn bit\r\n\r\nlogic [15:0] a, b, c, d;\r\na = '0;   // gán tất cả 16 bit bằng 0\r\nb = '1;   // gán tất cả 16 bit bằng 1\r\nc = 'x;   // gán tất cả 16 bit bằng x\r\nd = 'z;   // gán tất cả 16 bit bằng z\r\n\r\nVí dụ 6: Dấu gạch dưới trong các hằng số\r\n\r\n27_195_000             // số thập phân không xác định kích thước 27195000\r\n16'b0011_0101_0001_1111 // số nhị phân 16 bit\r\n32 'h 12ab_f001        // số thập lục phân 32 bit\r\n\r\nMột hằng số nguyên là một vector (xem mục 7.4) kiểu logic với phạm vi [n-1:0], trong đó n là số lượng bit trong hằng số, như được chỉ định ở trên. Vector này có dấu nếu hằng số có dấu, và không có dấu trong trường hợp ngược lại. Các hằng số âm có kích thước xác định và các hằng số có dấu có kích thước xác định sẽ được mở rộng dấu khi được gán cho một đối tượng dữ liệu kiểu logic, bất kể bản thân kiểu dữ liệu đó có dấu hay không.\r\n\r\n5.7.2 Hằng số thực\r\n\r\nCác hằng số thực phải được biểu diễn theo mô tả của IEEE Std 754, một tiêu chuẩn IEEE dành cho các số thực phẩy động độ chính xác kép.\r\n\r\nSố thực có thể được xác định bằng ký hiệu thập phân (ví dụ: 14.72) hoặc ký hiệu khoa học (ví dụ: 39e8, đại diện cho 39 nhân với 10 mũ 8). Các số thực được biểu diễn với một dấu chấm thập phân phải có ít nhất một chữ số ở mỗi bên của dấu chấm thập phân.\r\n\r\nVí dụ:\r\n\r\n1.2\r\n0.1\r\n2394.26331\r\n1.2E12 (ký hiệu số mũ có thể là e hoặc E)\r\n1.30e-2\r\n0.1e-0\r\n23E10\r\n29E-2\r\n236.123_763_e-12 (các dấu gạch dưới bị bỏ qua)\r\n\r\nCác dạng số thực sau đây là không hợp lệ vì chúng không có ít nhất một chữ số ở mỗi bên của dấu chấm thập phân:\r\n\r\n.12\r\n9.\r\n4.E3\r\n.2e-7",
+      "grammar": [
+        {
+          "phrase": "Sized negative literal constant numbers and sized signed literal constant numbers are sign-extended when assigned to a data object of type logic",
+          "explain": "Mệnh đề bị động (passive voice) \"are sign-extended\" kết hợp với mệnh đề thời gian rút gọn \"when assigned to...\" (rút gọn từ \"when they are assigned to...\")."
+        },
+        {
+          "phrase": "regardless of whether the type itself is signed",
+          "explain": "Cấu trúc \"regardless of whether...\" kết hợp mệnh đề danh từ để diễn tả sự bất chấp/không phụ thuộc vào điều kiện nào đó."
+        },
+        {
+          "phrase": "The real literal constant numbers shall be represented as described by IEEE Std 754",
+          "explain": "Thể bị động sử dụng động từ khuyết thiếu \"shall be\" dùng trong các chuẩn mực kỹ thuật để thể hiện quy định bắt buộc."
+        },
+        {
+          "phrase": "39e8, which indicates 39 multiplied by 10 to the eighth power",
+          "explain": "Mệnh đề quan hệ không xác định (non-defining relative clause) \"which indicates...\" đi kèm với cụm phân từ quá khứ rút gọn \"multiplied by...\"."
+        },
+        {
+          "phrase": "Real numbers expressed with a decimal point shall have at least one digit on each side of the decimal point",
+          "explain": "Cụm phân từ quá khứ \"expressed with a decimal point\" làm mệnh đề quan hệ rút gọn bổ nghĩa cho chủ ngữ \"Real numbers\"."
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "left padding",
+          "explain": "sự đệm/chèn bit vào phía bên trái của một chuỗi nhị phân"
+        },
+        {
+          "type": "vocab",
+          "phrase": "sign-extended",
+          "explain": "(động từ/tính từ) được mở rộng dấu; hành vi sao chép bit dấu (MSB) sang các bit cao hơn để giữ nguyên giá trị đại số"
+        },
+        {
+          "type": "phrase",
+          "phrase": "regardless of whether",
+          "explain": "bất kể việc... có hay không, không phụ thuộc vào việc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "double-precision floating-point numbers",
+          "explain": "các số thực phẩy động độ chính xác kép (chuẩn 64-bit)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "scientific notation",
+          "explain": "ký hiệu khoa học (dạng viết số dùng lũy thừa của 10, ví dụ 1.5e3)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "decimal notation",
+          "explain": "ký hiệu thập phân (dạng viết số thực thông thường có dấu chấm thập phân)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "to the eighth power",
+          "explain": "mũ 8 (lũy thừa bậc 8)"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "**Nội dung tổng quát:**\r\nTrang sách thuộc chuẩn IEEE 1800-2023 của ngôn ngữ SystemVerilog, trình bày quy định về các kiểu biểu diễn hằng số (literals) gồm: kiểu số thực mặc định (real), hằng số thời gian (time literals), và hằng số chuỗi (string literals).\r\n\r\n**Ý chính bắt buộc phải hiểu:**\r\n1. **Kiểu số thực mặc định & Ép kiểu:** Mặc định các số thập phân (fixed-point) và số dạng mũ (exponent) có kiểu dữ liệu là `real`. Để chuyển thành kiểu `shortreal`, cần sử dụng cú pháp ép kiểu (casting) dạng `shortreal'(giá_trị)`.\r\n2. **Hằng số thời gian (Time literals):** Được viết bằng số nguyên hoặc số thực thập phân đi liền ngay sau là đơn vị thời gian (không có khoảng trắng), gồm: `fs`, `ps`, `ns`, `us`, `ms`, `s`. Giá trị thời gian này được hiểu là kiểu `realtime` và tự động quy đổi (scale) theo đơn vị thời gian hiện tại của hệ thống.\r\n3. **Hằng số chuỗi (String literals):** \r\n   - Có hai dạng: chuỗi ngoặc kép đơn (`\"...\"`) và chuỗi ngoặc kép ba (`\"\"\"...\"\"\"`). Ngôn ngữ không giới hạn độ dài hằng số chuỗi.\r\n   - Chuỗi ngoặc kép đơn phải viết trên một dòng duy nhất. Nếu muốn xuống dòng trong mã nguồn mà không ngắt chuỗi, phải đặt dấu xược ngược (`\\`) ở cuối dòng.\r\n   - Các ký tự đặc biệt hoặc ký tự không in được được biểu diễn qua chuỗi ký tự thoát (escape sequence).\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Ký hiệu BNF (Syntax 5-3 / Phụ lục A):** Dạng ký hiệu chuẩn dùng để định nghĩa cú pháp ngôn ngữ lập trình (cần nắm cách đọc BNF để hiểu chính xác quy tắc của ngôn ngữ).\r\n- **Escape sequence (Mục 5.9.1):** Cách biểu diễn các ký tự như ngắt dòng `\\n`, tab `\\t`, hay ký tự gõ Hex/Octal trong chuỗi.\r\n- **Casting (Mục 6.24):** Cơ chế ép kiểu dữ liệu trong SystemVerilog.",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm tra Phần cứng Hợp nhất\r\n\r\nKiểu mặc định cho định dạng số thực định điểm (ví dụ: `1.2`) và định dạng số mũ (ví dụ: `2.0e10`) phải là **real**.\r\n\r\nCó thể sử dụng ép kiểu (cast) để chuyển đổi các giá trị hằng số thực sang kiểu **shortreal** (ví dụ: `shortreal'(1.2)`). Ép kiểu được mô tả trong mục 6.24.\r\n\r\n**5.8 Hằng số thời gian**\r\n\r\nThời gian được viết ở định dạng số nguyên hoặc số thực định điểm, theo sau ngay lập tức (không có khoảng trắng) bởi một đơn vị thời gian (**fs ps ns us ms s**).\r\nVí dụ:\r\n`2.1ns`\r\n`40ps`\r\n\r\nHằng số thời gian được diễn giải dưới dạng giá trị **realtime** được tỉ lệ hóa theo đơn vị thời gian hiện tại.\r\n\r\n**5.9 Hằng số chuỗi**\r\n\r\nMột *hằng số chuỗi* (string literal) là một chuỗi các ký tự được bao bởi một cặp dấu ngoặc kép đơn (`\"\"`), gọi là *chuỗi trong ngoặc kép* (quoted string), hoặc một cặp ba dấu ngoặc kép (`\"\"\"...\"\"\"`), gọi là *chuỗi trong ngoặc kép ba* (triple-quoted string). Không có giới hạn định trước đối với độ dài của hằng số chuỗi.\r\n\r\nCú pháp cho hằng số chuỗi được thể hiện trong Cú pháp 5-3.\r\n\r\n--------------------------------------------------------------------------------\r\nstring_literal ::=\r\n    quoted_string\r\n  | triple_quoted_string\r\nquoted_string ::= \" { quoted_string_item | string_escape_seq } \"\r\ntriple_quoted_string ::= \"\"\" { triple_quoted_string_item | string_escape_seq } \"\"\"\r\nquoted_string_item ::= any_ASCII_character except \\ or newline or \"\r\ntriple_quoted_string_item ::= any_ASCII_character except \\\r\nstring_escape_seq ::=\r\n    \\any_ASCII_character\r\n  | \\one_to_three_digit_octal_number\r\n  | \\x one_to_two_digit_hex_number\r\n--------------------------------------------------------------------------------\r\n*Cú pháp 5-3—Cú pháp cho hằng số chuỗi (trích từ Phụ lục A)*\r\n\r\nBên trong một hằng số chuỗi, các ký tự không in được và các ký tự đặc biệt khác có thể được biểu diễn bằng một chuỗi ký tự thoát (string escape sequence) như mô tả trong 5.9.1. Việc hỗ trợ các ký tự ASCII không in được mà không dùng ký tự thoát sẽ tùy thuộc vào công cụ thực thi.\r\n\r\nMột chuỗi trong ngoặc kép phải nằm trên một dòng duy nhất trừ khi ký tự xuống dòng được báo trước ngay lập tức bởi ký tự `\\` (dấu xược ngược). Trong trường hợp này, ký tự xược ngược và ký tự xuống dòng sẽ bị bỏ qua.\r\n\r\n*Ví dụ 1:*\r\n\r\n`$display(\"Humpty Dumpty sat on a wall. \\`\r\n`Humpty Dumpty had a great fall.\");`\r\n\r\nin ra",
+      "grammar": [
+        {
+          "phrase": "The default type for fixed-point format and exponent format shall be real",
+          "explain": "cấu trúc câu quy định bắt buộc (normative requirement) trong tiêu chuẩn kỹ thuật sử dụng trợ động từ \"shall be\""
+        },
+        {
+          "phrase": "A cast can be used to convert real literal values to the shortreal type",
+          "explain": "câu bị động chứa động từ khuyết thiếu (can + be + past participle) chỉ khả năng áp dụng phương pháp"
+        },
+        {
+          "phrase": "written in integer or fixed-point format, followed without a space by a time unit",
+          "explain": "rút gọn mệnh đề quan hệ dạng quá khứ phân tử (past participle clause) bổ nghĩa cho danh từ \"Time\""
+        },
+        {
+          "phrase": "interpreted as a realtime value scaled to the current time unit",
+          "explain": "câu bị động chứa mệnh đề rút gọn dạng quá khứ phân tử (\"scaled to...\") bổ nghĩa cho \"realtime value\""
+        },
+        {
+          "phrase": "a sequence of characters enclosed by a single pair of double quotes, called a quoted string",
+          "explain": "cụm danh từ lồng ghép nhiều mệnh đề quá khứ phân tử rút gọn bổ nghĩa nối tiếp nhau"
+        },
+        {
+          "phrase": "shall be contained in a single line unless the newline character is immediately preceded by a backslash",
+          "explain": "mệnh đề điều kiện ngoại lệ với \"unless\" kết hợp câu bị động \"is immediately preceded by\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "exponent",
+          "explain": "(danh từ) số mũ, chỉ định dạng biểu diễn số thực dạng lũy thừa (ví dụ 2.0e10)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "fixed-point format",
+          "explain": "(cụm danh từ) định dạng số thực định điểm (số có dấu chấm thập phân cố định)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "casting",
+          "explain": "(danh từ) việc ép kiểu dữ liệu trong lập trình"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time literal",
+          "explain": "(cụm danh từ) hằng số thời gian (giá trị thời gian kèm đơn vị trong mã nguồn)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "scaled to",
+          "explain": "(cụm động từ/tính từ) được quy đổi hoặc tỉ lệ hóa theo một đơn vị đo lường khác"
+        },
+        {
+          "type": "collocation",
+          "phrase": "string literal",
+          "explain": "(cụm danh từ) hằng số chuỗi (chuỗi ký tự cố định nằm trong dấu ngoặc kép)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "triple-quoted string",
+          "explain": "(cụm danh từ) chuỗi ký tự được đặt bên trong ba dấu ngoặc kép"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nonprintable",
+          "explain": "(tính từ) không in được (chỉ các ký tự điều khiển hệ thống không hiển thị ra màn hình)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "escape sequence",
+          "explain": "(cụm danh từ) chuỗi ký tự thoát (chuỗi bắt đầu bằng dấu `\\` để biểu diễn ký tự đặc biệt)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "implementation-dependent",
+          "explain": "(tính từ) phụ thuộc vào công cụ thực thi / trình biên dịch (không bắt buộc chuẩn hóa giống nhau)"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "- **Nội dung tổng quát**: Trang sách này thuộc chuẩn IEEE 1800-2023 của ngôn ngữ SystemVerilog, chi tiết hóa cách hoạt động của hằng chuỗi ký tự nằm trong ba dấu ngoặc kép (triple-quoted string literals), so sánh điểm khác biệt giữa nó và chuỗi đặt trong một dấu ngoặc kép thông thường, đồng thời quy định cách biểu diễn dữ liệu của chuỗi dưới dạng mã ASCII 8-bit trong biểu thức và phép gán.\r\n- **Ý chính người đọc cần nắm**:\r\n  1. Hằng chuỗi ba dấu ngoặc kép (`\"\"\"...\"\"\"`) khác chuỗi kép thông thường ở 2 điểm chính: cho phép ngắt dòng trực tiếp (không cần dùng chuỗi thoát `\\n`) và cho phép chèn trực tiếp dấu ngoặc kép `\"` (không cần dùng `\\\"`).\r\n  2. Ngoài 2 điểm trên, mọi tính chất khác đều giống hệt chuỗi đơn ngoặc kép. Nếu dùng dấu gạch chéo ngược `\\` ở cuối dòng (escaped newline) trong chuỗi 3 ngoặc kép, ký tự xuống dòng đó cũng sẽ bị nối liền (loại bỏ xuống dòng) giống như trong chuỗi thường.\r\n  3. Khi được dùng làm toán hạng trong biểu thức hoặc phép gán, chuỗi ký tự được coi là hằng số nguyên không dấu (unsigned integer constant), bao gồm một dãy các giá trị ASCII 8-bit (mỗi ký tự hoặc mỗi chuỗi ký tự thoát tương ứng với 1 byte 8-bit).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm**:\r\n  - *Escape sequence (Chuỗi ký tự thoát)*: Các ký tự bắt đầu bằng dấu `\\` như `\\n`, `\\t`, `\\\"` dùng để biểu diễn các ký tự đặc biệt hoặc ký tự không in được.\r\n  - *Mã ASCII 8-bit*: Hệ thống mã hóa ký tự chuẩn, trong đó mỗi ký tự được biểu diễn bằng 1 byte (8 bit).",
+      "translation": "Humpty Dumpty sat on a wall. Humpty Dumpty had a great fall.\r\n\r\nVí dụ 2:\r\n\r\n$display(\"Humpty Dumpty sat on a wall.\\n\\\r\nHumpty Dumpty had a great fall.\");\r\n\r\nin ra:\r\n\r\nHumpty Dumpty sat on a wall.\r\nHumpty Dumpty had a great fall.\r\n\r\nHằng chuỗi ký tự trong ba dấu ngoặc kép khác với hằng chuỗi ký tự trong dấu ngoặc kép theo hai cách:\r\n— Hằng chuỗi ký tự trong ba dấu ngoặc kép cho phép chèn trực tiếp ký tự dòng mới mà không cần sử dụng chuỗi ký tự thoát \\n.\r\n— Hằng chuỗi ký tự trong ba dấu ngoặc kép cho phép chèn trực tiếp ký tự \" mà không cần sử dụng chuỗi ký tự thoát \\\".\r\n\r\nTrong tất cả các trường hợp khác, hai cấu trúc này là hoàn toàn giống nhau. Điều này có nghĩa là một ký tự dòng mới được thoát trong hằng chuỗi ký tự ba dấu ngoặc kép sẽ được xử lý chính xác giống như một ký tự dòng mới được thoát trong hằng chuỗi ký tự đơn ngoặc kép.\r\n\r\nVí dụ 3:\r\n\r\n$display(\"\"\"Humpty Dumpty sat on a \"wall\".\r\nHumpty Dumpty had a great fall. \"\"\");\r\n\r\nin ra:\r\n\r\nHumpty Dumpty sat on a \"wall\".\r\nHumpty Dumpty had a great fall.\r\n\r\nVí dụ 4:\r\n\r\n$display(\"\"\"Humpty Dumpty sat on a wall. \\\r\nHumpty Dumpty had a great fall. \"\"\");\r\n\r\nin ra:\r\n\r\nHumpty Dumpty sat on a wall. Humpty Dumpty had a great fall.\r\n\r\nVí dụ 5:\r\n\r\n$display(\"\"\"Humpty Dumpty \\n sat on a wall. \\n\r\nHumpty Dumpty had a great fall. \"\"\");\r\n\r\nin ra:\r\n\r\nHumpty Dumpty \r\n sat on a wall. \r\n\r\nHumpty Dumpty had a great fall.\r\n\r\nCác hằng chuỗi ký tự được sử dụng làm toán hạng trong các biểu thức và phép gán sẽ được xử lý như các hằng số nguyên không dấu được biểu diễn bởi một chuỗi các giá trị ASCII 8-bit, với một giá trị ASCII 8-bit đại diện cho một ký tự. Một chuỗi ký tự thoát trong hằng chuỗi ký tự cũng được biểu diễn bằng một giá trị ASCII 8-bit duy nhất.",
+      "grammar": [
+        {
+          "phrase": "allow for a newline character to be inserted directly without using the \\n escape sequence",
+          "explain": "cấu trúc \"allow for sth to be done\" (cho phép cái gì được thực hiện) kết hợp với danh động từ sau giới từ \"without using\""
+        },
+        {
+          "phrase": "This means that an escaped newline in a triple-quoted string literal is treated exactly like an escaped newline in a single-quoted string literal",
+          "explain": "mệnh đề danh ngữ \"that...\" làm tân ngữ cho \"means\", chứa cấu trúc bị động \"is treated\" và cấu trúc so sánh bằng \"treated exactly like...\""
+        },
+        {
+          "phrase": "String literals used as operands in expressions and assignments shall be treated as unsigned integer constants represented by a sequence of 8-bit ASCII values",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân từ (\"used as operands...\", \"represented by...\"), đi kèm cấu trúc bị động bắt buộc trong văn bản quy chuẩn \"shall be treated as\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ) hằng / giá trị trực tiếp — giá trị cố định được viết trực tiếp vào mã nguồn lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "operand",
+          "explain": "(danh từ) toán hạng — đối tượng dữ liệu tham gia vào một phép toán hoặc biểu thức"
+        },
+        {
+          "type": "collocation",
+          "phrase": "triple-quoted string literal",
+          "explain": "hằng chuỗi ký tự trong ba dấu ngoặc kép"
+        },
+        {
+          "type": "collocation",
+          "phrase": "escape sequence",
+          "explain": "chuỗi ký tự thoát (các chuỗi điều khiển bắt đầu bằng dấu gạch chéo ngược như \\n, \\t)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "escaped newline",
+          "explain": "ký tự ngắt dòng được thoát (dùng dấu \\ ở cuối dòng để nối liền dòng mã)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "unsigned integer constant",
+          "explain": "hằng số nguyên không dấu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "allow for something to be done",
+          "explain": "cho phép điều gì/cái gì được thực hiện"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "- **Nội dung tổng quát:** Trang sách trình bày về quy tắc gán, lưu trữ và thao tác với các hằng chuỗi ký tự (string literal) trong ngôn ngữ SystemVerilog, bao gồm cách thức xử lý khi gán chuỗi vào mảng đóng gói (packed array), mảng không đóng gói (unpacked array), và kiểu dữ liệu chuỗi động (`string`).\r\n- **Những ý chính người đọc BẮT BUỘC phải hiểu:**\r\n  1. **Gán chuỗi vào Mảng đóng gói (Packed array / Integral type):** Chuỗi ký tự được căn phải (right-justified). Mỗi ký tự chiếm 8 bit (mã ASCII).\r\n     - Nếu độ rộng của mảng lớn hơn độ dài chuỗi: Các bit thừa ở bên trái sẽ được độn thêm số 0 (pad with zeros).\r\n     - Nếu độ rộng của mảng nhỏ hơn độ dài chuỗi: Các ký tự phía bên trái sẽ bị cắt bỏ (truncated).\r\n     - Có thể biểu diễn bằng mảng 1 chiều (ví dụ: `bit [8*12:1]`) hoặc mảng đóng gói đa chiều (ví dụ: `bit [0:11][7:0]`).\r\n  2. **Gán chuỗi vào Mảng không đóng gói (Unpacked array):** Khi kích thước không bằng nhau, chuỗi sẽ được căn trái (left-justified) thay vì căn phải.\r\n  3. **Kiểu dữ liệu `string`:** Dùng để lưu trữ chuỗi có độ dài linh hoạt (tự động thay đổi kích thước). Hỗ trợ cú pháp chuỗi nhiều dòng bằng dấu ba ngoặc kép (`\"\"\"...\"\"\"`). Ký tự xuống dòng trước dấu đóng `\"\"\"` vẫn được tính vào nội dung chuỗi.\r\n  4. **Ép kiểu và Phép toán:** Chuỗi có thể được ép kiểu (cast) hoặc thao tác bằng các toán tử SystemVerilog dựa trên chuỗi giá trị ASCII 8-bit.\r\n- **Khái niệm/Kiến thức nền CẦN tìm hiểu thêm:**\r\n  - *Packed array vs Unpacked array (Mục 7.4):* Cần hiểu sự khác biệt về lưu trữ bộ nhớ vật lý giữa mảng đóng gói (các bit liên tục) và mảng rời rạc để tránh lỗi khi gán và căn lề dữ liệu.\r\n  - *Ép kiểu (Casting - Mục 6.24) & Phép toán chuỗi (Mục 11.10):* Tìm hiểu thêm cách SystemVerilog xử lý toán tử trên các vector chứa ký tự ASCII.",
+      "translation": "Tiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nMột hằng chuỗi (string literal) có thể được gán cho một kiểu số nguyên (integral type), chẳng hạn như một mảng đóng gói (packed array). Nếu kích thước khác nhau, chuỗi sẽ được căn phải. Để lưu trữ hoàn toàn một hằng chuỗi, kiểu số nguyên nên được khai báo với độ rộng bằng số lượng ký tự trong chuỗi nhân với 8. Ví dụ:\r\n\r\n    byte c1 = \"A\" ;\r\n    bit [7:0] d = \"\\n\" ;\r\n\r\nCác quy tắc gán trong SystemVerilog sẽ được tuân thủ nếu độ rộng mảng đóng gói không khớp với số lượng ký tự nhân với 8. Khi một kiểu số nguyên lớn hơn mức cần thiết để chứa giá trị hằng chuỗi được gán, giá trị đó sẽ được căn phải, và các bit ngoài cùng bên trái sẽ được độn thêm các giá trị không phải chuỗi (số 0). Nếu hằng chuỗi lớn hơn kiểu số nguyên đích, chuỗi sẽ được căn phải và các ký tự ngoài cùng bên trái sẽ bị cắt bỏ.\r\n\r\nVí dụ, để lưu trữ chuỗi 12 ký tự \"Hello world\\n\" cần một biến rộng 8 × 12, tức là 96 bit.\r\n\r\n    bit [8*12:1] stringvar = \"Hello world\\n\";\r\n\r\nHoặc có thể sử dụng mảng đóng gói đa chiều với các trường con 8-bit, như sau:\r\n\r\n    bit [0:11] [7:0] stringvar = \"Hello world\\n\" ;\r\n\r\nMột hằng chuỗi có thể được gán cho một mảng byte không đóng gói (unpacked array). Nếu kích thước khác nhau, chuỗi sẽ được căn trái.\r\n\r\n    byte c3 [0:12] = \"hello world\\n\" ;\r\n\r\nMảng đóng gói và mảng không đóng gói được thảo luận trong Mục 7.4.\r\n\r\nCác hằng chuỗi cũng có thể được ép kiểu sang kiểu mảng đóng gói hoặc mảng không đóng gói, điều này tuân theo các quy tắc tương tự như khi gán hằng chuỗi cho mảng đóng gói hoặc mảng không đóng gói. Việc ép kiểu được thảo luận trong Mục 6.24.\r\n\r\nSystemVerilog cũng bao gồm kiểu dữ liệu `string` mà một hằng chuỗi có thể được gán vào đó. Các biến thuộc kiểu `string` có độ dài tùy ý; chúng được tự động thay đổi kích thước linh hoạt để chứa bất kỳ chuỗi nào. Hằng chuỗi là các mảng đóng gói (có độ rộng là bội số của 8 bit), và chúng được chuyển đổi ngầm định sang kiểu `string` khi được gán cho một biến kiểu `string` hoặc được sử dụng trong một biểu thức chứa các toán hạng kiểu `string` (xem Mục 6.16).\r\n\r\nVí dụ sau đây minh họa việc gán cho một biến kiểu `string` bằng cách sử dụng ba dấu ngoặc kép trên nhiều dòng để bắt đầu và kết thúc giá trị chuỗi.\r\n\r\n*Ví dụ 6:*\r\n    string foo;\r\n    foo = \"\"\"\r\n    This is one continuous string.\r\n    Single ' and double \" can\r\n    be placed throughout, and\r\n    only a triple quote will end it.\r\n    \"\"\";\r\n\r\nGHI CHÚ—Trong ví dụ trên, ký tự xuống dòng ngay trước dấu ba ngoặc kép kết thúc cũng được bao gồm trong chuỗi.\r\n\r\nCác hằng chuỗi được lưu trữ trong các vector có thể được thao tác bằng cách sử dụng các toán tử SystemVerilog. Giá trị được thao tác bởi toán tử là chuỗi các giá trị ASCII 8-bit. Xem Mục 11.10 đối với các phép toán trên hằng chuỗi.",
+      "grammar": [
+        {
+          "phrase": "To fully store a string literal, the integral type should be declared with a width equal to the number of characters in the string multiplied by 8",
+          "explain": "Cấu trúc chỉ mục đích (To + V) kết hợp thể bị động (\"should be declared\") và hai cụm phân từ/tính từ rút gọn (\"equal to...\", \"multiplied by...\")"
+        },
+        {
+          "phrase": "When an integral type is larger than required to hold the string literal value being assigned, the value is right-justified, and the leftmost bits are padded with zeros",
+          "explain": "Mệnh đề thời gian \"When...\" chứa mệnh đề bị động (\"is right-justified\", \"are padded with zeros\") và phân từ bổ nghĩa (\"being assigned\")"
+        },
+        {
+          "phrase": "Variables of type string have arbitrary length; they are dynamically resized to hold any string",
+          "explain": "Mệnh đề thể bị động (\"are dynamically resized\") kết hợp với động từ nguyên mẫu chỉ mục đích (\"to hold...\")"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "string literal",
+          "explain": "(cụm danh từ) hằng chuỗi ký tự — giá trị chuỗi cố định nằm trong dấu ngoặc kép"
+        },
+        {
+          "type": "collocation",
+          "phrase": "integral type",
+          "explain": "(cụm danh từ) kiểu số nguyên — tập hợp các kiểu dữ liệu biểu diễn dạng nhị phân/số nguyên trong SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "packed array",
+          "explain": "(cụm danh từ) mảng đóng gói — các phần tử dữ liệu được ghép liền kề thành một chuỗi bit liên tục"
+        },
+        {
+          "type": "collocation",
+          "phrase": "unpacked array",
+          "explain": "(cụm danh từ) mảng không đóng gói / mảng rời rạc — mảng có các phần tử lưu trữ ở các ô nhớ riêng biệt"
+        },
+        {
+          "type": "vocab",
+          "phrase": "right-justified",
+          "explain": "(tính từ) được căn phải — dữ liệu được đẩy về phía bit thấp (LSB)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "left-justified",
+          "explain": "(tính từ) được căn trái — dữ liệu được đẩy về phía bit cao (MSB) hoặc chỉ số đầu tiên"
+        },
+        {
+          "type": "vocab",
+          "phrase": "pad",
+          "explain": "(động từ) độn thêm, thêm vào (ví dụ: chèn thêm các bit 0 cho đủ độ dài)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "truncate",
+          "explain": "(động từ) cắt bỏ, xén bớt (cắt các bit/ký tự dư thừa)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "arbitrary length",
+          "explain": "(cụm danh từ) độ dài tùy ý / độ dài linh hoạt không cố định"
+        },
+        {
+          "type": "phrase",
+          "phrase": "dynamically resized",
+          "explain": "(cụm phó từ + động từ) được thay đổi kích thước một cách linh hoạt/tự động trong quá trình thực thi"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "- **Nội dung tổng quát:** Trang sách này thuộc Chuẩn IEEE 1800-2023 của ngôn ngữ SystemVerilog, trình bày chi tiết về phần **5.9.1 Các ký tự đặc biệt trong chuỗi** (Special characters in strings) và phần đầu của **5.10 Hằng cấu trúc** (Structure literals).\r\n- **Những ý chính người đọc bắt buộc phải hiểu:**\r\n  1. **Các ký tự thoát (Escape sequences):** Bảng 5-1 định nghĩa các ký tự đặc biệt được biểu diễn bằng ký tự thoát bắt đầu bằng dấu gạch chéo ngược `\\`, bao gồm dòng mới (`\\n`), tab (`\\t`), gạch chéo ngược (`\\\\`), ngoặc kép (`\\\"`), tab đứng (`\\v`), sang trang (`\\f`), chuông (`\\a`), biểu diễn bát phân (`\\ddd`), và biểu diễn thập lục phân (`\\xdd`).\r\n  2. **Quy tắc bát phân và thập lục phân:** Đối với `\\ddd` và `\\xdd`, nếu dùng ít chữ số hơn tối đa, ký tự liền sau không được là chữ số bát phân/thập lục phân. Các ký tự trạng thái không xác định (`x_digit`) hoặc trở kháng cao (`z_digit`) không được phép xuất hiện trong chuỗi thoát. Ký tự bát phân vượt quá `\\377` sẽ bị báo lỗi.\r\n  3. **Xử lý ký tự thoát không hợp lệ:** Nếu một ký tự được nối sau `\\` nhưng không nằm trong Bảng 5-1, dấu `\\` sẽ bị bỏ qua và ký tự đó được xử lý như ký tự thường (ví dụ: `\\b` trở thành `b`).\r\n  4. **Quy tắc nối dòng (Line continuation):** Nếu muốn in ra ký tự `\\` ở cuối dòng mà vẫn nối dòng tiếp theo, cần phải dùng ba dấu gạch chéo ngược `\\\\\\` (hai dấu đầu tạo thành ký tự `\\`, dấu thứ ba dùng để nối dòng).\r\n  5. **Hằng cấu trúc (Structure literals):** Là các mẫu gán cấu trúc (assignment patterns) có thể được chỉ định kiểu một cách tường minh (explicit) hoặc ẩn (implicit).\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Mã ASCII và Hệ cơ số Bát phân / Thập lục phân:** Cần biết cách quy đổi ký tự sang mã bát phân (octal) và thập lục phân (hex) để hiểu cách SystemVerilog mã hóa ký tự trực tiếp.\r\n  - **Trạng thái logic 4 giá trị của Verilog/SystemVerilog (`0`, `1`, `x`, `z`):** Cần hiểu khái niệm `x_digit` (giá trị không xác định) và `z_digit` (trở kháng cao) để biết lý do tại sao chúng bị cấm trong ký tự thoát.",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\n**5.9.1 Các ký tự đặc biệt trong chuỗi**\r\n\r\nMột số ký tự ASCII nhất định chỉ có thể được biểu diễn trong các chuỗi hằng bằng cách sử dụng chuỗi thoát (escape sequence). Bảng 5-1 liệt kê các ký tự này ở cột bên phải, cùng với chuỗi thoát biểu diễn ký tự đó ở cột bên trái. Mặc dù các chuỗi hằng nằm trong dấu ngoặc kép ba hỗ trợ ký tự `\"` và ký tự dòng mới không cần thoát, các chuỗi thoát liên quan đến các ký tự đó vẫn được hỗ trợ.\r\n\r\n**Bảng 5-1—Quy định các ký tự đặc biệt trong chuỗi hằng**\r\n\r\n| Chuỗi thoát | Ký tự được tạo ra bởi chuỗi thoát |\r\n| :--- | :--- |\r\n| `\\n` | Ký tự dòng mới (Newline character) |\r\n| `\\t` | Ký tự Tab |\r\n| `\\\\` | Ký tự `\\` |\r\n| `\\\"` | Ký tự `\"` |\r\n| `\\v` | Tab đứng (Vertical tab) |\r\n| `\\f` | Sang trang (Form feed) |\r\n| `\\a` | Chuông (Bell) |\r\n| `\\ddd` | Một ký tự được chỉ định bằng 1 đến 3 *chữ_số_bát_phân* (xem Cú pháp 5-2). Nếu sử dụng ít hơn ba chữ số, ký tự tiếp theo không được là *chữ_số_bát_phân*. Các công cụ thực thi có thể đưa ra lỗi nếu ký tự được biểu diễn lớn hơn `\\377`. Việc xuất hiện một *chữ_số_x* hoặc *chữ_số_z* (xem Cú pháp 5-2) làm *chữ_số_bát_phân* trong chuỗi thoát là bất hợp lệ. |\r\n| `\\xdd` | Một ký tự được chỉ định bằng 1 đến 2 *chữ_số_thập_lục_phân* (xem Cú pháp 5-2). Nếu chỉ sử dụng một chữ số, ký tự tiếp theo không được là *chữ_số_thập_lục_phân*. Việc xuất hiện một *chữ_số_x* hoặc *chữ_số_z* (xem Cú pháp 5-2) làm *chữ_số_thập_lục_phân* trong chuỗi thoát là bất hợp lệ. |\r\n\r\nMột ký tự thoát không xuất hiện trong Bảng 5-1 sẽ được xử lý giống như thể ký tự đó không được thoát. Ví dụ, `\"\\b\"` được xử lý giống như `\"b\"`. Cả hai chuỗi hằng đều được coi là chứa một ký tự duy nhất, đó là chữ cái `\"b\"`.\r\n\r\nNếu ký tự dòng mới được đứng trước ngay bởi `\\\\` (dấu gạch chéo ngược đôi), dấu gạch chéo ngược đôi này được hiểu là một chuỗi thoát biểu diễn một ký tự gạch chéo ngược duy nhất trong chuỗi chứ không phải là phần đầu của một chuỗi nối dòng. Do đó, một chuỗi nối dòng đòi hỏi phải có dấu gạch chéo ngược thứ ba.\r\n\r\n*Ví dụ:*\r\n\r\n$display(\"Humpty Dumpty sat on a wall. \\\\\\\r\nHumpty Dumpty had a great fall.\");\r\n\r\nin ra:\r\n\r\nHumpty Dumpty sat on a wall. \\Humpty Dumpty had a great fall.\r\n\r\n**5.10 Hằng cấu trúc**\r\n\r\nHằng cấu trúc là các mẫu gán cấu trúc hoặc các biểu thức mẫu với các biểu thức thành viên hằng số (xem 10.9.2). Một hằng cấu trúc phải có một kiểu dữ liệu, kiểu này có thể được chỉ định một cách tường minh bằng một tiền tố hoặc chỉ định ẩn bởi ngữ cảnh dạng phép gán (xem 10.8).\r\n\r\ntypedef struct {int a; shortreal b;} ab;\r\n\r\n---\r\n83\r\nSử dụng có bản quyền được cấp phép giới hạn cho: Hai Tra. Tải về vào ngày 28 tháng 05 năm 2024 lúc 10:36:42 UTC từ IEEE Xplore. Các hạn chế được áp dụng.",
+      "grammar": [
+        {
+          "phrase": "Certain ASCII characters can only be represented in string literals using an escape sequence",
+          "explain": "thể bị động với động từ khuyết thiếu (modal passive: \"can only be represented\")"
+        },
+        {
+          "phrase": "A character specified in 1 to 3 octal_digits",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân tử (reduced relative clause) bổ nghĩa cho \"A character\""
+        },
+        {
+          "phrase": "If fewer than three digits are used, the following character shall not be an octal_digit",
+          "explain": "câu điều kiện loại 1 (real condition) kết hợp động từ nguyên mẫu có tính pháp lý (\"shall not be\")"
+        },
+        {
+          "phrase": "An escaped character not appearing in Table 5-1 is treated as if the character was not escaped",
+          "explain": "mệnh đề quan hệ rút gọn dạng hiện tại phân tử (\"not appearing\") đi kèm cấu trúc giả định \"as if\" (như thể là)"
+        },
+        {
+          "phrase": "If a newline character is immediately preceded by \\\\ (double backslash), the double backslash is interpreted as an escape sequence",
+          "explain": "câu điều kiện kết hợp cấu trúc bị động ở cả hai mệnh đề"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ) hằng số, giá trị hằng được viết trực tiếp trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "escape sequence",
+          "explain": "(danh từ) chuỗi thoát, ký tự thoát (dùng dấu \\ để biểu diễn ký tự đặc biệt)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "precede",
+          "explain": "(động từ) đi trước, đứng ngay trước"
+        },
+        {
+          "type": "vocab",
+          "phrase": "explicit",
+          "explain": "(tính từ) tường minh, rõ ràng, được chỉ định trực tiếp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "implicit",
+          "explain": "(tính từ) ẩn, không tường minh, được suy ra từ ngữ cảnh"
+        },
+        {
+          "type": "collocation",
+          "phrase": "string literal",
+          "explain": "(cụm danh từ) chuỗi hằng, hằng chuỗi chữ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "line continuation sequence",
+          "explain": "(cụm danh từ) chuỗi nối dòng (dùng ký tự \\ ở cuối dòng)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assignment pattern",
+          "explain": "(cụm danh từ) mẫu gán giá trị (trong SystemVerilog)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as if",
+          "explain": "(liên từ) như thể là, giống như là"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "summary": "- **Nội dung tổng quát:** Trang này thuộc chuẩn IEEE 1800-2023 dành cho ngôn ngữ SystemVerilog, quy định cụ thể về cú pháp và tắc gán giá trị khởi tạo cho kiểu dữ liệu cấu trúc (`struct`) và mảng các cấu trúc thông qua hằng cấu trúc (structure literals).\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. Quy tắc ngoặc nhọn lồng nhau (nested braces): Khác với ngôn ngữ C cho phép viết phẳng danh sách giá trị, SystemVerilog bắt buộc các dấu ngoặc nhọn phải lồng nhau tương ứng đúng với cấp độ của cấu trúc hoặc mảng các cấu trúc.\r\n  2. Các cách khởi tạo hằng cấu trúc linh hoạt: Có thể gán theo cặp `tên_thành_viên: giá_trị`, gán giá trị mặc định cho toàn bộ thành viên trong cấu trúc (`default: giá_trị`), hoặc gán theo kiểu dữ liệu (`kiểu_dữ_liệu: giá_trị`).\r\n  3. Sử dụng toán tử lặp (replication operator): Cho phép dùng cú pháp lặp dạng `'{N{...}}` để gán cho nhiều phần tử/thành viên cùng lúc, trong đó cặp ngoặc nhọn bên trong của phép lặp sẽ tự động được loại bỏ khi khai triển.\r\n- **Khái niệm/kiến thức nền cần tìm hiểu thêm:**\r\n  - Khái niệm về `struct` (cấu trúc) và `array of structs` (mảng cấu trúc) trong HDL/SystemVerilog.\r\n  - Mục 10.9.2 của chuẩn SystemVerilog (liên quan đến hằng cấu trúc theo kiểu dữ liệu và giá trị mặc định) để hiểu sâu hơn về cơ chế xác định kiểu dựa trên vế trái (left-hand context).",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Mô tả và Kiểm thử Phần cứng Hợp nhất\r\n\r\nab c;\r\nc = '{0, 0.0}; // kiểu hằng cấu trúc được xác định từ\r\n               // ngữ cảnh phía bên trái (c)\r\n\r\nCác dấu ngoặc nhọn lồng nhau phải phản ánh đúng cấu trúc. Ví dụ:\r\n\r\nab abarr[1:0] = '{ '{1, 1.0}, '{2, 2.0}};\r\n\r\nCách viết thay thế kiểu ngôn ngữ C '{1, 1.0, 2, 2.0} cho ví dụ trước là không được phép.\r\n\r\nHằng cấu trúc cũng có thể sử dụng tên thành viên và giá trị, hoặc sử dụng kiểu dữ liệu và giá trị mặc định (xem 10.9.2):\r\n\r\nc = '{a:0, b:0.0};              // tên thành viên và giá trị cho thành viên đó\r\nc = '{default:0};               // tất cả các phần tử của cấu trúc c được đặt thành 0\r\nd = ab'{int:1, shortreal:1.0};  // kiểu dữ liệu và giá trị mặc định cho tất cả\r\n                               // các thành viên thuộc kiểu đó\r\n\r\nKhi một mảng các cấu trúc được khởi tạo, các dấu ngoặc nhọn lồng nhau phải phản ánh mảng và cấu trúc. Ví dụ:\r\n\r\nab abarr[1:0] = '{ '{1, 1.0}, '{2, 2.0}};\r\n\r\nCác toán tử lặp có thể được sử dụng để gán giá trị cho đúng số lượng thành viên. Cặp dấu ngoặc nhọn bên trong trong một phép lặp sẽ bị loại bỏ.\r\n\r\nstruct {int X,Y,Z;} XYZ = '{3{1}};\r\ntypedef struct {int a,b[4];} ab_t;\r\nint a,b,c;\r\nab_t v1[1:0] [2:0];\r\nv1 = '{2{'{3{'{a,'{2{b,c}}}}}}}};\r\n\r\n/* khai triển thành '{ '{3{ '{ a, '{2{ b, c } } } } },\r\n                       '{3{ '{ a, '{2{ b, c } } } } }\r\n                     } */\r\n\r\n/* khai triển thành '{ '{ '{ a, '{2{ b, c } } },\r\n                       '{ a, '{2{ b, c } } },\r\n                       '{ a, '{2{ b, c } } }\r\n                     },\r\n                     '{ '{ a, '{2{ b, c } } },\r\n                       '{ a, '{2{ b, c } } },\r\n                       '{ a, '{2{ b, c } } }\r\n                     } */\r\n\r\n/* khai triển thành '{ '{ '{ a, '{ b, c, b, c } },\r\n                       '{ a, '{ b, c, b, c } },\r\n                       '{ a, '{ b, c, b, c } }\r\n                     },\r\n                     '{ '{ a, '{ b, c, b, c } },\r\n                       '{ a, '{ b, c, b, c } },\r\n                       '{ a, '{ b, c, b, c } }\r\n                     } */\r\n\r\n84",
+      "grammar": [
+        {
+          "phrase": "Nested braces shall reflect the structure",
+          "explain": "động từ khuyết thiếu \"shall\" kết hợp động từ nguyên thể chỉ quy định bắt buộc trong tiêu chuẩn kỹ thuật"
+        },
+        {
+          "phrase": "is not allowed",
+          "explain": "dạng bị động thì hiện tại đơn (passive voice) biểu thị quy tắc không cho phép"
+        },
+        {
+          "phrase": "When an array of structures is initialized",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian chứa thể bị động \"is initialized\""
+        },
+        {
+          "phrase": "can be used to set the values",
+          "explain": "thể bị động với động từ khuyết thiếu (modal passive \"can be used to\") diễn tả khả năng sử dụng của công cụ/toán tử"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ) hằng, giá trị hằng được viết trực tiếp trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "replication",
+          "explain": "(danh từ) sự lặp lại, sự nhân bản"
+        },
+        {
+          "type": "collocation",
+          "phrase": "left-hand context",
+          "explain": "ngữ cảnh vế trái (trong phép gán lập trình)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "nested braces",
+          "explain": "các dấu ngoặc nhọn lồng nhau"
+        },
+        {
+          "type": "collocation",
+          "phrase": "array of structures",
+          "explain": "mảng các cấu trúc"
+        },
+        {
+          "type": "collocation",
+          "phrase": "replication operator",
+          "explain": "toán tử lặp / toán tử nhân bản"
+        },
+        {
+          "type": "phrase",
+          "phrase": "reflect the structure",
+          "explain": "phản ánh/thể hiện đúng cấu trúc"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "summary": "**1. Nội dung tổng quát:**\r\nTrang 85 của chuẩn IEEE 1800-2023 về ngôn ngữ SystemVerilog tập trung trình bày hai thành phần cú pháp quan trọng: **Hằng số mảng (Array literals - Mục 5.11)** và **Thuộc tính (Attributes - Mục 5.12)**. Đây là những cơ chế giúp người lập trình khởi tạo mảng một cách linh hoạt và bổ sung thông tin chỉ dẫn (metadata) cho các công cụ biên dịch, tổng hợp hoặc mô phỏng.\r\n\r\n**2. Các ý chính người đọc bắt buộc phải hiểu:**\r\n- **Array literals (Hằng số mảng):** \r\n  + Cú pháp tương tự như cách khởi tạo mảng trong ngôn ngữ C nhưng cho phép sử dụng toán tử lặp (`'{ { } }`).\r\n  + Việc lồng các cặp dấu ngoặc nhọn phụ thuộc vào số chiều của mảng. Khi dùng toán tử lặp, cặp dấu ngoặc nhọn bên trong biểu thức lặp sẽ được loại bỏ.\r\n  + Hằng mảng phải có một kiểu dữ liệu xác định: có thể ghi rõ tiền tố kiểu (explicit prefix) hoặc ngầm định dựa vào ngữ cảnh phép gán (assignment-like context).\r\n  + Hằng mảng hỗ trợ gán theo chỉ số (index), theo kiểu dữ liệu (type) làm khóa (key), hoặc dùng từ khóa `default` để gán giá trị mặc định cho các phần tử còn lại.\r\n- **Attributes (Thuộc tính):**\r\n  + Là cơ chế để gán các thuộc tính/chỉ dẫn cho các đối tượng, câu lệnh hoặc nhóm câu lệnh mà không làm thay đổi ngữ nghĩa logic của mã nguồn. Các công cụ (EDAs, simulators) sẽ đọc thuộc tính này để điều khiển hành vi xử lý.\r\n  + Cú pháp khai báo thuộc tính được đặt trong cặp ký hiệu `(*` và `*)`.\r\n  + Nếu thuộc tính không được gán giá trị cụ thể, nó mặc định có kiểu dữ liệu `bit` với giá trị là `1`.\r\n  + Nếu một thuộc tính trùng tên được định nghĩa nhiều lần cho cùng một phần tử, giá trị khai báo cuối cùng sẽ được áp dụng (công cụ có thể đưa ra cảnh báo).\r\n  + Không cho phép lồng ghép thuộc tính (`attribute_instance`) bên trong biểu thức hằng của một thuộc tính khác.\r\n\r\n**3. Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Assignment patterns (Mẫu gán - Mục 10.9.1):** Cần đọc thêm để hiểu cách SystemVerilog áp dụng các kiểu gán theo cấu trúc, mảng và các quy tắc khớp kiểu.\r\n- **Data type context (Ngữ cảnh kiểu dữ liệu - Mục 10.8):** Giúp hiểu cơ chế ngôn ngữ tự suy luận kiểu cho hằng số mảng khi không ghi rõ tên kiểu tiền tố.\r\n- **Annex A (Phụ lục A):** Chứa toàn bộ cú pháp BNF đầy đủ của ngôn ngữ SystemVerilog để tra cứu chính xác các quy tắc ngữ pháp của `attribute_instance`.",
+      "translation": "**1800-2023**\r\nIEEE Standard for SystemVerilog—Unified Hardware Design, Specification, and Verification Language\r\n\r\n### 5.11 Hằng số mảng (Array literals)\r\n\r\nHằng số mảng về mặt cú pháp tương tự như các giá trị khởi tạo trong ngôn ngữ C, nhưng cho phép sử dụng toán tử lặp (`'{ { } }`).\r\n\r\nint n[1:2][1:3] = '{'{0,1,2},'{3{4}}};\r\n\r\nViệc lồng ghép các dấu ngoặc nhọn phải tuân theo số chiều của mảng, không giống như trong C. Tuy nhiên, cặp dấu ngoặc nhọn bên trong một biểu thức lặp sẽ được loại bỏ. Một biểu thức lặp chỉ hoạt động trên một chiều mảng.\r\n\r\nint n[1:2][1:6] = '{2{'{3{4, 5}}}}; // tương đương với\r\n'{'{4,5,4,5,4,5},'{4,5,4,5,4,5}}\r\n\r\nHằng số mảng là các mẫu gán mảng (array assignment patterns) hoặc biểu thức mẫu có các biểu thức thành viên là hằng số (xem 10.9.1). Một hằng số mảng phải có một kiểu dữ liệu, kiểu này có thể được chỉ định rõ ràng bằng một tiền tố hoặc chỉ định ngầm định bởi một ngữ cảnh dạng phép gán (xem 10.8).\r\n\r\ntypedef int triple [1:3];\r\n$mydisplay(triple'{0,1,2});\r\n\r\nHằng số mảng cũng có thể sử dụng chỉ số hoặc kiểu dữ liệu của chúng làm khóa (key) và sử dụng giá trị khóa mặc định (xem 10.9.1).\r\n\r\ntriple b = '{1:1, default:0}; // chỉ số 2 và 3 được gán giá trị 0\r\n\r\n---\r\n\r\n### 5.12 Thuộc tính (Attributes)\r\n\r\nMột cơ chế được đưa vào để chỉ định các thuộc tính cho các đối tượng, câu lệnh và nhóm câu lệnh trong mã nguồn SystemVerilog, giúp các công cụ khác nhau (bao gồm cả trình mô phỏng) có thể sử dụng nhằm kiểm soát hoạt động hoặc hành vi của công cụ đó. Các thuộc tính này được gọi là *attributes*. Tiểu mục này quy định cơ chế cú pháp được sử dụng để chỉ định các thuộc tính mà không chuẩn hóa bất kỳ thuộc tính cụ thể nào.\r\n\r\nCú pháp để chỉ định một thuộc tính được hiển thị trong Cú pháp 5-4.\r\n\r\n---\r\n`attribute_instance ::= (* attr_spec { , attr_spec } *)` // *từ Phụ lục A.9.1*\r\n`attr_spec ::= attr_name [ = constant_expression ]`\r\n`attr_name ::= identifier`\r\n\r\n*Cú pháp 5-4—Cú pháp cho các thuộc tính (đoạn trích từ Phụ lục A)*\r\n---\r\n\r\nMột `attribute_instance` có thể xuất hiện trong mô tả SystemVerilog như một tiền tố gắn liền với một khai báo, một mục trong module, một câu lệnh, hoặc một kết nối cổng. Nó cũng có thể xuất hiện như một hậu tố cho một toán tử hoặc một tên hàm trong một biểu thức.\r\n\r\nKiểu mặc định của một thuộc tính không có giá trị là **bit**, với giá trị là 1. Nếu không, thuộc tính sẽ mang kiểu dữ liệu của biểu thức gán cho nó.\r\n\r\nNếu cùng một tên thuộc tính được định nghĩa nhiều hơn một lần cho cùng một phần tử ngôn ngữ, giá trị thuộc tính cuối cùng sẽ được sử dụng, và công cụ có thể đưa ra cảnh báo rằng việc chỉ định thuộc tính trùng lặp đã xảy ra.\r\n\r\nViệc lồng ghép các thể hiện thuộc tính là không được phép. Việc chỉ định giá trị của một thuộc tính bằng một biểu thức hằng chứa một thể hiện thuộc tính khác sẽ bị coi là bất hợp pháp.\r\n\r\n---\r\n85\r\nCopyright © 2024 IEEE. All rights reserved.",
+      "grammar": [
+        {
+          "phrase": "Array literals are syntactically similar to C initializers, with the replication operator ( {{}} ) allowed",
+          "explain": "cấu trúc tuyệt đối/bổ nghĩa với \"with + N + V-ed\" (with the replication operator allowed)"
+        },
+        {
+          "phrase": "which may be either explicitly indicated with a prefix or implicitly indicated by an assignment-like context",
+          "explain": "mệnh đề quan hệ không xác định \"which...\", chứa cấu trúc kết hợp \"either A or B\" ở dạng bị động"
+        },
+        {
+          "phrase": "A mechanism is included for specifying properties about objects",
+          "explain": "thể bị động (passive voice) với giới từ \"for + V-ing\" chỉ mục đích"
+        },
+        {
+          "phrase": "If the same attribute name is defined more than once for the same language element, the last attribute value shall be used",
+          "explain": "câu điều kiện loại 1 (Conditional sentence Type 1) kết hợp thể bị động với động từ khuyết thiếu \"shall be used\""
+        },
+        {
+          "phrase": "It shall be illegal to specify the value of an attribute with a constant expression that contains an attribute instance",
+          "explain": "cấu trúc chủ ngữ giả \"It + be + Adj + to-V\" kết hợp mệnh đề quan hệ bổ nghĩa cho danh từ \"constant expression\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "literal",
+          "explain": "(danh từ) hằng số, giá trị ghi trực tiếp trong mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "replication",
+          "explain": "(danh từ) sự lặp lại, sự nhân bản"
+        },
+        {
+          "type": "vocab",
+          "phrase": "nesting",
+          "explain": "(danh từ) sự lồng ghép (ngoặc, cấu trúc điều kiện, v.v.)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "excerpt",
+          "explain": "(danh từ) đoạn trích, bản trích dẫn ngắn từ tài liệu lớn hơn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "disallow",
+          "explain": "(động từ) không cho phép, cấm"
+        },
+        {
+          "type": "collocation",
+          "phrase": "syntactically similar to",
+          "explain": "tương đồng về mặt cú pháp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assignment-like context",
+          "explain": "ngữ cảnh dạng phép gán (ngữ cảnh giúp suy luận kiểu)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "attribute instance",
+          "explain": "thể hiện thuộc tính (một lần xuất hiện/khai báo thuộc tính)"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "summary": "Nội dung của trang 86 trong chuẩn IEEE 1800-2023 (SystemVerilog) tập trung vào việc hướng dẫn cú pháp đính kèm các thuộc tính (attribute instances) vào các phần tử ngôn ngữ khác nhau trong thiết kế phần cứng. Thuộc tính trong SystemVerilog được đặt trong cặp ký tự đặc biệt `(* ... *)` và dùng để truyền chỉ thị cho các công cụ tổng hợp (synthesis tools) hoặc công cụ mô phỏng.\r\n\r\nSau khi đọc trang này, người đọc cần nắm vững các ý chính sau:\r\n- Cách gắn thuộc tính cho câu lệnh `case`: Có thể đính kèm nhiều thuộc tính trong cùng một cặp `(* ... *)` phân tách bằng dấu phẩy, hoặc tách thành nhiều cặp `(* ... *)` nối tiếp nhau. Có thể gán giá trị explicit (ví dụ `=1`, `=0`) hoặc bỏ qua giá trị gán (ngầm định là 1).\r\n- Cách kích hoạt hoặc loại bỏ thuộc tính: Đặt giá trị bằng `1` để bật hoặc bằng `0` để tắt/loại bỏ thuộc tính đó (ví dụ `parallel_case = 0`).\r\n- Khả năng đính kèm thuộc tính ở nhiều mức độ khác nhau: Có thể đính kèm thuộc tính cho định nghĩa module (`module definition`), thể hiện khởi tạo module (`module instantiation`), hoặc khai báo biến (`variable declaration`).\r\n- Phạm vi ảnh hưởng của thuộc tính: Thuộc tính chỉ áp dụng cho danh sách các biến nằm trực tiếp trong câu lệnh khai báo đi liền sau nó, không tự động lan sang các dòng khai báo biến độc lập phía dưới.\r\n\r\nĐể hiểu trọn vẹn nội dung này, người đọc cần có kiến thức nền về ngôn ngữ mô tả phần cứng SystemVerilog (như câu lệnh `case`, định nghĩa và khởi tạo `module`, khai báo biến kiểu `logic`), cũng như vai trò của các thuộc tính bổ trợ tổng hợp (như `full_case`, `parallel_case`, `fsm_state`, `optimize_power`) trong quy trình thiết kế vi mạch (EDA/Synthesis).",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE cho SystemVerilog—Ngôn ngữ Thiết kế, Phân tích Kỹ thuật và Kiểm tra Phần cứng Hợp nhất\r\n\r\nTham khảo Phụ lục A để biết cú pháp chỉ định một thể hiện thuộc tính trên các phần tử ngôn ngữ cụ thể. Một số ví dụ được minh họa dưới đây.\r\n\r\nVí dụ 1: Ví dụ sau minh họa cách đính kèm các thuộc tính vào một câu lệnh case:\r\n\r\n(* full_case, parallel_case *)\r\ncase (a)\r\n<rest_of_case_statement>\r\n\r\nhoặc\r\n\r\n(* full_case=1 *)\r\n(* parallel_case=1 *) // Nhiều thể hiện thuộc tính cũng hợp lệ\r\ncase (a)\r\n<rest_of_case_statement>\r\n\r\nhoặc\r\n\r\n(* full_case, // không gán giá trị\r\n   parallel_case=1 *)\r\ncase (a)\r\n<rest_of_case_statement>\r\n\r\nVí dụ 2: Để đính kèm thuộc tính full_case, nhưng không đính kèm thuộc tính parallel_case:\r\n\r\n(* full_case *) // parallel_case không được chỉ định\r\ncase (a)\r\n<rest_of_case_statement>\r\n\r\nhoặc\r\n\r\n(* full_case=1, parallel_case = 0 *)\r\ncase (a)\r\n<rest_of_case_statement>\r\n\r\nVí dụ 3: Để đính kèm một thuộc tính vào một định nghĩa module:\r\n\r\n(* optimize_power *)\r\nmodule mod1 (<port_list>);\r\n\r\nhoặc\r\n\r\n(* optimize_power=1 *)\r\nmodule mod1 (<port_list>);\r\n\r\nVí dụ 4: Để đính kèm một thuộc tính vào một thể hiện module:\r\n\r\n(* optimize_power=0 *)\r\nmod1 synth1 (<port_list>);\r\n\r\nVí dụ 5: Để đính kèm một thuộc tính vào một khai báo biến:\r\n\r\n(* fsm_state *) logic [7:0] state1;\r\n(* fsm_state=1 *) logic [3:0] state2, state3;\r\nlogic [3:0] reg1;                // reg1 KHÔNG được thiết lập fsm_state\r\n(* fsm_state=0 *) logic [3:0] reg2; // reg2 cũng không",
+      "grammar": [
+        {
+          "phrase": "Refer to Annex A for the syntax of specifying an attribute instance on specific language elements",
+          "explain": "động từ mệnh lệnh (\"Refer to\") dùng để hướng dẫn người đọc tra cứu tài liệu tham khảo"
+        },
+        {
+          "phrase": "how to attach attributes to a case statement",
+          "explain": "cấu trúc \"how + to-infinitive\" làm tân ngữ, chỉ phương cách thực hiện một hành động"
+        },
+        {
+          "phrase": "Several examples are illustrated below",
+          "explain": "thể bị động (passive voice) ở thì hiện tại đơn, dùng để giới thiệu các nội dung theo sau"
+        },
+        {
+          "phrase": "To attach the full_case attribute, but not the parallel_case attribute",
+          "explain": "cụm động từ nguyên mẫu có \"To\" (to-infinitive clause) đứng đầu câu đóng vai trò làm trạng ngữ chỉ mục đích"
+        },
+        {
+          "phrase": "reg1 does NOT have fsm_state set",
+          "explain": "cấu trúc truyền dụng/tác động (causative structure) với \"have + object + past participle\" thể hiện một đối tượng mang trạng thái được thiết lập"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "attribute",
+          "explain": "(danh từ) thuộc tính, thông tin bổ sung đính kèm vào mã nguồn để hướng dẫn công cụ tổng hợp/mô phỏng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "instantiation",
+          "explain": "(danh từ) sự khởi tạo thể hiện, việc tạo ra một thực thể cụ thể từ một định nghĩa lớp/module"
+        },
+        {
+          "type": "phrase",
+          "phrase": "attribute instance",
+          "explain": "thể hiện thuộc tính (cú pháp khai báo một hoặc nhiều thuộc tính cụ thể trong mã SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "module definition",
+          "explain": "việc định nghĩa module (khai báo tên module, cổng giao tiếp và nội dung bên trong)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "variable declaration",
+          "explain": "việc khai báo biến trong ngôn ngữ lập trình/mô tả phần cứng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "Refer to",
+          "explain": "tham chiếu đến, tra cứu tại (cụm động từ chỉ hướng dẫn đọc)"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "summary": "Trang 87 (Trang 15 trong tập file này) khép lại phần ví dụ về việc gán thuộc tính (attributes) cho các toán tử, hàm, và toán tử điều kiện; đồng thời mở đầu Mục 5.13 giới thiệu về các phương thức tích hợp sẵn (Built-in methods) trong SystemVerilog.\r\n\r\nNội dung trọng tâm mà người học cần nắm vững bao gồm:\r\n1. Cú pháp gán thuộc tính bằng `(* ... *)` áp dụng cho toán tử, lời gọi hàm và toán tử điều kiện.\r\n2. Khái niệm và cú pháp gọi phương thức tích hợp sẵn (Built-in methods): SystemVerilog sử dụng cú pháp dấu chấm (`.`) tương tự C++ (ví dụ `object.task_or_function()`).\r\n3. Sự khác biệt giữa Built-in methods và System tasks (nhiệm vụ hệ thống bắt đầu bằng dấu `$`):\r\n   - Built-in methods không cần tiền tố `$` vì đã gắn chặt với đối tượng/kiểu dữ liệu, giúp tránh trùng tên (collisions) và không làm lộn xộn không gian tên toàn cục (global name space).\r\n   - Built-in methods không thể bị người dùng định nghĩa lại (redefine) thông qua PLI.\r\n   - Thể hiện ngữ nghĩa chính xác theo kiểu dữ liệu (ví dụ: `.size` cho mảng động, `.num` cho mảng liên kết, `.len` cho chuỗi) thay vì dùng chung một system task như `$size` kém trực quan.\r\n4. Trường hợp sử dụng System task: Dùng cho các tác vụ tạo hiệu ứng phụ (side effect) như `$stop`, `$reset` hoặc không thao tác trên dữ liệu cụ thể nào như `$random`.\r\n5. Quy tắc dùng cặp dấu ngoặc đơn `()`: Khi phương thức không có tham số (hoặc các tham số đều có giá trị mặc định), dấu ngoặc `()` là tùy chọn có thể bỏ qua, trừ trường hợp sử dụng lời gọi phương thức như một biến ẩn (implicit variable) thì bắt buộc phải có `()`.\r\n\r\nCác khái niệm/thuật ngữ nền cần tìm hiểu thêm:\r\n- Cú pháp phương thức/lớp trong C++ (C++ class method syntax).\r\n- System task / System function trong Verilog (các hàm hệ thống bắt đầu bằng `$`).\r\n- PLI (Programming Language Interface): Giao diện lập trình ứng dụng cho phép kết nối mã C/C++ với giả lập Verilog.\r\n- Các kiểu dữ liệu nâng cao: Mảng động (dynamic array), mảng liên kết (associative array), chuỗi (string).",
+      "translation": "1800-2023\r\nTiêu chuẩn IEEE dành cho SystemVerilog—Ngôn ngữ Thiết kế, Đặc tả và Kiểm tra Phần cứng Hợp nhất\r\n\r\nVí dụ 6: Để gán một thuộc tính cho một toán tử:\r\na = b + (* mode = \"cla\" *) c; // thiết lập giá trị cho thuộc tính 'mode'\r\n                              // thành chuỗi \"cla\".\r\n\r\nVí dụ 7: Để gán một thuộc tính cho một lời gọi hàm:\r\na = add (* mode = \"cla\" *) (b, c);\r\n\r\nVí dụ 8: Để gán một thuộc tính cho một toán tử điều kiện:\r\na = b ? (* no_glitch *) c : d;\r\n\r\n5.13 Các phương thức tích hợp sẵn (Built-in methods)\r\n\r\nSystemVerilog sử dụng cú pháp gọi phương thức lớp tương tự C++, trong đó một thủ tục con (subroutine) được gọi bằng cách sử dụng ký hiệu dấu chấm ( . ).\r\n\r\nobject.task_or_function()\r\n\r\nĐối tượng xác định duy nhất dữ liệu mà thủ tục con thao tác trên đó. Vì vậy, khái niệm phương thức được mở rộng một cách tự nhiên cho các kiểu dữ liệu tích hợp sẵn nhằm bổ sung chức năng, điều mà theo truyền thống vốn được thực hiện thông qua các nhiệm vụ hệ thống (system tasks) hoặc hàm hệ thống (system functions). Khác với các nhiệm vụ hệ thống, các phương thức tích hợp sẵn không được thêm tiền tố $ vì chúng không yêu cầu tiền tố đặc biệt để tránh xung đột với các định danh do người dùng định nghĩa. Nhờ đó, cú pháp phương thức cho phép mở rộng ngôn ngữ mà không cần thêm các từ khóa mới hoặc làm lộn xộn không gian tên toàn cục với các nhiệm vụ hệ thống.\r\n\r\nCác phương thức tích hợp sẵn, không giống như các nhiệm vụ hệ thống, không thể bị định nghĩa lại bởi người dùng thông qua các tác vụ PLI. Do đó, chỉ những hàm mà người dùng không được phép định nghĩa lại mới là ứng viên phù hợp cho các lời gọi phương thức tích hợp sẵn.\r\n\r\nNói chung, một phương thức tích hợp sẵn được ưu tiên hơn một nhiệm vụ hệ thống khi một chức năng cụ thể áp dụng cho tất cả các kiểu dữ liệu hoặc khi nó áp dụng cho một kiểu dữ liệu cụ thể. Ví dụ:\r\n\r\ndynamic_array.size, associative_array.num, và string.len\r\n\r\nĐây đều là các khái niệm tương tự nhau, nhưng chúng đại diện cho những điều khác nhau. Một mảng động có kích thước (size), một mảng liên kết chứa một số lượng phần tử nhất định (num), và một chuỗi có một độ dài nhất định (len). Việc sử dụng cùng một nhiệm vụ hệ thống, chẳng hạn như $size, cho tất cả các đối tượng này sẽ kém rõ ràng và kém trực quan hơn.\r\n\r\nMột phương thức tích hợp sẵn chỉ có thể gắn liền với một kiểu dữ liệu cụ thể. Do đó, nếu một chức năng nào đó chỉ là một tác động phụ đơn giản (ví dụ: $stop hoặc $reset) hoặc nó không thao tác trên dữ liệu cụ thể nào (ví dụ: $random), thì một nhiệm vụ hệ thống sẽ được sử dụng.\r\n\r\nKhi một lời gọi phương thức tích hợp sẵn dạng thủ tục con không chỉ định tham số truyền vào, cặp dấu ngoặc đơn rỗng, ( ), đi sau tên thủ tục con là tùy chọn. Điều này cũng đúng đối với các thủ tục con yêu cầu tham số khi tất cả tham số đều đã được định nghĩa giá trị mặc định. Đối với một phương thức, quy tắc này cho phép các lời gọi đơn giản xuất hiện dưới dạng các thuộc tính của đối tượng hoặc của kiểu dữ liệu tích hợp sẵn. Lưu ý ngoại lệ đối với quy tắc này khi sử dụng lời gọi phương thức tích hợp sẵn như một biến ẩn, trong đó cặp dấu ngoặc đơn luôn bắt buộc phải có ngay cả khi rỗng (xem 13.4.1). Các quy tắc tương tự được định nghĩa cho các thủ tục con trong 13.5.5.",
+      "grammar": [
+        {
+          "phrase": "in which a subroutine is called using the dot notation (.)",
+          "explain": "mệnh đề quan hệ bắt đầu bằng giới từ \"in which\" bổ nghĩa cho \"a C++ -like class method calling syntax\""
+        },
+        {
+          "phrase": "the method concept is naturally extended to built-in types in order to add functionality",
+          "explain": "thể bị động (is naturally extended) kết hợp với cụm chỉ mục đích \"in order to\""
+        },
+        {
+          "phrase": "which traditionally was done via system tasks or system functions",
+          "explain": "mệnh đề quan hệ phi xác định bổ nghĩa cho hành động \"thêm chức năng\""
+        },
+        {
+          "phrase": "because they require no special prefix to avoid collisions with user-defined identifiers",
+          "explain": "mệnh đề chỉ nguyên nhân (because) chứa cụm động từ nguyên mẫu chỉ mục đích \"to avoid collisions\""
+        },
+        {
+          "phrase": "without the addition of new keywords or the cluttering of the global name space",
+          "explain": "cụm giới từ \"without\" kết hợp danh từ hóa (addition, cluttering) mô tả cách thức không gây ra ảnh hưởng tiêu cực"
+        },
+        {
+          "phrase": "only functions that users should not be allowed to redefine are good candidates for built-in method calls",
+          "explain": "mệnh đề quan hệ (that...) bổ nghĩa cho \"functions\", chứa dạng bị động \"be allowed to do\""
+        },
+        {
+          "phrase": "wherein the parentheses are always required even when empty",
+          "explain": "mệnh đề quan hệ bắt đầu bằng trạng từ \"wherein\" (trong đó) diễn tả hoàn cảnh/trường hợp đặc biệt"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "subroutine",
+          "explain": "(danh từ) thủ tục con, chương trình con (gồm task hoặc function trong SystemVerilog)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "identifier",
+          "explain": "(danh từ) định danh, tên do người dùng đặt cho biến/hàm/hằng số"
+        },
+        {
+          "type": "vocab",
+          "phrase": "collision",
+          "explain": "(danh từ) sự xung đột, sự trùng tên trong không gian tên"
+        },
+        {
+          "type": "vocab",
+          "phrase": "cluttering",
+          "explain": "(danh từ) sự làm lộn xộn, làm rác/bừa bộn (không gian tên)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "implicit",
+          "explain": "(tính từ) ẩn, ngầm hiểu (không khai báo trực tiếp)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "built-in method",
+          "explain": "(cụm danh từ) phương thức được tích hợp sẵn trong ngôn ngữ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "dot notation",
+          "explain": "(cụm danh từ) cú pháp/ký hiệu dấu chấm dùng để truy cập thuộc tính/phương thức"
+        },
+        {
+          "type": "collocation",
+          "phrase": "global name space",
+          "explain": "(cụm danh từ) không gian tên toàn cục"
+        },
+        {
+          "type": "collocation",
+          "phrase": "side effect",
+          "explain": "(cụm danh từ) tác động phụ, hiệu ứng phụ (thay đổi trạng thái hệ thống mà không nhất thiết trả về dữ liệu)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "in order to",
+          "explain": "(cụm từ) để, nhằm mục đích (chỉ mục đích của hành động)"
+        }
+      ]
+    }
+  ]
+}
