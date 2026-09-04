@@ -1,0 +1,1043 @@
+{
+  "book": "SV_for_verification",
+  "chapter": "chp3",
+  "pages": [
+    {
+      "page": 1,
+      "summary": "- **Nội dung tổng quát:** Trang sách là phần mở đầu của Chương 3 (\"Các câu lệnh thủ tục và Hàm/thủ tục\"), giới thiệu khái quát về các cải tiến trong SystemVerilog đối với các câu lệnh thủ tục (Procedural Statements). Ngôn ngữ này đã vay mượn nhiều cú pháp tiện lợi từ C và C++ để giúp việc viết code kiểm thử (testbench) trở nên đơn giản, rõ ràng và ít lỗi hơn.\r\n- **Những ý chính người đọc cần nắm bắt:**\r\n  1. SystemVerilog mang lại các cải tiến từng bước giúp cú pháp gần gũi với lập trình phần mềm C/C++, đặc biệt là cơ chế truyền tham số cho các hàm/thủ tục (`tasks` và `functions`).\r\n  2. Cho phép khai báo biến vòng lặp ngay bên trong vòng lặp `for`, giúp thu hẹp phạm vi (scope) của biến và ngăn ngừa các lỗi logic tiềm ẩn.\r\n  3. Bổ sung các toán tử tự tăng (`++`), tự giảm (`--`) dưới dạng tiền tố/hậu tố, cùng các toán tử gán phức hợp (`+=`, `-=`, `^=`,...).\r\n  4. Hỗ trợ đặt nhãn (label) khớp nhau ở cả đầu và cuối các khối lệnh (như `begin`...`end`, `fork`...`join`, `endmodule`, `endtask`, `endfunction`), giúp cấu trúc code tường minh và dễ đọc hơn.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n  - **Task và Function trong Hardware Description Language (HDL):** Cần nắm phân biệt giữa `task` (có thể tiêu tốn thời gian mô phỏng, chứa trễ) và `function` (thực thi trong 0 thời gian mô phỏng, trả về giá trị) để hiểu ngữ cảnh ứng dụng.\r\n  - **Phạm vi của biến (Scope of Variable):** Khái niệm biến cục bộ và biến toàn cục để hiểu rõ lợi ích của việc khai báo biến trực tiếp trong vòng lặp `for`.",
+      "translation": "Chương 3\r\nCác câu lệnh thủ tục và Hàm/thủ tục\r\n\r\nKhi kiểm thử thiết kế của mình, bạn cần viết một lượng lớn mã nguồn, hầu hết nằm trong các task và function. SystemVerilog mang đến nhiều cải tiến từng bước giúp công việc này trở nên dễ dàng hơn bằng cách làm cho ngôn ngữ này giống C hơn, đặc biệt là ở cơ chế truyền tham số. Nếu bạn có nền tảng về kỹ thuật phần mềm, những bổ sung này sẽ rất quen thuộc.\r\n\r\n3.1 Các câu lệnh thủ tục\r\n\r\nSystemVerilog tiếp nhận nhiều toán tử và câu lệnh từ C và C++. Bạn có thể khai báo một biến vòng lặp ngay bên trong vòng lặp `for`, qua đó giới hạn phạm vi hoạt động của biến đó và tránh được một số lỗi lập trình. Các toán tử tự động tăng `++` và tự động giảm `--` mới hiện đã hỗ trợ ở cả dạng tiền tố (pre-form) và hậu tố (post-form). Các phép gán phức hợp, `+=`, `-=`, `^=`, và nhiều toán tử khác giúp mã nguồn của bạn gọn gàng hơn. Nếu bạn đặt nhãn (label) cho câu lệnh `begin` hoặc `fork`, bạn có thể đặt cùng nhãn đó ở câu lệnh `end` hoặc `join` tương ứng. Điều này giúp dễ dàng đối chiếu điểm bắt đầu và kết thúc của một khối lệnh. Bạn cũng có thể đặt nhãn cho các câu lệnh kết thúc khác trong SystemVerilog như `endmodule`, `endtask`, `endfunction`, và các câu lệnh khác mà bạn sẽ tìm hiểu trong cuốn sách này. Mẫu 3.1 sẽ minh họa một số cấu trúc mới này.\r\n\r\nC. Spear và G. Tumbush, SystemVerilog cho Kiểm thử: Hướng dẫn Học các Tính năng Ngôn ngữ Testbench, DOI 10.1007/978-1-4614-0715-7_3, © Springer Science+Business Media, LLC 2012\r\n69",
+      "grammar": [
+        {
+          "phrase": "most of which is in tasks and functions",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"most of which\" để bổ nghĩa cho danh từ không đếm được \"code\" ở phía trước"
+        },
+        {
+          "phrase": "to make this easier by making the language look more like C",
+          "explain": "cấu trúc \"make + O + Adj\" (make this easier) kết hợp phương thức \"by + V-ing\" và cấu trúc \"make + O + V (bare-inf)\" (make the language look)"
+        },
+        {
+          "phrase": "a loop variable inside a for loop that then restricts the scope of the loop variable",
+          "explain": "mệnh đề quan hệ (relative clause) sử dụng \"that\" bổ nghĩa cho cụm danh từ \"a loop variable inside a for loop\""
+        },
+        {
+          "phrase": "others that you will learn in this book",
+          "explain": "mệnh đề quan hệ xác định (defining relative clause) bổ nghĩa cho đại từ \"others\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "write a great deal of code",
+          "explain": "viết một lượng lớn mã nguồn"
+        },
+        {
+          "type": "vocab",
+          "phrase": "incremental",
+          "explain": "(tính từ) tăng dần, cải tiến từng bước mang tính tích lũy"
+        },
+        {
+          "type": "phrase",
+          "phrase": "software engineering",
+          "explain": "ngành kỹ thuật phần mềm / công nghệ phần mềm"
+        },
+        {
+          "type": "collocation",
+          "phrase": "restrict the scope",
+          "explain": "giới hạn phạm vi (hoạt động/hiệu lực của biến hoặc đối tượng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "auto-increment",
+          "explain": "(danh từ/tính từ) tự động tăng (như toán tử ++)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "auto-decrement",
+          "explain": "(danh từ/tính từ) tự động giảm (như toán tử --)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compound assignment",
+          "explain": "phép gán phức hợp / toán tử gán kết hợp (ví dụ: +=, -=, ^=)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "matching statement",
+          "explain": "câu lệnh đối ứng / câu lệnh tương thích ghép cặp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "construct",
+          "explain": "(danh từ) cấu trúc cú pháp/cấu trúc lệnh trong ngôn ngữ lập trình"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "summary": "- **Nội dung tổng quát**: Trang sách này thuộc Chương 3 (Procedural Statements and Routines), tiếp tục giới thiệu các câu lệnh điều khiển luồng và toán tử mới trong SystemVerilog. Cụ thể là cách sử dụng vòng lặp `do...while`, toán tử gán phức hợp (`+=`), việc khai báo biến trực tiếp trong vòng lặp `for`, cũng như hai câu lệnh điều khiển vòng lặp quan trọng: `continue` và `break`.\r\n- **Những ý chính người đọc bắt buộc phải hiểu**:\r\n  1. **Toán tử gán phức hợp (Compound Assignment)**: Cú pháp như `sum += array[j]` tương đương với `sum = sum + array[j]`, giúp viết mã ngắn gọn hơn.\r\n  2. **Khai báo biến trong vòng lặp**: Cho phép khai báo biến đếm ngay bên trong vòng lặp `for` (ví dụ: `for (int i=0; i<10; i++)`).\r\n  3. **Vòng lặp `do...while`**: Thực hiện khối lệnh trước rồi mới kiểm tra điều kiện lặp ở cuối.\r\n  4. **Câu lệnh `continue`**: Bỏ qua các câu lệnh còn lại trong lượt lặp hiện tại và chuyển ngay sang lượt lặp tiếp theo.\r\n  5. **Câu lệnh `break`**: Thoát hoàn toàn và lập tức khỏi vòng lặp đang chạy.\r\n  6. **Ứng dụng thực tế với File I/O**: Áp dụng `break` và `continue` khi đọc tệp lệnh (`commands.txt`) bằng các tác vụ hệ thống Verilog (`$fopen`, `$fscanf`, `$feof`, `$fclose`) để bỏ qua dòng trống hoặc kết thúc quá trình đọc file.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm**:\r\n  - **File I/O System Tasks trong Verilog-2001**: Cần hiểu cách làm việc với tập tin (mở file `$fopen`, đọc file `$fscanf`, kiểm tra kết thúc file `$feof`, đóng file `$fclose`) để nắm rõ cách xử lý dữ liệu kiểm thử từ file bên ngoài.",
+      "translation": "70  |  3 Các câu lệnh và thủ tục lập trình\r\n\r\n**Mẫu 3.1** Các câu lệnh và toán tử thủ tục mới\r\n\r\ninitial\r\n  begin : example\r\n  integer array[10], sum, j;\r\n\r\n  // Khai báo i trong câu lệnh for\r\n  for (int i=0; i<10; i++)    // Tăng i\r\n    array[i] = i;\r\n\r\n  // TÍnh tổng các giá trị trong mảng\r\n  sum = array[9];\r\n  j=8;\r\n  do                          // Vòng lặp do...while\r\n    sum += array[j];          // Phép gán phức hợp\r\n  while (j--);                // Kiểm tra xem j=0 hay chưa\r\n  $display(\"Sum=%4d\", sum);    // %4d - chỉ định độ rộng hiển thị\r\n  end : example               // Nhãn kết thúc\r\n\r\nHai câu lệnh mới giúp ích cho việc xử lý vòng lặp. Đầu tiên, nếu bạn đang ở trong một vòng lặp nhưng muốn bỏ qua phần còn lại của các câu lệnh và thực hiện lượt lặp tiếp theo, hãy sử dụng `continue`. Nếu bạn muốn rời khỏi vòng lặp ngay lập tức, hãy sử dụng `break`.\r\n\r\nPhép gán phức hợp trong Mẫu 3.1 tương đương với `sum = sum + array[j];`. Vòng lặp trong Mẫu 3.2 đọc các lệnh từ một tập tin bằng cách sử dụng các tác vụ hệ thống File I/O vốn là một phần của chuẩn Verilog-2001. Nếu lệnh đọc được chỉ là một dòng trống, mã nguồn sẽ thực hiện `continue` để bỏ qua mọi xử lý tiếp theo đối với lệnh đó. Nếu lệnh là “done”, mã nguồn sẽ thực hiện `break` để chấm dứt vòng lặp.\r\n\r\n**Mẫu 3.2** Sử dụng `break` và `continue` khi đọc một tập tin\r\n\r\ninitial begin\r\n  bit [127:0] cmd;\r\n  int file, c;\r\n\r\n  file = $fopen(\"commands.txt\", \"r\");\r\n  while (!$feof(file)) begin\r\n    c = $fscanf(file, \"%s\", cmd);\r\n    case (cmd)\r\n      \"\": continue;           // Dòng trống - nhảy đến cuối vòng lặp\r\n      \"done\": break;          // Hoàn tất - rời khỏi vòng lặp\r\n      ...                     // Xử lý các lệnh khác tại đây\r\n    endcase // case(cmd)\r\n  end\r\n  $fclose(file);\r\nend",
+      "grammar": [
+        {
+          "phrase": "if you are in a loop, but want to skip over the rest of the statements and do the next iteration, use continue",
+          "explain": "Cấu trúc câu điều kiện loại 0/1 kết hợp mệnh lệnh thức (Imperative formulation) dùng để đưa ra chỉ dẫn hành động"
+        },
+        {
+          "phrase": "the file I/O system tasks that are part of Verilog-2001",
+          "explain": "Mệnh đề quan hệ (relative clause) bổ nghĩa cho cụm danh từ \"the file I/O system tasks\""
+        },
+        {
+          "phrase": "skipping any further processing of the command",
+          "explain": "Mệnh đề phân từ hiện tại (present participle clause) đóng vai trò rút gọn giải thích cho kết quả của hành động trước đó"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "procedural",
+          "explain": "(tính từ) mang tính thủ tục, tuần tự trong lập trình phần cứng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "iteration",
+          "explain": "(danh từ) lượt lặp, sự lặp lại một chu kỳ trong vòng lặp"
+        },
+        {
+          "type": "vocab",
+          "phrase": "terminate",
+          "explain": "(động từ) chấm dứt, kết thúc (vòng lặp hoặc tiến trình)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compound assignment",
+          "explain": "(cụm danh từ) phép gán phức hợp / toán tử gán hợp nhất (như +=, -=)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "skip over",
+          "explain": "(cụm động từ) bỏ qua, nhảy qua không xử lý"
+        },
+        {
+          "type": "collocation",
+          "phrase": "system task",
+          "explain": "(cụm danh từ) tác vụ hệ thống (các hàm tích hợp sẵn trong Verilog/SystemVerilog bắt đầu bằng ký tự $)"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "summary": "- **Nội dung tổng quát:** Trang này hoàn thiện phần mở rộng cho câu lệnh `case` với từ khóa `inside` (Sample 3.3), sau đó đi vào Mục 3.2 giới thiệu về Nhiệm vụ (Task), Hàm (Function) và Hàm không trả về giá trị (Void Function) trong SystemVerilog.\r\n- **Những ý chính người đọc bắt buộc phải hiểu:**\r\n  1. *Câu lệnh case-inside:* Cho phép dùng khoảng/miền giá trị (range) thay vì kê khai từng giá trị cố định.\r\n  2. *Sự khác biệt giữa Task và Function:* Task có thể tiêu tốn thời gian mô phỏng (dùng các câu lệnh tạo trễ `#`, chờ sự kiện `@`, `wait`), còn Function thì tuyệt đối không được tiêu tốn thời gian hay gọi Task trực tiếp.\r\n  3. *Sự nới lỏng của SystemVerilog:* Function có thể gọi Task nhưng chỉ nằm bên trong một luồng mới được tạo bởi `fork...join_none`.\r\n  4. *Quy tắc thiết kế tốt (Best Practice):* Nếu một Task không chứa các câu lệnh tiêu tốn thời gian, hãy đổi nó thành `void function` (hàm không trả về giá trị) để có thể gọi tự do từ bất kỳ đâu (đặc biệt phù hợp cho các hàm in ấn/debug).\r\n  5. *Bỏ qua giá trị trả về:* Để gọi một hàm và cố tình lờ đi giá trị trả về của nó, cần ép kiểu kết quả sang `void` bằng cú pháp `void'(...)`.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm:** LRM (Language Reference Manual - Tài liệu tham khảo chuẩn ngôn ngữ), khái niệm tạo luồng song song (`fork...join_none`), cú pháp ép kiểu (casting syntax) trong SystemVerilog.",
+      "translation": "3.2 Task, Function và Void Function (Trang 71)\r\n\r\nSystemVerilog mở rộng câu lệnh `case` để bạn không còn phải đưa ra mọi giá trị có thể có nữa, mà thay vào đó có thể cung cấp một khoảng giá trị như thể hiện trong Ví dụ 3.3. Đây là một phiên bản của toán tử `inside`, sẽ được trình bày chi tiết hơn trong Mục 6.4.5.\r\n\r\nVí dụ 3.3 Câu lệnh case-inside với các khoảng giá trị\r\ncase (graduation_year) inside // <<< Chú ý từ khóa \"inside\"\r\n  [1950:1959]: $display(\"Do you like bobby sox?\");\r\n  [1960:1969]: $display(\"Did you go to Woodstock?\");\r\n  [1970:1979]: $display(\"Did you dance to disco?\");\r\nendcase\r\n\r\n3.2 Task, Function và Void Function\r\n\r\nVerilog phân biệt rất rõ ràng giữa task và function. Điểm khác biệt quan trọng nhất là một task có thể tiêu tốn thời gian mô phỏng trong khi một function thì không thể. Một function không thể có độ trễ `#100`, câu lệnh chặn (blocking statement) như `@(posedge clock)` hay `wait (ready)`, hoặc gọi một task. Ngoài ra, một function trong Verilog phải trả về một giá trị và giá trị đó phải được sử dụng, chẳng hạn như trong một câu lệnh gán.\r\n\r\nSystemVerilog nới lỏng quy tắc này một chút ở chỗ: một function có thể gọi một task, nhưng chỉ bên trong một luồng (thread) được tạo ra bằng câu lệnh `fork...join_none` (được mô tả trong Mục 7.1).\r\n\r\n[Lời khuyên]:\r\nNếu bạn có một task trong SystemVerilog không tiêu tốn thời gian, bạn nên chuyển nó thành một `void function` — tức là một function không trả về giá trị. Lúc này, nó có thể được gọi từ bất kỳ task hay function nào. Để đạt tính linh hoạt tối đa, bất kỳ thủ tục tinh chỉnh/sửa lỗi (debug routine) nào cũng nên là một `void function` thay vì một task để có thể gọi được từ mọi nơi. Ví dụ 3.4 in ra các giá trị từ một máy trạng thái (state machine).\r\n\r\nVí dụ 3.4 Void function dùng cho mục đích debug\r\nfunction void print_state();\r\n  $display(\"@%0t: state = %s\", $time, cur_state.name());\r\nendfunction\r\n\r\nTrong SystemVerilog, nếu muốn gọi một function và bỏ qua giá trị trả về của nó, hãy ép kiểu kết quả sang `void`, như thể hiện trong Ví dụ 3.5. Một số trình mô phỏng, chẳng hạn như VCS, cho phép bạn bỏ qua giá trị trả về mà không cần dùng cú pháp `void`. Tuy nhiên, LRM chỉ ra rằng trường hợp này nên đưa ra một cảnh báo (warning).\r\n\r\nVí dụ 3.5 Bỏ qua giá trị trả về của hàm\r\nvoid'($fscanf(file, \"%d\", i));",
+      "grammar": [
+        {
+          "phrase": "SystemVerilog expands the case statement so that you no longer have to give every possible value, but can instead give a range values",
+          "explain": "mệnh đề chỉ mục đích (so that) kết hợp cấu trúc tương phản/thay thế \"no longer have to ..., but can instead ...\""
+        },
+        {
+          "phrase": "shown more in more detail in Section 6.4.5",
+          "explain": "mệnh đề phân từ quá khứ (past participle clause) rút gọn bổ nghĩa cho \"the inside operator\""
+        },
+        {
+          "phrase": "The most important difference is that a task can consume time whereas a function cannot",
+          "explain": "mệnh đề danh ngữ (that-clause) làm bổ ngữ cho chủ ngữ, kết hợp liên từ so sánh đối lập \"whereas\""
+        },
+        {
+          "phrase": "a thread spawned with the fork...join_none statement",
+          "explain": "cụm danh từ chứa mệnh đề phân từ bị động \"spawned with...\" bổ nghĩa cho \"a thread\""
+        },
+        {
+          "phrase": "a void function, which is a function that does not return a value",
+          "explain": "mệnh đề quan hệ không xác định (which) chứa tiếp mệnh đề quan hệ xác định (that) để định nghĩa thuật ngữ"
+        },
+        {
+          "phrase": "so that it can be called from any task or function",
+          "explain": "mệnh đề chỉ mục đích dạng bị động (can be called)"
+        },
+        {
+          "phrase": "if you want to call a function and ignore its return value, cast the result to void",
+          "explain": "câu điều kiện loại 1 với mệnh đề chính ở dạng mệnh lệnh (cast...)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "differentiation",
+          "explain": "(danh từ) sự phân biệt, sự khác biệt rõ rệt"
+        },
+        {
+          "type": "vocab",
+          "phrase": "consume",
+          "explain": "(động từ) tiêu tốn, tiêu thụ (thời gian mô phỏng trong kiểm thử vi mạch)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "routine",
+          "explain": "(danh từ) thủ tục/chương trình con đảm nhận một nhiệm vụ cụ thể trong lập trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "simulator",
+          "explain": "(danh từ) trình mô phỏng (phần mềm mô phỏng thiết kế phần cứng như VCS, ModelSim)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "cast",
+          "explain": "(động từ) ép kiểu dữ liệu trong lập trình"
+        },
+        {
+          "type": "collocation",
+          "phrase": "consume time",
+          "explain": "(cụm từ) tiêu tốn thời gian mô phỏng (simulation time)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "blocking statement",
+          "explain": "(cụm từ) câu lệnh chặn, tạm dừng luồng thực thi cho đến khi điều kiện thỏa mãn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "return value",
+          "explain": "(cụm từ) giá trị trả về của hàm"
+        },
+        {
+          "type": "phrase",
+          "phrase": "thread spawned with",
+          "explain": "(cụm từ) luồng thực thi được khởi tạo/sinh ra bằng..."
+        },
+        {
+          "type": "phrase",
+          "phrase": "Language Reference Manual (LRM)",
+          "explain": "(cụm từ) tài liệu hướng dẫn tiêu chuẩn chính thức của ngôn ngữ lập trình/mô tả phần cứng"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "summary": "- **Nội dung tổng quát:** Trang sách nằm ở Mục 3.3 và 3.4 thuộc Chương 3 (Procedural Statements and Routines), trình bày về các cải tiến cú pháp của SystemVerilog dành cho các task và function (gọi chung là routine). Mục tiêu chính là giúp cú pháp lập trình phần cứng trở nên gọn gàng, linh hoạt và gần gũi hơn với các ngôn ngữ lập trình phần mềm như C/C++.\r\n- **Các ý chính bắt buộc phải hiểu:**\r\n  1. **Lược bỏ dấu ngoặc đơn rỗng:** Trong SystemVerilog, khi định nghĩa hoặc gọi một routine không chứa đối số, cặp dấu ngoặc đơn `()` không còn là bắt buộc (mặc dù sách vẫn khuyến khích viết để giữ độ rõ ràng).\r\n  2. **Loại bỏ khối `begin...end`:** Khác với chuẩn Verilog-1995 bắt buộc phải có `begin...end` cho routine có nhiều dòng lệnh, SystemVerilog cho phép bỏ khối này vì bản thân cặp từ khóa `task/endtask` hoặc `function/endfunction` đã đủ để xác định phạm vi của routine.\r\n  3. **Tối ưu hóa khai báo đối số (C-style arguments):**Chuẩn Verilog-1995 cũ bắt buộc phải khai báo trùng lặp (khai báo chiều truyền dữ liệu `input/output` riêng và khai báo kiểu dữ liệu `reg/wire` riêng). SystemVerilog và Verilog-2001 đã giới thiệu cách khai báo gộp gọn hơn theo phong cách ngôn ngữ C.\r\n- **Khái niệm/kiến thức nền cần tìm hiểu thêm:**\r\n  - **Task vs. Function trong Verilog/SystemVerilog:** Cần hiểu sự khác biệt cơ bản (Function không tốn thời gian mô phỏng/không chứa thời gian chờ, trả về giá trị; Task có thể tiêu tốn thời gian mô phỏng và không có giá trị trả về trực tiếp qua tên hàm).\r\n  - **Lịch sử chuẩn Verilog (Verilog-1995, Verilog-2001, SystemVerilog):** Giúp hiểu rõ lý do vì sao có sự thay đổi cú pháp và cách viết cũ/mới trong mã nguồn RTL thương mại.",
+      "translation": "72\r\n3 Các câu lệnh thủ tục và Routine\r\n\r\n3.3 Tổng quan về Task và Function\r\n\r\nSystemVerilog thực hiện một số cải tiến nhỏ đối với task và function để giúp chúng nhìn giống các routine (chương trình con) trong C hoặc C++ hơn. Nói chung, một định nghĩa hoặc lời gọi routine không có đối số thì không bắt buộc phải có cặp dấu ngoặc đơn rỗng (). Cuốn sách này vẫn đưa chúng vào để tăng thêm độ rõ ràng.\r\n\r\n3.3.1 Loại bỏ Begin...End trong Routine\r\n\r\nCải tiến đầu tiên mà bạn có thể nhận thấy ở các routine trong SystemVerilog là các khối begin...end là tùy chọn (không bắt buộc), trong khi Verilog-1995 yêu cầu phải có chúng trên tất cả các routine, ngoại trừ các routine chỉ có một dòng lệnh. Các từ khóa task / endtask và function / endfunction đã đủ để xác định ranh giới của routine, như được thể hiện trong Mẫu 3.6.\r\n\r\nMẫu 3.6 Task đơn giản không có begin...end\r\ntask multiple_lines();\r\n    $display(\"First line\");\r\n    $display(\"Second line\");\r\n    endtask : multiple_lines\r\n\r\n3.4 Đối số của Routine\r\n\r\nNhiều cải tiến của SystemVerilog dành cho các routine giúp việc khai báo đối số trở nên dễ dàng hơn và mở rộng các cách truyền giá trị vào và ra khỏi một routine.\r\n\r\n3.4.1 Đối số Routine kiểu C\r\n\r\nSystemVerilog và Verilog-2001 cho phép bạn khai báo các đối số của task và function một cách gọn gàng hơn và ít bị lặp lại hơn. Task Verilog sau đây yêu cầu bạn phải khai báo một số đối số hai lần: một lần cho hướng truyền dữ liệu, và một lần cho kiểu dữ liệu, như được thể hiện trong Mẫu 3.7.\r\n\r\nMẫu 3.7 Đối số routine trong Verilog-1995\r\ntask mytask1;\r\n    output [31:0] x;\r\n    reg    [31:0] x;\r\n    input         y;\r\n    ...\r\nendtask",
+      "grammar": [
+        {
+          "phrase": "makes several small improvements to tasks and functions to make them look more like C or C++ routines",
+          "explain": "cấu trúc chỉ mục đích \"to V\" kết hợp cấu trúc \"make + O + V_bare\" (làm cho cái gì như thế nào)"
+        },
+        {
+          "phrase": "required them on all but single-line routines",
+          "explain": "cụm từ \"all but\" mang nghĩa \"tất cả ngoại trừ\""
+        },
+        {
+          "phrase": "are enough to define the routine boundaries, as shown in Sample 3.6",
+          "explain": "cấu trúc \"enough to V\" (đủ để làm gì) kết hợp mệnh đề bị động rút gọn \"as shown in...\""
+        },
+        {
+          "phrase": "requires you to declare some arguments twice: once for the direction, and once for the type",
+          "explain": "cấu trúc \"require sb to do sth\" (yêu cầu ai/cái gì làm việc gì)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "routine",
+          "explain": "(danh từ) chương trình con / thủ tục trong lập trình (bao gồm task và function)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "parenthesis",
+          "explain": "(danh từ) dấu ngoặc đơn (dạng số nhiều: parentheses)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "boundary",
+          "explain": "(danh từ) ranh giới, giới hạn phân chia vùng mã nguồn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "task and function",
+          "explain": "cụm từ chỉ hai loại chương trình con cơ bản trong kiểm thử/thiết kế vi mạch bằng Verilog/SystemVerilog"
+        },
+        {
+          "type": "collocation",
+          "phrase": "argument declaration",
+          "explain": "khai báo đối số / tham số truyền vào hoặc ra khỏi routine"
+        },
+        {
+          "type": "phrase",
+          "phrase": "all but",
+          "explain": "tất cả ngoại trừ / hầu như"
+        },
+        {
+          "type": "phrase",
+          "phrase": "C-style argument",
+          "explain": "phong cách khai báo đối số gộp kiểu ngôn ngữ C (kết hợp hướng và kiểu dữ liệu trên cùng 1 dòng)"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "summary": "- **Nội dung tổng quát:** Trang này giới thiệu cách khai báo tham số cho hàm/task (routine arguments) trong SystemVerilog bằng phong cách ngắn gọn kiểu C (C-style), giải thích cơ chế chiều mặc định (Argument Direction) cùng tính chất \"dính\" (sticky) của kiểu tham số, đồng thời bước đầu giới thiệu các kiểu tham số nâng cao (Advanced Argument Types).\r\n- **Các ý chính người đọc BẮT BUỘC phải hiểu:**\r\n  1. Cú pháp khai báo tham số kiểu C (C-style) giúp mã nguồn ngắn gọn hơn Verilog cổ điển.\r\n  2. Khi không khai báo chiều và kiểu dữ liệu, SystemVerilog mặc định tham số là `input logic` độ rộng 1-bit.\r\n  3. Khai báo tham số có tính chất \"sticky\" (kế thừa/dính): tham số đứng sau sẽ tự động kế thừa chiều và kiểu dữ liệu của tham số đứng liền trước nó cho đến khi có khai báo mới.\r\n  4. **Khuyên dùng từ tác giả:** Mặc dù cú pháp cho phép \"khai báo lười\" (lazy declarations), kỹ sư KHÔNG NÊN phụ thuộc vào các giá trị mặc định này vì dễ phát sinh những lỗi ẩn (subtle bugs) rất khó phát hiện. Cần luôn khai báo rõ ràng chiều và kiểu cho từng tham số.\r\n  5. Trong Verilog truyền thống, tham số được truyền theo cơ chế sao chép giá trị (pass-by-value): `input`/`inout` được chép vào biến cục bộ khi gọi routine, `output`/`inout` được chép ra ngoài khi kết thúc routine. Verilog cổ điển chỉ cho phép truyền các biến đơn (scalar), không cho phép truyền mảng/bộ nhớ (memories).\r\n- **Khái niệm/thuật ngữ CẦN tìm hiểu thêm:**\r\n  - Kiểu dữ liệu `logic` vs `bit` trong SystemVerilog (4-state vs 2-state logic).\r\n  - Cơ chế truyền tham số Pass-by-value (copy-in/copy-out) so với Pass-by-reference (`ref`) sẽ được làm rõ ở các phần tiếp theo.",
+      "translation": "3.4 Tham số Routine\r\n\r\nVới SystemVerilog, bạn có thể sử dụng cú pháp kiểu C ngắn gọn hơn, được minh họa trong Ví dụ 3.8. Lưu ý rằng bạn nên sử dụng kiểu dữ liệu đầu vào vạn năng là `logic`.\r\n\r\nVí dụ 3.8 Tham số routine kiểu C\r\ntask mytask2 (output logic [31:0] x,\r\n              input  logic y);\r\n...\r\nendtask\r\n\r\n3.4.2 Chiều Tham số\r\n\r\nBạn thậm chí có thể tắt hơn nữa khi khai báo các tham số cho routine. Chiều và kiểu dữ liệu mặc định là \"input logic\" và có tính chất \"dính\" (sticky), do đó bạn không cần phải lặp lại chúng đối với các tham số tương tự. Ví dụ 3.9 minh họa một phần đầu routine được viết bằng phong cách Verilog-1995 kết hợp các kiểu dữ liệu của SystemVerilog.\r\n\r\nVí dụ 3.9 Tham số routine kiểu Verilog dài dòng\r\ntask t3;\r\n  input a, b;\r\n  logic a, b;\r\n  output [15:0] u, v;\r\n  bit [15:0] u, v;\r\n...\r\nendtask\r\n\r\nBạn có thể viết lại đoạn này như trong Ví dụ 3.10.\r\n\r\nVí dụ 3.10 Tham số routine với các kiểu dữ liệu có tính dính (sticky)\r\ntask t3(a, b, output bit [15:0] u, v); // Khai báo lười\r\n...\r\nendtask\r\n\r\nCác tham số `a` và `b` là kiểu input logic, độ rộng 1 bit. Các tham số `u` và `v` là kiểu output bit độ rộng 16 bit. Giờ đây khi đã biết điều này, bạn đừng dựa vào các giá trị mặc định, vì mã nguồn của bạn sẽ bị tràn ngập bởi những lỗi ngầm rất khó tìm, như được giải thích ở Mục 3.4.6. Luôn khai báo rõ ràng kiểu dữ liệu và chiều cho mọi tham số của routine.\r\n\r\n3.4.3 Các Kiểu Tham số Nâng cao\r\n\r\nVerilog có một cách đơn giản để xử lý các tham số: một tham số `input` hoặc `inout` được sao chép vào một biến cục bộ lúc bắt đầu routine, trong khi một tham số `output` hoặc `inout` sẽ được sao chép ra ngoài khi routine kết thúc. Không thể truyền bộ nhớ (mảng) vào trong một routine Verilog, mà chỉ có thể truyền các biến đơn (scalar).",
+      "grammar": [
+        {
+          "phrase": "Note that you should use the universal input type of logic",
+          "explain": "mệnh đề danh từ (noun clause) đóng vai trò tân ngữ bổ nghĩa cho động từ mệnh lệnh \"Note\""
+        },
+        {
+          "phrase": "written using the Verilog-1995 style and SystemVerilog data types",
+          "explain": "rút gọn mệnh đề quan hệ dạng quá khứ phân từ (past participle clause) bổ nghĩa cho \"a routine header\""
+        },
+        {
+          "phrase": "Now that you know this, don't depend on the defaults",
+          "explain": "cấu trúc \"Now that + S + V\" mang nghĩa \"Bởi vì giờ đây...\", dùng để nêu nguyên nhân khi bối cảnh đã thay đổi"
+        },
+        {
+          "phrase": "as your code will be infested with subtle and hard to find bugs",
+          "explain": "câu bị động với động từ \"infest\" (be infested with = bị tràn ngập/xâm nhập bởi)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "phrase",
+          "phrase": "C-style routine arguments",
+          "explain": "tham số hàm/task khai báo theo phong cách ngôn ngữ C"
+        },
+        {
+          "type": "vocab",
+          "phrase": "sticky",
+          "explain": "(tính từ) có tính chất kế thừa/dính (nghĩa trong ngữ cảnh này: khai báo phía trước tiếp tục áp dụng cho các phần tử phía sau nếu không có khai báo mới)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "lazy declarations",
+          "explain": "các khai báo lười biếng (chỉ ghi tên biến, bỏ qua chiều và kiểu dữ liệu để phụ thuộc vào giá trị mặc định)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "infested with",
+          "explain": "bị tràn ngập, bị quấy phá bởi (thường dùng cho sâu bọ, dịch bệnh hoặc lỗi phần mềm/bugs)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "subtle",
+          "explain": "(tính từ) tinh vi, ẩn xảo, khó phát hiện (thường đi với \"bugs\")"
+        },
+        {
+          "type": "vocab",
+          "phrase": "scalar",
+          "explain": "(danh từ/tính từ) biến đơn / đại lượng vô hướng (trong thiết kế vi mạch chỉ biến 1 giá trị/1 bit, đối lập với mảng hay bộ nhớ)"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "summary": "Nội dung trang 74 nằm trong Chương 3 (Các câu lệnh thủ tục và Routine), tập trung giải thích về việc truyền tham số theo dạng tham chiếu (`ref`) và kết hợp với từ khóa `const` trong SystemVerilog. Trang sách đưa ra hai lợi ích lớn của việc dùng `ref` thay cho các kiểu truyền tham số truyền thống (`input`, `output`, `inout`).\r\n\r\nNhững ý chính mà người đọc BẮT BUỘC phải hiểu:\r\n1. **Truyền mảng tối ưu hiệu năng bằng `ref`:** Việc truyền mảng thông qua `input` sẽ buộc hệ thống phải sao chép toàn bộ mảng vào bộ nhớ stack, gây tiêu tốn tài nguyên và giảm tốc độ mô phỏng đối với các mảng lớn. Sử dụng `ref` giúp truyền địa chỉ tham chiếu của mảng, tránh việc sao chép dữ liệu.\r\n2. **Bảo vệ dữ liệu với `const ref`:** Khi kết hợp `const` với `ref` (`const ref`), routine vẫn truy cập mảng theo dạng tham chiếu để đạt hiệu năng tối đa nhưng không thể thay đổi nội dung của mảng. Nếu có hành vi sửa đổi dữ liệu mảng, trình biên dịch sẽ báo lỗi ngay lập tức.\r\n3. **Quy định bộ nhớ `automatic`:** Theo chuẩn SystemVerilog LRM, tham số dạng `ref` chỉ có thể được dùng trong các routine có thuộc tính lưu trữ tự động (`automatic storage`).\r\n4. **Chia sẻ dữ liệu tức thì giữa các luồng (Threads):** Lợi ích thứ hai của `ref` là khi một task sửa đổi giá trị của biến dạng `ref`, hàm/tiến trình gọi nó sẽ thấy ngay sự thay đổi đó tức thì mà không cần chờ task thực thi xong.\r\n\r\nNhững khái niệm/kiến thức nền CẦN tìm hiểu thêm:\r\n- **Pass-by-value vs. Pass-by-reference:** Cần hiểu sự khác biệt giữa truyền giá trị (sao chép biến) và truyền tham chiếu (trỏ trực tiếp vào ô nhớ) trong lập trình C/C++ để nắm bản chất của `ref`.\r\n- **Automatic vs. Static Storage trong SystemVerilog:** Cần tìm hiểu Section 3.6 để hiểu cách SystemVerilog quản lý bộ nhớ động (automatic) và bộ nhớ tĩnh (static), cũng như lý do tại sao `ref` lại yêu cầu `automatic`.\r\n- **Mô hình đa luồng (Concurrent Threads & `fork-join`):** Tìm hiểu thêm Chương 7 để hiểu cách các tiến trình chạy song song tương tác dữ liệu với nhau thông qua biến tham chiếu.",
+      "translation": "Trong SystemVerilog, bạn có thể chỉ định rằng một tham số được truyền theo dạng tham chiếu (`ref`), thay vì sao chép giá trị của nó. Kiểu tham số này, `ref`, có một số ưu điểm vượt trội so với `input`, `output`, và `inout`. Đầu tiên, hiện tại bạn có thể truyền một mảng vào trong một routine, ở ví dụ dưới đây là một routine in ra mã kiểm tra (checksum).\r\n\r\nMẫu 3.11 Truyền mảng sử dụng `ref` và `const`\r\nfunction automatic void print_csm11 (const ref bit [31:0] a[]);\r\n    bit [31:0] checksum = 0;\r\n    for (int i=0; i<a.size(); i++)\r\n        checksum ^= a[i];\r\n    $display(\"The array checksum is %h\", checksum);\r\nendfunction\r\n\r\nPhép gán phức hợp `=^` trong Mẫu 3.11 là một cách viết ngắn gọn của câu lệnh: `checksum = checksum ^ a[i];`\r\n\r\nSystemVerilog cho phép bạn truyền các tham số mảng mà không cần hướng `ref`, nhưng khi đó mảng sẽ bị sao chép vào bộ nhớ stack, đây là một thao tác tốn kém chi phí xử lý đối với hầu hết các mảng trừ những mảng rất nhỏ.\r\n\r\nTài liệu chuẩn SystemVerilog LRM quy định rằng các tham số `ref` chỉ có thể được sử dụng trong các routine có cơ chế lưu trữ tự động (`automatic storage`). Nếu bạn chỉ định thuộc tính `automatic` cho các chương trình (program) và module, tất cả các routine bên trong sẽ tự động trở thành `automatic`. Xem Phần 3.6 để biết thêm chi tiết về lưu trữ.\r\n\r\nMẫu 3.11 cũng minh họa từ khóa sửa đổi `const`. Kết quả là, mảng `a` trỏ trực tiếp đến mảng trong lời gọi routine, nhưng nội dung của mảng thì không thể bị sửa đổi. Nếu bạn cố gắng thay đổi nội dung, trình biên dịch sẽ in ra một thông báo lỗi.\r\n\r\n[Lời khuyên]: Luôn luôn sử dụng `ref` khi truyền mảng vào một routine để đạt hiệu năng tốt nhất. Nếu bạn không muốn routine thay đổi các giá trị của mảng, hãy sử dụng kiểu `const ref`, điều này khiến trình biên dịch kiểm tra xem routine của bạn có chỉnh sửa mảng hay không.\r\n\r\nLợi ích thứ hai của các tham số `ref` là một task có thể chỉnh sửa một biến và sự thay đổi đó được nhận biết ngay lập tức bởi hàm gọi nó. Điều này rất hữu ích khi bạn có nhiều luồng (threads) đang thực thi đồng thời và muốn có một cách đơn giản để truyền thông tin. Xem Chương 7 để biết thêm chi tiết về việc sử dụng `fork-join`.\r\n\r\nTrong Mẫu 3.12, khối `thread2` trong khối `initial` có thể truy cập dữ liệu từ bộ nhớ ngay khi tín hiệu `enable` được kích hoạt (asserted), mặc dù task `bus_read` chưa kết thúc cho đến khi giao dịch trên bus hoàn tất, điều này có thể mất vài chu kỳ sau đó.",
+      "grammar": [
+        {
+          "phrase": "can specify that an argument is passed by reference, rather than copying its value",
+          "explain": "Mệnh đề danh ngữ đứng sau động từ \"specify\", đi kèm cụm từ chỉ sự lựa chọn \"rather than + V-ing\""
+        },
+        {
+          "phrase": "allows you to pass array arguments without the ref direction, but the array is copied onto the stack, an expensive operation for all but the smallest arrays",
+          "explain": "Cấu trúc \"allow someone to do something\" đi kèm mệnh đề bổ nghĩa dưới dạng cụm danh từ đồng vị (\"an expensive operation...\")"
+        },
+        {
+          "phrase": "ref arguments can only be used in routines with automatic storage",
+          "explain": "Câu bị động ở thì hiện tại đơn với động từ khuyết thiếu \"can only be used\""
+        },
+        {
+          "phrase": "If you try to change the contents, the compiler prints an error",
+          "explain": "Câu điều kiện loại 1 (Zero/First conditional) diễn tả quy tắc/kết quả hiển nhiên trong lập trình"
+        },
+        {
+          "phrase": "the const ref type, which causes the compiler to check that your routine does not modify the array",
+          "explain": "Mệnh đề quan hệ phi xác định \"which...\", chứa cấu trúc \"cause somebody to do something\" và mệnh đề danh ngữ \"that...\""
+        },
+        {
+          "phrase": "even though the bus_read task does not return until the bus transaction completes, which could be several cycles later",
+          "explain": "Mệnh đề nhượng bộ \"even though\" kết hợp với cấu trúc thời gian \"not... until\", nối tiếp bằng mệnh đề quan hệ \"which...\" bổ nghĩa cho toàn bộ ý trước đó"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "pass by reference",
+          "explain": "(cụm từ) truyền bằng tham chiếu (truyền địa chỉ ô nhớ thay vì sao chép giá trị)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "checksum",
+          "explain": "(danh từ) mã kiểm tra tổng, dùng để xác minh tính toàn vẹn của dữ liệu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compound assignment",
+          "explain": "(cụm từ) phép gán phức hợp (ví dụ: `+=`, `-=`, `^=`)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "shorthand",
+          "explain": "(danh từ/tính từ) cách viết tắt, lối viết ngắn gọn"
+        },
+        {
+          "type": "phrase",
+          "phrase": "copied onto the stack",
+          "explain": "(cụm từ) được sao chép vào vùng nhớ stack (thường gây tốn kém tài nguyên hệ thống)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "attribute",
+          "explain": "(danh từ) thuộc tính, đặc tính được gán cho một đối tượng trong mã nguồn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "automatic storage",
+          "explain": "(cụm từ) cơ chế lưu trữ tự động (cấp phát và giải phóng bộ nhớ động theo scope)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "modifier",
+          "explain": "(danh từ) từ sửa đổi, từ hạn định (trong lập trình như `const`, `static`, `ref`)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "concurrent",
+          "explain": "(tính từ) đồng thời, song song (nhiều tiến trình/luồng chạy cùng một lúc)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "assert",
+          "explain": "(động từ) kích hoạt, đưa tín hiệu lên mức tích cực (thường là mức 1/HIGH trong thiết kế vi mạch)"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "summary": "Nội dung trang 75 tập trung vào hai khái niệm quan trọng liên quan đến cách truyền đối số cho routine (task/function) trong SystemVerilog: truyền tham chiếu (`ref`) giữa các luồng đồng thời (threads) và thiết lập giá trị mặc định cho đối số (Default Value for an Argument).\r\n\r\nNhững ý chính mà người đọc BẮT BUỘC phải hiểu:\r\n1. **Sự khác biệt quan trọng giữa `ref` và `output` khi làm việc với đa luồng (`fork...join`)**: Khi một đối số được khai báo là `ref`, nó hoạt động như một con trỏ tham chiếu trực tiếp đến biến gốc. Mọi sự thay đổi dữ liệu bên trong task sẽ lập tức kích hoạt sự kiện (`@data`) ở các luồng khác bên ngoài task ngay tại thời điểm thay đổi. Ngược lại, nếu dùng `output`, giá trị chỉ được cập nhật và trả về khi task kết thúc hoàn toàn (`endtask`), do đó không thể kích hoạt sự kiện thời gian thực trong suốt quá trình giao dịch bus.\r\n2. **Giá trị mặc định cho đối số (Default Argument Values)**: Giúp mở rộng tính năng của các hàm/task cũ mà không làm hỏng (break) các lời gọi hàm đã tồn tại trong toàn bộ môi trường kiểm thử (testbench). Người viết mã có thể thêm các tham số mới kèm giá trị mặc định, cho phép lời gọi hàm bỏ qua các tham số này nếu không cần thiết.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- **Pass-by-value vs. Pass-by-reference trong C++/SystemVerilog**: Để hiểu sâu bản chất bộ nhớ của từ khóa `ref`.\r\n- **Khối lệnh bất đồng bộ `fork...join`**: Cần hiểu cách các luồng (thread) thực thi song song trong SystemVerilog để thấy được tầm quan trọng của việc cập nhật biến thời gian thực khi truyền bằng `ref`.",
+      "translation": "3.4 Các đối số của Routine                                75\r\n\r\nMẫu 3.12 Sử dụng ref giữa các luồng (threads)\r\n\r\ntask automatic bus_read(input logic [31:0] addr,\r\n                        ref logic [31:0] data);\r\n\r\n  // Yêu cầu bus và truyền địa chỉ\r\n  bus_request <= 1'b1;\r\n  @(posedge bus_grant) bus_addr <= addr;\r\n\r\n  // Chờ dữ liệu từ bộ nhớ\r\n  @(posedge bus_enable) data <= bus_data;\r\n\r\n  // Giải phóng bus và chờ cấp quyền\r\n  bus_request <= 1'b0;\r\n  @(negedge bus_grant);\r\nendtask\r\n\r\nlogic [31:0] addr, data;\r\n\r\ninitial\r\n  fork\r\n    bus_read(addr, data);\r\n    begin : thread2\r\n      @data; // Kích hoạt khi dữ liệu thay đổi\r\n      $display(\"Read %h from bus\", data);\r\n    end\r\n  join\r\n\r\nĐối số `data` được truyền dưới dạng `ref`, và kết quả là câu lệnh `@data` sẽ kích hoạt ngay khi `data` thay đổi bên trong task. Nếu bạn khai báo `data` dưới dạng `output`, câu lệnh `@data` sẽ không được kích hoạt cho đến khi giao dịch trên bus kết thúc.\r\n\r\n\r\n3.4.4 Giá trị Mặc định cho Đối số\r\n\r\nKhi môi trường kiểm thử (testbench) của bạn ngày càng trở nên phức tạp hơn, bạn có thể muốn thêm các bộ điều khiển bổ sung vào mã nguồn của mình nhưng không muốn làm hỏng mã hiện có. Đối với hàm trong Ví dụ 3.11, bạn có thể muốn in chuỗi kiểm tra (checksum) chỉ cho các giá trị nằm ở giữa mảng. Tuy nhiên, bạn không muốn quay lại và viết lại mọi lời gọi hàm để thêm các đối số bổ sung. Trong SystemVerilog, bạn có thể chỉ định một giá trị mặc định được sử dụng nếu bạn bỏ qua đối số đó trong lời gọi hàm. Ví dụ 3.13 thêm các đối số `low` và `high` vào hàm `print_csm` để bạn có thể tính và in chuỗi kiểm tra cho một khoảng giá trị nhất định.",
+      "grammar": [
+        {
+          "phrase": "The data argument is passed as ref",
+          "explain": "Cấu trúc câu bị động (passive voice) ở thì hiện tại đơn"
+        },
+        {
+          "phrase": "as a result, the @data statement triggers as soon as data changes in the task",
+          "explain": "Cấu trúc nối nguyên nhân - kết quả (\"as a result\") kết hợp với liên từ thời gian thực (\"as soon as\")"
+        },
+        {
+          "phrase": "If you had declared data as output, the @data statement would not trigger until the end of the bus transaction",
+          "explain": "Câu điều kiện loại 3 (third conditional / past unreal conditional) diễn tả giả định trái ngược với thực tế đã xảy ra"
+        },
+        {
+          "phrase": "As your testbench grows in sophistication, you may want to add additional controls",
+          "explain": "Mệnh đề chỉ sự tiến triển/tỷ lệ thuận với liên từ \"As\" (\"Cùng với việc / Khi...\")"
+        },
+        {
+          "phrase": "you can specify a default value that is used if you leave out an argument in the call",
+          "explain": "Mệnh đề quan hệ \"that is used...\" bổ nghĩa cho danh từ, kết hợp mệnh đề điều kiện loại 1"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "sophistication",
+          "explain": "(danh từ) sự tinh vi, mức độ phức tạp/tiên tiến của một hệ thống"
+        },
+        {
+          "type": "vocab",
+          "phrase": "checksum",
+          "explain": "(danh từ) mã kiểm tra tổng (dùng xác minh tính toàn vẹn của dữ liệu)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "bus transaction",
+          "explain": "(cụm từ chuyên ngành) một giao dịch/phiên truyền nhận dữ liệu trên bus"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as a result",
+          "explain": "(cụm từ) kết quả là, vì vậy (dùng làm từ nối giữa hai mệnh đề/câu)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as soon as",
+          "explain": "(cụm từ) ngay khi (liên từ chỉ sự việc xảy ra liền kề)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "leave out",
+          "explain": "(phrasal verb) bỏ qua, bỏ sót, không bao gồm"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "summary": "Nội dung trang 76 thuộc Chương 3 (\"Procedural Statements and Routines\") của sách kỹ thuật về SystemVerilog. Trang này hướng dẫn chi tiết hai kỹ thuật quan trọng khi khai báo và sử dụng hàm/thủ tục (routine):\r\n\r\n1. **Giá trị đối số mặc định (Default Argument Values):**\r\n   - Cho phép gán giá trị mặc định cho các tham số đầu vào trong khai báo hàm (ví dụ `low = 0`, `high = -1`).\r\n   - Khi gọi hàm, người lập trình có thể bỏ qua các đối số có giá trị mặc định, hoặc để trống vị trí đối số giữa các dấu phẩy (như `print_csm(a, , 2)`).\r\n   - Kỹ thuật dùng giá trị ngoài phạm vi (như `-1`) làm giá trị mặc định giúp hàm kiểm tra xem người gọi có chủ động truyền tham số hay không. Nếu không, hàm sẽ tự tính toán giá trị hợp lệ (ví dụ lấy kích thước tối đa của mảng minus 1).\r\n   - Cơ chế hoạt động của vòng lặp `for` trong Verilog: luôn khởi tạo và kiểm tra điều kiện trước khi thực thi thân vòng lặp, giúp tránh lỗi thực thi ngoài ý muốn nếu truyền tham số đầu vào sai lệch (`low > high`).\r\n\r\n2. **Truyền đối số theo tên (Passing Arguments by Name):**\r\n   - Giới thiệu khái niệm truyền đối số theo tên đối số (port-like syntax) tương tự cú pháp kết nối cổng (port) của một module.\r\n   - Giúp việc truyền tham số linh hoạt hơn khi routine có nhiều đối số với giá trị mặc định mà người dùng chỉ muốn thay đổi một vài đối số nhất định mà không cần nhớ đúng thứ tự vị trí.\r\n\r\n**Khái niệm/Kiến thức nền cần tìm hiểu thêm:**\r\n- **Pass-by-reference (`ref`) & `const ref` trong SystemVerilog:** Cần hiểu cơ chế truyền tham chiếu để nắm được lý do tại sao mảng `a` được khai báo dạng `const ref bit [31:0] a[]` (truyền tham chiếu không cho phép sửa đổi dữ liệu mảng gốc để tối ưu hiệu năng).\r\n- **SystemVerilog LRM (Language Reference Manual):** Tài liệu chuẩn quy định cú pháp và hành vi của ngôn ngữ SystemVerilog.",
+      "translation": "76\r\n3 Cụm lệnh thủ tục và Routine\r\n\r\n**Ví dụ 3.13** Hàm với các giá trị đối số mặc định\r\n\r\nfunction automatic void print_csm (const ref bit [31:0] a[],\r\n                                   input bit [31:0] low = 0,\r\n                                   input int high = -1);\r\n  bit [31:0] checksum = 0;\r\n  if (high == -1 || high >= a.size())\r\n    high = a.size()-1;\r\n\r\n  for (int i=low; i<=high; i++)\r\n    checksum ^= a[i];\r\n  $display(\"The array checksum is %h\", checksum);\r\nendfunction\r\n\r\nBạn có thể gọi hàm này theo các cách sau, như minh họa trong Ví dụ 3.14. Lưu ý rằng lời gọi đầu tiên tương thích với cả hai phiên bản của routine `print_csm`.\r\n\r\n**Ví dụ 3.14** Sử dụng các giá trị đối số mặc định\r\n\r\nprint_csm(a);          // Checksum a[0:size()-1] - mặc định\r\nprint_csm(a, 2, 4);    // Checksum a[2:4]\r\nprint_csm(a, 1);       // Bắt đầu tại 1\r\nprint_csm(a, , 2);     // Checksum a[0:2]\r\nprint_csm();           // Lỗi biên dịch: a không có giá trị mặc định\r\n\r\nViệc sử dụng giá trị mặc định là −1 (hoặc bất kỳ giá trị nào ngoài phạm vi) là một cách tốt để kiểm tra xem lời gọi hàm có chỉ định giá trị cụ thể hay không.\r\n\r\nVòng lặp `for` trong Verilog luôn thực thi phần khởi tạo (`int i=low`) và phép kiểm tra điều kiện (`i<=high`) trước khi bắt đầu chạy phần thân của vòng lặp. Do đó, nếu bạn vô tình truyền một giá trị `low` lớn hơn `high` hoặc lớn hơn kích thước mảng, vòng lặp `for` sẽ không bao giờ thực thi phần thân.\r\n\r\n### 3.4.5 Truyền đối số theo tên (Passing Arguments by Name)\r\n\r\nCó thể bạn đã nhận thấy trong SystemVerilog LRM rằng các đối số truyền vào một task hoặc function đôi khi được gọi là các \"port\" (cổng), giống như các kết nối của một module. Nếu bạn có một task hoặc function với nhiều đối số, trong đó một số đối số có giá trị mặc định, và bạn chỉ muốn thiết lập một vài đối số trong số đó, bạn có thể chỉ định một tập hợp con bằng cách truyền tên đối số của routine theo cú pháp giống như cổng kết nối module, như minh họa trong Ví dụ 3.15.",
+      "grammar": [
+        {
+          "phrase": "compatible with both versions of the print_csm routine",
+          "explain": "tính từ đi kèm giới từ (compatible with) nghĩa là \"tương thích với\""
+        },
+        {
+          "phrase": "Using a default value of -1 (or any out-of-range value) is a good way to see if the call specified a value.",
+          "explain": "danh động từ (Using...) đóng vai trò làm chủ ngữ ngữ pháp của câu"
+        },
+        {
+          "phrase": "if you accidentally passed a low value that was larger than high or the array size",
+          "explain": "mệnh đề quan hệ (that was larger than...) bổ nghĩa cho danh từ \"a low value\""
+        },
+        {
+          "phrase": "You may have noticed in the SystemVerilog LRM that the arguments to a task or function are sometimes called \"ports\"",
+          "explain": "động từ khuyết thiếu chỉ sự suy đoán/nhận thức trong quá khứ (may have noticed)"
+        },
+        {
+          "phrase": "arguments to a task or function are sometimes called \"ports\"",
+          "explain": "dạng câu bị động ở thì hiện tại đơn (are called)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "checksum",
+          "explain": "(danh từ) mã kiểm tra giá trị toàn vẹn của dữ liệu (chuỗi bit tổng hợp)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "LRM",
+          "explain": "(viết tắt) Language Reference Manual - Tài liệu Hướng dẫn Tham chiếu Ngôn ngữ chuẩn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "default argument values",
+          "explain": "(cụm danh từ) các giá trị đối số mặc định"
+        },
+        {
+          "type": "vocab",
+          "phrase": "out-of-range",
+          "explain": "(tính từ) ngoài phạm vi hợp lệ"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compile error",
+          "explain": "(cụm danh từ) lỗi biên dịch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "pass arguments by name",
+          "explain": "(cụm động từ) truyền đối số theo tên tham số thay vì truyền theo vị trí"
+        },
+        {
+          "type": "phrase",
+          "phrase": "port-like syntax",
+          "explain": "(cụm danh từ) cú pháp dạng cổng kết nối (cú pháp kiểu `.port_name(value)` giống như khi kết nối các cổng của module)"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "summary": "Trang sách nằm trong Mục 3.4 \"Routine Arguments\" (Các đối số của Routine) thuộc Chương 3, tập trung vào hai nội dung chính: kỹ thuật gán đối số theo tên kèm giá trị mặc định, và lỗi lập trình phổ biến liên quan đến tính chất kế thừa (\"sticky\") thuộc tính đối số trong SystemVerilog.\r\n\r\nCác ý chính người đọc bắt buộc phải nắm vững:\r\n1. Gán đối số linh hoạt: SystemVerilog cho phép gọi routine bằng cách bỏ trống đối số để dùng giá trị mặc định (default values), gán đối số theo vị trí (positional binding), gán theo tên (`.name(value)`), hoặc kết hợp cả hai phong cách.\r\n2. Tính chất \"dính\" (Sticky behavior) của khai báo đối số: Trong SystemVerilog, nếu một đối số không được chỉ định rõ hướng (`input`, `output`, `inout`, `ref`) hoặc kiểu dữ liệu (`int`, `logic`,...), nó sẽ tự động kế thừa (dính theo) hướng và kiểu của đối số ngay trước nó. Đối số đầu tiên nếu không ghi rõ hướng sẽ mặc định là `input`.\r\n3. Lỗi tiềm ẩn nguy hiểm: Khi thêm một đối số mảng dùng `ref` ở đầu danh sách (ví dụ `ref int array[50]`), các đối số phía sau như `int a, b` nếu không ghi rõ hướng sẽ vô tình bị biến thành `ref` thay vì `input`. Trình biên dịch sẽ không báo lỗi hay cảnh báo, gây ra lỗi logic rất khó phát hiện.\r\n4. Quy tắc viết code an toàn (Best Practice): Luôn khai báo rõ ràng hướng (`input`, `output`, `ref`) cho mọi đối số nếu trong danh sách khai báo có sử dụng hướng khác với `input` mặc định.\r\n\r\nKhái niệm/kiến thức nền cần tìm hiểu thêm:\r\n- Phân biệt Pass-by-Value (truyền theo giá trị) và Pass-by-Reference (`ref` - truyền theo tham chiếu) trong SystemVerilog để hiểu tại sao việc vô tình dùng `ref` cho biến nguyên lại nguy hiểm.\r\n- Cú pháp khai báo `task`/`function` automatic và tĩnh (static) trong SystemVerilog.",
+      "translation": "Mẫu 3.15 Gán đối số theo tên\r\n\r\ntask many (input int a=1, b=2, c=3, d=4);\r\n  $display(\"%0d %0d %0d %0d\", a, b, c, d);\r\nendtask\r\n\r\ninitial begin                 // a   b   c   d\r\n  many(6, 7, 8, 9);           // 6   7   8   9   Chỉ định tất cả các giá trị\r\n  many();                     // 1   2   3   4   Sử dụng giá trị mặc định\r\n  many(.c(5));                // 1   2   5   4   Chỉ chỉ định c\r\n  many(, 6, .d(8));           // 1   6   3   8   Kết hợp các kiểu\r\nend\r\n\r\n3.4.6 Các lỗi lập trình phổ biến\r\n\r\nLỗi lập trình phổ biến nhất mà bạn dễ mắc phải đối với một routine là quên mất rằng kiểu đối số có tính chất \"dính\" (kế thừa) so với đối số đứng trước nó, và kiểu mặc định cho đối số đầu tiên là input 1-bit. Hãy bắt đầu với khai báo header của task đơn giản trong Mẫu 3.16.\r\n\r\nMẫu 3.16 Khai báo header ban đầu của task\r\n\r\ntask sticky(int a, b);\r\n\r\nHai đối số này là các số nguyên đầu vào (input integer). Khi đang viết task, bạn nhận ra rằng mình cần truy cập vào một mảng, vì vậy bạn thêm một đối số mảng mới và sử dụng kiểu ref để mảng không phải bị sao chép. Khai báo header của bạn lúc này trông giống như Mẫu 3.17.\r\n\r\nMẫu 3.17 Khai báo header của task với đối số mảng bổ sung\r\n\r\ntask automatic sticky(ref int array[50],\r\n                      int a, b); // Các đối số này thuộc hướng nào?\r\n\r\nCác kiểu đối số a và b ở đây là gì? Chúng nhận hướng từ đối số trước đó, tức là kiểu ref. Việc sử dụng ref cho một biến đơn giản như kiểu int thường là không cần thiết, nhưng trình biên dịch thậm chí sẽ không đưa ra bất kỳ cảnh báo nào, và do đó bạn sẽ không nhận ra rằng mình đang dùng sai hướng.\r\nNếu có bất kỳ đối số nào trong routine của bạn thuộc kiểu khác với kiểu input mặc định, hãy chỉ định rõ hướng cho tất cả các đối số như được trình bày trong Mẫu 3.18.\r\n\r\nMẫu 3.18 Khai báo header của task với đối số mảng bổ sung\r\n\r\ntask automatic sticky(ref     int array[50],\r\n                      input int a, b); // Hãy khai báo rõ ràng",
+      "grammar": [
+        {
+          "phrase": "The most common coding mistake that you are likely to make with a routine is forgetting that the argument type is sticky",
+          "explain": "mệnh đề quan hệ \"that you are likely to make\" bổ nghĩa cho \"mistake\", kết hợp mệnh đề danh từ \"that the argument type is sticky\" đóng vai trò bổ ngữ cho động từ \"is\""
+        },
+        {
+          "phrase": "so you add a new array argument, and use the ref type so it does not have to be copied",
+          "explain": "liên từ chỉ kết quả \"so\" kết hợp mệnh đề chỉ mục đích \"so it does not have to be copied\" sử dụng thể bị động (passive voice)"
+        },
+        {
+          "phrase": "If any argument to your routine is something other than the default input type, specify the direction for all arguments as shown in Sample 3.18",
+          "explain": "câu điều kiện loại 1 kết hợp câu mệnh lệnh (\"specify...\") và mệnh đề rút gọn dạng bị động \"as shown in...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "sticky",
+          "explain": "(tính từ) có tính chất kế thừa/dính theo thuộc tính (kiểu dữ liệu, chiều truyền) của đối số phía trước trong SystemVerilog"
+        },
+        {
+          "type": "phrase",
+          "phrase": "binding arguments by name",
+          "explain": "(cụm từ) gán/liên kết đối số theo tên bằng cú pháp `.name(value)`"
+        },
+        {
+          "type": "collocation",
+          "phrase": "argument direction",
+          "explain": "(cụm từ) hướng truyền của đối số trong thủ tục/hàm (`input`, `output`, `inout`, `ref`)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "default value",
+          "explain": "(cụm từ) giá trị mặc định được định nghĩa sẵn cho tham số"
+        },
+        {
+          "type": "collocation",
+          "phrase": "routine header",
+          "explain": "(cụm từ) phần dòng tiêu đề khai báo tên và tham số của task/function"
+        },
+        {
+          "type": "phrase",
+          "phrase": "pass-by-reference",
+          "explain": "(cụm từ) phương thức truyền đối số theo tham chiếu (`ref`)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "be explicit",
+          "explain": "(cụm từ) hãy khai báo/chỉ định một cách rõ ràng, minh bạch"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "summary": "- **Nội dung tổng quát**: Trang này thuộc Chương 3 (Procedural Statements and Routines), trình bày về cơ chế trả về (return) từ một routine (task hoặc function) trong SystemVerilog. Trang sách đối chiếu sự hạn chế của Verilog cổ điển với những cải tiến của SystemVerilog, cụ thể là việc bổ sung câu lệnh `return` giúp thoát sớm routine và khả năng trả về kiểu mảng (array) từ hàm.\r\n\r\n- **Những ý chính người đọc bắt buộc phải hiểu**:\r\n  1. *Sự khác biệt giữa Verilog và SystemVerilog*: Trong Verilog truyền thống, routine chỉ kết thúc khi chạy hết câu lệnh cuối cùng và hàm trả về giá trị bằng cách gán vào tên hàm. SystemVerilog đưa vào lệnh `return` giúp kiểm soát luồng điều khiển linh hoạt hơn.\r\n  2. *Lợi ích của lệnh `return` (thoát sớm - early return)*: Cho phép thoát khỏi task/function ngay khi phát hiện lỗi hoặc đạt điều kiện nhất định, tránh việc phải lồng nhiều khối lệnh `else` làm code bị thụt lề sâu và khó đọc.\r\n  3. *Trả về kiểu dữ liệu phức tạp (mảng)*: Verilog cũ chỉ cho phép trả về kiểu đơn giản (bit, integer, vector). SystemVerilog cho phép hàm trả về mảng bằng cách định nghĩa kiểu dữ liệu (typedef) cho mảng rồi dùng kiểu đó làm kiểu trả về của hàm.\r\n\r\n- **Khái niệm/thuật ngữ/kiến thức nền cần tìm hiểu thêm**:\r\n  - *Task và Function*: Cần nắm rõ sự khác nhau cơ bản giữa `task` (có thể tiêu tốn thời gian mô phỏng, dùng tham số `ref`/`output` để trả dữ liệu) và `function` (thực thi trong 0 thời gian mô phỏng, trả về 1 giá trị/mảng).\r\n  - *Từ khóa `automatic`*: Quy định thời gian tồn tại (lifetime) của biến cục bộ trong routine, được cấp phát động mỗi khi routine được gọi.\r\n  - *Định nghĩa kiểu mảng (`typedef`)*: Cần tìm hiểu cách tạo kiểu dữ liệu mảng tùy chỉnh để làm kiểu trả về cho hàm.",
+      "translation": "78 | 3 Các câu lệnh thủ tục và Routine\r\n\r\n3.5 Trả về từ một Routine\r\n\r\nVerilog trước đây có một cách sơ khai để kết thúc một routine; sau khi bạn thực thi câu lệnh cuối cùng trong một routine, nó sẽ quay trở lại mã nguồn đã gọi nó. Ngoài ra, một hàm (function) trả về một giá trị bằng cách gán giá trị đó cho một biến có cùng tên với hàm.\r\n\r\n3.5.1 Câu lệnh Return\r\n\r\nSystemVerilog bổ sung câu lệnh `return` nhằm giúp bạn dễ dàng kiểm soát luồng thực thi trong các routine của mình hơn. Task trong Mẫu 3.19 cần phải thoát sớm vì lý do kiểm tra lỗi. Nếu không, nó sẽ phải đưa phần còn lại của task vào trong một mệnh đề `else`, điều này sẽ làm tăng độ thụt lề và khiến mã nguồn trở nên khó đọc hơn.\r\n\r\nMẫu 3.19 Return trong một task\r\ntask automatic load_array(input int len, ref int array[]);\r\n  if (len <= 0) begin\r\n    $display(\"Bad len\");\r\n    return;\r\n  end\r\n  // Mã nguồn cho phần còn lại của task\r\n  ...\r\nendtask\r\n\r\nCâu lệnh `return` trong Mẫu 3.20 có thể đơn giản hóa các hàm của bạn.\r\n\r\nMẫu 3.20 Return trong một hàm\r\nfunction bit transmit(input bit [31:0] data);\r\n  // Gửi giao dịch\r\n  ...\r\n  return status; // Trả về trạng thái: 0=lỗi\r\nendfunction\r\n\r\n3.5.2 Trả về một Mảng từ một Hàm\r\n\r\nCác routine trong Verilog chỉ có thể trả về một giá trị đơn giản như bit, integer, hoặc vector. Nếu bạn muốn tính toán và trả về một mảng, không có cách nào đơn giản cả. Trong SystemVerilog, một hàm có thể trả về một mảng bằng cách sử dụng một vài kỹ thuật.\r\n\r\nCách đầu tiên là định nghĩa một kiểu dữ liệu (type) cho mảng, sau đó sử dụng kiểu đó trong khai báo hàm. Mẫu 3.21 sử dụng kiểu mảng từ Mẫu 2.40, và tạo một hàm để khởi tạo mảng.",
+      "grammar": [
+        {
+          "phrase": "after you executed the last statement in a routine, it returned to the calling code",
+          "explain": "mệnh đề trạng ngữ chỉ thời gian (adverbial clause of time) kết hợp với thì quá khứ đơn diễn tả thứ tự hành động"
+        },
+        {
+          "phrase": "assigning that value to a variable with the same name as the function",
+          "explain": "danh động từ (gerund) đứng sau giới từ \"by\" để chỉ phương thức/cách thức thực hiện hành động"
+        },
+        {
+          "phrase": "Otherwise, it would have to put the rest of the task in an else clause, which would cause more indentation and be more difficult to read",
+          "explain": "câu điều kiện giả định ẩn (dùng \"Otherwise\") đi kèm mệnh đề quan hệ không xác định (`which...`) bổ nghĩa cho toàn bộ vế trước"
+        },
+        {
+          "phrase": "If you wanted to compute and return an array, there was no simple way",
+          "explain": "câu điều kiện loại 2 (second conditional) diễn tả giả định trái với thực tế/quy định trong ngữ cảnh Verilog cũ"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "primitive",
+          "explain": "(tính từ) sơ khai, cổ điển, cơ bản (chưa được tối ưu hoặc phát triển đầy đủ)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "calling code",
+          "explain": "(cụm danh từ) đoạn mã gọi routine/hàm"
+        },
+        {
+          "type": "phrase",
+          "phrase": "return early",
+          "explain": "(cụm động từ) thoát/trả về kết quả sớm trước khi thực hiện hết các câu lệnh bên dưới"
+        },
+        {
+          "type": "collocation",
+          "phrase": "error checking",
+          "explain": "(cụm danh từ) việc kiểm tra lỗi trong chương trình"
+        },
+        {
+          "type": "vocab",
+          "phrase": "indentation",
+          "explain": "(danh từ) sự thụt lề (khoảng trắng đầu dòng để phân cấp cấu trúc mã nguồn)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "vector",
+          "explain": "(danh từ) mảng bit liên tục có độ rộng cố định trong lập trình phần cứng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "function declaration",
+          "explain": "(cụm danh từ) sự khai báo hàm (bao gồm kiểu trả về, tên hàm và tham số)"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "summary": "Nội dung trang 79 tiếp tục thảo luận về cách tối ưu hóa hiệu năng khi làm việc với mảng trong hàm (SystemVerilog), đồng thời bắt đầu Phần 3.6 trình bày lịch sử và bản chất của việc lưu trữ dữ liệu cục bộ (Local Data Storage).\r\n\r\nNhững ý chính người đọc bắt buộc phải hiểu:\r\n- **Truyền mảng bằng giá trị vs. tham chiếu (ref):** Việc trả về hoặc truyền một mảng theo dạng giá trị (copy-by-value) sẽ sao chép toàn bộ dữ liệu của mảng, gây suy giảm hiệu năng nghiêm trọng nếu mảng có kích thước lớn. Sử dụng từ khóa `ref` giúp truyền mảng dưới dạng tham chiếu, tránh được hành vi sao chép này.\r\n- **Bọc mảng trong Lớp (Class):** Một cách khác để trả về mảng từ hàm là gói mảng vào trong một đối tượng lớp và trả về con trỏ/tay cầm (handle) của đối tượng đó.\r\n- **Nguồn gốc việc cấp phát bộ nhớ tĩnh trong Verilog:** Verilog nguyên bản (thập niên 1980) được thiết kế để mô tả phần cứng thực tế trên silicon, nên tất cả các biến cục bộ và tham số hàm đều được cấp phát bộ nhớ tĩnh (static allocation) ở vị trí cố định, không dùng bộ nhớ ngăn xếp (stack).\r\n- **Hạn chế của việc cấp phát tĩnh:** Thiết kế tĩnh này khiến Verilog truyền thống không hỗ trợ các hàm đệ quy hoặc mã động, dễ tạo ra các lỗi ẩn (subtle bugs) cho những kĩ sư kiểm thử vốn quen thuộc với các ngôn ngữ lập trình phần mềm như C.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Từ khóa `ref` và hàm `automatic` trong SystemVerilog: Để hiểu cơ chế truyền tham chiếu và cấp phát bộ nhớ động/ngăn xếp cho biến cục bộ.\r\n- Cấp phát tĩnh (Static allocation) vs Cấp phát ngăn xếp (Stack allocation): Kiến thức cốt lõi về quản lý bộ nhớ máy tính để hiểu sự khác biệt giữa ngôn ngữ mô tả phần cứng (HDL) và ngôn ngữ phần mềm (C/C++).",
+      "translation": "3.6 Lưu trữ Dữ liệu Cục bộ\r\nTrang 79\r\n\r\nMẫu 3.21 Trả về một mảng từ một hàm bằng cách sử dụng typedef\r\n\r\ntypedef int fixed_array5_t[5];\r\nfixed_array5_t f5;\r\n\r\nfunction fixed_array5_t init(input int start);\r\n  foreach (init[i])\r\n    init[i] = i + start;\r\nendfunction\r\n\r\ninitial begin\r\n  f5 = init(5);\r\n  foreach (f5[i])\r\n    $display(\"f5[%0d] = %0d\", i, f5[i]);\r\nend\r\n\r\nMột vấn đề đối với đoạn mã ở trên là hàm init tạo ra một mảng, mảng này sau đó được sao chép vào mảng f5. Nếu mảng đó có kích thước lớn, điều này có thể gây ra vấn đề nghiêm trọng về hiệu năng.\r\nGiải pháp thay thế là truyền mảng vào hàm theo dạng tham chiếu. Cách dễ nhất là truyền mảng vào hàm dưới dạng một đối số ref, như được thể hiện trong Mẫu 3.22.\r\n\r\nMẫu 3.22 Truyền một mảng vào hàm dưới dạng một đối số ref\r\n\r\nfunction automatic void init(ref int f[5], input int start);\r\n  foreach (f[i])\r\n    f[i] = i + start;\r\nendfunction\r\n\r\nint fa[5];\r\ninitial begin\r\n  init(fa, 5);\r\n  foreach (fa[i])\r\n    $display(\"fa[%0d] = %0d\", i, fa[i]);\r\nend\r\n\r\nCách cuối cùng để một hàm trả về một mảng là bọc mảng đó bên trong một lớp (class), và trả về một tay cầm (handle) trỏ đến đối tượng đó. Chương 5 sẽ mô tả chi tiết về các lớp, đối tượng và tay cầm.\r\n\r\n3.6 Lưu trữ Dữ liệu Cục bộ\r\n\r\nKhi Verilog được tạo ra vào những năm 1980, nó gắn liền chặt chẽ với việc mô tả phần cứng. Do đó, tất cả các đối tượng trong ngôn ngữ đều được cấp phát tĩnh. Cụ thể, các đối số của hàm/thủ tục và các biến cục bộ được lưu trữ tại một vị trí cố định, thay vì được đẩy vào bộ nhớ ngăn xếp (stack) như các ngôn ngữ lập trình khác. Tại sao lại phải cố gắng mô hình hóa mã nguồn động như một hàm đệ quy khi không có cách nào để xây dựng điều đó trên chip silicon? Tuy nhiên, các kỹ sư phần mềm làm công tác kiểm thử thiết kế — những người vốn quen với hành vi của các ngôn ngữ dựa trên ngăn xếp như C — đã gặp phải những lỗi ẩn tinh vi này, và do đó bị hạn chế khả năng tạo ra các môi trường kiểm thử (testbench) phức tạp với các thư viện hàm.",
+      "grammar": [
+        {
+          "phrase": "creates an array, which is copied into the array f5",
+          "explain": "mệnh đề quan hệ không xác định (non-defining relative clause) bổ nghĩa cho \"an array\""
+        },
+        {
+          "phrase": "If the array was large, this could be a large performance problem",
+          "explain": "câu điều kiện loại 2 (second conditional) diễn tả giả định không có thật ở hiện tại/tương lai"
+        },
+        {
+          "phrase": "When Verilog was created in the 1980s, it was tightly tied to describing hardware",
+          "explain": "mệnh đề thời gian đi kèm câu bị động ở thì quá khứ đơn (was created, was tightly tied)"
+        },
+        {
+          "phrase": "who were used to the behavior of stack-based languages such as C, were bitten by these subtle bugs",
+          "explain": "mệnh đề quan hệ bổ nghĩa cho chủ ngữ, kết hợp cấu trúc \"be used to\" (quen với) và thể bị động \"were bitten\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "typedef",
+          "explain": "(danh từ) từ khóa định nghĩa kiểu dữ liệu mới trong SystemVerilog và C/C++"
+        },
+        {
+          "type": "collocation",
+          "phrase": "pass by reference",
+          "explain": "(cụm từ) truyền bằng tham chiếu (truyền địa chỉ ô nhớ thay vì sao chép giá trị)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "performance problem",
+          "explain": "(cụm danh từ) vấn đề suy giảm hiệu năng / tốc độ xử lý"
+        },
+        {
+          "type": "vocab",
+          "phrase": "handle",
+          "explain": "(danh từ) con trỏ / tay cầm quản lý đối tượng trong lập trình hướng đối tượng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "statically allocated",
+          "explain": "(trạng từ + tính từ) được cấp phát bộ nhớ tĩnh ở vị trí cố định"
+        },
+        {
+          "type": "collocation",
+          "phrase": "stack-based languages",
+          "explain": "(cụm danh từ) các ngôn ngữ lập trình quản lý bộ nhớ dựa trên ngăn xếp (stack)"
+        },
+        {
+          "type": "idiom",
+          "phrase": "bitten by",
+          "explain": "(thành ngữ/cụm từ) vấp phải / gánh chịu hậu quả từ một lỗi ẩn hoặc vấn đề không ngờ tới"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "summary": "- **Nội dung tổng quát**: Trang sách thuộc Chương 3 (Procedural Statements and Routines), tập trung trình bày về hai vấn đề quản lý bộ nhớ quan trọng trong SystemVerilog: Cơ chế cấp phát bộ nhớ tự động (**Automatic Storage**) và những rủi ro khi khởi tạo biến (**Variable Initialization**).\r\n- **Những ý chính người đọc bắt buộc phải hiểu**:\r\n  1. **Khái niệm và sự khác biệt giữa Static Storage và Automatic Storage**:\r\n     - Mặc định trong Verilog-1995 và cả SystemVerilog, các subprogram (routine: task, function) dùng bộ nhớ tĩnh (static storage). Tất cả các lần gọi hàm đều dùng chung một vùng nhớ cho biến cục bộ. Điều này khiến các luồng (threads) chạy song song dễ ghi đè giá trị lên nhau (gây ra lỗi race condition).\r\n     - Từ Verilog-2001 và SystemVerilog, từ khóa `automatic` cho phép trình mô phỏng sử dụng bộ nhớ ngăn xếp (stack) cho các biến cục bộ. Mỗi lần gọi routine sẽ tạo ra một vùng nhớ riêng biệt, giúp các lệnh gọi đồng thời (concurrent calls) hoạt động an toàn.\r\n     - Quy tắc tốt nhất: Luôn khai báo từ khóa `automatic` cho các khối `program`.\r\n  2. **Vấn đề khởi tạo biến (Variable Initialization)**:\r\n     - Trong vùng lưu trữ tĩnh, nếu gán giá trị cho biến cục bộ ngay khi khai báo (ví dụ: `int i = 0;`), việc gán này thực chất xảy ra *trước khi* quá trình mô phỏng bắt đầu và chỉ diễn ra 1 lần duy nhất, không phải mỗi lần gọi hàm.\r\n     - Giải pháp: Tránh gán giá trị cho biến lúc khai báo (trừ hằng số); hãy dùng câu lệnh gán riêng biệt trong luồng thực thi để kiểm soát chính xác thời điểm khởi tạo.\r\n- **Khái niệm/Kiến thức nền cần tìm hiểu thêm**:\r\n  - **Stack vs Heap/Static Memory**: Hiểu cơ chế cấp phát bộ nhớ trong lập trình (C/C++ hoặc SystemVerilog) để nắm rõ lý do vì sao stack giải quyết được bài toán đa luồng.\r\n  - **Thread / Concurrency trong SystemVerilog**: Cách các tiến trình chạy song song tương tác với biến cục bộ.",
+      "translation": "3.6.1 Bộ nhớ Tự động (Automatic Storage)\r\n\r\nTrong Verilog-1995, nếu bạn cố gắng gọi một task từ nhiều vị trí khác nhau trong testbench, các biến cục bộ sẽ dùng chung một vùng lưu trữ tĩnh (static storage), và do đó các luồng (threads) khác nhau sẽ ghi đè lên giá trị của nhau. Trong Verilog-2001, bạn có thể chỉ định các task, function và module sử dụng bộ nhớ tự động (automatic storage), điều này khiến trình mô phỏng sử dụng vùng nhớ ngăn xếp (stack) cho các biến cục bộ.\r\n\r\nTrong SystemVerilog, các routine vẫn sử dụng bộ nhớ tĩnh theo mặc định, áp dụng cho cả module và program block. Bạn nên luôn luôn làm cho các program block (và các routine của chúng) sử dụng bộ nhớ tự động bằng cách đặt từ khóa `automatic` trong câu lệnh `program`. Trong Chương 4, bạn sẽ học về các khối `program` chứa mã testbench. Phần 7.1.6 sẽ trình bày cách bộ nhớ tự động giúp ích khi bạn tạo nhiều luồng chạy song song.\r\n\r\nMẫu 3.23 minh họa một task dùng để theo dõi khi dữ liệu được ghi vào bộ nhớ.\r\n\r\nMẫu 3.23: Chỉ định bộ nhớ tự động trong các khối program\r\nprogram automatic test();\r\n  task wait_for_bus(input logic [31:0] addr, expect_data,\r\n                    output logic success);\r\n    while (bus_addr !== addr)\r\n      @(bus_addr);\r\n    success = (bus_data == expect_data);\r\n  endtask\r\n\r\nendprogram\r\n\r\nBạn có thể gọi task này nhiều lần cùng một lúc (đồng thời), vì các đối số `addr` và `expect_data` được lưu trữ riêng biệt cho mỗi lần gọi. Nếu không có bổ trợ `automatic`, nếu bạn gọi `wait_for_bus` lần thứ hai trong khi lần gọi đầu tiên vẫn đang chờ, lần gọi thứ hai sẽ ghi đè lên hai đối số đó.\r\n\r\n3.6.2 Khởi tạo Biến (Variable Initialization)\r\n\r\nMột vấn đề tương tự cũng xảy ra khi bạn cố gắng khởi tạo một biến cục bộ ngay trong câu lệnh khai báo, vì thực chất nó được khởi tạo trước khi quá trình mô phỏng bắt đầu. Giải pháp chung là tránh việc khởi tạo biến trong câu lệnh khai báo với bất kỳ giá trị nào ngoại trừ hằng số. Hãy sử dụng một câu lệnh gán riêng biệt để giúp bạn kiểm soát tốt hơn thời điểm thực hiện khởi tạo.",
+      "grammar": [
+        {
+          "phrase": "you can specify that tasks, functions, and modules use automatic storage, which causes the simulator to use the stack for local variables",
+          "explain": "Mệnh đề quan hệ không xác định (non-defining relative clause) dùng \"which\" để bổ nghĩa cho toàn bộ ý của mệnh đề phía trước"
+        },
+        {
+          "phrase": "You should always make program blocks (and their routines) use automatic storage by putting the automatic keyword in the program statement",
+          "explain": "Cấu trúc thể sai khiến/tác động: \"make somebody/something do something\" (bắt/làm cho cái gì thực hiện hành động gì)"
+        },
+        {
+          "phrase": "Without the automatic modifier, if you called wait_for_bus a second time while the first was still waiting, the second call would overwrite the two arguments",
+          "explain": "Câu điều kiện giả định (loại 2) kết hợp với mệnh đề trạng ngữ chỉ thời gian \"while...\" để mô tả một kịch bản giả định và hậu quả của nó"
+        },
+        {
+          "phrase": "avoid initializing a variable in a declaration to anything other than a constant",
+          "explain": "Cấu trúc \"avoid + V-ing\" (tránh làm gì đó) kết hợp với cụm từ chỉ sự ngoại trừ \"other than\" (ngoại trừ/khác với)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "automatic storage",
+          "explain": "(cụm danh từ) cơ chế lưu trữ tự động (biến được cấp phát trên stack khi vào hàm và giải phóng khi thoát hàm)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "static storage",
+          "explain": "(cụm danh từ) cơ chế lưu trữ tĩnh (biến tồn tại xuyên suốt quá trình chạy chương trình tại 1 vùng nhớ cố định)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "step on each other’s values",
+          "explain": "(cụm từ) ghi đè/can thiệp làm hỏng dữ liệu của nhau (nói về các luồng xử lý dữ liệu)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "concurrent",
+          "explain": "(tính từ) đồng thời, xẩy ra cùng một lúc (trong bối cảnh mô phỏng phần cứng/đa luồng)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "call a task multiple times concurrently",
+          "explain": "(cụm từ) gọi một tác vụ (task) nhiều lần đồng thời"
+        },
+        {
+          "type": "vocab",
+          "phrase": "overwrite",
+          "explain": "(động từ) ghi đè dữ liệu"
+        },
+        {
+          "type": "collocation",
+          "phrase": "assignment statement",
+          "explain": "(cụm danh từ) câu lệnh gán giá trị"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "summary": "Trang sách này giải thích về một lỗi thường gặp trong SystemVerilog liên quan đến việc khởi tạo biến tĩnh (static initialization bug) trong các khối lệnh/tác vụ (task/program), đưa ra các phương pháp khắc phục, và bắt đầu giới thiệu Mục 3.7 về cách quản lý \"Giá trị thời gian\" (Time Values).\r\n\r\nNhững ý chính người đọc bắt buộc phải hiểu:\r\n1. Bản chất của lỗi khởi tạo tĩnh: Trong SystemVerilog, mặc định các biến được khai báo và gán giá trị khởi tạo ngay bên trong một khối câu lệnh (như trong `program` hoặc `task` mặc định) sẽ được cấp phát tĩnh (statically allocated). Điều này có nghĩa là biến chỉ được khởi tạo **một lần duy nhất tại thời điểm bắt đầu mô phỏng (time 0)**, chứ không phải mỗi khi khối lệnh `begin...end` đó được gọi hay thực thi.\r\n2. Giải pháp 1 (Khuyên dùng): Thêm từ khóa `automatic` khi khai báo `program` (hoặc `task`/`function`). Việc này chuyển chế độ cấp phát bộ nhớ của các biến bên trong thành động (automatic), giúp biến được khởi tạo lại mỗi lần khối lệnh được truy cập.\r\n3. Giải pháp 2 (Phong cách lập trình tốt): Tách riêng phần khai báo biến và phần gán giá trị (ví dụ: khai báo `logic [7:0] local_addr;` trước, sau đó mới gán `local_addr = addr << 2;` ở dòng tiếp theo). Cách này tránh việc vô tình kích hoạt cơ chế khởi tạo tĩnh của SystemVerilog.\r\n4. Giới thiệu về xử lý thời gian (Section 3.7): Chuẩn bị tìm hiểu các cơ chế quản lý đơn vị thời gian (Time Units) và độ chính xác (Precision), cũng như những lưu ý về thứ tự biên dịch khi dùng chỉ thị compiler `` `timescale ``.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Vòng đời của biến (Variable Lifetime) trong SystemVerilog: Phân biệt sự khác nhau giữa `static` (tồn tại suốt quá trình chạy) và `automatic` (chỉ tồn tại khi phạm vi khối lệnh/hàm được thực thi). Sự hiểu lầm giữa tư duy lập trình C (nơi biến cục bộ mặc định là `automatic`) và SystemVerilog (nơi biến trong khối `program`/`module` mặc định có thể là `static`) là nguyên nhân chính gây ra lỗi này.",
+      "translation": "3.7 Giá trị thời gian | 81\r\n\r\nTác vụ (task) trong Mẫu 3.24 quan sát bus sau 5 chu kỳ và sau đó tạo một biến cục bộ, đồng thời cố gắng khởi tạo nó bằng giá trị hiện tại của bus địa chỉ.\r\n\r\nMẫu 3.24 Lỗi khởi tạo tĩnh\r\nprogram initialization; // Phiên bản bị lỗi\r\n\r\n  task check_bus();\r\n    repeat (5) @(posedge clock);\r\n    if (bus_cmd === READ) begin\r\n      // Khi nào local_addr được khởi tạo?\r\n      logic [7:0] local_addr = addr<<2; // Lỗi\r\n      $display(\"Local Addr = %h\", local_addr);\r\n    end\r\n  endtask\r\nendprogram\r\n\r\nLỗi ở đây là biến `local_addr` được cấp phát tĩnh, do đó nó thực sự được khởi tạo ngay tại thời điểm bắt đầu mô phỏng, chứ không phải khi khối `begin...end` được truy cập. Một lần nữa, giải pháp là khai báo chương trình dưới dạng `automatic` như trình bày trong Mẫu 3.25.\r\n\r\nMẫu 3.25 Sửa lỗi khởi tạo tĩnh: sử dụng `automatic`\r\nprogram automatic initialization; // Đã sửa lỗi\r\n...\r\nendprogram\r\n\r\nNgoài ra, bạn có thể tránh điều này bằng cách không bao giờ khởi tạo biến ngay trong câu lệnh khai báo, nhưng điều này khó nhớ hơn, đặc biệt là đối với các lập trình viên C. Mẫu 3.26 minh họa phong cách được khuyến nghị là tách biệt phần khai báo và phần khởi tạo.\r\n\r\nMẫu 3.26 Sửa lỗi khởi tạo tĩnh: tách biệt khai báo và khởi tạo\r\nlogic [7:0] local_addr;\r\nlocal_addr = addr << 2; // Đã sửa lỗi\r\n\r\n3.7 Giá trị thời gian\r\n\r\nSystemVerilog cung cấp một số cú pháp mới cho phép bạn chỉ định rõ ràng và không mơ hồ các giá trị thời gian trong hệ thống của mình.\r\n\r\n3.7.1 Đơn vị thời gian và Độ chính xác\r\n\r\nKhi bạn dựa vào chỉ thị biên dịch `timescale, bạn phải biên dịch các tệp theo đúng thứ tự để đảm bảo tất cả các độ trễ đều sử dụng đúng tỉ lệ và độ chính xác. Một cách...",
+      "grammar": [
+        {
+          "phrase": "attempts to initialize it to the current value of the address bus",
+          "explain": "cấu trúc chỉ mục đích/hành động (attempt + to-infinitive + object + to + noun phrase), trong đó \"to initialize X to Y\" nghĩa là \"khởi tạo X bằng giá trị Y\""
+        },
+        {
+          "phrase": "The bug is that the variable local_addr is statically allocated",
+          "explain": "mệnh đề danh ngữ (noun clause) \"that...\" làm bổ ngữ cho chủ ngữ (subject complement), giải thích rõ \"bug\" là gì"
+        },
+        {
+          "phrase": "is statically allocated, so it is actually initialized at the start of simulation, not when the begin...end block is entered",
+          "explain": "câu ghép chứa các dạng bị động (passive voice) diễn tả trạng thái của biến trong tiến trình mô phỏng"
+        },
+        {
+          "phrase": "avoid this by never initializing a variable in the declaration",
+          "explain": "cấu trúc chỉ phương thức thực hiện (avoid + N + by + V-ing) kết hợp từ phủ định \"never\""
+        },
+        {
+          "phrase": "allows you to unambiguously specify time values in your system",
+          "explain": "cấu trúc \"allow + O + to-V\" đi kèm trạng từ bổ nghĩa cho động từ \"unambiguously specify\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "statically allocated",
+          "explain": "(cụm từ kỹ thuật) được cấp phát tĩnh (vùng nhớ tồn tại cố định suốt quá trình mô phỏng)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "automatic",
+          "explain": "(tính từ/từ khóa kỹ thuật) tự động/cấp phát động (vùng nhớ chỉ được khởi tạo khi đi vào phạm vi khối lệnh)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directive",
+          "explain": "(cụm từ kỹ thuật) chỉ thị biên dịch (các lệnh điều hướng trình biên dịch, bắt đầu bằng dấu backtick như `timescale)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "break apart",
+          "explain": "(cụm động từ) tách rời, chia nhỏ (ở đây là tách riêng câu lệnh khai báo và gán giá trị)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "precision",
+          "explain": "(danh từ) độ chính xác, độ phân giải (trong SystemVerilog: khoảng thời gian nhỏ nhất có thể biểu diễn)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "time values",
+          "explain": "(cụm từ) các giá trị thời gian (độ trễ, chu kỳ xung mốc)"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "summary": "Nội dung trang 82 thuộc Chương 3 (Các câu lệnh thủ tục và Routine) trong sách kỹ thuật về SystemVerilog, tập trung vào hai chủ đề chính: Hằng số thời gian (Time Literals - Mục 3.7.2) và Biến thời gian (Time and Variables - Mục 3.7.3).\r\n\r\nNhững ý chính người đọc BẮT BUỘC phải hiểu sau khi đọc trang này:\r\n1. Giải pháp cho vấn đề thứ tự biên dịch (Compilation Ordering Problem): Tránh sự mơ hồ do trình chỉ dẫn ``timescale` gây ra bằng cách sử dụng các khai báo `timeunit` và `timeprecision` cụ thể trong từng module.\r\n2. Cách dùng Hằng số thời gian (Time Literals): SystemVerilog cho phép ghi trực tiếp độ trễ kèm đơn vị thời gian (như `0.1ns`, `20ps`, `#41ps`).\r\n3. Hàm hệ thống `$timeformat()`: Dùng để định dạng cách hiển thị giá trị thời gian khi in ra bằng ký tự tả dạng `%t`. Bốn tham số của hàm gồm: hệ số tỷ lệ (scaling factor, ví dụ `-9` cho nanosecond), số chữ số sau dấu chấm thập phân, chuỗi ký tự đơn vị in kèm, và chiều rộng trường hiển thị tối thiểu.\r\n4. Sự khác biệt giữa biến `time` và `realtime`: Biến kiểu `time` là số nguyên 64-bit nên sẽ tự động làm tròn độ trễ và không thể lưu trữ phần thập phân (phân số). Nếu muốn giữ độ chính xác cao đối với các giá trị thời gian thực (có phần thập phân), người lập trình bắt buộc phải dùng biến kiểu `realtime`.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Khái niệm về `timeunit` và `timeprecision` trong SystemVerilog LRM (Language Reference Manual): Cần nắm vững cách trình biên dịch tính toán độ trễ dựa trên đơn vị và độ chính xác để hiểu tại sao trong Sample 3.27, lệnh `#1` lại tương ứng với `1.000ns` và `#41ps` lại cộng thêm đúng `0.041ns` vào tổng thời gian simulated.\r\n- Các hệ thống hàm Task in ấn thời gian (`$time`, `$realtime`, `$timeformat`): Cần hiểu cách các tác vụ này truy xuất thời gian mô phỏng (simulation time) để phục vụ cho việc ghi log và kiểm thử (testbench).",
+      "translation": "để tránh vấn đề về thứ tự biên dịch này, giải pháp là yêu cầu mỗi tệp bắt đầu bằng trình chỉ dẫn biên dịch ``timescale` phải kết thúc bằng một trình chỉ dẫn khác giúp đặt lại nó về giá trị mặc định cụ thể của công ty, chẳng hạn như `1ns/1ns`.\r\n\r\nCác khai báo `timeunit` và `timeprecision` loại bỏ sự mơ hồ này bằng cách xác định chính xác các giá trị cho từng module. Mẫu 3.27 hiển thị các khai báo này. Lưu ý rằng nếu bạn sử dụng các khai báo này thay vì ``timescale`, bạn phải đặt chúng trong mọi module có chứa độ trễ. Xem tài liệu LRM để biết thêm chi tiết về các khai báo này.\r\n\r\n3.7.2 Hằng số thời gian (Time Literals)\r\n\r\nSystemVerilog cho phép bạn chỉ định rõ ràng một giá trị thời gian kèm theo đơn vị mà không sợ bị mơ hồ. Code của bạn có thể sử dụng các độ trễ như `0.1ns` hoặc `20ps`. Bạn chỉ cần nhớ sử dụng `timeunit` và `timeprecision` hoặc ``timescale`. Bạn có thể làm cho đoạn code của mình nhận biết thời gian rõ ràng hơn bằng cách sử dụng các task hệ thống Verilog kinh điển như `$timeformat()`, `$time`, và `$realtime`. Bốn đối số truyền vào `$timeformat` là hệ số tỷ lệ (-9 đối với nanosecond, -12 đối với picosecond), số chữ số nằm ở bên phải dấu chấm thập phân, một chuỗi ký tự để in ra sau giá trị thời gian, và chiều rộng trường hiển thị tối thiểu.\r\n\r\nMẫu 3.27 hiển thị các độ trễ khác nhau và kết quả thu được từ việc in thời gian khi nó được định dạng bằng `$timeformat()` cùng ký tự tả dạng `%t`.\r\n\r\nMẫu 3.27 Hằng số thời gian và `$timeformat`\r\n\r\nmodule timing;\r\n  timeunit 1ns;\r\n  timeprecision 1ps;\r\n  initial begin\r\n    $timeformat(-9, 3, \"ns\", 8);\r\n    #1      $display(\"%t\", $realtime); // 1.000ns\r\n    #2ns    $display(\"%t\", $realtime); // 3.000ns\r\n    #0.1ns  $display(\"%t\", $realtime); // 3.100ns\r\n    #41ps   $display(\"%t\", $realtime); // 3.141ns\r\n  end\r\nendmodule\r\n\r\n3.7.3 Thời gian và Biến (Time and Variables)\r\n\r\nBạn có thể lưu trữ các giá trị thời gian vào trong biến và sử dụng chúng trong các tính toán cũng như độ trễ. Các giá trị thời gian được quy đổi tỷ lệ và làm tròn theo thang thời gian (time scale) và độ chính xác (precision) hiện tại. Các biến thuộc kiểu `time` không thể lưu trữ độ trễ dạng phân số vì chúng chỉ là các số nguyên 64-bit, do đó các độ trễ sẽ bị làm tròn. Bạn nên sử dụng các biến `realtime` nếu đây là một vấn đề cần lưu tâm.\r\n\r\nMẫu 3.28 hiển thị cách các biến `realtime` bị làm tròn khi được sử dụng làm độ trễ.",
+      "grammar": [
+        {
+          "phrase": "require that every file that starts with a `timescale compiler directive should end with one that resets it back",
+          "explain": "cấu trúc giả định (subjunctive) đi với động từ \"require that\", kết hợp mệnh đề quan hệ \"that starts...\" bổ nghĩa cho \"file\" và \"that resets...\" bổ nghĩa cho đại từ \"one\""
+        },
+        {
+          "phrase": "Note that if you use these instead of `timescale, you must put them in every module that has a delay",
+          "explain": "câu điều kiện loại 1 (conditional clause) kết hợp mệnh đề quan hệ bổ nghĩa cho \"every module\""
+        },
+        {
+          "phrase": "SystemVerilog allows you to unambiguously specify a time value plus units",
+          "explain": "cấu trúc \"allow someone to do something\" (cho phép ai làm gì) chèn trạng từ \"unambiguously\" bổ nghĩa cho động từ \"specify\""
+        },
+        {
+          "phrase": "Variables of type time cannot hold fractional delays as they are just 64-bit integers",
+          "explain": "mệnh đề chỉ lý do/nguyên nhân sử dụng liên từ \"as\" (vì, do bởi)"
+        },
+        {
+          "phrase": "You should use realtime variables if this is a problem",
+          "explain": "câu điều kiện loại 1 kết hợp động từ khuyết thiếu \"should\" thể hiện lời khuyên"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "ambiguity",
+          "explain": "(danh từ) sự mơ hồ, nhập nhằng, không rõ ràng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "specifier",
+          "explain": "(danh từ) ký tự tả dạng, toán tử định dạng trong chuỗi in"
+        },
+        {
+          "type": "collocation",
+          "phrase": "compiler directive",
+          "explain": "(cụm danh từ) trình chỉ dẫn biên dịch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "scaling factor",
+          "explain": "(cụm danh từ) hệ số tỷ lệ, hệ số quy đổi"
+        },
+        {
+          "type": "collocation",
+          "phrase": "decimal point",
+          "explain": "(cụm danh từ) dấu chấm thập phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "system task",
+          "explain": "(cụm danh từ) tác vụ hệ thống (hàm tích hợp sẵn trong Verilog/SystemVerilog có dấu $)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "field width",
+          "explain": "(cụm danh từ) chiều rộng của trường (độ rộng ký tự hiển thị)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "right of the decimal point",
+          "explain": "(cụm từ) phía bên phải dấu chấm thập phân"
+        },
+        {
+          "type": "phrase",
+          "phrase": "reset something back to something",
+          "explain": "(cụm động từ) đặt lại/khôi phục cái gì về lại trạng thái ban đầu"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "summary": "Trang sách này tập trung vào sự khác biệt giữa hai task thời gian `$time` và `$realtime` trong SystemVerilog, đưa ra ví dụ minh họa về hiện tượng làm tròn thời gian, sau đó tổng kết Chương 3 và đưa ra bài tập thực hành.\r\n\r\nNhững ý chính người đọc bắt buộc phải hiểu:\r\n1. Sự khác biệt giữa `$time` và `$realtime`: Task `$time` trả về giá trị thời gian kiểu số nguyên (integer) đã quy đổi theo đơn vị thời gian của module và bị làm tròn (mất phần thập phân). Ngược lại, `$realtime` trả về số thực (real number) giữ nguyên đầy đủ độ chính xác kể cả phần thập phân.\r\n2. Ảnh hưởng của khai báo biến thời gian: Khai báo `time` sẽ làm tròn giá trị gán (ví dụ `800ps` thành `1ns` nếu timescale là `1ns/100ps`), trong khi `realtime` lưu trữ chính xác giá trị thực (`0.8ns`).\r\n3. Tổng kết Chương 3: SystemVerilog mang lại các tính năng và cấu trúc lập trình giống C/C++, giúp viết testbench dễ hơn, đồng thời tích hợp các tính năng HDL mạnh mẽ như điều khiển luồng (thread control), kiểm soát thời gian, và logic 4 trạng thái (4-state logic).\r\n4. Thực hành: Áp dụng kiến thức đã học để tạo mảng số nguyên 512 phần tử, định nghĩa biến chỉ số 9-bit, khởi tạo phần tử cuối và truyền mảng/địa chỉ vào một task.\r\n\r\nKhái niệm/Kiến thức nền cần tìm hiểu thêm:\r\n- Cú pháp chỉ thị `` `timescale ``: Cần hiểu rõ khái niệm time unit (đơn vị thời gian) và time precision (độ chính xác thời gian) để hiểu cách hệ thống làm tròn số.\r\n- Cách truyền tham số cho `task` trong SystemVerilog: Giúp hoàn thành đúng bài tập thực hành ở phần 3.9.",
+      "translation": "**Mẫu 3.28 Các biến thời gian và sự làm tròn**\r\n\r\n`timescale 1ns/100ps\r\n\r\nmodule ps;\r\n\r\n    initial begin\r\n        realtime rtdelay = 800ps;  // Được lưu dưới dạng 0.8 (800ps)\r\n        time     tdelay  = 800ps;  // Được làm tròn thành 1\r\n\r\n        $timeformat(-12, 0, \"ps\", 5);\r\n        #rtdelay;                // Trễ một khoảng 800ps\r\n        $display(\"%t\", rtdelay);  // In ra \"800ps\"\r\n        #tdelay;                 // Trễ thêm 1ns\r\n        $display(\"%t\", tdelay);   // In ra \"1000ps\"\r\n    end\r\n\r\nendmodule\r\n`timescale 1ns/1ns              // Đặt lại về mặc định\r\n\r\n**3.7.4 $time so với $realtime**\r\n\r\nTask hệ thống `$time` trả về một số nguyên được định tỷ lệ theo đơn vị thời gian của module hiện tại, nhưng bỏ qua các đơn vị phần thập phân, trong khi `$realtime` trả về một số thực với giá trị thời gian đầy đủ, bao gồm cả phần thập phân. Cuốn sách này sử dụng `$time` trong các ví dụ để cho ngắn gọn, nhưng các testbench của bạn có thể sẽ cần sử dụng `$realtime`.\r\n\r\n**3.8 Kết luận**\r\n\r\nCác cấu trúc thủ tục và tính năng task/function mới của SystemVerilog giúp bạn tạo các testbench dễ dàng hơn bằng cách làm cho ngôn ngữ này trông giống với các ngôn ngữ lập trình khác như C/C++ hơn. Như một điểm cộng, SystemVerilog bổ sung thêm các cấu trúc HDL như điều khiển thời gian, điều khiển luồng (thread) đơn giản, và logic 4 trạng thái.\r\n\r\n**3.9 Bài tập**\r\n\r\n1. Tạo mã SystemVerilog đáp ứng các yêu cầu sau:\r\n   a. Tạo một mảng số nguyên gồm 512 phần tử\r\n   b. Tạo một biến địa chỉ 9-bit để làm chỉ số truy xuất vào mảng\r\n   c. Khởi tạo vị trí cuối cùng trong mảng bằng 5\r\n   d. Gọi một task, `my_task()`, và truyền mảng cùng địa chỉ đó vào task",
+      "grammar": [
+        {
+          "phrase": "The system task $time returns an integer scaled to the time unit of the current module, but missing any fractional units, while $realtime returns a real number with the complete time value, including fractions",
+          "explain": "Cấu trúc mệnh đề song song nối bởi từ nối đối lập \"while\", kết hợp các phân tử rút gọn bổ nghĩa (\"scaled to...\", \"missing...\", \"including...\")"
+        },
+        {
+          "phrase": "make it easier for you to create testbenches by making the language look more like other programming languages",
+          "explain": "Cấu trúc tân ngữ giả \"make it + adj + for sb to do sth\" (làm cho việc gì đó dễ dàng hơn cho ai) kết hợp giới từ \"by + V-ing\" (chỉ phương thức) và so sánh \"look more like\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "fractional",
+          "explain": "(tính từ) thuộc về phần thập phân, phân số"
+        },
+        {
+          "type": "vocab",
+          "phrase": "brevity",
+          "explain": "(danh từ) sự ngắn gọn, sự xúc tích (thường dùng trong văn viết)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "procedural constructs",
+          "explain": "(cụm danh từ) các cấu trúc thủ tục (khối lệnh điều khiển luồng thực thi trong HDL như initial, always)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "4-state logic",
+          "explain": "(cụm danh từ) logic 4 trạng thái (gồm 0, 1, X-không xác định, Z-trở kháng cao)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "scaled to",
+          "explain": "(cụm động từ/tính từ) được quy đổi/định tỷ lệ theo một đơn vị đo lường khác"
+        },
+        {
+          "type": "phrase",
+          "phrase": "index into",
+          "explain": "(cụm động từ) dùng làm chỉ số để truy cập/truy xuất vào mảng hoặc cơ sở dữ liệu"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "summary": "Trang này thuộc Chương 3 \"Procedural Statements and Routines\", bao gồm các bài tập củng cố kiến thức về cách định nghĩa `task` và `function` trong SystemVerilog, cơ chế truyền tham số, quản lý bộ nhớ (`automatic` vs `static`), và định dạng thời gian hiển thị mô phỏng.\r\n\r\nNhững ý chính người đọc bắt buộc phải hiểu được sau khi đọc trang này:\r\n- Cách viết `task` truyền mảng hằng số theo dạng tham chiếu (`const ref`) và thực hiện giảm chỉ số trước khi truy cập (`pre-decrementing`).\r\n- Ý nghĩa và sự khác biệt về hành vi giữa `automatic task` và `static task` khi được gọi đồng thời từ các tiến trình song song (khối `fork...join`). Với `automatic task`, mỗi lần gọi sẽ tạo ra vùng nhớ cục bộ riêng rẽ; trong khi với `static task` (mặc định), các lần gọi dùng chung vùng nhớ, dẫn đến nguy cơ xung đột dữ liệu (race condition) và làm sai lệch giá trị đầu ra.\r\n- Cách sử dụng lệnh hệ thống `$timeformat` để thiết lập định dạng in thời gian mô phỏng (đơn vị picosecond, số chữ số thập phân, độ rộng hiển thị tối thiểu).\r\n\r\nCác khái niệm/thuật ngữ cần tìm hiểu thêm:\r\n- `automatic` vs `static lifetime`: Cần hiểu rõ cơ chế cấp phát bộ nhớ trong SystemVerilog để tránh các lỗi ẩn khi chạy mô phỏng đa tiến trình.\r\n- `fork...join`: Khối lệnh thực thi song song các tiến trình con trong SystemVerilog.\r\n- `$timeformat`: Hàm hệ thống điều khiển định dạng hiển thị cho toán tử `%t`.",
+      "translation": "e. Tạo task `my_task()` nhận hai đầu vào: một mảng số nguyên hằng số gồm 512 phần tử được truyền theo dạng tham chiếu (`ref`), và một địa chỉ 9-bit. Task này gọi một hàm `print_int()` và truyền phần tử mảng có chỉ số tương ứng với địa chỉ đó, đồng thời giảm giá trị địa chỉ trước khi truy cập (pre-decrementing).\r\nf. Tạo hàm `print_int()` để in ra thời gian mô phỏng và giá trị của đầu vào. Hàm này không có giá trị trả về (`void`).\r\n\r\n2. Đối với đoạn mã SystemVerilog sau, kết quả hiển thị sẽ là gì nếu task `my_task2()` được khai báo là `automatic`?\r\n\r\nint new_address1, new_address2;\r\nbit clk;\r\ninitial begin\r\n  fork\r\n    my_task2(21, new_address1);\r\n    my_task2(20, new_address2);\r\n  join\r\n  $display(\"new_address1 = %0d\", new_address1);\r\n  $display(\"new_address2 = %0d\", new_address2);\r\nend\r\n\r\ninitial\r\n  forever #50 clk = !clk;\r\n\r\ntask my_task2(input int address, output int new_address);\r\n  @(clk);\r\n  new_address = address;\r\nendtask\r\n\r\n3. Cũng với đoạn mã SystemVerilog trong Bài tập 2, kết quả hiển thị sẽ là gì nếu task `my_task2()` không phải là `automatic` (tức là `static`)?\r\n4. Viết đoạn mã SystemVerilog để quy định rằng thời gian sẽ được in theo đơn vị ps (picosecond), hiển thị 2 chữ số ở phần thập phân, và sử dụng ít ký tự nhất có thể.",
+      "grammar": [
+        {
+          "phrase": "a constant 512-element integer array passed by reference",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân từ (`passed by reference`), bổ nghĩa cho danh từ `integer array`"
+        },
+        {
+          "phrase": "passes the array element indexed by the address, pre-decrementing the address",
+          "explain": "hiện tại phân từ (`pre-decrementing`) đóng vai trò trạng ngữ chỉ hành động xảy ra đồng thời hoặc ngay sau hành động chính"
+        },
+        {
+          "phrase": "what is displayed if the task my_task2() is automatic?",
+          "explain": "câu điều kiện loại 1 (thực tế ở hiện tại) với mệnh đề chính ở thể bị động (`what is displayed`)"
+        },
+        {
+          "phrase": "specify that the time should be printed in ps",
+          "explain": "mệnh đề danh từ bắt đầu bằng `that` làm tân ngữ cho động từ `specify`, chứa động từ khuyết thiếu ở thể bị động (`should be printed`)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "pre-decrementing",
+          "explain": "(danh từ/động từ) thao tác giảm giá trị của biến trước khi biến đó được sử dụng trong biểu thức"
+        },
+        {
+          "type": "collocation",
+          "phrase": "pass by reference",
+          "explain": "(cụm từ) truyền tham số theo dạng tham chiếu (dùng từ khóa `ref` trong SystemVerilog)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "simulation time",
+          "explain": "(danh từ ghép) thời gian mô phỏng mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "automatic task",
+          "explain": "(cụm từ kỹ thuật) task tự động, tạo không gian lưu trữ biến cục bộ riêng cho mỗi lần gọi"
+        },
+        {
+          "type": "phrase",
+          "phrase": "to the right of the decimal point",
+          "explain": "(cụm từ) ở phía bên phải dấu phẩy thập phân (phần thập phân)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "as few characters as possible",
+          "explain": "(cụm từ) càng ít ký tự càng tốt / tối ưu hóa độ rộng trường hiển thị"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "summary": "Trang sách này trình bày một bài tập thực hành trong chuỗi bài tập thuộc Chương 3 (Mục 3.9 Bài tập, trang 85) về ngôn ngữ mô tả phần cứng SystemVerilog.\r\n\r\nNội dung trọng tâm mà người đọc cần nắm vững qua bài tập này bao gồm:\r\n- **Khai báo đơn vị và độ chính xác thời gian (`timeunit` và `timeprecision`)**: Hiểu cách thiết lập đơn vị thời gian mô phỏng (1ns) và độ phân giải/độ chính xác mô phỏng (1ps).\r\n- **Tham số kiểu số thực và kiểu thời gian (`parameter real` và `parameter time`)**: Phân biệt cách lưu trữ giá trị thời gian thực (5.5) so với giá trị thời gian định dạng sẵn (5ns).\r\n- **Hành vi hoãn thời gian (Delay processing)**: Cách cú pháp hoãn `#t_time` và `#t_real` tác động lên tiến trình mô phỏng, bao gồm cách hệ thống làm tròn hoặc quy đổi số thực sang các bước thời gian (time steps).\r\n- **Khối mô phỏng song song (`initial begin ... end`)**: Hiểu rằng hai khối `initial` hoạt động đồng thời độc lập tại mốc thời gian 0ns, dẫn đến sự xen kẽ thời gian xuất đầu ra.\r\n- **Sự khác biệt giữa `$time` và `$realtime` cùng định dạng `%t`**: `$time` trả về thời gian mô phỏng dưới dạng số nguyên (đã làm tròn theo độ chính xác), trong khi `$realtime` trả về thời gian dưới dạng số thực.\r\n\r\nKiến thức nền cần tìm hiểu thêm: Cụ thể về nhiệm vụ hệ thống `$timeformat` (được nhắc tới ở Bài tập 4 trước đó) để biết định dạng mặc định hoặc định dạng tùy chỉnh của `%t` khi in thời gian mô phỏng ra màn hình console.",
+      "translation": "3.9 Bài tập\r\nTrang 85\r\n\r\n5. Sử dụng nhiệm vụ hệ thống định dạng từ Bài tập 4, nội dung nào sẽ được hiển thị bởi đoạn mã sau?\r\n\r\ntimeunit 1ns;\r\ntimeprecision 1ps;\r\nparameter real t_real = 5.5;\r\nparameter time t_time = 5ns;\r\n\r\ninitial begin\r\n  #t_time $display(\"1 %t\", $realtime);\r\n  #t_real $display(\"1 %t\", $realtime);\r\n  #t_time $display(\"1 %t\", $realtime);\r\n  #t_real $display(\"1 %t\", $realtime);\r\nend\r\n\r\ninitial begin\r\n  #t_time $display(\"2 %t\", $time);\r\n  #t_real $display(\"2 %t\", $time);\r\n  #t_time $display(\"2 %t\", $time);\r\n  #t_real $display(\"2 %t\", $time);\r\nend",
+      "grammar": [
+        {
+          "phrase": "Using the formatting system task from Exercise 4, what is displayed by the following code?",
+          "explain": "mệnh đề hiện tại phân tử (participle clause) \"Using...\" đóng vai trò trạng ngữ chỉ phương thức/bối cảnh cho câu hỏi bị động chính phía sau"
+        },
+        {
+          "phrase": "what is displayed by the following code?",
+          "explain": "câu hỏi ở thể bị động (passive voice) với động từ \"display\" và tác nhân \"the following code\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "collocation",
+          "phrase": "formatting system task",
+          "explain": "cụm từ chỉ các nhiệm vụ hệ thống chuyên dùng để định dạng văn bản/thời gian trong Verilog/SystemVerilog (như $timeformat)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "timeunit",
+          "explain": "(từ khóa SystemVerilog) chỉ thị khai báo đơn vị thời gian cơ sở cho các giá trị hoãn (delay)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "timeprecision",
+          "explain": "(từ khóa SystemVerilog) chỉ thị khai báo độ chính xác/độ phân giải tối thiểu của thời gian mô phỏng"
+        },
+        {
+          "type": "phrase",
+          "phrase": "initial begin ... end",
+          "explain": "khối lệnh khởi tạo chạy một lần duy nhất tại thời điểm bắt đầu mô phỏng (t = 0)"
+        }
+      ]
+    }
+  ]
+}
