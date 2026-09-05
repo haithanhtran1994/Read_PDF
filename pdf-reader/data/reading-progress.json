@@ -10,22 +10,22 @@
   },
   "gh:pdf/SystemVerilog for Verification Chris Spear 3rd Edition.pdf": {
     "name": "SystemVerilog for Verification Chris Spear 3rd Edition.pdf",
-    "page": 1,
+    "page": 10,
     "numPages": 499,
     "source": {
       "type": "github",
       "path": "pdf/SystemVerilog for Verification Chris Spear 3rd Edition.pdf"
     },
-    "updatedAt": "2026-09-05T04:25:35.518Z"
+    "updatedAt": "2026-09-05T04:26:12.783Z"
   },
   "gh:pdf/Shin_Kanzen_Masuta_N2-Dokkai.pdf": {
     "name": "Shin_Kanzen_Masuta_N2-Dokkai.pdf",
-    "page": 1,
+    "page": 11,
     "numPages": 238,
     "source": {
       "type": "github",
       "path": "pdf/Shin_Kanzen_Masuta_N2-Dokkai.pdf"
     },
-    "updatedAt": "2026-09-05T04:25:48.287Z"
+    "updatedAt": "2026-09-05T07:31:30.986Z"
   }
 }
