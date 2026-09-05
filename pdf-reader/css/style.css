@@ -359,3 +359,95 @@ button { font-family: inherit; cursor: pointer; }
 @media (max-width: 640px) {
   .json-content { padding: 12px 12px 32px; }
 }
+
+/* ==================================================================
+   Popup nhận diện Kanji viết tay — kéo thả tự do + đổi kích thước
+   (nút ✍️ trên thanh công cụ Pane A). Vẽ xong (dừng tay 1 chút) thì
+   tự động nhận diện, không cần bấm nút. Kết quả nhấn vào để ghép vào
+   "Chuỗi đã ghép" bên dưới, từ đó có thể Tra cứu hoặc Thêm vào trang
+   JSON đang mở dưới dạng từ vựng (type: vocab).
+   ================================================================== */
+.kanji-panel {
+  position: fixed; z-index: 75;
+  width: min(400px, 92vw); height: min(600px, 86vh);
+  min-width: 280px; min-height: 380px;
+  max-width: 96vw; max-height: 94vh;
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.kanji-panel.hidden { display: none; }
+.kanji-panel-handle {
+  display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 10px;
+  border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; flex-shrink: 0;
+}
+.kanji-panel-handle:active { cursor: grabbing; }
+.kanji-panel-body {
+  flex: 1; min-height: 0; overflow: auto; padding: 10px; font-size: 13px;
+}
+.kanji-canvas-box {
+  position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+  aspect-ratio: 1 / 1; width: 100%; max-width: 360px; margin: 0 auto; touch-action: none; overflow: hidden;
+}
+.kanji-canvas-box::before, .kanji-canvas-box::after { content: ""; position: absolute; background: var(--line); z-index: 0; }
+.kanji-canvas-box::before { left: 0; right: 0; top: 50%; height: 1px; }
+.kanji-canvas-box::after { top: 0; bottom: 0; left: 50%; width: 1px; }
+.kanji-canvas-box canvas { position: relative; z-index: 1; display: block; width: 100%; height: 100%; touch-action: none; }
+.kanji-controls { display: flex; gap: 8px; max-width: 360px; margin: 10px auto 0; }
+.kanji-controls button { flex: 1; padding: 8px 0; font-size: 12px; }
+.kanji-status { font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top: 8px; text-align: center; }
+.kanji-status.error { color: var(--shuiro); }
+
+.kanji-candidates { display: flex; flex-wrap: wrap; gap: 6px; min-height: 46px; margin-top: 4px; }
+.kanji-candidate {
+  width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Sans CJK JP",serif;
+  font-size: 24px; line-height: 1; white-space: nowrap; background: #fff; border: 1px solid var(--line);
+  border-radius: var(--radius); color: var(--ink); cursor: pointer; padding: 2px;
+}
+.kanji-candidate.multi { font-size: 13px; letter-spacing: -0.05em; }
+.kanji-candidate:active { background: var(--paper); }
+.kanji-candidate:first-child { border-color: var(--shuiro); box-shadow: inset 0 0 0 1px var(--shuiro); }
+
+.kanji-composed-box { margin-top: 14px; }
+.kanji-composed-box > label { display: block; font-size: 11px; color: var(--ink-soft); margin-bottom: 6px; }
+.kanji-composed-text {
+  min-height: 40px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
+  padding: 8px 10px; font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Sans CJK JP",serif;
+  font-size: 20px; line-height: 1.3; word-break: break-all; color: var(--ink);
+}
+.kanji-composed-text:empty::before {
+  content: "Chưa có chữ nào — bấm vào 1 kết quả bên trên để thêm.";
+  font-family: var(--font-ui); font-size: 12px; color: var(--ink-soft);
+}
+.kanji-composed-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.kanji-composed-actions button { flex: 1 1 auto; min-width: 78px; padding: 8px 6px; font-size: 12px; }
+
+.kanji-lookup-box { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.kanji-lookup-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--ink-soft); margin-bottom: 6px;
+}
+.kanji-refresh-btn {
+  border: 1px solid var(--line); border-radius: var(--radius); background: transparent;
+  color: var(--ink-soft); font-size: 11px; padding: 3px 7px;
+}
+.kanji-refresh-btn:active { background: var(--line); }
+.kanji-lookup-results { max-height: 220px; overflow: auto; }
+.kanji-lookup-src { margin-top: 4px; font-size: 11px; color: var(--ink-soft); font-style: italic; }
+
+.kanji-resize-handle {
+  position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize;
+  touch-action: none; z-index: 2;
+}
+.kanji-resize-handle::after {
+  content: ""; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px;
+  background:
+    linear-gradient(135deg, transparent 0 45%, var(--ink-soft) 45% 55%, transparent 55% 100%),
+    linear-gradient(135deg, transparent 0 65%, var(--ink-soft) 65% 75%, transparent 75% 100%);
+  opacity: .7;
+}
+
+@media (max-width: 640px) {
+  .kanji-panel { width: 94vw; height: 82vh; }
+}

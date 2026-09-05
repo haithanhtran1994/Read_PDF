@@ -14,9 +14,12 @@
                      đọc — trang đang đọc dở của TỪNG file PDF đã từng mở, cache local — nguồn
                      "thật" là 1 file JSON dùng chung trên GitHub khi có cấu hình GitHub, để mở
                      từ nhiều thiết bị vẫn thấy đúng trang đang đọc dở)
+   - "dictIndex"  : key "all" -> { entries: [...], syncedAt }  (cache mục từ vựng/ngữ pháp gom từ
+                     TOÀN BỘ data/<book>/<chapter>.json trên GitHub, dùng cho nút "Tra cứu" trong
+                     popup nhận diện Kanji — xem js/kanji.js. Quét lại khi bấm "↻ Làm mới".)
 */
 const DB_NAME = "pdf_dual_reader_db";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -35,6 +38,8 @@ function openDB() {
       if (!db.objectStoreNames.contains("jsonMarks")) db.createObjectStore("jsonMarks");
       // cache tiến độ đọc (trang đang đọc dở) của từng file PDF
       if (!db.objectStoreNames.contains("progress")) db.createObjectStore("progress");
+      // cache dữ liệu tra cứu (gom từ toàn bộ sách) cho popup nhận diện Kanji
+      if (!db.objectStoreNames.contains("dictIndex")) db.createObjectStore("dictIndex");
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -116,4 +121,7 @@ const Store = {
 
   saveReadingProgress: (map) => idbSet("progress", "all", map || {}),
   getReadingProgress: () => idbGet("progress", "all"),
+
+  saveDictIndex: (data) => idbSet("dictIndex", "all", data || null),
+  getDictIndex: () => idbGet("dictIndex", "all"),
 };

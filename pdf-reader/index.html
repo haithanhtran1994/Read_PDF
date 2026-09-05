@@ -40,6 +40,7 @@
         <button id="btnSearchToggleA" class="icon-btn" aria-label="Tìm trong trang" title="Tìm trong trang này">🔍</button>
         <button id="btnOutlineA" class="icon-btn" aria-label="Mục lục PDF" title="Mục lục (nhảy nhanh tới mục)">📑</button>
         <button id="btnSpeakA" class="icon-btn" aria-label="Đọc văn bản" title="Đọc to (bôi đen 1 đoạn để chỉ đọc đoạn đó, không thì đọc cả trang)">🔊</button>
+        <button id="btnKanjiTool" class="icon-btn" aria-label="Nhận diện Kanji viết tay" title="Nhận diện Kanji viết tay">✍️</button>
         <div class="pane-nav">
           <button class="nav-btn small" data-act="zoomOut">−</button>
           <button class="nav-btn small" data-act="zoomIn">+</button>
@@ -147,6 +148,67 @@
   </div>
 </div>
 
+<!-- Nhận diện Kanji viết tay — popup nổi, kéo thả tự do + đổi kích thước được -->
+<div id="kanjiPanel" class="kanji-panel hidden">
+  <div class="kanji-panel-handle" id="kanjiPanelHandle">
+    <span class="popup-grip"></span>
+    <span class="add-panel-title">Nhận diện Kanji</span>
+    <button id="btnKanjiRetry" class="icon-btn" aria-label="Nhận diện lại" title="Nhận diện lại">⟳</button>
+    <button id="btnCloseKanjiPanel" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <div class="kanji-panel-body">
+    <div class="kanji-canvas-box">
+      <canvas id="kanjiPad"></canvas>
+    </div>
+    <div class="kanji-controls">
+      <button id="btnKanjiUndo" class="btn-cancel">Xoá nét cuối</button>
+      <button id="btnKanjiClear" class="btn-cancel">Xoá hết</button>
+    </div>
+    <div class="kanji-status" id="kanjiStatus"></div>
+    <div class="kanji-candidates" id="kanjiCandidates"></div>
+
+    <div class="kanji-composed-box">
+      <label>Chuỗi đã ghép</label>
+      <div class="kanji-composed-text" id="kanjiComposed"></div>
+      <div class="kanji-composed-actions">
+        <button id="btnKanjiComposedUndo" class="btn-cancel">Xoá ký tự cuối</button>
+        <button id="btnKanjiComposedClear" class="btn-cancel">Xoá chuỗi</button>
+        <button id="btnKanjiCopy" class="btn-cancel">Copy</button>
+        <button id="btnKanjiLookup" class="btn-cancel">🔍 Tra cứu</button>
+        <button id="btnKanjiAddVocab" class="btn-save">＋ Thêm từ</button>
+      </div>
+    </div>
+
+    <div class="kanji-lookup-box hidden" id="kanjiLookupBox">
+      <div class="kanji-lookup-label">
+        <span>Kết quả tra cứu</span>
+        <button id="btnKanjiLookupRefresh" class="kanji-refresh-btn" type="button" title="Quét lại toàn bộ data/ trên GitHub (dữ liệu tra cứu được cache lại trên máy)">↻ Làm mới</button>
+      </div>
+      <div id="kanjiLookupResults" class="kanji-lookup-results"></div>
+    </div>
+  </div>
+  <div class="kanji-resize-handle" id="kanjiResizeHandle" aria-hidden="true"></div>
+</div>
+
+<!-- Thêm từ vựng vào ĐÚNG trang JSON đang mở ở cột bên phải, lấy chữ từ chuỗi đã ghép bên trên -->
+<div id="vocabAddOverlay" class="drawer-overlay hidden"></div>
+<div id="vocabAddPanel" class="gh-panel gh-panel-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Thêm từ vựng</h2>
+    <button id="btnCloseVocabAdd" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <p class="gh-hint" id="vocabAddTarget"></p>
+  <label>Từ vựng</label>
+  <div class="add-text-original" id="vocabAddPhrase"></div>
+  <label>Giải thích</label>
+  <textarea id="vocabAddExplain" rows="3" placeholder="Nghĩa, cách dùng, ghi chú…"></textarea>
+  <div class="edit-actions">
+    <button id="btnVocabAddSubmit" class="btn-save">Thêm</button>
+    <button id="btnVocabAddCancel" class="btn-cancel">Hủy</button>
+  </div>
+  <div id="vocabAddStatus" class="gh-hint"></div>
+</div>
+
 <!-- Mục lục JSON: chọn book -> chọn chapter -->
 <div id="tocOverlay" class="drawer-overlay hidden"></div>
 <div id="tocPanel" class="gh-panel gh-panel-modal hidden">
@@ -251,5 +313,6 @@
 <script src="js/db.js"></script>
 <script src="js/github.js"></script>
 <script src="js/app.js"></script>
+<script src="js/kanji.js"></script>
 </body>
 </html>

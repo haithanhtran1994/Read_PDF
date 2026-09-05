@@ -2,7 +2,7 @@
    Lưu ý: thư viện pdf.js tải từ CDN (cdnjs) — lần đầu mở app CẦN có mạng để tải.
    Trình duyệt sẽ tự cache các file CDN đó theo cơ chế HTTP cache thông thường.
 */
-const CACHE_NAME = "pdf-dual-reader-v9";
+const CACHE_NAME = "pdf-dual-reader-v10";
 const APP_SHELL = [
   "./index.html",
   "./manifest.json",
@@ -10,6 +10,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/db.js",
   "./js/github.js",
+  "./js/kanji.js",
 ];
 
 self.addEventListener("install", (event) => {
