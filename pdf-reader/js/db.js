@@ -10,9 +10,13 @@
    - "jsonMarks"  : key = tên sách -> [ {id, chapter, page, field, start, end, type, color, createdAt} ]
                      (highlight/gạch chân trong Tóm tắt & Bản dịch ở cột JSON, cache local — nguồn
                      "thật" là data/<book>/mark.json trên GitHub khi có cấu hình GitHub)
+   - "progress"   : key "all" -> { [pdfId]: {name, page, numPages, source, updatedAt} }  (tiến độ
+                     đọc — trang đang đọc dở của TỪNG file PDF đã từng mở, cache local — nguồn
+                     "thật" là 1 file JSON dùng chung trên GitHub khi có cấu hình GitHub, để mở
+                     từ nhiều thiết bị vẫn thấy đúng trang đang đọc dở)
 */
 const DB_NAME = "pdf_dual_reader_db";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -29,6 +33,8 @@ function openDB() {
       if (!db.objectStoreNames.contains("highlights")) db.createObjectStore("highlights");
       // cache highlight/underline trong Tóm tắt & Bản dịch, theo từng sách
       if (!db.objectStoreNames.contains("jsonMarks")) db.createObjectStore("jsonMarks");
+      // cache tiến độ đọc (trang đang đọc dở) của từng file PDF
+      if (!db.objectStoreNames.contains("progress")) db.createObjectStore("progress");
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -107,4 +113,7 @@ const Store = {
 
   saveMarkList: (book, records) => idbSet("jsonMarks", book, records || []),
   getMarkList: (book) => idbGet("jsonMarks", book),
+
+  saveReadingProgress: (map) => idbSet("progress", "all", map || {}),
+  getReadingProgress: () => idbGet("progress", "all"),
 };

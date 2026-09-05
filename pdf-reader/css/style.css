@@ -74,10 +74,11 @@ button { font-family: inherit; cursor: pointer; }
 .split { flex: 1; display: flex; min-height: 0; }
 .split.layout-horizontal { flex-direction: row; }
 .split.layout-vertical { flex-direction: column; }
-/* Đổi 2 bên cho nhau: chỉ đảo VỊ TRÍ hiển thị (trái/phải hoặc trên/dưới) của paneA & paneB,
-   không đụng tới bố cục chia đôi (ngang/dọc) đang chọn. */
-.split.swapped.layout-horizontal { flex-direction: row-reverse; }
-.split.swapped.layout-vertical { flex-direction: column-reverse; }
+/* "Đổi 2 bên cho nhau": thuần đổi thứ tự hiển thị bằng CSS order, không đổi ID/DOM nên
+   mọi logic gắn theo #paneA/#paneB vẫn hoạt động bình thường, chỉ đổi vị trí trên màn hình. */
+.split.swapped #paneA { order: 3; }
+.split.swapped #paneResizer { order: 2; }
+.split.swapped #paneB { order: 1; }
 
 .pane {
   flex: 1 1 50%; min-width: 0; min-height: 0;

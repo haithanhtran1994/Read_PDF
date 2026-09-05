@@ -170,6 +170,16 @@ const GH = (() => {
     }
   }
 
+  // Ghi đè 1 object JSON (không phải mảng) lên GitHub (đọc sha mới nhất trước để tránh conflict).
+  // Dùng cho tiến độ đọc PDF (reading-progress.json): { [pdfId]: {name, page, numPages, updatedAt} }.
+  async function putJSONObject(cfg, relPath, obj, message) {
+    const path = fullPath(cfg, relPath);
+    const existing = await getFile(cfg, path).catch(() => null);
+    const sha = existing ? existing.sha : null;
+    await putTextFile(cfg, relPath, JSON.stringify(obj, null, 2), message || `Update ${relPath}`, sha);
+    return obj;
+  }
+
   return {
     getConfig: Store.getConfig,
     saveConfig: Store.saveConfig,
@@ -180,6 +190,7 @@ const GH = (() => {
     putFile,
     putTextFile,
     putJSONArray,
+    putJSONObject,
     appendNoteToRepo,
     listDir,
     fullPath,

@@ -23,8 +23,9 @@
 
 const state = {
   layout: "horizontal",
-  swapped: false, // đổi vị trí hiển thị 2 bên (paneA <-> paneB) cho nhau, không đổi bố cục
   splitRatio: null, // % chiều rộng/cao dành cho paneA, null = mặc định 50/50
+  panesSwapped: false, // đổi vị trí hiển thị 2 cột (không đổi bố cục ngang/dọc)
+  readingProgress: {}, // { [pdfId]: {name, page, numPages, source, updatedAt} } — trang đang đọc dở của từng file PDF
   panes: {
     A: {
       name: null, pdfDoc: null, pageNum: 1, numPages: 0, scale: null,
@@ -68,7 +69,7 @@ const els = {
   splitContainer: $("#splitContainer"),
   paneResizer: $("#paneResizer"),
   btnLayout: $("#btnLayout"),
-  btnSwapSides: $("#btnSwapSides"),
+  btnSwapPanes: $("#btnSwapPanes"),
   btnGithubStatus: $("#btnGithubStatus"),
   btnImport: $("#btnImport"),
   hlToolbar: $("#hlToolbar"),
@@ -135,8 +136,8 @@ async function init() {
 
   const uiState = await Store.getUiState();
   if (uiState && uiState.layout) setLayout(uiState.layout, false);
-  if (uiState && uiState.swapped) setSwapSides(true, false);
   if (uiState && uiState.splitRatio) applySplitRatio(uiState.splitRatio);
+  if (uiState && uiState.panesSwapped) setPanesSwapped(true, false);
   if (uiState && uiState.collapse) applyCollapseState(uiState.collapse);
 
   const cfg = await Store.getConfig();
@@ -163,20 +164,32 @@ async function init() {
   speakBtn.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
   speakBtn.addEventListener("click", () => toggleSpeak("A"));
 
+  // Tải tiến độ đọc (trang đang đọc dở của từng file PDF) TRƯỚC khi mở lại PDF lần trước,
+  // để loadPdfIntoPane biết mở đúng trang đã đọc dở thay vì luôn về trang 1.
+  await loadReadingProgress();
+
   // Khôi phục PDF đã mở lần trước (lưu trong IndexedDB), kèm nguồn gốc (device/github)
   // để biết đọc/ghi highlight đúng chỗ.
   const saved = await Store.getPdf("A");
   if (saved && saved.blob) {
     try {
       await openPdfBlob("A", saved.blob, saved.name, saved.source || { type: "device" });
+      // An toàn cho lúc khởi động app (đặc biệt PWA standalone trên iOS): layout của
+      // .pane-scroll đôi khi CHƯA ổn định xong tại thời điểm render lần đầu này (clientWidth
+      // đọc sai/lệch), khiến trang PDF hiển thị sai kích thước (đen xì) cho tới khi có 1 thao
+      // tác khác vô tình làm trình duyệt tính lại layout. Đợi chắc chắn đã qua ít nhất 1 khung
+      // hình đã layout+paint xong rồi tính lại kích thước 1 lần nữa cho chắc.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { fitAndRender("A", true).catch(() => {}); });
+      });
     } catch (e) { /* bỏ qua nếu lỗi */ }
   }
 
   els.btnLayout.addEventListener("click", () => {
     setLayout(state.layout === "horizontal" ? "vertical" : "horizontal", true);
   });
-  els.btnSwapSides.addEventListener("click", () => {
-    setSwapSides(!state.swapped, true);
+  els.btnSwapPanes.addEventListener("click", () => {
+    setPanesSwapped(!state.panesSwapped, true);
   });
 
   bindSelectionHandlers();
@@ -211,8 +224,8 @@ function debounce(fn, ms) {
 function persistJsonUiState() {
   Store.saveUiState({
     layout: state.layout,
-    swapped: state.swapped,
     splitRatio: state.splitRatio,
+    panesSwapped: state.panesSwapped,
     collapse: getCollapseState(),
     json: {
       book: state.json.book,
@@ -232,12 +245,15 @@ function setLayout(layout, persist) {
   setTimeout(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); }, 50);
 }
 
-// ---------- Đổi 2 bên cho nhau (chỉ đổi VỊ TRÍ hiển thị, không đổi bố cục chia đôi) ----------
-function setSwapSides(swapped, persist) {
-  state.swapped = swapped;
+// Đổi VỊ TRÍ hiển thị 2 cột cho nhau (cột PDF <-> cột JSON), khác với "Đổi bố cục"
+// (chỉ đổi ngang/dọc). Thuần CSS (order), không đụng gì tới ID/logic của từng cột nên
+// mọi chức năng khác (tìm kiếm, đọc to, mục lục, ghi chú...) vẫn hoạt động y nguyên.
+function setPanesSwapped(swapped, persist) {
+  state.panesSwapped = swapped;
   els.splitContainer.classList.toggle("swapped", swapped);
-  if (els.btnSwapSides) els.btnSwapSides.classList.toggle("active", swapped);
+  if (els.btnSwapPanes) els.btnSwapPanes.classList.toggle("active", swapped);
   if (persist) persistJsonUiState();
+  setTimeout(() => { if (state.panes.A.pdfDoc) fitAndRender("A", true); }, 50);
 }
 
 // ---------- Thanh công cụ có thể ẩn/hiện (topbar + pane-toolbar) ----------
@@ -307,9 +323,6 @@ function bindResizer() {
     } else {
       ratio = ((e.clientX - rect.left) / rect.width) * 100;
     }
-    // Khi đã "đổi 2 bên", paneA nằm ở phía ngược lại trên màn hình -> đảo tỉ lệ
-    // lại để % vẫn tương ứng đúng với paneA (chỗ đang kéo vẫn theo đúng ngón tay).
-    if (state.swapped) ratio = 100 - ratio;
     ratio = Math.min(85, Math.max(15, ratio));
     applySplitRatio(ratio);
   });
@@ -356,8 +369,8 @@ function bindSwipeNav(scrollEl, slot, isJson) {
 
   scrollEl.addEventListener("touchend", () => {
     if (t && t.dir === "h" && Math.abs(t.dx) > H_THRESHOLD) {
-      // Vuốt ở BÊN NÀO cũng chuyển trang cho CẢ 2 bên (PDF lẫn JSON) cùng lúc —
-      // khác với nút ‹ › riêng của từng bên (chỉ chuyển trang bên đó).
+      // Vuốt ở BÊN NÀO cũng chuyển trang CẢ 2 bên cùng lúc (PDF + JSON), không riêng
+      // bên vừa vuốt — khác với cặp nút ‹ › vẫn chỉ chuyển trang đúng bên có nút đó.
       const dir = t.dx < 0 ? "next" : "prev";
       handlePaneNav("A", dir);
       handleJsonNav(dir);
@@ -446,18 +459,72 @@ function computePdfId(name, source) {
   return `local:${name}:${size}`;
 }
 
+// ---------- Tiến độ đọc (trang đang đọc dở của TỪNG file PDF) ----------
+// Lưu chung 1 file JSON trên GitHub (mặc định data/reading-progress.json, đổi được qua
+// cfg.progressPath) để mở từ điện thoại hay PC đều thấy đúng trang đang đọc dở, không chỉ
+// riêng máy đang dùng. Ghi có debounce để khỏi gọi GitHub API liên tục lúc lật trang nhanh.
+let progressSaveTimer = null;
+const READING_PROGRESS_DEBOUNCE_MS = 900;
+
+function readingProgressRelPath(cfg) {
+  return (cfg && cfg.progressPath) || "data/reading-progress.json";
+}
+
+function queueSaveReadingProgress(slot) {
+  const pane = state.panes[slot];
+  if (!pane.pdfDoc || !pane.pdfId) return;
+  state.readingProgress[pane.pdfId] = {
+    name: pane.name,
+    page: pane.pageNum,
+    numPages: pane.numPages,
+    source: pane.source,
+    updatedAt: new Date().toISOString(),
+  };
+  Store.saveReadingProgress(state.readingProgress).catch(() => {});
+  clearTimeout(progressSaveTimer);
+  progressSaveTimer = setTimeout(() => {
+    persistReadingProgressToGithub().catch((e) => console.warn("Lưu tiến độ đọc lỗi:", e));
+  }, READING_PROGRESS_DEBOUNCE_MS);
+}
+
+async function persistReadingProgressToGithub() {
+  const cfg = await Store.getConfig();
+  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) return;
+  await GH.putJSONObject(cfg, readingProgressRelPath(cfg), state.readingProgress, "Cập nhật tiến độ đọc PDF");
+}
+
+// Tải tiến độ đọc: ưu tiên bản trên GitHub (nguồn "thật", đọc được từ mọi thiết bị),
+// dùng bản cache local khi mất mạng/chưa cấu hình GitHub.
+async function loadReadingProgress() {
+  let map = (await Store.getReadingProgress().catch(() => null)) || {};
+  const cfg = await Store.getConfig();
+  if (cfg && cfg.owner && cfg.repo && cfg.token) {
+    try {
+      const remote = await GH.getJSONObject(cfg, readingProgressRelPath(cfg));
+      if (remote && remote.data && typeof remote.data === "object") {
+        map = remote.data;
+        Store.saveReadingProgress(map).catch(() => {});
+      }
+    } catch (e) { /* offline hoặc chưa có file — dùng bản local đã có */ }
+  }
+  state.readingProgress = map;
+}
+
 async function loadPdfIntoPane(slot, arrayBuffer, name, source) {
   const pane = state.panes[slot];
   const pe = paneEls(slot);
   const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   const pdfDoc = await loadingTask.promise;
   pane.pdfDoc = pdfDoc;
-  pane.pageNum = 1;
   pane.numPages = pdfDoc.numPages;
   pane.scale = null; // sẽ auto-fit
   pane.name = name;
   pane.source = source || { type: "device" };
   pane.pdfId = computePdfId(name, pane.source);
+  // Đọc dở tới trang nào lần trước thì mở lại đúng trang đó (nếu file này đã có tiến độ lưu lại)
+  const savedProgress = state.readingProgress[pane.pdfId];
+  const savedPage = savedProgress && Number.isFinite(savedProgress.page) ? savedProgress.page : 1;
+  pane.pageNum = Math.min(Math.max(1, savedPage), pane.numPages);
   pane.highlightsByPage = {};
   pane.outline = undefined; // chưa biết có mục lục hay không, đang tải
   pe.title.textContent = name;
@@ -598,6 +665,7 @@ async function fitAndRender(slot, refit) {
   resetSearch(slot);
 
   pe.pageInd.textContent = `${pane.pageNum}/${pane.numPages}`;
+  queueSaveReadingProgress(slot);
 }
 
 function handlePaneNav(slot, act) {
