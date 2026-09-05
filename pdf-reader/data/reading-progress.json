@@ -27,5 +27,15 @@
       "path": "pdf/Shin_Kanzen_Masuta_N2-Dokkai.pdf"
     },
     "updatedAt": "2026-09-05T16:02:48.183Z"
+  },
+  "gh:pdf/IEEE_SV.pdf": {
+    "name": "IEEE_SV.pdf",
+    "page": 1,
+    "numPages": 1354,
+    "source": {
+      "type": "github",
+      "path": "pdf/IEEE_SV.pdf"
+    },
+    "updatedAt": "2026-09-05T16:03:02.385Z"
   }
 }
