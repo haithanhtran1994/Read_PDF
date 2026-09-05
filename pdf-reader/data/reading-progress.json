@@ -1,0 +1,21 @@
+{
+  "local:chp1_origin.pdf:0": {
+    "name": "chp1_origin.pdf",
+    "page": 1,
+    "numPages": 52,
+    "source": {
+      "type": "device"
+    },
+    "updatedAt": "2026-09-05T04:24:31.287Z"
+  },
+  "gh:pdf/SystemVerilog for Verification Chris Spear 3rd Edition.pdf": {
+    "name": "SystemVerilog for Verification Chris Spear 3rd Edition.pdf",
+    "page": 1,
+    "numPages": 499,
+    "source": {
+      "type": "github",
+      "path": "pdf/SystemVerilog for Verification Chris Spear 3rd Edition.pdf"
+    },
+    "updatedAt": "2026-09-05T04:25:35.518Z"
+  }
+}
