@@ -369,8 +369,8 @@ button { font-family: inherit; cursor: pointer; }
    ================================================================== */
 .kanji-panel {
   position: fixed; z-index: 75;
-  width: min(400px, 92vw); height: min(600px, 86vh);
-  min-width: 280px; min-height: 380px;
+  width: min(380px, 92vw); height: min(78vh, 620px);
+  min-width: 260px; min-height: 300px;
   max-width: 96vw; max-height: 94vh;
   background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
@@ -382,29 +382,25 @@ button { font-family: inherit; cursor: pointer; }
   border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; flex-shrink: 0;
 }
 .kanji-panel-handle:active { cursor: grabbing; }
+
+/* D1 (khu vực vẽ) + D2 (khu vực kết quả). Mặc định (dọc máy/màn hình hẹp): D1 trên, D2 dưới,
+   cuộn chung theo chiều dọc. Khi xoay ngang (rộng hơn cao): tự chuyển D1 sang trái, D2 sang
+   phải, mỗi cột tự cuộn riêng — tận dụng chiều rộng thay vì phải cuộn dọc rất dài. */
 .kanji-panel-body {
-  flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; font-size: 13px;
+  flex: 1; min-height: 0; overflow: auto; padding: 10px; font-size: 13px;
+  display: flex; flex-direction: column; gap: 4px;
 }
-/* D1 (vẽ) trên, D2 (kết quả) dưới — mặc định, dùng khi popup dọc (cao hơn rộng, vd. iPhone đứng) */
-.kanji-pane-draw {
-  flex-shrink: 0; overflow: auto; padding: 10px 10px 6px;
+.kanji-col-draw { flex: 0 0 auto; }
+.kanji-col-result { flex: 1 1 auto; min-width: 0; }
+
+@media (orientation: landscape) {
+  .kanji-panel-body { flex-direction: row; align-items: stretch; overflow: hidden; gap: 14px; }
+  .kanji-col-draw { flex: 0 0 min(42%, 260px); display: flex; flex-direction: column; }
+  .kanji-col-result { flex: 1; overflow-y: auto; padding-right: 2px; }
+  .kanji-canvas-box { max-width: 100%; }
+  .kanji-controls { max-width: 100%; }
 }
-.kanji-pane-result {
-  flex: 1; min-height: 0; overflow: auto; padding: 6px 10px 10px;
-  border-top: 1px solid var(--line);
-}
-/* D1 (vẽ) trái, D2 (kết quả) phải — tự bật khi popup rộng hơn cao (vd. iPhone xoay ngang) */
-.kanji-panel-body.kanji-layout-row {
-  flex-direction: row;
-}
-.kanji-layout-row .kanji-pane-draw {
-  flex: 0 0 42%; max-width: 300px; overflow: auto; padding: 10px;
-  border-top: none; border-right: 1px solid var(--line);
-}
-.kanji-layout-row .kanji-pane-result {
-  flex: 1; min-width: 0; overflow: auto; padding: 10px;
-  border-top: none;
-}
+
 .kanji-canvas-box {
   position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
   aspect-ratio: 1 / 1; width: 100%; max-width: 360px; margin: 0 auto; touch-action: none; overflow: hidden;
@@ -466,8 +462,4 @@ button { font-family: inherit; cursor: pointer; }
     linear-gradient(135deg, transparent 0 45%, var(--ink-soft) 45% 55%, transparent 55% 100%),
     linear-gradient(135deg, transparent 0 65%, var(--ink-soft) 65% 75%, transparent 75% 100%);
   opacity: .7;
-}
-
-@media (max-width: 640px) {
-  .kanji-panel { width: 94vw; height: 82vh; }
 }

@@ -302,35 +302,67 @@ function addKanjiDictEntry(merged, type, it, book, chapter, page) {
   if (!dup) entry.sources.push({ book, chapter, page });
 }
 
+// Chạy tối đa `limit` việc cùng lúc thay vì làm tuần tự từng cái — đây là chỗ tăng tốc chính
+// cho việc quét toàn bộ sách (trước đây gọi API cho từng chương MỘT rồi mới gọi chương kế
+// tiếp, rất chậm vì mỗi lần gọi GitHub API tốn 200-500ms độ trễ mạng; giờ chạy song song
+// nhiều chương 1 lúc). `limit` để 6-8 là hợp lý — vượt quá số này trình duyệt cũng tự giới
+// hạn số kết nối đồng thời tới cùng 1 domain, tăng thêm không lợi gì mà dễ bị GitHub chặn.
+async function mapWithConcurrency(items, limit, fn) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < items.length) {
+      const i = nextIndex++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
 async function scanKanjiDictFromGithub(cfg, onProgress) {
   const booksPath = cfg.booksPath || "data";
   const merged = new Map();
-  const bookItems = (await GH.listDir(cfg, booksPath)).filter((it) => it.type === "dir");
-  for (const bookItem of bookItems) {
+  const bookItems = (await GH.listDir(cfg, GH.fullPath(cfg, booksPath))).filter((it) => it.type === "dir");
+
+  // B1: liệt kê danh sách chương của TỪNG sách — song song luôn, không chờ sách này xong mới
+  // liệt kê sách kế tiếp.
+  if (onProgress) onProgress(`Đang liệt kê ${bookItems.length} sách…`);
+  const perBook = await mapWithConcurrency(bookItems, 6, async (bookItem) => {
     const book = bookItem.name;
-    if (onProgress) onProgress(`Đang quét sách "${book}"…`);
-    let chapterItems = [];
     try {
-      chapterItems = (await GH.listDir(cfg, `${booksPath}/${book}`))
+      const files = (await GH.listDir(cfg, GH.fullPath(cfg, `${booksPath}/${book}`)))
         .filter((it) => it.type === "file" && /\.json$/i.test(it.name));
-    } catch (e) { continue; }
-    for (const chFile of chapterItems) {
-      const chapter = chFile.name.replace(/\.json$/i, "");
-      try {
-        const res = await GH.getJSONObject(cfg, `${booksPath}/${book}/${chFile.name}`);
-        const data = res ? res.data : null;
-        const pages = (data && Array.isArray(data.pages)) ? data.pages : [];
-        pages.forEach((page) => {
-          const pageNum = page.page;
-          (page.grammar || []).forEach((it) => addKanjiDictEntry(merged, "grammar", it, book, chapter, pageNum));
-          (page.analysis || []).forEach((it) => {
-            const type = KANJI_TYPE_LABEL[it.type] ? it.type : "phrase";
-            addKanjiDictEntry(merged, type, it, book, chapter, pageNum);
-          });
-        });
-      } catch (e) { /* bỏ qua chương lỗi, quét tiếp chương khác */ }
+      return { book, files };
+    } catch (e) {
+      return { book, files: [] };
     }
-  }
+  });
+
+  const tasks = [];
+  perBook.forEach(({ book, files }) => files.forEach((chFile) => tasks.push({ book, chFile })));
+
+  // B2: tải nội dung TỪNG chương — cũng song song (tối đa 8 chương cùng lúc).
+  let done = 0;
+  await mapWithConcurrency(tasks, 8, async ({ book, chFile }) => {
+    const chapter = chFile.name.replace(/\.json$/i, "");
+    try {
+      const res = await GH.getJSONObject(cfg, `${booksPath}/${book}/${chFile.name}`);
+      const data = res ? res.data : null;
+      const pages = (data && Array.isArray(data.pages)) ? data.pages : [];
+      pages.forEach((page) => {
+        const pageNum = page.page;
+        (page.grammar || []).forEach((it) => addKanjiDictEntry(merged, "grammar", it, book, chapter, pageNum));
+        (page.analysis || []).forEach((it) => {
+          const type = KANJI_TYPE_LABEL[it.type] ? it.type : "phrase";
+          addKanjiDictEntry(merged, type, it, book, chapter, pageNum);
+        });
+      });
+    } catch (e) { /* bỏ qua chương lỗi, các chương khác vẫn chạy song song bình thường */ }
+    done++;
+    if (onProgress) onProgress(`Đang tải nội dung… (${done}/${tasks.length} chương)`);
+  });
+
   // Nếu app từ điển riêng (dictionary-app) đang dùng chung repo này và đã ẩn 1 số mục
   // (data/hidden.json hoặc cfg.hiddenPath) thì lọc bớt cho đồng bộ. Không có file này cũng
   // không sao — bỏ qua lặng lẽ.
@@ -361,6 +393,33 @@ async function ensureKanjiDictIndex(forceRefresh, onProgress) {
   kanjiDictCache = entries;
   await Store.saveDictIndex({ entries, syncedAt: Date.now() }).catch(() => {});
   return entries;
+}
+
+// Chèn 1 mục vừa "Thêm từ" thẳng vào cache đang có (bộ nhớ VÀ cache đã lưu trên máy), để tra cứu
+// thấy ngay lập tức mà không cần bấm "↻ Làm mới" hay đợi quét lại toàn bộ GitHub. Trước đây chỉ
+// xoá cache trong bộ nhớ (kanjiDictCache = null) nhưng cache đã lưu trên máy (IndexedDB) thì vẫn
+// còn nguyên và được ensureKanjiDictIndex() ưu tiên đọc lại — khiến từ mới thêm bị báo "Không tìm
+// thấy" cho tới khi bấm "Làm mới" thủ công. Nếu chưa từng có cache nào cả (chưa ai bấm Tra cứu
+// lần nào) thì bỏ qua — lần Tra cứu đầu tiên sẽ tự quét mới đầy đủ, đã có sẵn từ này trên GitHub.
+async function addEntryToKanjiDictCache(newEntry) {
+  const key = `${newEntry.type}\u0000${kanjiNormalize(newEntry.phrase)}\u0000${kanjiNormalize(newEntry.explain)}`;
+  const entry = Object.assign({ key }, newEntry);
+  let list = kanjiDictCache;
+  if (!list) {
+    const cached = await Store.getDictIndex().catch(() => null);
+    list = (cached && Array.isArray(cached.entries)) ? cached.entries : null;
+  }
+  if (!list) return;
+  const src = entry.sources[0];
+  const existing = list.find((e) => e.key === key);
+  if (existing) {
+    const dup = existing.sources.some((s) => s.book === src.book && s.chapter === src.chapter && s.page === src.page);
+    if (!dup) existing.sources.push(src);
+  } else {
+    list = list.concat([entry]);
+  }
+  kanjiDictCache = list;
+  await Store.saveDictIndex({ entries: list, syncedAt: Date.now() }).catch(() => {});
 }
 
 function searchKanjiDict(entries, query) {
@@ -490,7 +549,10 @@ async function submitVocabAdd() {
     await GH.putTextFile(cfg, relPath, JSON.stringify(raw, null, 2),
       `Thêm từ vựng "${phrase}" — ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
     await Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
-    kanjiDictCache = null; // dữ liệu tra cứu đã cũ do vừa thêm mục mới -> buộc quét lại lần tra cứu sau
+    await addEntryToKanjiDictCache({
+      type: "vocab", phrase, explain,
+      sources: [{ book: j.book, chapter: j.chapter, page: page.page ?? j.pageIdx + 1 }],
+    });
     statusEl.textContent = "Đã thêm ✓";
     if (!state.json.editing) renderJsonPage();
     setTimeout(() => {
@@ -514,44 +576,24 @@ function bindVocabAddPanel() {
 }
 
 // ---------- Mở/đóng popup + kéo thả + đổi kích thước ----------
-
-// Kích thước vùng nhìn thấy thực tế. Trên iOS Safari, window.innerWidth/innerHeight
-// không trừ đi thanh địa chỉ/thanh công cụ đang hiện -> dùng visualViewport khi có,
-// để không tính lố kích thước popup trên iPhone.
-function kanjiViewportSize() {
-  const vv = window.visualViewport;
-  return vv ? { w: vv.width, h: vv.height } : { w: window.innerWidth, h: window.innerHeight };
-}
-
-// Bật layout ngang (D1 trái, D2 phải) khi popup rộng hơn cao (vd. xoay ngang iPhone),
-// ngược lại giữ layout dọc (D1 trên, D2 dưới) mặc định. Dựa trên kích thước THẬT của
-// popup nên cũng tự đổi nếu người dùng tự kéo-resize popup thành hình ngang.
-function kanjiUpdateLayout() {
+// Đảm bảo popup luôn nằm gọn trong màn hình hiện tại (không tràn ra ngoài khi xoay ngang/dọc
+// hoặc khi màn hình nhỏ). Gọi lại mỗi khi mở popup và mỗi khi resize/xoay màn hình.
+function clampKanjiPanelToViewport() {
   const panel = $("#kanjiPanel");
-  const body = panel.querySelector(".kanji-panel-body");
-  if (!body) return;
-  const rect = panel.getBoundingClientRect();
-  const isWide = rect.width > rect.height * 1.05;
-  body.classList.toggle("kanji-layout-row", isWide);
-}
-
-// Co/dời popup lại cho vừa vùng nhìn thấy hiện tại (gọi lại mỗi khi xoay máy/resize),
-// giữ nguyên tỉ lệ kích thước đã có thay vì luôn reset về mặc định.
-function kanjiFitPanelToViewport() {
-  const panel = $("#kanjiPanel");
-  const { w: vw, h: vh } = kanjiViewportSize();
-  let w = Math.min(parseFloat(panel.style.width) || vw - 24, vw - 16);
-  let h = Math.min(parseFloat(panel.style.height) || vh - 24, vh - 16);
-  w = Math.max(280, w);
-  h = Math.max(380, h);
+  const margin = 8;
+  const maxW = window.innerWidth - margin * 2;
+  const maxH = window.innerHeight - margin * 2;
+  const minW = Math.min(260, maxW);
+  const minH = Math.min(300, maxH);
+  const w = Math.min(Math.max(panel.offsetWidth, minW), maxW);
+  const h = Math.min(Math.max(panel.offsetHeight, minH), maxH);
   panel.style.width = w + "px";
   panel.style.height = h + "px";
-  let left = parseFloat(panel.style.left);
-  let top = parseFloat(panel.style.top);
-  if (!isFinite(left)) left = (vw - w) / 2;
-  if (!isFinite(top)) top = (vh - h) / 2 - 20;
-  panel.style.left = Math.min(Math.max(8, left), Math.max(8, vw - w - 8)) + "px";
-  panel.style.top = Math.min(Math.max(8, top), Math.max(8, vh - h - 8)) + "px";
+  const rect = panel.getBoundingClientRect();
+  const left = Math.min(Math.max(margin, rect.left), window.innerWidth - w - margin);
+  const top = Math.min(Math.max(margin, rect.top), window.innerHeight - h - margin);
+  panel.style.left = left + "px";
+  panel.style.top = top + "px";
 }
 
 function openKanjiPanel() {
@@ -559,18 +601,18 @@ function openKanjiPanel() {
   if (!panel.classList.contains("hidden")) return;
   panel.classList.remove("hidden");
   if (!kanjiState.positioned) {
-    const { w: vw, h: vh } = kanjiViewportSize();
-    const w = Math.min(400, vw - 24);
-    const h = Math.min(600, vh - 24);
+    // Dọc máy: popup hẹp mà cao (D1 vẽ trên, D2 kết quả dưới). Ngang máy: popup rộng mà thấp
+    // (D1 vẽ bên trái, D2 kết quả bên phải — xem CSS .kanji-panel-body @media orientation).
+    const landscape = window.innerWidth > window.innerHeight;
+    const w = landscape ? Math.min(640, window.innerWidth - 24) : Math.min(380, window.innerWidth - 24);
+    const h = landscape ? Math.min(420, window.innerHeight - 24) : Math.min(620, window.innerHeight - 24);
     panel.style.width = w + "px";
     panel.style.height = h + "px";
-    panel.style.left = Math.max(8, (vw - w) / 2) + "px";
-    panel.style.top = Math.max(8, (vh - h) / 2 - 20) + "px";
+    panel.style.left = Math.max(8, (window.innerWidth - w) / 2) + "px";
+    panel.style.top = Math.max(8, (window.innerHeight - h) / 2 - 10) + "px";
     kanjiState.positioned = true;
-  } else {
-    kanjiFitPanelToViewport();
   }
-  kanjiUpdateLayout();
+  clampKanjiPanelToViewport(); // phòng trường hợp đã đổi hướng màn hình từ lần mở trước
   requestAnimationFrame(() => kanjiResizeCanvas(false));
 }
 
@@ -628,28 +670,13 @@ function bindKanjiPanelResize() {
     const dx = e.clientX - startX, dy = e.clientY - startY;
     const maxW = window.innerWidth - panel.getBoundingClientRect().left - 4;
     const maxH = window.innerHeight - panel.getBoundingClientRect().top - 4;
-    const w = Math.min(Math.max(280, startW + dx), maxW);
-    const h = Math.min(Math.max(380, startH + dy), maxH);
+    const w = Math.min(Math.max(260, startW + dx), maxW);
+    const h = Math.min(Math.max(300, startH + dy), maxH);
     panel.style.width = w + "px";
     panel.style.height = h + "px";
-    kanjiUpdateLayout();
     kanjiResizeCanvas(true);
   });
   ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => { resizing = false; }));
-}
-
-// Xoay máy / đổi kích thước cửa sổ (kể cả thanh địa chỉ Safari ẩn/hiện làm đổi
-// visualViewport) -> co lại vừa màn hình + đổi layout D1/D2 cho phù hợp hướng mới.
-function bindKanjiViewportEvents() {
-  const onViewportChange = () => {
-    if ($("#kanjiPanel").classList.contains("hidden")) return;
-    kanjiFitPanelToViewport();
-    kanjiUpdateLayout();
-    kanjiResizeCanvas(true);
-  };
-  window.addEventListener("resize", onViewportChange);
-  window.addEventListener("orientationchange", () => setTimeout(onViewportChange, 250));
-  if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewportChange);
 }
 
 function initKanji() {
@@ -659,7 +686,14 @@ function initKanji() {
   bindKanjiPanelToggle();
   bindKanjiPanelDrag();
   bindKanjiPanelResize();
-  bindKanjiViewportEvents();
+  const handleViewportChange = () => {
+    if ($("#kanjiPanel").classList.contains("hidden")) return;
+    clampKanjiPanelToViewport();
+    kanjiResizeCanvas(true);
+  };
+  window.addEventListener("resize", handleViewportChange);
+  // orientationchange bắn ra hơi sớm hơn lúc layout (row/column D1-D2) đã đổi xong — đợi 1 chút.
+  window.addEventListener("orientationchange", () => setTimeout(handleViewportChange, 250));
 }
 
 document.addEventListener("DOMContentLoaded", initKanji);
