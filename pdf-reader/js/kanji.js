@@ -514,19 +514,63 @@ function bindVocabAddPanel() {
 }
 
 // ---------- Mở/đóng popup + kéo thả + đổi kích thước ----------
+
+// Kích thước vùng nhìn thấy thực tế. Trên iOS Safari, window.innerWidth/innerHeight
+// không trừ đi thanh địa chỉ/thanh công cụ đang hiện -> dùng visualViewport khi có,
+// để không tính lố kích thước popup trên iPhone.
+function kanjiViewportSize() {
+  const vv = window.visualViewport;
+  return vv ? { w: vv.width, h: vv.height } : { w: window.innerWidth, h: window.innerHeight };
+}
+
+// Bật layout ngang (D1 trái, D2 phải) khi popup rộng hơn cao (vd. xoay ngang iPhone),
+// ngược lại giữ layout dọc (D1 trên, D2 dưới) mặc định. Dựa trên kích thước THẬT của
+// popup nên cũng tự đổi nếu người dùng tự kéo-resize popup thành hình ngang.
+function kanjiUpdateLayout() {
+  const panel = $("#kanjiPanel");
+  const body = panel.querySelector(".kanji-panel-body");
+  if (!body) return;
+  const rect = panel.getBoundingClientRect();
+  const isWide = rect.width > rect.height * 1.05;
+  body.classList.toggle("kanji-layout-row", isWide);
+}
+
+// Co/dời popup lại cho vừa vùng nhìn thấy hiện tại (gọi lại mỗi khi xoay máy/resize),
+// giữ nguyên tỉ lệ kích thước đã có thay vì luôn reset về mặc định.
+function kanjiFitPanelToViewport() {
+  const panel = $("#kanjiPanel");
+  const { w: vw, h: vh } = kanjiViewportSize();
+  let w = Math.min(parseFloat(panel.style.width) || vw - 24, vw - 16);
+  let h = Math.min(parseFloat(panel.style.height) || vh - 24, vh - 16);
+  w = Math.max(280, w);
+  h = Math.max(380, h);
+  panel.style.width = w + "px";
+  panel.style.height = h + "px";
+  let left = parseFloat(panel.style.left);
+  let top = parseFloat(panel.style.top);
+  if (!isFinite(left)) left = (vw - w) / 2;
+  if (!isFinite(top)) top = (vh - h) / 2 - 20;
+  panel.style.left = Math.min(Math.max(8, left), Math.max(8, vw - w - 8)) + "px";
+  panel.style.top = Math.min(Math.max(8, top), Math.max(8, vh - h - 8)) + "px";
+}
+
 function openKanjiPanel() {
   const panel = $("#kanjiPanel");
   if (!panel.classList.contains("hidden")) return;
   panel.classList.remove("hidden");
   if (!kanjiState.positioned) {
-    const w = Math.min(400, window.innerWidth - 24);
-    const h = Math.min(600, window.innerHeight - 24);
+    const { w: vw, h: vh } = kanjiViewportSize();
+    const w = Math.min(400, vw - 24);
+    const h = Math.min(600, vh - 24);
     panel.style.width = w + "px";
     panel.style.height = h + "px";
-    panel.style.left = Math.max(8, (window.innerWidth - w) / 2) + "px";
-    panel.style.top = Math.max(8, (window.innerHeight - h) / 2 - 20) + "px";
+    panel.style.left = Math.max(8, (vw - w) / 2) + "px";
+    panel.style.top = Math.max(8, (vh - h) / 2 - 20) + "px";
     kanjiState.positioned = true;
+  } else {
+    kanjiFitPanelToViewport();
   }
+  kanjiUpdateLayout();
   requestAnimationFrame(() => kanjiResizeCanvas(false));
 }
 
@@ -588,9 +632,24 @@ function bindKanjiPanelResize() {
     const h = Math.min(Math.max(380, startH + dy), maxH);
     panel.style.width = w + "px";
     panel.style.height = h + "px";
+    kanjiUpdateLayout();
     kanjiResizeCanvas(true);
   });
   ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => { resizing = false; }));
+}
+
+// Xoay máy / đổi kích thước cửa sổ (kể cả thanh địa chỉ Safari ẩn/hiện làm đổi
+// visualViewport) -> co lại vừa màn hình + đổi layout D1/D2 cho phù hợp hướng mới.
+function bindKanjiViewportEvents() {
+  const onViewportChange = () => {
+    if ($("#kanjiPanel").classList.contains("hidden")) return;
+    kanjiFitPanelToViewport();
+    kanjiUpdateLayout();
+    kanjiResizeCanvas(true);
+  };
+  window.addEventListener("resize", onViewportChange);
+  window.addEventListener("orientationchange", () => setTimeout(onViewportChange, 250));
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewportChange);
 }
 
 function initKanji() {
@@ -600,9 +659,7 @@ function initKanji() {
   bindKanjiPanelToggle();
   bindKanjiPanelDrag();
   bindKanjiPanelResize();
-  window.addEventListener("resize", () => {
-    if (!$("#kanjiPanel").classList.contains("hidden")) kanjiResizeCanvas(true);
-  });
+  bindKanjiViewportEvents();
 }
 
 document.addEventListener("DOMContentLoaded", initKanji);

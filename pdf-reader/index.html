@@ -180,34 +180,41 @@
     <button id="btnCloseKanjiPanel" class="icon-btn" aria-label="Đóng">✕</button>
   </div>
   <div class="kanji-panel-body">
-    <div class="kanji-canvas-box">
-      <canvas id="kanjiPad"></canvas>
-    </div>
-    <div class="kanji-controls">
-      <button id="btnKanjiUndo" class="btn-cancel">Xoá nét cuối</button>
-      <button id="btnKanjiClear" class="btn-cancel">Xoá hết</button>
-    </div>
-    <div class="kanji-status" id="kanjiStatus"></div>
-    <div class="kanji-candidates" id="kanjiCandidates"></div>
-
-    <div class="kanji-composed-box">
-      <label>Chuỗi đã ghép</label>
-      <div class="kanji-composed-text" id="kanjiComposed"></div>
-      <div class="kanji-composed-actions">
-        <button id="btnKanjiComposedUndo" class="btn-cancel">Xoá ký tự cuối</button>
-        <button id="btnKanjiComposedClear" class="btn-cancel">Xoá chuỗi</button>
-        <button id="btnKanjiCopy" class="btn-cancel">Copy</button>
-        <button id="btnKanjiLookup" class="btn-cancel">🔍 Tra cứu</button>
-        <button id="btnKanjiAddVocab" class="btn-save">＋ Thêm từ</button>
+    <!-- D1: khu vực vẽ -->
+    <div class="kanji-pane kanji-pane-draw">
+      <div class="kanji-canvas-box">
+        <canvas id="kanjiPad"></canvas>
       </div>
+      <div class="kanji-controls">
+        <button id="btnKanjiUndo" class="btn-cancel">Xoá nét cuối</button>
+        <button id="btnKanjiClear" class="btn-cancel">Xoá hết</button>
+      </div>
+      <div class="kanji-status" id="kanjiStatus"></div>
     </div>
 
-    <div class="kanji-lookup-box hidden" id="kanjiLookupBox">
-      <div class="kanji-lookup-label">
-        <span>Kết quả tra cứu</span>
-        <button id="btnKanjiLookupRefresh" class="kanji-refresh-btn" type="button" title="Quét lại toàn bộ data/ trên GitHub (dữ liệu tra cứu được cache lại trên máy)">↻ Làm mới</button>
+    <!-- D2: khu vực hiển thị kết quả -->
+    <div class="kanji-pane kanji-pane-result">
+      <div class="kanji-candidates" id="kanjiCandidates"></div>
+
+      <div class="kanji-composed-box">
+        <label>Chuỗi đã ghép</label>
+        <div class="kanji-composed-text" id="kanjiComposed"></div>
+        <div class="kanji-composed-actions">
+          <button id="btnKanjiComposedUndo" class="btn-cancel">Xoá ký tự cuối</button>
+          <button id="btnKanjiComposedClear" class="btn-cancel">Xoá chuỗi</button>
+          <button id="btnKanjiCopy" class="btn-cancel">Copy</button>
+          <button id="btnKanjiLookup" class="btn-cancel">🔍 Tra cứu</button>
+          <button id="btnKanjiAddVocab" class="btn-save">＋ Thêm từ</button>
+        </div>
       </div>
-      <div id="kanjiLookupResults" class="kanji-lookup-results"></div>
+
+      <div class="kanji-lookup-box hidden" id="kanjiLookupBox">
+        <div class="kanji-lookup-label">
+          <span>Kết quả tra cứu</span>
+          <button id="btnKanjiLookupRefresh" class="kanji-refresh-btn" type="button" title="Quét lại toàn bộ data/ trên GitHub (dữ liệu tra cứu được cache lại trên máy)">↻ Làm mới</button>
+        </div>
+        <div id="kanjiLookupResults" class="kanji-lookup-results"></div>
+      </div>
     </div>
   </div>
   <div class="kanji-resize-handle" id="kanjiResizeHandle" aria-hidden="true"></div>

@@ -383,7 +383,27 @@ button { font-family: inherit; cursor: pointer; }
 }
 .kanji-panel-handle:active { cursor: grabbing; }
 .kanji-panel-body {
-  flex: 1; min-height: 0; overflow: auto; padding: 10px; font-size: 13px;
+  flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; font-size: 13px;
+}
+/* D1 (vẽ) trên, D2 (kết quả) dưới — mặc định, dùng khi popup dọc (cao hơn rộng, vd. iPhone đứng) */
+.kanji-pane-draw {
+  flex-shrink: 0; overflow: auto; padding: 10px 10px 6px;
+}
+.kanji-pane-result {
+  flex: 1; min-height: 0; overflow: auto; padding: 6px 10px 10px;
+  border-top: 1px solid var(--line);
+}
+/* D1 (vẽ) trái, D2 (kết quả) phải — tự bật khi popup rộng hơn cao (vd. iPhone xoay ngang) */
+.kanji-panel-body.kanji-layout-row {
+  flex-direction: row;
+}
+.kanji-layout-row .kanji-pane-draw {
+  flex: 0 0 42%; max-width: 300px; overflow: auto; padding: 10px;
+  border-top: none; border-right: 1px solid var(--line);
+}
+.kanji-layout-row .kanji-pane-result {
+  flex: 1; min-width: 0; overflow: auto; padding: 10px;
+  border-top: none;
 }
 .kanji-canvas-box {
   position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
