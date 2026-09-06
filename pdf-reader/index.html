@@ -2,6 +2,29 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<script>
+// Dọn 1 LẦN các service-worker/cache cũ có thể đang bị kẹt trên máy người dùng (do đổi cách
+// cache ở các bản trước). Dùng cờ trong localStorage để chỉ chạy đúng 1 lần cho mỗi máy, không
+// lặp lại mỗi lần mở app (tránh mất khả năng đọc offline). Nếu sau này cần ép dọn lại lần nữa,
+// đổi "sw_cleanup_v1" thành "sw_cleanup_v2".
+(function () {
+  var FLAG = "sw_cleanup_v1";
+  try {
+    if (localStorage.getItem(FLAG)) return;
+    localStorage.setItem(FLAG, "1");
+  } catch (e) { /* Safari chế độ riêng tư có thể chặn localStorage — bỏ qua, không sao */ }
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { r.unregister(); });
+    }).catch(function () {});
+  }
+  if (window.caches) {
+    caches.keys().then(function (keys) {
+      keys.forEach(function (k) { caches.delete(k); });
+    }).catch(function () {});
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#EDE7D6">
 <title>PDF Dual Reader</title>
