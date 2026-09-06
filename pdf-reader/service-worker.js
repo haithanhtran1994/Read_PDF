@@ -8,7 +8,7 @@
    ngay bản cache cũ, tải bản mới cho LẦN SAU) khiến mỗi lần đẩy code mới lên phải mở app
    2 lần mới thấy đúng — nay chỉ cần 1 lần.
 */
-const CACHE_NAME = "pdf-dual-reader-v16";
+const CACHE_NAME = "pdf-dual-reader-v17";
 const APP_SHELL = [
   "./index.html",
   "./manifest.json",

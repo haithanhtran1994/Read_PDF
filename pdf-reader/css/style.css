@@ -378,7 +378,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .kanji-panel.hidden { display: none; }
 .kanji-panel-handle {
-  display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 10px;
+  display: flex; align-items: center; justify-content: center; padding: 5px 0;
   border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; flex-shrink: 0;
 }
 .kanji-panel-handle:active { cursor: grabbing; }
@@ -409,8 +409,12 @@ button { font-family: inherit; cursor: pointer; }
 .kanji-canvas-box::before { left: 0; right: 0; top: 50%; height: 1px; }
 .kanji-canvas-box::after { top: 0; bottom: 0; left: 50%; width: 1px; }
 .kanji-canvas-box canvas { position: relative; z-index: 1; display: block; width: 100%; height: 100%; touch-action: none; }
-.kanji-controls { display: flex; gap: 8px; max-width: 360px; margin: 10px auto 0; }
-.kanji-controls button { flex: 1; padding: 8px 0; font-size: 12px; }
+/* Hàng nút của D1: 2 nút chữ (Xoá nét cuối/Xoá hết) co giãn, cộng thêm 2 nút icon vuông
+   (⟳ nhận diện lại, ✕ đóng popup — trước đây nằm ở thanh tiêu đề riêng, nay dồn xuống đây cho
+   đỡ tốn diện tích chiều cao) giữ kích thước cố định, không bị kéo giãn theo. */
+.kanji-controls { display: flex; flex-wrap: wrap; gap: 8px; max-width: 360px; margin: 10px auto 0; }
+.kanji-controls button:not(.icon-btn) { flex: 1 1 100px; padding: 8px 0; font-size: 12px; }
+.kanji-controls .icon-btn { flex: 0 0 auto; }
 .kanji-status { font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top: 8px; text-align: center; }
 .kanji-status.error { color: var(--shuiro); }
 
