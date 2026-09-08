@@ -198,6 +198,19 @@ button { font-family: inherit; cursor: pointer; }
 .highlightLayer .persist-ul {
   position: absolute; border-bottom-style: solid; pointer-events: auto; cursor: pointer;
 }
+/* Text tự do đặt lên PDF (nút "🔤" bên thanh công cụ cột JSON) — chạm để sửa nội dung,
+   kéo để di chuyển. Màu dùng chung với màu hl/ul của cột JSON (state.jsonHlColor).
+   To đúng bằng chữ (không set width cố định — absolute + chỉ "left/top" thì trình duyệt tự
+   co theo nội dung), không viền, chỉ có nền mờ để dễ đọc trên nền trang PDF. */
+.highlightLayer .persist-text {
+  position: absolute; pointer-events: auto; cursor: grab; touch-action: none;
+  background: rgba(255,255,255,.55); border-radius: 2px;
+  padding: 1px 3px; white-space: pre-wrap; word-break: break-word; line-height: 1.25;
+}
+.highlightLayer .persist-text:active { cursor: grabbing; }
+/* Nút "👁" ẩn/hiện toàn bộ text đã thêm (không xoá, chỉ tạm ẩn khỏi màn hình) */
+.highlightLayer.text-boxes-hidden .persist-text { display: none; }
+.page-wrap.text-add-mode canvas, .page-wrap.text-add-mode .textLayer { cursor: crosshair; }
 
 /* ---- Highlight/underline/add toolbar (hiện DƯỚI đoạn được chọn) ---- */
 .hl-toolbar {
@@ -241,10 +254,16 @@ button { font-family: inherit; cursor: pointer; }
   background: #fff; color: var(--ink); resize: vertical;
 }
 .edit-actions { margin-top: 10px; display: flex; gap: 8px; }
+.edit-actions.hidden, .add-panel-body .hidden { display: none; }
 .btn-save, .btn-cancel { flex: 1; border: none; border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
 .btn-save { background: var(--shuiro); color: #fff; }
 .btn-cancel { background: var(--line); color: var(--ink); }
 .gh-hint { font-size: 11px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+
+/* ---- Stepper cỡ chữ trong bảng "Thêm text" trên PDF ---- */
+.text-size-stepper { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.text-size-stepper .icon-btn { width: 30px; height: 30px; font-size: 16px; }
+.text-size-stepper span { min-width: 22px; text-align: center; font-size: 13px; }
 
 /* ---- GitHub config modal ---- */
 .drawer-overlay {
@@ -287,6 +306,16 @@ button { font-family: inherit; cursor: pointer; }
 .mode-btn.edit-btn { flex: 0 0 34px; font-size: 14px; padding: 6px 0; }
 .json-hl-swatches { display: flex; gap: 3px; flex: 0 0 auto; }
 .json-hl-swatches .swatch { width: 18px; height: 18px; }
+/* Nút chọn màu đầy đủ (thay cho 4 ô màu cố định) — bấm vào mở bảng màu hệ thống của trình
+   duyệt/điện thoại, chọn được bất kỳ màu nào, không chỉ 4 màu dựng sẵn. */
+.color-pick-input {
+  -webkit-appearance: none; appearance: none; -moz-appearance: none;
+  width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 50%;
+  padding: 0; background: none; cursor: pointer; flex: 0 0 auto;
+}
+.color-pick-input::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.color-pick-input::-webkit-color-swatch { border: 1px solid var(--line); border-radius: 50%; }
+.color-pick-input::-moz-color-swatch { border: 1px solid var(--line); border-radius: 50%; }
 .json-scroll { background: var(--paper); display: block; }
 .json-content { max-width: 640px; margin: 0 auto; padding: 14px 16px 40px; }
 .json-section { margin-bottom: 18px; }
@@ -378,7 +407,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .kanji-panel.hidden { display: none; }
 .kanji-panel-handle {
-  display: flex; align-items: center; justify-content: center; padding: 5px 0;
+  display: flex; align-items: center; justify-content: center; padding: 10px 0;
   border-bottom: 1px solid var(--line); cursor: grab; touch-action: none; flex-shrink: 0;
 }
 .kanji-panel-handle:active { cursor: grabbing; }

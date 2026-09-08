@@ -44,6 +44,9 @@ const state = {
   hlMode: "highlight",
   hlColor: "#F7E27A",
   jsonHlColor: "#F7E27A",
+  addTextMode: false,   // đang bật chế độ "chấm 1 điểm trên PDF để thêm text" hay không
+  textBoxesVisible: true, // đang hiện hay đang tạm ẩn toàn bộ text đã thêm lên PDF (nút "👁")
+  textFontSize: 14,     // cỡ chữ dùng lần gần nhất trong popup "Thêm text" (đơn vị PDF, không đổi theo zoom)
   jsonMarksByBook: {}, // { [book]: [ {id, chapter, page, field, start, end, type, color} ] }
   dragging: null,
   json: {
@@ -81,6 +84,10 @@ const els = {
   addNote: $("#addNote"),
   addTranslation: $("#addTranslation"),
   addStatus: $("#addStatus"),
+  textAddPanel: $("#textAddPanel"),
+  textAddPanelHandle: $("#textAddPanelHandle"),
+  textAddInput: $("#textAddInput"),
+  textAddStatus: $("#textAddStatus"),
   githubOverlay: $("#githubOverlay"),
   githubConfigPanel: $("#githubConfigPanel"),
   // Pane B / JSON
@@ -195,6 +202,7 @@ async function init() {
   bindSelectionHandlers();
   bindHlToolbar();
   bindAddPanel();
+  bindAddTextTool();
   bindGithubConfig();
   bindJsonPane();
   bindImportPanel();
@@ -1260,13 +1268,14 @@ function getPlainTextOffsetsInContainer(container, range) {
 function bindJsonHlToolbar() {
   $("#btnJsonHighlight").addEventListener("click", () => applyJsonMark("highlight"));
   $("#btnJsonUnderline").addEventListener("click", () => applyJsonMark("underline"));
-  $("#jsonHlSwatches").querySelectorAll(".swatch").forEach((sw) => {
-    sw.addEventListener("click", () => {
-      state.jsonHlColor = sw.dataset.color;
-      $("#jsonHlSwatches").querySelectorAll(".swatch").forEach((s) => s.classList.remove("active"));
-      sw.classList.add("active");
-    });
-  });
+  // 1 nút màu duy nhất (input type=color) mở bảng màu đầy đủ của hệ điều hành/trình duyệt,
+  // chọn được bất kỳ màu nào — thay cho 4 ô màu dựng sẵn trước đây. Màu này dùng chung cho cả
+  // highlight/gạch chân bên cột JSON LẪN màu chữ của text tự do đặt lên PDF (state.jsonHlColor).
+  const colorInput = $("#jsonColorInput");
+  if (colorInput) {
+    colorInput.value = state.jsonHlColor || "#F7E27A";
+    colorInput.addEventListener("input", () => { state.jsonHlColor = colorInput.value; });
+  }
 }
 
 async function applyJsonMark(mode) {
@@ -1543,6 +1552,9 @@ function bindSelectionHandlers() {
 function handleSelectionEnd(e) {
   // Đừng đóng toolbar nếu người dùng đang bấm chính vào toolbar/panel
   if (e && e.target && (e.target.closest("#hlToolbar") || e.target.closest("#addPanel"))) return;
+  // Đang ở chế độ "thêm text" (chấm điểm trên PDF) -> bỏ qua toolbar Highlight/Gạch chân/Add
+  // để khỏi chồng lên nhau, chấm vào đâu cũng chỉ để đặt text.
+  if (state.addTextMode) return;
 
   const sel = window.getSelection();
   if (!sel || sel.isCollapsed || sel.toString().trim() === "") { hideHlToolbar(); return; }
@@ -1760,6 +1772,7 @@ function renderHighlightOverlay(slot) {
   if (!pane.viewport) return;
   const records = (pane.highlightsByPage && pane.highlightsByPage[pane.pageNum]) || [];
   records.forEach((record) => {
+    if (record.mode === "text") { renderTextBox(slot, pane, pe, record); return; }
     (record.quads || []).forEach((q) => {
       const p1 = pane.viewport.convertToViewportPoint(q[0], q[1]);
       const p2 = pane.viewport.convertToViewportPoint(q[2], q[3]);
@@ -1800,6 +1813,257 @@ function deleteHighlight(slot, id) {
   });
   renderHighlightOverlay(slot);
   persistHighlights(pane).catch((e) => console.warn("Xóa highlight lỗi:", e));
+}
+
+// ---------- Thêm text tự do lên PDF (nút "🔤" bên thanh công cụ cột JSON) ----------
+// Dùng CHUNG kho lưu trữ với highlight/gạch chân (pane.highlightsByPage, persistHighlights,
+// loadHighlightsForPane, deleteHighlight — tất cả đều generic theo "id", không quan tâm record
+// là loại gì) — record ở đây có { mode: "text", x, y (toạ độ PDF, góc trên-trái), w (bề rộng
+// khung, đơn vị PDF), fontSize (đơn vị PDF), color, text }. x/y/w/fontSize lưu theo đơn vị PDF
+// (không phụ thuộc zoom) rồi nhân với pane.viewport.scale lúc vẽ, y hệt cách quads của
+// highlight/gạch chân đang làm, để phóng to/thu nhỏ vẫn đúng tỉ lệ.
+const TEXT_BOX_DEFAULT_W = 180;
+const DEFAULT_TEXT_FONT_SIZE = 14;
+let textAddCtx = null; // { mode: "create"|"edit", slot, page, x, y, record? } — đang sửa gì trong popup
+
+function bindAddTextTool() {
+  const pe = paneEls("A");
+  let down = null;
+
+  // "Chấm 1 điểm" = pointerdown rồi pointerup gần như tại chỗ (không phải kéo/cuộn).
+  pe.pageWrap.addEventListener("pointerdown", (e) => {
+    if (!state.addTextMode) return;
+    if (e.target.closest(".persist-text")) return; // để chính text đó tự xử lý (xem bindTextBoxInteractions)
+    down = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  });
+  pe.pageWrap.addEventListener("pointerup", (e) => {
+    if (!state.addTextMode || !down || down.id !== e.pointerId) { down = null; return; }
+    const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    down = null;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) return; // đang cuộn/kéo, không phải chấm điểm
+    if (e.target.closest(".persist-text")) return;
+    handlePlaceNewText(e);
+  });
+  pe.pageWrap.addEventListener("pointercancel", () => { down = null; });
+
+  $("#btnAddTextMode").addEventListener("click", () => {
+    state.addTextMode = !state.addTextMode;
+    $("#btnAddTextMode").classList.toggle("active", state.addTextMode);
+    pe.pageWrap.classList.toggle("text-add-mode", state.addTextMode);
+    if (!state.addTextMode) closeTextAddPanel();
+  });
+
+  // "👁" ẩn/hiện toàn bộ text đã thêm lên PDF (không xoá gì, chỉ tạm giấu khỏi màn hình).
+  $("#btnToggleTextBoxes").addEventListener("click", () => {
+    state.textBoxesVisible = !state.textBoxesVisible;
+    $("#btnToggleTextBoxes").classList.toggle("active", !state.textBoxesVisible);
+    pe.highlightLayer.classList.toggle("text-boxes-hidden", !state.textBoxesVisible);
+  });
+
+  bindTextAddPanel();
+}
+
+function handlePlaceNewText(e) {
+  const pane = state.panes.A;
+  if (!pane.pdfDoc || !pane.viewport) { alert("Chưa mở PDF nào ở cột này."); return; }
+  const pe = paneEls("A");
+  const canvasRect = pe.canvas.getBoundingClientRect();
+  const left = e.clientX - canvasRect.left;
+  const top = e.clientY - canvasRect.top;
+  if (left < 0 || top < 0 || left > canvasRect.width || top > canvasRect.height) return; // chấm ra ngoài trang
+  const p = pane.viewport.convertToPdfPoint(left, top);
+  openTextAddPanel({
+    mode: "create", slot: "A", page: pane.pageNum,
+    x: p[0], y: p[1], clientX: e.clientX, clientY: e.clientY,
+  });
+}
+
+// Vẽ 1 record loại "text" lên highlightLayer (tọa độ PDF -> tọa độ màn hình theo viewport
+// hiện tại, giống hệt cách renderHighlightOverlay đổi tọa độ cho quads highlight/gạch chân).
+// KHÔNG set width cố định: phần tử absolute chỉ có left/top (không có right) nên trình duyệt
+// tự co theo đúng độ dài của chữ; chỉ giới hạn maxWidth để chữ quá dài không tràn ra ngoài
+// mép phải trang.
+function renderTextBox(slot, pane, pe, record) {
+  const p = pane.viewport.convertToViewportPoint(record.x, record.y);
+  const scale = pane.viewport.scale || pane.scale || 1;
+  const el = document.createElement("div");
+  el.className = "persist-text";
+  el.dataset.id = record.id;
+  el.style.left = p[0] + "px";
+  el.style.top = p[1] + "px";
+  el.style.maxWidth = Math.max(40, (pe.canvas.clientWidth || 0) - p[0] - 4) + "px";
+  el.style.fontSize = Math.max(4, (record.fontSize || DEFAULT_TEXT_FONT_SIZE) * scale) + "px";
+  el.style.color = record.color || "#211C15";
+  el.textContent = record.text || "";
+  el.title = "Chạm để sửa, kéo để di chuyển";
+  bindTextBoxInteractions(slot, el, record);
+  pe.highlightLayer.appendChild(el);
+}
+
+// Chạm (không di chuyển) -> mở popup sửa nội dung. Kéo (di chuyển rõ ràng) -> đổi vị trí,
+// lưu lại tọa độ PDF mới khi thả tay. Luôn hoạt động, không cần bật chế độ "🔤".
+function bindTextBoxInteractions(slot, el, record) {
+  let start = null, moved = false;
+  el.addEventListener("pointerdown", (e) => {
+    e.stopPropagation(); // đừng để bindAddTextTool ở pageWrap coi đây là 1 lần chấm điểm mới
+    start = { x: e.clientX, y: e.clientY, left: el.offsetLeft, top: el.offsetTop };
+    moved = false;
+    try { el.setPointerCapture(e.pointerId); } catch (err) { /* bỏ qua */ }
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (!start) return;
+    const dx = e.clientX - start.x, dy = e.clientY - start.y;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+    if (!moved) return;
+    el.style.left = (start.left + dx) + "px";
+    el.style.top = (start.top + dy) + "px";
+  });
+  const finish = () => {
+    if (!start) return;
+    const wasMoved = moved;
+    start = null; moved = false;
+    if (wasMoved) commitTextBoxMove(slot, record, el);
+    else openTextAddPanel({ mode: "edit", slot, record });
+  };
+  el.addEventListener("pointerup", finish);
+  el.addEventListener("pointercancel", () => { start = null; moved = false; });
+}
+
+function commitTextBoxMove(slot, record, el) {
+  const pane = state.panes[slot];
+  if (!pane.viewport) return;
+  const pe = paneEls(slot);
+  const canvasRect = pe.canvas.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const p = pane.viewport.convertToPdfPoint(elRect.left - canvasRect.left, elRect.top - canvasRect.top);
+  record.x = p[0]; record.y = p[1];
+  persistHighlights(pane).catch((e) => console.warn("Lưu vị trí text lỗi:", e));
+}
+
+// ---- Popup nhập nội dung/cỡ chữ (thêm mới hoặc sửa text đã đặt) — kéo thả tự do ----
+function openTextAddPanel(opts) {
+  textAddCtx = opts;
+  const isEdit = opts.mode === "edit";
+  const record = opts.record;
+
+  els.textAddInput.value = isEdit ? (record.text || "") : "";
+  const size = isEdit ? (record.fontSize || DEFAULT_TEXT_FONT_SIZE) : (state.textFontSize || DEFAULT_TEXT_FONT_SIZE);
+  state.textFontSize = size;
+  $("#textSizeValue").textContent = String(size);
+  els.textAddStatus.textContent = "";
+  $("#btnTextAddDelete").classList.toggle("hidden", !isEdit);
+
+  let clientX = opts.clientX, clientY = opts.clientY;
+  if (clientX == null || clientY == null) {
+    // Mở từ việc chạm sửa 1 text đã đặt sẵn -> lấy vị trí hiện tại của nó trên màn hình.
+    const el = document.querySelector(`.persist-text[data-id="${record.id}"]`);
+    if (el) { const r = el.getBoundingClientRect(); clientX = r.left; clientY = r.bottom + 6; }
+    else { clientX = window.innerWidth / 2; clientY = window.innerHeight / 2; }
+  }
+  const panelW = 280;
+  const left = Math.min(Math.max(8, clientX), window.innerWidth - panelW - 8);
+  const top = Math.min(Math.max(8, clientY), window.innerHeight - 260);
+  els.textAddPanel.style.left = left + "px";
+  els.textAddPanel.style.top = top + "px";
+
+  els.textAddPanel.classList.remove("hidden");
+  els.textAddInput.focus();
+}
+
+function closeTextAddPanel() {
+  els.textAddPanel.classList.add("hidden");
+  textAddCtx = null;
+}
+
+function stepTextSize(delta) {
+  const cur = Number($("#textSizeValue").textContent) || DEFAULT_TEXT_FONT_SIZE;
+  const next = Math.min(48, Math.max(4, cur + delta));
+  $("#textSizeValue").textContent = String(next);
+  state.textFontSize = next;
+}
+
+async function submitTextAdd() {
+  if (!textAddCtx) return;
+  const text = els.textAddInput.value.trim();
+  if (!text) { els.textAddStatus.textContent = "Chưa nhập nội dung."; return; }
+  const fontSize = Number($("#textSizeValue").textContent) || DEFAULT_TEXT_FONT_SIZE;
+  const ctx = textAddCtx;
+  const slot = ctx.slot;
+  const pane = state.panes[slot];
+
+  if (ctx.mode === "edit") {
+    ctx.record.text = text;
+    ctx.record.fontSize = fontSize;
+  } else {
+    const record = {
+      id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      page: ctx.page,
+      mode: "text",
+      x: ctx.x, y: ctx.y,
+      w: TEXT_BOX_DEFAULT_W,
+      fontSize,
+      color: state.jsonHlColor,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    if (!pane.highlightsByPage[record.page]) pane.highlightsByPage[record.page] = [];
+    pane.highlightsByPage[record.page].push(record);
+  }
+  renderHighlightOverlay(slot);
+
+  // QUAN TRỌNG: đợi lưu xong (kể cả đẩy GitHub nếu có cấu hình) rồi mới đóng popup, và báo lỗi
+  // rõ ràng nếu thất bại — trước đây bấm Lưu là đóng popup ngay, lưu chạy ngầm phía sau, nên nếu
+  // đẩy GitHub lỗi (mạng chập chờn…) thì lần load sau bị đè lại bằng bản trên GitHub (thiếu text
+  // vừa thêm) mà không hề biết, tưởng đã lưu xong nhưng mở lại thì mất.
+  els.textAddStatus.textContent = "Đang lưu…";
+  $("#btnTextAddSubmit").disabled = true;
+  $("#btnTextAddCancel").disabled = true;
+  try {
+    await persistHighlights(pane);
+    els.textAddStatus.textContent = "Đã lưu ✓";
+    setTimeout(closeTextAddPanel, 500);
+  } catch (e) {
+    els.textAddStatus.textContent = `Lỗi khi lưu: ${e.message}. Bấm "Lưu" để thử lại (đã lưu tạm trên máy, chưa chắc đã đẩy lên GitHub).`;
+  } finally {
+    $("#btnTextAddSubmit").disabled = false;
+    $("#btnTextAddCancel").disabled = false;
+  }
+}
+
+function bindTextAddPanel() {
+  $("#btnCloseTextAdd").addEventListener("click", closeTextAddPanel);
+  $("#btnTextAddCancel").addEventListener("click", closeTextAddPanel);
+  $("#btnTextAddSubmit").addEventListener("click", submitTextAdd);
+  $("#btnTextAddDelete").addEventListener("click", () => {
+    if (!textAddCtx || textAddCtx.mode !== "edit") return;
+    const ctx = textAddCtx;
+    closeTextAddPanel();
+    deleteHighlight(ctx.slot, ctx.record.id);
+  });
+  $("#btnTextSizeDown").addEventListener("click", () => stepTextSize(-2));
+  $("#btnTextSizeUp").addEventListener("click", () => stepTextSize(2));
+
+  // Kéo thả tự do (giống hệt bindAddPanel ở trên) để dời popup ra khỏi chỗ đang gõ nếu cần.
+  let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+  els.textAddPanelHandle.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    const r = els.textAddPanel.getBoundingClientRect();
+    startLeft = r.left; startTop = r.top;
+    els.textAddPanelHandle.setPointerCapture(e.pointerId);
+  });
+  els.textAddPanelHandle.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    const w = els.textAddPanel.offsetWidth, h = els.textAddPanel.offsetHeight;
+    const left = Math.min(Math.max(4, startLeft + dx), window.innerWidth - w - 4);
+    const top = Math.min(Math.max(4, startTop + dy), window.innerHeight - h - 4);
+    els.textAddPanel.style.left = left + "px";
+    els.textAddPanel.style.top = top + "px";
+  });
+  ["pointerup", "pointercancel"].forEach((ev) =>
+    els.textAddPanelHandle.addEventListener(ev, () => (dragging = false))
+  );
 }
 
 // ---------- Bảng "Add" — kéo thả tự do ----------

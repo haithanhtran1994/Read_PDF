@@ -63,7 +63,6 @@
         <button id="btnSearchToggleA" class="icon-btn" aria-label="Tìm trong trang" title="Tìm trong trang này">🔍</button>
         <button id="btnOutlineA" class="icon-btn" aria-label="Mục lục PDF" title="Mục lục (nhảy nhanh tới mục)">📑</button>
         <button id="btnSpeakA" class="icon-btn" aria-label="Đọc văn bản" title="Đọc to (bôi đen 1 đoạn để chỉ đọc đoạn đó, không thì đọc cả trang)">🔊</button>
-        <button id="btnKanjiTool" class="icon-btn" aria-label="Nhận diện Kanji viết tay" title="Nhận diện Kanji viết tay">✍️</button>
         <div class="pane-nav">
           <button class="nav-btn small" data-act="zoomOut">−</button>
           <button class="nav-btn small" data-act="zoomIn">+</button>
@@ -113,11 +112,11 @@
       <button class="mode-btn hl-act-mini" id="btnJsonHighlight" type="button" title="Highlight đoạn đã bôi đen (trong Tóm tắt/Bản dịch)">🖍</button>
       <button class="mode-btn hl-act-mini" id="btnJsonUnderline" type="button" title="Gạch chân đoạn đã bôi đen (trong Tóm tắt/Bản dịch)">U̲</button>
       <span class="json-hl-swatches" id="jsonHlSwatches">
-        <button class="swatch active" data-color="#F7E27A" style="background:#F7E27A" title="Vàng"></button>
-        <button class="swatch" data-color="#A8D5BA" style="background:#A8D5BA" title="Xanh lá"></button>
-        <button class="swatch" data-color="#9AC5E8" style="background:#9AC5E8" title="Xanh dương"></button>
-        <button class="swatch" data-color="#E7A6C0" style="background:#E7A6C0" title="Hồng"></button>
+        <input type="color" id="jsonColorInput" class="color-pick-input" value="#F7E27A" title="Chọn màu (bấm để mở bảng màu đầy đủ)">
       </span>
+      <button class="mode-btn hl-act-mini" id="btnKanjiTool" type="button" aria-label="Nhận diện Kanji viết tay" title="Nhận diện Kanji viết tay">✍️</button>
+      <button class="mode-btn hl-act-mini" id="btnAddTextMode" type="button" aria-label="Thêm text lên PDF" title="Bật/tắt chế độ thêm text lên PDF — bật rồi chấm 1 điểm trên PDF để đặt text">🔤</button>
+      <button class="mode-btn hl-act-mini" id="btnToggleTextBoxes" type="button" aria-label="Ẩn/hiện các text đã thêm lên PDF" title="Ẩn/hiện các text đã thêm lên PDF">👁</button>
       <button class="mode-btn edit-btn" id="btnJsonEdit" type="button" title="Sửa nội dung trang này">✎</button>
     </div>
     <div class="pane-scroll json-scroll" id="scrollB">
@@ -217,6 +216,32 @@
     </div>
   </div>
   <div class="kanji-resize-handle" id="kanjiResizeHandle" aria-hidden="true"></div>
+</div>
+
+<!-- Thêm text tự do lên PDF (nút "🔤" bên thanh công cụ cột JSON) — bật chế độ rồi chấm 1
+     điểm trên PDF để đặt textbox tại đó. Bấm lại vào text đã đặt để sửa/xoá, kéo để di chuyển. -->
+<div id="textAddPanel" class="add-panel hidden">
+  <div class="add-panel-handle" id="textAddPanelHandle">
+    <span class="popup-grip"></span>
+    <span class="add-panel-title">Thêm text</span>
+    <button id="btnCloseTextAdd" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <div class="add-panel-body">
+    <label>Nội dung</label>
+    <textarea id="textAddInput" rows="3" placeholder="Nhập text…"></textarea>
+    <label>Cỡ chữ</label>
+    <div class="text-size-stepper">
+      <button id="btnTextSizeDown" class="icon-btn" type="button" aria-label="Giảm cỡ chữ">−</button>
+      <span id="textSizeValue">14</span>
+      <button id="btnTextSizeUp" class="icon-btn" type="button" aria-label="Tăng cỡ chữ">+</button>
+    </div>
+    <div class="edit-actions">
+      <button id="btnTextAddSubmit" class="btn-save">Lưu</button>
+      <button id="btnTextAddDelete" class="btn-cancel hidden">Xoá</button>
+      <button id="btnTextAddCancel" class="btn-cancel">Hủy</button>
+    </div>
+    <div id="textAddStatus" class="gh-hint"></div>
+  </div>
 </div>
 
 <!-- Thêm từ vựng vào ĐÚNG trang JSON đang mở ở cột bên phải, lấy chữ từ chuỗi đã ghép bên trên -->

@@ -33,6 +33,7 @@ const GH = (() => {
     try {
       const res = await fetch(`${apiBase(cfg)}/${path}?ref=${cfg.branch || "main"}`, {
         headers: { Authorization: `token ${cfg.token}` },
+        cache: "no-store", // đừng để trình duyệt trả bản cache cũ -> sha đọc được luôn là mới nhất
       });
       if (res.status === 404) return null;
       if (!res.ok) {
@@ -60,6 +61,7 @@ const GH = (() => {
           Authorization: `token ${cfg.token}`,
           Accept: "application/vnd.github.raw",
         },
+        cache: "no-store",
       });
       if (res.status === 404) return null;
       if (!res.ok) {
@@ -90,29 +92,43 @@ const GH = (() => {
 
   async function putFile(cfg, relPath, base64Content, message, knownSha) {
     const path = fullPath(cfg, relPath);
-    const sha = knownSha !== undefined ? knownSha : (await getFile(cfg, path))?.sha || null;
-    const body = {
-      message: message || `Update ${relPath}`,
-      content: base64Content,
-      branch: cfg.branch || "main",
-    };
-    if (sha) body.sha = sha;
+    let sha = knownSha !== undefined ? knownSha : (await getFile(cfg, path))?.sha || null;
+    const maxAttempts = 3;
 
-    const res = await fetch(`${apiBase(cfg)}/${path}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `token ${cfg.token}`,
-        "Content-Type": "application/json",
-        Accept: "application/vnd.github+json",
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const body = {
+        message: message || `Update ${relPath}`,
+        content: base64Content,
+        branch: cfg.branch || "main",
+      };
+      if (sha) body.sha = sha;
+
+      const res = await fetch(`${apiBase(cfg)}/${path}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${cfg.token}`,
+          "Content-Type": "application/json",
+          Accept: "application/vnd.github+json",
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) return res.json();
+
       let msg = res.status;
       try { msg = (await res.json()).message || msg; } catch (e) {}
+
+      // 409 = sha không khớp: file trên GitHub vừa đổi giữa lúc đọc sha và lúc ghi (ví dụ vừa
+      // lưu 1 lần khác trước đó chưa đầy 1 giây). Thay vì bắt người dùng tự bấm "Lưu" lại, tự
+      // đọc sha MỚI NHẤT rồi thử ghi lại vài lần trước khi báo lỗi thật.
+      const isConflict = res.status === 409 || /does not match|sha/i.test(String(msg));
+      if (isConflict && attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 300 * attempt));
+        const fresh = await getFile(cfg, path).catch(() => null);
+        sha = fresh ? fresh.sha : null;
+        continue;
+      }
       throw new Error(`${relPath}: ${msg}`);
     }
-    return res.json();
   }
 
   async function putTextFile(cfg, relPath, textContent, message, knownSha) {

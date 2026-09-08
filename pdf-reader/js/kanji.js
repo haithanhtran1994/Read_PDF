@@ -38,6 +38,24 @@ const KANJI_RECOGNIZE_DEBOUNCE_MS = 700;
 let kanjiCtx = null;
 let kanjiDictCache = null; // mảng entries đã gom, cache trong bộ nhớ (tránh quét lại GitHub nhiều lần trong 1 phiên)
 
+// Vị trí/kích thước popup nhớ được từ lần trước (đọc từ IndexedDB — xem js/db.js).
+// null nếu chưa từng mở/kéo bao giờ -> lần đầu sẽ dùng kích thước nhỏ mặc định.
+let kanjiSavedRect = null;
+let kanjiRectLoaded = false;
+
+async function loadKanjiRectOnce() {
+  if (kanjiRectLoaded) return;
+  kanjiRectLoaded = true;
+  try { kanjiSavedRect = await Store.getKanjiPanelRect(); } catch (e) { kanjiSavedRect = null; }
+}
+
+function saveKanjiRect() {
+  const panel = $("#kanjiPanel");
+  const r = panel.getBoundingClientRect();
+  kanjiSavedRect = { left: r.left, top: r.top, width: r.width, height: r.height };
+  Store.saveKanjiPanelRect(kanjiSavedRect).catch(() => {});
+}
+
 const KANJI_TYPE_LABEL = {
   grammar: "Ngữ pháp", vocab: "Từ vựng", idiom: "Thành ngữ",
   slang: "Slang", collocation: "Collocation", phrase: "Cụm từ",
@@ -596,20 +614,33 @@ function clampKanjiPanelToViewport() {
   panel.style.top = top + "px";
 }
 
-function openKanjiPanel() {
+async function openKanjiPanel() {
   const panel = $("#kanjiPanel");
   if (!panel.classList.contains("hidden")) return;
   panel.classList.remove("hidden");
+  await loadKanjiRectOnce();
   if (!kanjiState.positioned) {
-    // Dọc máy: popup hẹp mà cao (D1 vẽ trên, D2 kết quả dưới). Ngang máy: popup rộng mà thấp
-    // (D1 vẽ bên trái, D2 kết quả bên phải — xem CSS .kanji-panel-body @media orientation).
-    const landscape = window.innerWidth > window.innerHeight;
-    const w = landscape ? Math.min(640, window.innerWidth - 24) : Math.min(380, window.innerWidth - 24);
-    const h = landscape ? Math.min(420, window.innerHeight - 24) : Math.min(620, window.innerHeight - 24);
-    panel.style.width = w + "px";
-    panel.style.height = h + "px";
-    panel.style.left = Math.max(8, (window.innerWidth - w) / 2) + "px";
-    panel.style.top = Math.max(8, (window.innerHeight - h) / 2 - 10) + "px";
+    if (kanjiSavedRect && kanjiSavedRect.width && kanjiSavedRect.height) {
+      // Đã có vị trí/kích thước từ lần trước (đóng popup lúc nào cũng lưu lại) -> dùng luôn,
+      // clampKanjiPanelToViewport() bên dưới sẽ tự kéo về trong màn hình nếu đã đổi hướng/kích
+      // thước màn hình từ lần đó.
+      panel.style.width = kanjiSavedRect.width + "px";
+      panel.style.height = kanjiSavedRect.height + "px";
+      panel.style.left = kanjiSavedRect.left + "px";
+      panel.style.top = kanjiSavedRect.top + "px";
+    } else {
+      // Lần đầu tiên chưa từng mở: để popup NHỎ và nằm giữa màn hình (tránh sát viền, chỗ khó
+      // bấm vào tay cầm để kéo) — người dùng tự kéo to ra bằng tay cầm ở góc dưới phải nếu cần.
+      // Dọc máy: popup hẹp mà cao (D1 vẽ trên, D2 kết quả dưới). Ngang máy: popup rộng mà thấp
+      // (D1 vẽ bên trái, D2 kết quả bên phải — xem CSS .kanji-panel-body @media orientation).
+      const landscape = window.innerWidth > window.innerHeight;
+      const w = landscape ? Math.min(360, window.innerWidth - 24) : Math.min(300, window.innerWidth - 24);
+      const h = landscape ? Math.min(300, window.innerHeight - 24) : Math.min(420, window.innerHeight - 24);
+      panel.style.width = w + "px";
+      panel.style.height = h + "px";
+      panel.style.left = Math.max(8, (window.innerWidth - w) / 2) + "px";
+      panel.style.top = Math.max(8, (window.innerHeight - h) / 2 - 10) + "px";
+    }
     kanjiState.positioned = true;
   }
   clampKanjiPanelToViewport(); // phòng trường hợp đã đổi hướng màn hình từ lần mở trước
@@ -650,7 +681,10 @@ function bindKanjiPanelDrag() {
     panel.style.left = left + "px";
     panel.style.top = top + "px";
   });
-  ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => { dragging = false; }));
+  ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => {
+    if (dragging) saveKanjiRect(); // kéo xong -> nhớ vị trí mới cho lần mở sau
+    dragging = false;
+  }));
 }
 
 function bindKanjiPanelResize() {
@@ -676,10 +710,14 @@ function bindKanjiPanelResize() {
     panel.style.height = h + "px";
     kanjiResizeCanvas(true);
   });
-  ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => { resizing = false; }));
+  ["pointerup", "pointercancel"].forEach((ev) => handle.addEventListener(ev, () => {
+    if (resizing) saveKanjiRect(); // đổi kích thước xong -> nhớ kích thước mới cho lần mở sau
+    resizing = false;
+  }));
 }
 
 function initKanji() {
+  loadKanjiRectOnce(); // đọc trước (không chờ) để mở popup lần đầu không bị nháy vị trí mặc định
   bindKanjiCanvas();
   bindKanjiComposedActions();
   bindVocabAddPanel();
@@ -690,6 +728,7 @@ function initKanji() {
     if ($("#kanjiPanel").classList.contains("hidden")) return;
     clampKanjiPanelToViewport();
     kanjiResizeCanvas(true);
+    saveKanjiRect(); // màn hình đổi hướng/kích thước -> nhớ luôn vị trí đã bị kéo về cho khớp
   };
   window.addEventListener("resize", handleViewportChange);
   // orientationchange bắn ra hơi sớm hơn lúc layout (row/column D1-D2) đã đổi xong — đợi 1 chút.

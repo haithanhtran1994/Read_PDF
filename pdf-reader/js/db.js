@@ -102,6 +102,11 @@ const Store = {
 
   getUiState: () => idbGet("state", "ui"),
   saveUiState: (s) => idbSet("state", "ui", s),
+  // Vị trí/kích thước popup Kanji lần gần nhất (px màn hình) — để lần sau mở lại
+  // giữ nguyên, không phải kéo lại từ đầu. Lưu riêng khỏi "ui" để không đụng tới
+  // logic persistJsonUiState() đang có.
+  getKanjiPanelRect: () => idbGet("state", "kanjiPanelRect"),
+  saveKanjiPanelRect: (r) => idbSet("state", "kanjiPanelRect", r),
 
   savePdf: (slot, name, blob, source) => idbSet("pdfs", slot, { name, blob, source: source || null }),
   getPdf: (slot) => idbGet("pdfs", slot),
