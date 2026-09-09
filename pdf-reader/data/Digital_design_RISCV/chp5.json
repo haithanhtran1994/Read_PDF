@@ -3612,6 +3612,568 @@
           "explain": "(danh từ) dấu/độ lớn (phương pháp biểu diễn số có dấu dùng 1 bit dấu riêng và các bit còn lại đại diện cho độ lớn)"
         }
       ]
+    },
+    {
+      "page": 53,
+      "summary": "",
+      "translation": "Exercises (Trang 289)\r\n\r\nBài tập 5.33 Hãy biểu diễn các số cơ số 10 sau đây dưới dạng dấu phẩy cố định (fixed-point) 16-bit dấu/độ lớn (sign/magnitude) với 8 bit nguyên và 8 bit phân số. Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân (hexadecimal).\r\n(a) -13.5625\r\n(b) 42.3125\r\n(c) -17.15625\r\n\r\nBài tập 5.34 Hãy biểu diễn các số cơ số 10 sau đây dưới dạng dấu phẩy cố định 12-bit dấu/độ lớn với 6 bit nguyên và 6 bit phân số. Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân.\r\n(a) -30.5\r\n(b) 16.25\r\n(c) -8.078125\r\n\r\nBài tập 5.35 Hãy biểu diễn các số cơ số 10 trong Bài tập 5.33 dưới định dạng Q8.8 (định dạng bù 2 số dấu phẩy cố định 16-bit với 8 bit nguyên và 8 bit phân số). Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân.\r\n\r\nBài tập 5.36 Hãy biểu diễn các số cơ số 10 trong Bài tập 5.34 dưới định dạng Q6.6 (định dạng bù 2 số dấu phẩy cố định 12-bit với 6 bit nguyên và 6 bit phân số). Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân.\r\n\r\nBài tập 5.37 Hãy biểu diễn các số cơ số 10 trong Bài tập 5.33 dưới định dạng số chấm động độ chính xác đơn IEEE 754 (IEEE 754 single-precision floating-point). Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân.\r\n\r\nBài tập 5.38 Hãy biểu diễn các số cơ số 10 trong Bài tập 5.34 dưới định dạng số chấm động độ chính xác đơn IEEE 754. Hãy biểu diễn kết quả của bạn dưới dạng thập lục phân.\r\n\r\nBài tập 5.39 Hãy chuyển đổi các số nhị phân dấu phẩy cố định bù 2 dưới dạng Q4.4 sau đây sang cơ số 10. Dấu chấm nhị phân ngầm định được hiển thị rõ ràng để trợ giúp cho việc diễn giải của bạn.\r\n(a) 0101.1000\r\n(b) 1111.1111\r\n(c) 1000.0000\r\n\r\nBài tập 5.40 Lặp lại Bài tập 5.39 cho các số nhị phân dấu phẩy cố định bù 2 có định dạng Q6.5 sau đây.\r\n(a) 011101.10101\r\n(b) 100110.11010\r\n(c) 101000.00100",
+      "grammar": [
+        {
+          "phrase": "The implied binary point is explicitly shown to aid in your interpretation",
+          "explain": "thể bị động (passive voice \"is shown\") kết hợp với cấu trúc chỉ mục đích (\"to aid in...\")"
+        },
+        {
+          "phrase": "Repeat Exercise 5.39 for the following Q6.5 format (two's complement binary fixed-point) numbers",
+          "explain": "câu mệnh lệnh (imperative sentence) dùng để đưa ra yêu cầu/hướng dẫn bài tập"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "hexadecimal",
+          "explain": "(danh từ/tính từ) hệ thập lục phân (hệ cơ số 16)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "magnitude",
+          "explain": "(danh từ) độ lớn, giá trị tuyệt đối"
+        },
+        {
+          "type": "phrase",
+          "phrase": "fixed-point format",
+          "explain": "(cụm danh từ) định dạng dấu phẩy cố định (biểu diễn số có phần thập phân với số lượng bit quy định trước)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "sign/magnitude format",
+          "explain": "(cụm danh từ) định dạng dấu/độ lớn (dùng 1 bit làm dấu, các bit còn lại thể hiện độ lớn của số)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "two's complement",
+          "explain": "(cụm danh từ) mã bù hai (phương pháp biểu diễn số nhị phân có dấu phổ biến trong máy tính)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "single-precision floating-point",
+          "explain": "(cụm danh từ) định dạng số chấm động độ chính xác đơn (32-bit theo chuẩn IEEE 754)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "implied binary point",
+          "explain": "(cụm danh từ) dấu chấm nhị phân ngầm định (vị trí quy ước ngăn cách phần nguyên và phần phân số)"
+        }
+      ]
+    },
+    {
+      "page": 54,
+      "summary": "",
+      "translation": "**Bài tập 5.41** Khi cộng hai số chấm động, số có phần mũ nhỏ hơn sẽ được dịch chuyển (dịch bit). Tại sao lại như vậy? Hãy giải thích bằng lời và đưa ra một ví dụ để minh họa cho lời giải thích của bạn.\r\n\r\n**Bài tập 5.42** Cộng các số chấm động độ chính xác đơn IEEE 754 sau đây.\r\n(a) C0123456 + 81C564B7\r\n(b) D0B10301 + D1B43203\r\n(c) 5EF10324 + 5E039020\r\n\r\n**Bài tập 5.43** Cộng các số chấm động độ chính xác đơn IEEE 754 sau đây.\r\n(a) C0D20004 + 72407020\r\n(b) C0D20004 + 40DC0004\r\n(c) (5FBE4000 + 3FF80000) + DFDE4000 (Tại sao kết quả lại phản trực giác? Hãy giải thích.)\r\n\r\n**Bài tập 5.44** Mở rộng các bước trong Mục 5.3.2 về thực hiện phép cộng số chấm động để có thể áp dụng cho cả số chấm động âm cũng như số chấm động dương.\r\n\r\n**Bài tập 5.45** Xét các số chấm động độ chính xác đơn IEEE 754.\r\n(a) Có bao nhiêu số có thể được biểu diễn bằng định dạng số chấm động độ chính xác đơn IEEE 754? Bạn không cần đếm $\\pm\\infty$ hoặc NaN.\r\n(b) Có bao nhiêu số bổ sung có thể được biểu diễn nếu $\\pm\\infty$ và NaN không được biểu diễn?\r\n(c) Giải thích tại sao $\\pm\\infty$ và NaN lại được dành cho các biểu diễn đặc biệt.\r\n\r\n**Bài tập 5.46** Xét các số thập phân sau: 245 và 0.0625.\r\n(a) Viết hai số này bằng biểu diễn số chấm động độ chính xác đơn. Đưa ra câu trả lời của bạn dưới dạng số thập lục phân (hexadecimal).\r\n(b) Thực hiện so sánh độ lớn của hai số 32-bit ở phần (a). Nói cách khác, hãy diễn giải hai số 32-bit đó như là các số bù 2 và so sánh chúng. Phép so sánh số nguyên này có cho kết quả đúng không?\r\n(c) Bạn quyết định tự nghĩ ra một hệ biểu diễn số chấm động độ chính xác đơn mới. Mọi thứ đều giống với chuẩn số chấm động độ chính xác đơn IEEE 754, ngoại trừ việc bạn biểu diễn phần mũ bằng số bù 2 thay vì số mũ có độ lệch (biased exponent).",
+      "grammar": [
+        {
+          "phrase": "When adding two floating-point numbers, the number with the smaller exponent is shifted",
+          "explain": "mệnh đề rút gọn thời gian \"When + V-ing\" kết hợp với thể bị động \"is shifted\""
+        },
+        {
+          "phrase": "How many additional numbers could be represented if ±∞ and NaN were not represented?",
+          "explain": "câu điều kiện loại 2 (giả định trái ngược với thực tế ở hiện tại) với \"could be represented\" và \"were not represented\""
+        },
+        {
+          "phrase": "Everything is the same as the IEEE 754 single-precision floating-point standard, except that you represent the exponent using two’s complement",
+          "explain": "cấu trúc so sánh bằng \"the same as\" kết hợp với mệnh đề loại trừ \"except that + S + V\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "exponent",
+          "explain": "(danh từ) phần mũ, số mũ (trong biểu diễn số học)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "single-precision",
+          "explain": "(tính từ) độ chính xác đơn (chuẩn biểu diễn 32-bit)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "counterintuitive",
+          "explain": "(tính từ) phản trực giác, trái với suy luận thông thường"
+        },
+        {
+          "type": "vocab",
+          "phrase": "notation",
+          "explain": "(danh từ) ký hiệu, hệ biểu diễn số"
+        },
+        {
+          "type": "vocab",
+          "phrase": "magnitude",
+          "explain": "(danh từ) độ lớn, giá trị tuyệt đối"
+        },
+        {
+          "type": "vocab",
+          "phrase": "biased",
+          "explain": "(tính từ) có độ lệch (dùng trong \"biased exponent\" - phần mũ dịch lệch)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "floating-point number",
+          "explain": "(cụm danh từ) số chấm động"
+        },
+        {
+          "type": "collocation",
+          "phrase": "two's complement",
+          "explain": "(cụm danh từ) số bù 2 (phương pháp mã hóa số nguyên âm)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "justify your explanation",
+          "explain": "(cụm từ) đưa ra lý do / bằng chứng để chứng minh cho lời giải thích"
+        }
+      ]
+    },
+    {
+      "page": 55,
+      "summary": "",
+      "translation": "...thay vì dùng độ lệch (bias). Hãy viết hai số bằng chuẩn mới của bạn. Đưa ra câu trả lời dưới dạng số thập lục phân (hexadecimal).\r\n\r\n(d) Phép so sánh số nguyên có hoạt động được với biểu diễn số thực dấu phẩy động mới của bạn ở phần (c) không?\r\n(e) Tại sao lại tiện lợi khi phép so sánh số nguyên có thể áp dụng được cho các số thực dấu phẩy động?\r\n\r\n**Bài tập 5.47** Thiết kế một bộ cộng số thực dấu phẩy động độ chính xác đơn (single-precision floating-point adder) bằng ngôn ngữ HDL yêu thích của bạn. Trước khi lập mã thiết kế bằng HDL, hãy vẽ sơ đồ nguyên lý (schematic) cho thiết kế của bạn. Mô phỏng và kiểm thử bộ cộng để chứng minh với một người hoài nghi rằng nó hoạt động chính xác. Bạn chỉ cần xét các số dương và sử dụng phương pháp làm tròn về 0 (lược bỏ/truncate). Bạn cũng có thể bỏ qua các trường hợp đặc biệt cho trong Bảng 5.4.\r\n\r\n**Bài tập 5.48** Trong bài tập này, bạn sẽ khám phá thiết kế của một bộ nhân số thực dấu phẩy động 32-bit. Bộ nhân có hai đầu vào số thực dấu phẩy động 32-bit và tạo ra một đầu ra số thực dấu phẩy động 32-bit. Bạn chỉ cần xét các số dương và sử dụng phương pháp làm tròn về 0 (lược bỏ/truncate). Bạn cũng có thể bỏ qua các trường hợp đặc biệt cho trong Bảng 5.4.\r\n(a) Viết các bước cần thiết để thực hiện phép nhân số thực dấu phẩy động 32-bit.\r\n(b) Vẽ sơ đồ nguyên lý của bộ nhân số thực dấu phẩy động 32-bit.\r\n(c) Thiết kế bộ nhân số thực dấu phẩy động 32-bit bằng HDL. Mô phỏng và kiểm thử bộ nhân của bạn để chứng minh với một người hoài nghi rằng nó hoạt động chính xác.\r\n\r\n**Bài tập 5.49** Trong bài tập này, bạn sẽ khám phá thiết kế của một bộ cộng tiền tố (prefix adder) 32-bit.\r\n(a) Vẽ sơ đồ nguyên lý cho thiết kế của bạn.\r\n(b) Thiết kế bộ cộng tiền tố 32-bit bằng HDL. Mô phỏng và kiểm thử bộ cộng của bạn để chứng minh rằng nó hoạt động chính xác.\r\n(c) Độ trễ của bộ cộng tiền tố 32-bit trong phần (a) là bao nhiêu? Giả sử độ trễ của mỗi cổng logic 2 đầu vào là 100 ps.\r\n(d) Thiết kế một phiên bản đường ống hóa (pipelined) của bộ cộng tiền tố 32-bit. Vẽ sơ đồ nguyên lý cho thiết kế của bạn. Bộ cộng tiền tố đường ống hóa của bạn có thể chạy nhanh đến mức nào? Bạn có thể giả định chi phí quản lý chuỗi ($t_{pcq} + t_{setup}$) là 80 ps. Hãy làm cho thiết kế chạy nhanh nhất có thể.\r\n(e) Thiết kế bộ cộng tiền tố 32-bit đường ống hóa bằng HDL.\r\n\r\n**Bài tập 5.50** Một bộ tăng (incrementer) cộng thêm 1 vào một số N-bit. Hãy xây dựng một bộ tăng 8-bit bằng cách sử dụng các bộ cộng bán phần (half adders).",
+      "grammar": [
+        {
+          "phrase": "prove to a skeptic that it functions correctly",
+          "explain": "cấu trúc \"prove to [someone] that + [clause]\" (chứng minh với ai đó rằng...), dùng mệnh đề danh ngữ làm tân ngữ"
+        },
+        {
+          "phrase": "Assume that each two-input gate delay is 100 ps",
+          "explain": "mệnh đề danh ngữ \"that...\" đóng vai trò làm tân ngữ trực tiếp cho động từ \"Assume\""
+        },
+        {
+          "phrase": "Make the design run as fast as possible",
+          "explain": "cấu trúc \"make + O + V(bare)\" (khiến/làm cho cái gì hoạt động) kết hợp với cụm so sánh bằng \"as [adj/adv] as possible\" (càng... càng tốt)"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "bias",
+          "explain": "(danh từ) độ lệch, giá trị dịch dùng trong biểu diễn số thực dấu phẩy động"
+        },
+        {
+          "type": "vocab",
+          "phrase": "hexadecimal",
+          "explain": "(danh từ/tính từ) hệ thập lục phân, cơ số 16"
+        },
+        {
+          "type": "vocab",
+          "phrase": "schematic",
+          "explain": "(danh từ) sơ đồ nguyên lý mạch điện"
+        },
+        {
+          "type": "vocab",
+          "phrase": "skeptic",
+          "explain": "(danh từ) người hay hoài nghi, người đòi hỏi bằng chứng rõ ràng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "truncate",
+          "explain": "(động từ) cắt bỏ, làm tròn về 0 bằng cách bỏ bớt phần lẻ"
+        },
+        {
+          "type": "vocab",
+          "phrase": "incrementer",
+          "explain": "(danh từ) bộ tăng (mạch cộng thêm 1)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "single-precision floating-point adder",
+          "explain": "cụm danh từ: bộ cộng số thực dấu phẩy động độ chính xác đơn"
+        },
+        {
+          "type": "collocation",
+          "phrase": "round toward zero",
+          "explain": "cụm từ: chế độ làm tròn về phía số 0"
+        },
+        {
+          "type": "collocation",
+          "phrase": "prefix adder",
+          "explain": "cụm danh từ: bộ cộng tiền tố"
+        },
+        {
+          "type": "collocation",
+          "phrase": "sequencing overhead",
+          "explain": "cụm danh từ: chi phí thời gian định thời chuỗi (t_pcq + t_setup)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "half adder",
+          "explain": "cụm danh từ: bộ cộng bán phần"
+        },
+        {
+          "type": "collocation",
+          "phrase": "pipelined version",
+          "explain": "cụm danh từ: phiên bản đường ống hóa"
+        }
+      ]
+    },
+    {
+      "page": 56,
+      "summary": "",
+      "translation": "292\r\nCHƯƠNG NĂM | Các Khối Xây Dựng Kỹ Thuật Số\r\n\r\nBài tập 5.51 Hãy thiết kế một bộ đếm đồng bộ Lên/Xuống (Up/Down) 32-bit. Các tín hiệu đầu vào gồm Reset và Up. Khi Reset = 1, tất cả các đầu ra đều bằng 0. Ngược lại, khi Up = 1, mạch sẽ đếm tiến (đếm lên), và khi Up = 0, mạch sẽ đếm lùi (đếm xuống).\r\n\r\nBài tập 5.52 Thiết kế một bộ đếm 32-bit tăng thêm 4 sau mỗi sườn xung đồng hồ. Bộ đếm có các đầu vào reset và clock. Khi reset, đầu ra bộ đếm bằng 0.\r\n\r\nBài tập 5.53 Chỉnh sửa bộ đếm ở Bài tập 5.52 sao cho tại mỗi sườn xung đồng hồ, bộ đếm có thể tăng thêm 4 hoặc nạp một giá trị 32-bit mới (D), tùy thuộc vào tín hiệu điều khiển Load. Khi Load = 1, bộ đếm sẽ nạp giá trị mới D. Ngược lại, nó sẽ tăng thêm 4.\r\n\r\nBài tập 5.54 Một bộ đếm Johnson N-bit bao gồm một thanh ghi dịch N-bit kèm theo tín hiệu reset. Đầu ra của thanh ghi dịch (S_out) được đảo ngược và đưa trở lại đầu vào (S_in). Khi bộ đếm được reset, tất cả các bit đều được xóa về 0.\r\n(a) Hãy trình bày chuỗi đầu ra Q_{3:0} tạo bởi bộ đếm Johnson 4-bit ngay sau khi bộ đếm được reset.\r\n(b) Cần bao nhiêu chu kỳ xung đồng hồ trôi qua cho đến khi bộ đếm Johnson N-bit lặp lại chuỗi của nó? Hãy giải thích.\r\n(c) Thiết kế một bộ đếm thập phân sử dụng một bộ đếm Johnson 5-bit, mười cổng AND và các cổng đảo (inverter). Bộ đếm thập phân có các tín hiệu clock, reset và mười đầu ra mã hóa one-hot Y_{9:0}. Khi bộ đếm được reset, Y_0 được kích hoạt (asserted). Ở mỗi chu kỳ tiếp theo, đầu ra kế tiếp sẽ được kích hoạt. Sau mười chu kỳ, bộ đếm sẽ lặp lại. Hãy vẽ sơ đồ nguyên lý của bộ đếm thập phân này.\r\n(d) Bộ đếm Johnson có thể có những ưu điểm gì so với một bộ đếm thông thường?\r\n\r\nBài tập 5.55 Viết mã HDL cho một flip-flop 4-bit có khả năng quét (scannable flip-flop) tương tự như bộ flip-flop được thể hiện trong Hình 5.39. Mô phỏng và kiểm thử mô-đun HDL của bạn để chứng minh nó hoạt động chính xác.\r\n\r\nBài tập 5.56 Ngôn ngữ tiếng Anh có độ dư thừa cao giúp chúng ta có thể phục hồi lại các bản tin bị nhiễu/lỗi. Dữ liệu nhị phân cũng có thể được truyền dưới dạng dư thừa để cho phép sửa lỗi. Ví dụ, số 0 có thể được mã hóa thành 00000 và số 1 có thể được mã hóa thành 11111. Giá trị này sau đó có thể được gửi qua một kênh truyền có nhiễu làm lật tối đa hai bit. Bên nhận có thể phục hồi dữ liệu gốc vì số 0 sẽ có ít nhất ba trong số năm bit nhận được là bit 0; tương tự, số 1 sẽ có ít nhất ba bit 1.\r\n(a) Hãy đề xuất một quy tắc mã hóa để truyền 00, 01, 10 hoặc 11 bằng cách sử dụng 5 bit thông tin sao cho tất cả các lỗi làm sai lệch một bit của dữ liệu mã hóa...",
+      "grammar": [
+        {
+          "phrase": "Modify the counter from Exercise 5.52 such that the counter will either increment by 4 or load a new 32-bit value",
+          "explain": "cấu trúc \"such that\" kết hợp cặp liên từ \"either... or...\" diễn tả hai khả năng lựa chọn tùy thuộc vào điều kiện"
+        },
+        {
+          "phrase": "starting immediately after the counter is reset",
+          "explain": "cụm phân từ hiện tại (participle phrase) làm trạng ngữ chỉ thời gian, rút gọn cho câu điều kiện/thời gian"
+        },
+        {
+          "phrase": "How many cycles elapse until an N-bit Johnson counter repeats its sequence?",
+          "explain": "mệnh đề chỉ thời gian chứa liên từ \"until\" diễn tả giới hạn của hành động kéo dài"
+        },
+        {
+          "phrase": "a 0 will have at least three of the five received bits as 0's",
+          "explain": "cấu trúc chỉ số lượng phân đoạn \"at least three of the five...\" sử dụng quá khứ phân từ \"received\" làm tính từ bổ nghĩa cho \"bits\""
+        },
+        {
+          "phrase": "such that all errors that corrupt one bit of the encoded data",
+          "explain": "mệnh đề quan hệ \"that corrupt...\" bổ nghĩa cho danh từ \"all errors\", nằm trong mệnh đề chỉ mục đích/kết quả \"such that...\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "synchronous",
+          "explain": "(tính từ) đồng bộ — chỉ các mạch điện tử hoạt động phụ thuộc vào cùng một tín hiệu xung nhịp clock"
+        },
+        {
+          "type": "vocab",
+          "phrase": "inverted",
+          "explain": "(tính từ) bị đảo ngược — mức logic chuyển từ 0 thành 1 hoặc ngược lại"
+        },
+        {
+          "type": "vocab",
+          "phrase": "asserted",
+          "explain": "(tính từ) được kích hoạt — tín hiệu được đưa vào trạng thái tích cực (thường là mức logic 1)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "redundant",
+          "explain": "(tính từ) dư thừa — chứa thêm thông tin phụ trợ dùng cho việc phát hiện và tự động sửa lỗi"
+        },
+        {
+          "type": "vocab",
+          "phrase": "garbled",
+          "explain": "(tính từ) bị nhiễu, sai lệch — diễn tả thông tin hoặc dữ liệu bị biến dạng trong quá trình truyền tải"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock edge",
+          "explain": "sườn xung đồng hồ — thời điểm tín hiệu xung nhịp chuyển trạng thái (rising edge hoặc falling edge)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "shift register",
+          "explain": "thanh ghi dịch — chuỗi các flip-flop mắc nối tiếp dùng để dịch chuyển dữ liệu nhị phân"
+        },
+        {
+          "type": "collocation",
+          "phrase": "one-hot",
+          "explain": "mã hóa one-hot — phương pháp mã hóa mà chỉ có duy nhất 1 bit đạt mức tích cực (1) tại một thời điểm"
+        },
+        {
+          "type": "collocation",
+          "phrase": "error correction",
+          "explain": "sửa lỗi — kỹ thuật phát hiện và khắc phục các sai sót dữ liệu khi truyền nhận"
+        },
+        {
+          "type": "collocation",
+          "phrase": "noisy channel",
+          "explain": "kênh truyền có nhiễu — môi trường truyền thông bị tác động bởi các yếu tố nhiễu làm hỏng dữ liệu"
+        }
+      ]
+    },
+    {
+      "page": 57,
+      "summary": "",
+      "translation": "...có thể được sửa lỗi. Gợi ý: các mã hóa 00000 và 11111 cho 00 và 11 tương ứng sẽ không có tác dụng.\r\n\r\n(b) Thiết kế một mạch nhận dữ liệu đã mã hóa 5 bit của bạn và giải mã nó thành 00, 01, 10, hoặc 11, ngay cả khi một bit của dữ liệu truyền đi đã bị thay đổi.\r\n\r\n(c) Giả sử bạn muốn chuyển sang một phương pháp mã hóa 5 bit thay thế. Bạn sẽ triển khai thiết kế của mình như thế nào để dễ dàng thay đổi cách mã hóa mà không cần phải sử dụng phần cứng khác?\r\n\r\nBài tập 5.57 Flash EEPROM, thường được gọi đơn giản là bộ nhớ Flash, là một phát minh tương đối gần đây đã cách mạng hóa ngành điện tử tiêu dùng. Hãy nghiên cứu và giải thích cách bộ nhớ Flash hoạt động. Sử dụng sơ đồ minh họa cổng trôi (floating gate). Mô tả cách một bit trong bộ nhớ được lập trình. Trích dẫn nguồn tài liệu tham khảo một cách thích hợp.\r\n\r\nBài tập 5.58 Đội dự án nghiên cứu sinh vật ngoài hành tinh vừa phát hiện các sinh vật ngoài hành tinh sống ở đáy hồ Mono. Họ cần xây dựng một mạch điện để phân loại các sinh vật này theo hành tinh gốc tiềm năng dựa trên các đặc tính đo được từ tàu thăm dò của NASA: độ xanh lá (greenness), độ nâu (brownness), độ nhớt (sliminess) và độ xù xì/xấu xí (ugliness). Việc tham vấn kỹ lưỡng với các nhà sinh học vũ trụ dẫn đến các kết luận sau:\r\n• Nếu sinh vật có màu xanh lá và nhớt, hoặc xù xì, màu nâu và nhớt, nó có thể đến từ Sao Hỏa.\r\n• Nếu sinh vật xù xì, màu nâu và nhớt, hoặc có màu xanh lá và không xù xì cũng không nhớt, nó có thể đến từ Sao Kim.\r\n• Nếu sinh vật có màu nâu và không xù xì cũng không nhớt, hoặc có màu xanh lá và nhớt, nó có thể đến từ Sao Mộc.\r\nLưu ý rằng đây là một khoa học không chính xác; ví dụ, một dạng sống có đốm xanh lá và nâu, có nhớt nhưng không xù xì có thể đến từ Sao Hỏa hoặc Sao Mộc.\r\n\r\n(a) Lập trình một PLA 4 × 4 × 3 để xác định sinh vật ngoài hành tinh. Bạn có thể sử dụng ký hiệu dấu chấm (dot notation).\r\n(b) Lập trình một ROM 16 × 3 để xác định sinh vật ngoài hành tinh. Bạn có thể sử dụng ký hiệu dấu chấm.\r\n(c) Triển khai thiết kế của bạn bằng ngôn ngữ mô tả phần cứng (HDL).\r\n\r\nBài tập 5.59 Triển khai các hàm sau bằng cách sử dụng một ROM 16 × 3 duy nhất. Sử dụng ký hiệu dấu chấm để biểu thị nội dung của ROM.\r\n(a) X = AB + B C̄ D + Ā B̄\r\n(b) Y = AB + BD\r\n(c) Z = A + B + C + D",
+      "grammar": [
+        {
+          "phrase": "even if one bit of the transmitted data has been changed",
+          "explain": "mệnh đề nhượng bộ với \"even if\" kết hợp bị động thì hiện tại hoàn thành (has been changed)"
+        },
+        {
+          "phrase": "make it easy to change the encoding without having to use different hardware",
+          "explain": "cấu trúc tân ngữ giả \"make it + adj + to V\", đi kèm danh động từ sau giới từ \"without having to...\""
+        },
+        {
+          "phrase": "a fairly recent invention that has revolutionized consumer electronics",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho danh từ \"invention\""
+        },
+        {
+          "phrase": "a life form which is mottled green and brown and is slimy but not ugly",
+          "explain": "mệnh đề quan hệ sử dụng \"which\" bổ nghĩa cho cụm danh từ \"a life form\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "EEPROM",
+          "explain": "(danh từ) bộ nhớ chỉ đọc có thể xóa và lập trình lại bằng điện (Electrically Erasable Programmable Read-Only Memory)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "xenobiologist",
+          "explain": "(danh từ) nhà sinh học vũ trụ (chuyên nghiên cứu về sự sống ngoài Trái Đất)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "probe",
+          "explain": "(danh từ) tàu thăm dò, thiết bị thăm dò không gian"
+        },
+        {
+          "type": "vocab",
+          "phrase": "critter",
+          "explain": "(danh từ) sinh vật, con vật (từ thân mật/khẩu ngữ)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "beastie",
+          "explain": "(danh từ) sinh vật, con thú nhỏ (từ thân mật/khẩu ngữ)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "mottled",
+          "explain": "(tính từ) có đốm, lốm đốm nhiều màu"
+        },
+        {
+          "type": "phrase",
+          "phrase": "floating gate",
+          "explain": "(thuật ngữ) cổng trôi / cổng lơ lửng — cấu trúc lưu trữ điện tích trong transistor của bộ nhớ Flash"
+        },
+        {
+          "type": "phrase",
+          "phrase": "dot notation",
+          "explain": "(thuật ngữ) ký hiệu dấu chấm — biểu diễn kết nối trong sơ đồ PLA hoặc ROM"
+        },
+        {
+          "type": "collocation",
+          "phrase": "consumer electronics",
+          "explain": "(cụm danh từ) thiết bị điện tử tiêu dùng"
+        },
+        {
+          "type": "collocation",
+          "phrase": "life form",
+          "explain": "(cụm danh từ) dạng sống, sinh vật"
+        }
+      ]
+    },
+    {
+      "page": 58,
+      "summary": "",
+      "translation": "CHƯƠNG NĂM | Các khối mạch logic số\r\n\r\nBài tập 5.60 Thực thi các hàm số từ Bài tập 5.59 bằng cách sử dụng PLA kích thước 4 × 8 × 3. Bạn có thể sử dụng ký hiệu dấu chấm (dot notation).\r\n\r\nBài tập 5.61 Xác định kích thước của bộ nhớ ROM mà bạn có thể sử dụng để lập trình cho từng mạch tổ hợp sau đây. Việc sử dụng ROM để thực thi các hàm này có phải là một lựa chọn thiết kế tốt không? Giải thích tại sao có hoặc tại sao không.\r\n(a) một bộ cộng/trừ 16-bit có bit nhớ vào $C_{in}$ và bit nhớ ra $C_{out}$\r\n(b) một bộ nhân 8 × 8 bit\r\n(c) một bộ mã hóa ưu tiên 16-bit (xem Bài tập 2.36)\r\n\r\nBài tập 5.62 Xét các mạch ROM trong Hình 5.67. Đối với mỗi hàng, liệu mạch ở cột I có thể được thay thế bằng một mạch tương đương ở cột II bằng cách lập trình thích hợp cho bộ nhớ ROM của mạch ở cột II hay không?\r\n\r\n[Hình 5.67: Các mạch ROM]\r\n\r\nBài tập 5.63 Cần bao nhiêu phần tử logic (LE - Logic Element) trong FPGA Cyclone IV để thực hiện mỗi hàm sau đây? Hãy chỉ ra cách cấu hình một hoặc nhiều LE để thực hiện...",
+      "grammar": [
+        {
+          "phrase": "a ROM that you could use to program each of the following combinational circuits",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"a ROM\", xác định chức năng của bộ nhớ ROM được dùng"
+        },
+        {
+          "phrase": "Is using a ROM to implement these functions a good design choice?",
+          "explain": "danh động từ (gerund clause) \"using a ROM...\" đóng vai trò làm chủ ngữ trong câu hỏi"
+        },
+        {
+          "phrase": "can the circuit in column I be replaced by an equivalent circuit in column II by proper programming of the latter's ROM?",
+          "explain": "câu bị động (passive voice) đi với động từ khuyết thiếu \"can be replaced by\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "combinational",
+          "explain": "(tính từ) [thuộc] tổ hợp (mạch tổ hợp - combinational circuit: mạch có đầu ra chỉ phụ thuộc vào trạng thái đầu vào hiện tại)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "multiplier",
+          "explain": "(danh từ) bộ nhân (mạch thực hiện phép tính nhân số học trong kỹ thuật số)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "priority encoder",
+          "explain": "(danh từ) bộ mã hóa ưu tiên (mạch chọn và mã hóa tín hiệu đầu vào có độ ưu tiên cao nhất)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "design choice",
+          "explain": "(cụm danh từ) lựa chọn thiết kế, quyết định chọn phương án kiến trúc/mạch"
+        },
+        {
+          "type": "collocation",
+          "phrase": "dot notation",
+          "explain": "(cụm danh từ) ký hiệu dấu chấm (phương pháp dùng chấm đen biểu diễn liên kết nối trong sơ đồ ma trận PLA/PAL)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "replace A by B",
+          "explain": "(cụm động từ) thay thế đối tượng A bằng đối tượng B"
+        }
+      ]
+    },
+    {
+      "page": 59,
+      "summary": "",
+      "translation": "Bài tập\r\n[Trang 295]\r\n\r\n... chức năng. Bạn có thể thực hiện việc này bằng cách quan sát trực tiếp, mà không cần thực hiện tổng hợp logic.\r\n(a) hàm tổ hợp từ Bài tập 2.13(c)\r\n(b) hàm tổ hợp từ Bài tập 2.17(c)\r\n(c) hàm hai đầu ra từ Bài tập 2.24\r\n(d) hàm từ Bài tập 2.35\r\n(e) bộ mã hóa ưu tiên 4 đầu vào (xem Bài tập 2.36)\r\n\r\nBài tập 5.64 Lặp lại Bài tập 5.63 cho các hàm sau:\r\n(a) bộ mã hóa ưu tiên 8 đầu vào (xem Bài tập 2.36)\r\n(b) bộ giải mã 3:8\r\n(c) bộ cộng lan truyền nhớ 4 bit (không có cờ nhớ vào hoặc ra)\r\n(d) FSM từ Bài tập 3.22\r\n(e) bộ đếm mã Gray từ Bài tập 3.27\r\n\r\nBài tập 5.65 Xét Cyclone IV LE được thể hiện trong Hình 5.60. Theo bảng thông số kỹ thuật (datasheet), nó có các thông số thời gian được cho trong Bảng 5.7.\r\n(a) Số lượng Cyclone IV LE tối thiểu cần thiết để triển khai FSM ở Hình 3.26 là bao nhiêu?\r\n(b) Khi không có độ lệch xung nhịp (clock skew), tần số xung nhịp tối đa mà FSM này có thể hoạt động tin cậy là bao nhiêu?\r\n(c) Với độ lệch xung nhịp là 3 ns, tần số tối đa mà FSM có thể hoạt động tin cậy là bao nhiêu?\r\n\r\nBảng 5.7 Thông số thời gian của Cyclone IV\r\nTên thông số | Giá trị (ps)\r\n$t_{pcq}, t_{ccq}$ | 199\r\n$t_{setup}$ | 76\r\n$t_{hold}$ | 0\r\n$t_{pd}$ (trên mỗi LE) | 381\r\n$t_{wire}$ (giữa các LE) | 246\r\n$t_{skew}$ | 0",
+      "grammar": [
+        {
+          "phrase": "given in Table 5.7",
+          "explain": "mệnh đề phân từ quá khứ (past participle phrase) đóng vai trò rút gọn mệnh đề quan hệ \"which are given in Table 5.7\" để bổ nghĩa cho \"timing specifications\""
+        },
+        {
+          "phrase": "required to implement the FSM of Figure 3.26",
+          "explain": "mệnh đề phân từ quá khứ (past participle phrase) bổ nghĩa cho cụm danh từ \"Cyclone IV LEs\""
+        },
+        {
+          "phrase": "the fastest clock frequency at which this FSM will run reliably",
+          "explain": "mệnh đề quan hệ mở đầu bằng giới từ + đại từ quan hệ \"at which\" bổ nghĩa cho danh từ chỉ tần số \"the fastest clock frequency\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "datasheet",
+          "explain": "(danh từ) bảng dữ liệu kỹ thuật, tài liệu mô tả chi tiết thông số do nhà sản xuất cung cấp"
+        },
+        {
+          "type": "collocation",
+          "phrase": "logic synthesis",
+          "explain": "tổng hợp logic (quá trình chuyển đổi mô tả chức năng phần cứng thành mạng lưới cổng logic)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "priority encoder",
+          "explain": "bộ mã hóa ưu tiên (mạch logic xuất ra mã tương ứng với đầu vào có độ ưu tiên cao nhất)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "carry propagate adder",
+          "explain": "bộ cộng lan truyền nhớ (mạch cộng trong đó tín hiệu nhớ lan truyền qua từng bậc bit)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "clock skew",
+          "explain": "độ lệch xung nhịp (sự chênh lệch về thời điểm tín hiệu xung nhịp tới các linh kiện)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "by inspection",
+          "explain": "bằng cách quan sát/đánh giá trực tiếp (nhìn vào nhận ra ngay mà không cần tính toán hay tổng hợp mạch)"
+        }
+      ]
+    },
+    {
+      "page": 60,
+      "summary": "",
+      "translation": "296  CHƯƠNG NĂM  Các khối xây dựng kỹ thuật số\r\n\r\nBài tập 5.66 Lặp lại Bài tập 5.65 đối với FSM (máy trạng thái hữu hạn) ở Hình 3.31(b).\r\n\r\nBài tập 5.67 Bạn muốn sử dụng FPGA để hiện thực một hệ thống phân loại kẹo M&M có tích hợp cảm biến màu sắc và các động cơ nhằm phân loại kẹo màu đỏ vào một lọ và kẹo màu xanh lá vào một lọ khác. Thiết kế này được triển khai dưới dạng một FSM sử dụng FPGA Cyclone IV. Theo bảng thông số kỹ thuật (data sheet), FPGA này có các đặc tính thời gian như trình bày trong Bảng 5.7. Bạn muốn FSM của mình hoạt động ở tần số 100 MHz. Số lượng LE (phần tử logic) tối đa trên đường găng (critical path) là bao nhiêu? Tốc độ nhanh nhất mà FSM có thể hoạt động là bao nhiêu?",
+      "grammar": [
+        {
+          "phrase": "The design is to be implemented as an FSM using a Cyclone IV FPGA",
+          "explain": "cấu trúc \"be + to V\" dạng bị động (is to be implemented) dùng để diễn đạt yêu cầu, kế hoạch hoặc quy định bắt buộc phải thực hiện"
+        },
+        {
+          "phrase": "timing characteristics shown in Table 5.7",
+          "explain": "mệnh đề quan hệ rút gọn dạng quá khứ phân tử (past participle clause) bổ nghĩa cho \"timing characteristics\", viết đầy đủ là \"which are shown in Table 5.7\""
+        },
+        {
+          "phrase": "the fastest speed at which the FSM will run",
+          "explain": "mệnh đề quan hệ có giới từ đứng trước đại từ quan hệ (at which), trong đó \"at which\" thay cho giới từ \"at\" đi với danh từ \"speed\""
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "FSM",
+          "explain": "(viết tắt) Finite State Machine - máy trạng thái hữu hạn, mô hình biểu diễn các trạng thái logic trong thiết kế mạch kỹ thuật số"
+        },
+        {
+          "type": "vocab",
+          "phrase": "FPGA",
+          "explain": "(viết tắt) Field-Programmable Gate Array - mảng cổng lập trình được theo trường, loại vi mạch có thể cấu hình lại chức năng logic"
+        },
+        {
+          "type": "vocab",
+          "phrase": "LE",
+          "explain": "(viết tắt) Logic Element - phần tử logic, đơn vị cấu trúc cơ bản cấu tạo nên phần logic trong FPGA"
+        },
+        {
+          "type": "collocation",
+          "phrase": "critical path",
+          "explain": "đường găng (đường có tổng thời gian trễ tín hiệu dài nhất, quyết định tần số hoạt động tối đa của mạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "data sheet",
+          "explain": "bảng thông số kỹ thuật (tài liệu do nhà sản xuất cung cấp mô tả chi tiết đặc tính của linh kiện)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "timing characteristics",
+          "explain": "các đặc tính thời gian (các thông số trễ, thời gian thiết lập, thời gian giữ của mạch)"
+        },
+        {
+          "type": "phrase",
+          "phrase": "color sensor",
+          "explain": "cảm biến màu sắc"
+        }
+      ]
+    },
+    {
+      "page": 61,
+      "summary": "",
+      "translation": "Câu hỏi phỏng vấn | 297\r\n\r\n**Câu hỏi phỏng vấn**\r\n\r\nCác bài tập dưới đây trình bày những câu hỏi thực tế đã từng được sử dụng trong các buổi phỏng vấn xin việc vị trí thiết kế vi mạch kỹ thuật số (digital design).\r\n\r\n**Câu hỏi 5.1** Kết quả lớn nhất có thể có khi thực hiện phép nhân hai số $N$-bit không dấu là bao nhiêu?\r\n\r\n**Câu hỏi 5.2** Biểu diễn *Binary coded decimal* (BCD - Số thập phân mã hóa nhị phân) sử dụng 4 bit để mã hóa cho mỗi chữ số thập phân. Ví dụ: $42_{10}$ được biểu diễn thành $01000010_{\\text{BCD}}$. Hãy giải thích bằng lời tại sao các bộ xử lý lại có thể dùng biểu diễn BCD.\r\n\r\n**Câu hỏi 5.3** Thiết kế phần cứng để cộng hai số BCD không dấu 8-bit (xem Câu hỏi 5.2). Vẽ sơ đồ nguyên lý (schematic) cho thiết kế của bạn và viết một module HDL cho bộ cộng BCD này. Các tín hiệu đầu vào là $A, B$ và $C_{\\text{in}}$, các tín hiệu đầu ra là $S$ và $C_{\\text{out}}$. $C_{\\text{in}}$ và $C_{\\text{out}}$ là các bit nhớ (carry) 1-bit, còn $A, B$ và $S$ là các số BCD 8-bit.",
+      "grammar": [
+        {
+          "phrase": "questions that have been asked at interviews for digital design jobs",
+          "explain": "mệnh đề quan hệ (relative clause) bổ nghĩa cho \"questions\", sử dụng thì hiện tại hoàn thành ở dạng bị động (present perfect passive)"
+        },
+        {
+          "phrase": "What is the largest possible result of multiplying two unsigned N-bit numbers?",
+          "explain": "cấu trúc câu hỏi sử dụng so sánh nhất (\"the largest possible\") kết hợp danh động từ (\"multiplying\") đi sau giới từ \"of\""
+        },
+        {
+          "phrase": "Explain in words why processors might use BCD representation",
+          "explain": "câu mệnh lệnh kết hợp mệnh đề quan hệ/danh từ bắt đầu bằng \"why\" làm tân ngữ, dùng động từ khuyết thiếu \"might\" chỉ khả năng"
+        }
+      ],
+      "analysis": [
+        {
+          "type": "vocab",
+          "phrase": "unsigned",
+          "explain": "(tính từ) không dấu (dùng để chỉ các số nguyên không âm trong hệ thống số kỹ thuật số)"
+        },
+        {
+          "type": "vocab",
+          "phrase": "schematic",
+          "explain": "(danh từ) sơ đồ nguyên lý, sơ đồ mạch điện thể hiện sự kết nối giữa các linh kiện/khối chức năng"
+        },
+        {
+          "type": "vocab",
+          "phrase": "carry",
+          "explain": "(danh từ) bit nhớ, số nhớ sinh ra khi thực hiện phép cộng vượt quá dung lượng của vị trí hiện tại"
+        },
+        {
+          "type": "collocation",
+          "phrase": "digital design",
+          "explain": "(collocation) thiết kế kỹ thuật số / thiết kế vi mạch số"
+        },
+        {
+          "type": "collocation",
+          "phrase": "binary coded decimal",
+          "explain": "(collocation) số thập phân được mã hóa bằng số nhị phân (chuẩn biểu diễn dùng 4 bit nhị phân cho 1 chữ số thập phân)"
+        },
+        {
+          "type": "collocation",
+          "phrase": "HDL module",
+          "explain": "(collocation) mô-đun ngôn ngữ mô tả phần cứng (Hardware Description Language như Verilog hoặc VHDL)"
+        }
+      ]
     }
   ]
 }
