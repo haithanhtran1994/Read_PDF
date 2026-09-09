@@ -31,12 +31,12 @@
   },
   "gh:pdf/Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf": {
     "name": "Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf",
-    "page": 12,
+    "page": 11,
     "numPages": 238,
     "source": {
       "type": "github",
       "path": "pdf/Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf"
     },
-    "updatedAt": "2026-09-09T16:02:54.736Z"
+    "updatedAt": "2026-09-09T16:02:56.831Z"
   }
 }
