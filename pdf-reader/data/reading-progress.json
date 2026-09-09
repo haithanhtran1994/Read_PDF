@@ -18,5 +18,15 @@
       "path": "pdf/IEEE_SV.pdf"
     },
     "updatedAt": "2026-09-09T00:59:39.827Z"
+  },
+  "gh:pdf/Digital-Design-and_Computer-Architecture-RISC-V.pdf": {
+    "name": "Digital-Design-and_Computer-Architecture-RISC-V.pdf",
+    "page": 1,
+    "numPages": 733,
+    "source": {
+      "type": "github",
+      "path": "pdf/Digital-Design-and_Computer-Architecture-RISC-V.pdf"
+    },
+    "updatedAt": "2026-09-09T15:56:43.734Z"
   }
 }
