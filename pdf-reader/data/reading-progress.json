@@ -1,12 +1,12 @@
 {
   "gh:pdf/IEEE_SV.pdf": {
     "name": "IEEE_SV.pdf",
-    "page": 1,
+    "page": 2,
     "numPages": 1354,
     "source": {
       "type": "github",
       "path": "pdf/IEEE_SV.pdf"
     },
-    "updatedAt": "2026-09-11T13:24:49.014Z"
+    "updatedAt": "2026-09-11T13:24:53.870Z"
   }
 }
