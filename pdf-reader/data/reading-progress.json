@@ -1,14 +1,4 @@
 {
-  "gh:pdf/Shin_Kanzen_Masuta_N2-Dokkai.pdf": {
-    "name": "Shin_Kanzen_Masuta_N2-Dokkai.pdf",
-    "page": 11,
-    "numPages": 238,
-    "source": {
-      "type": "github",
-      "path": "pdf/Shin_Kanzen_Masuta_N2-Dokkai.pdf"
-    },
-    "updatedAt": "2026-09-09T00:27:29.814Z"
-  },
   "gh:pdf/IEEE_SV.pdf": {
     "name": "IEEE_SV.pdf",
     "page": 1,
@@ -17,26 +7,6 @@
       "type": "github",
       "path": "pdf/IEEE_SV.pdf"
     },
-    "updatedAt": "2026-09-09T16:02:19.635Z"
-  },
-  "gh:pdf/Digital-Design-and_Computer-Architecture-RISC-V.pdf": {
-    "name": "Digital-Design-and_Computer-Architecture-RISC-V.pdf",
-    "page": 78,
-    "numPages": 733,
-    "source": {
-      "type": "github",
-      "path": "pdf/Digital-Design-and_Computer-Architecture-RISC-V.pdf"
-    },
-    "updatedAt": "2026-09-09T16:34:21.273Z"
-  },
-  "gh:pdf/Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf": {
-    "name": "Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf",
-    "page": 12,
-    "numPages": 238,
-    "source": {
-      "type": "github",
-      "path": "pdf/Shin_Kanzen_Masuta_N2-Dokkai_18MB.pdf"
-    },
-    "updatedAt": "2026-09-09T16:17:43.757Z"
+    "updatedAt": "2026-09-11T13:24:25.695Z"
   }
 }
