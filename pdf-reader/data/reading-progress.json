@@ -18,5 +18,15 @@
       "path": "pdf/Digital_Design_RISCV/01_1_from_zero_to_one.pdf"
     },
     "updatedAt": "2026-09-17T14:49:43.284Z"
+  },
+  "gh:pdf/Digital_Design_RISCV/02_2_combinational_logic_design.pdf": {
+    "name": "02_2_combinational_logic_design.pdf",
+    "page": 1,
+    "numPages": 53,
+    "source": {
+      "type": "github",
+      "path": "pdf/Digital_Design_RISCV/02_2_combinational_logic_design.pdf"
+    },
+    "updatedAt": "2026-09-17T15:46:31.065Z"
   }
 }
