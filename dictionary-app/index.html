@@ -76,7 +76,7 @@
   <input type="text" id="cfgOwner" placeholder="haithanhtran1994">
   <label>Tên repo</label>
   <input type="text" id="cfgRepo" placeholder="Book_ver2">
-  <label>Thư mục dữ liệu sách JSON</label>
+  <label>Thư mục dữ liệu sách JSON (trong repo dữ liệu sách ở dưới nếu có cấu hình, không thì trong "Tên repo" ở trên)</label>
   <input type="text" id="cfgBooksPath" placeholder="data" value="data">
   <label>File lưu danh sách đã ẩn (dùng chung mọi thiết bị)</label>
   <input type="text" id="cfgHiddenPath" placeholder="dictionary-app/hidden.json" value="hidden.json">
@@ -84,6 +84,21 @@
   <input type="text" id="cfgBranch" value="main">
   <label>Personal Access Token</label>
   <input type="password" id="cfgToken" placeholder="github_pat_...">
+
+  <hr>
+  <p class="gh-hint"><b>Repo riêng chứa dữ liệu sách — tuỳ chọn.</b> Để trống cả 4 ô dưới nếu
+    "Thư mục dữ liệu sách JSON" ở trên vẫn nằm trong repo/app đọc sách như cũ. Điền vào nếu
+    dữ liệu sách đã chuyển sang 1 repo khác (ví dụ repo Private riêng) — danh sách đã ẩn vẫn
+    lưu ở repo/token phía trên, không đổi.</p>
+  <label>GitHub username chủ repo dữ liệu sách (bỏ trống = dùng username ở trên)</label>
+  <input type="text" id="cfgBookOwner" placeholder="haithanhtran1994">
+  <label>Tên repo dữ liệu sách (bỏ trống = dùng repo ở trên)</label>
+  <input type="text" id="cfgBookRepo" placeholder="Book_data">
+  <label>Branch (bỏ trống = dùng branch ở trên)</label>
+  <input type="text" id="cfgBookBranch" placeholder="main">
+  <label>Personal Access Token riêng cho repo này (bỏ trống = dùng token ở trên, nếu token đó đã có quyền truy cập repo này)</label>
+  <input type="password" id="cfgBookToken" placeholder="github_pat_...">
+
   <div class="edit-actions">
     <button id="btnSaveGhConfig" class="btn-save">Lưu & đồng bộ</button>
     <button id="btnCancelGhConfig" class="btn-cancel">Hủy</button>

@@ -8,8 +8,35 @@ const GH = (() => {
     return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents`;
   }
 
+  // Nối các đoạn đường dẫn, bỏ qua đoạn rỗng hoặc "." (dùng "." để chỉ định
+  // "ngay tại gốc repo", ví dụ khi repo dữ liệu sách không có prefix nào).
+  function joinPath(...parts) {
+    return parts
+      .filter((p) => p !== undefined && p !== null && p !== "" && p !== ".")
+      .map((p) => String(p).replace(/^\/+|\/+$/g, ""))
+      .filter(Boolean)
+      .join("/");
+  }
+
   function fullPath(cfg, relPath) {
-    return cfg.dataPrefix ? `${cfg.dataPrefix}/${relPath}` : relPath;
+    return joinPath(cfg.dataPrefix, relPath);
+  }
+
+  // Trả về 1 bản cfg "trỏ" sang repo riêng lưu dữ liệu sách (JSON) + PDF, nếu người
+  // dùng có cấu hình bookOwner/bookRepo (xem index.html mục "Repo dữ liệu sách/PDF").
+  // Nếu không cấu hình gì thêm, trả về nguyên cfg gốc -> KHÔNG đổi hành vi cũ, tương
+  // thích ngược 100% với cấu hình hiện có (ghi chú, highlight, tiến độ đọc vẫn ở
+  // đúng repo/app cũ như trước, chỉ sách + pdf mới đọc/ghi sang repo riêng này).
+  function bookRepoCfg(cfg) {
+    if (!cfg || !(cfg.bookOwner || cfg.bookRepo)) return cfg;
+    return {
+      ...cfg,
+      owner: cfg.bookOwner || cfg.owner,
+      repo: cfg.bookRepo || cfg.repo,
+      branch: cfg.bookBranch || cfg.branch,
+      token: cfg.bookToken || cfg.token,
+      dataPrefix: cfg.bookPrefix !== undefined ? cfg.bookPrefix : "",
+    };
   }
 
   function b64ToStr(b64) {
@@ -210,5 +237,7 @@ const GH = (() => {
     appendNoteToRepo,
     listDir,
     fullPath,
+    joinPath,
+    bookRepoCfg,
   };
 })();

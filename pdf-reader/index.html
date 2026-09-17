@@ -341,9 +341,9 @@
   <input type="text" id="cfgPrefix" placeholder="pdf-dual-reader-pwa">
   <label>Đường dẫn file JSON lưu ghi chú (trong thư mục app ở trên)</label>
   <input type="text" id="cfgNotesPath" placeholder="data/notes.json" value="data/notes.json">
-  <label>Thư mục dữ liệu sách JSON (trong thư mục app ở trên)</label>
+  <label>Thư mục dữ liệu sách JSON (trong repo dữ liệu sách ở dưới nếu có cấu hình, không thì trong thư mục app ở trên)</label>
   <input type="text" id="cfgBooksPath" placeholder="data" value="data">
-  <label>Thư mục chứa file PDF sách (trong thư mục app ở trên)</label>
+  <label>Thư mục chứa file PDF sách (trong repo dữ liệu sách ở dưới nếu có cấu hình, không thì trong thư mục app ở trên)</label>
   <input type="text" id="cfgPdfPath" placeholder="pdf" value="pdf">
   <label>Thư mục lưu highlight/gạch chân (trong thư mục app ở trên)</label>
   <input type="text" id="cfgHlPath" placeholder="highlights" value="highlights">
@@ -351,6 +351,22 @@
   <input type="text" id="cfgBranch" value="main">
   <label>Personal Access Token</label>
   <input type="password" id="cfgToken" placeholder="github_pat_...">
+
+  <hr>
+  <p class="gh-hint"><b>Repo riêng cho dữ liệu sách (PDF + JSON) — tuỳ chọn.</b> Để trống cả 5 ô dưới
+    nếu vẫn muốn PDF/data để chung 1 repo với app như trên. Điền vào nếu muốn tách PDF + data
+    ra 1 repo khác (nên đặt Private) — ghi chú/highlight/tiến độ đọc vẫn dùng repo ở trên, không đổi.</p>
+  <label>GitHub username chủ repo dữ liệu sách (bỏ trống = dùng username ở trên)</label>
+  <input type="text" id="cfgBookOwner" placeholder="haithanhtran1994">
+  <label>Tên repo dữ liệu sách (bỏ trống = dùng repo ở trên)</label>
+  <input type="text" id="cfgBookRepo" placeholder="Book_data">
+  <label>Đường dẫn tới thư mục app trong repo này (để trống nếu pdf/, &lt;tên sách&gt;/ nằm ngay gốc repo — gõ "." cũng có nghĩa là gốc)</label>
+  <input type="text" id="cfgBookPrefix" placeholder="(để trống = gốc repo)">
+  <label>Branch (bỏ trống = dùng branch ở trên)</label>
+  <input type="text" id="cfgBookBranch" placeholder="main">
+  <label>Personal Access Token riêng cho repo này (bỏ trống = dùng token ở trên, nếu token đó đã có quyền truy cập repo này)</label>
+  <input type="password" id="cfgBookToken" placeholder="github_pat_...">
+
   <div class="edit-actions">
     <button id="btnSaveGhConfig" class="btn-save">Lưu cấu hình</button>
     <button id="btnCancelGhConfig" class="btn-cancel">Hủy</button>

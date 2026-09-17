@@ -443,14 +443,16 @@ async function openPdfBlob(slot, blob, name, source) {
   await loadPdfIntoPane(slot, buf, name, source || { type: "device", size: blob.size });
 }
 
-// Mở PDF lấy trực tiếp từ GitHub (thư mục cfg.pdfPrefix trong repo).
+// Mở PDF lấy trực tiếp từ GitHub (thư mục cfg.pdfPrefix trong repo dữ liệu sách/PDF —
+// mặc định cùng repo với app, hoặc 1 repo riêng nếu đã cấu hình "Repo dữ liệu sách/PDF").
 async function openPdfFromGithub(relPath, name) {
   const cfg = await Store.getConfig();
   if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
     alert('Chưa cấu hình GitHub — mở "☁" ở góc trên để cấu hình trước.');
     return;
   }
-  const file = await GH.getBinaryFile(cfg, GH.fullPath(cfg, relPath));
+  const bcfg = GH.bookRepoCfg(cfg);
+  const file = await GH.getBinaryFile(bcfg, GH.fullPath(bcfg, relPath));
   if (!file) throw new Error("Không tìm thấy file trên GitHub.");
   const bytes = file.bytes;
   if (!bytes || !bytes.length) throw new Error("Tải file từ GitHub về nhưng rỗng — thử lại hoặc kiểm tra file trên GitHub.");
@@ -911,17 +913,18 @@ async function showPdfDir(relPath) {
     return;
   }
   try {
+    const bcfg = GH.bookRepoCfg(cfg);
     const pdfPrefix = cfg.pdfPrefix || "pdf";
-    const fullRel = relPath ? `${pdfPrefix}/${relPath}` : pdfPrefix;
-    const queriedPath = GH.fullPath(cfg, fullRel);
-    const items = await GH.listDir(cfg, queriedPath);
+    const fullRel = GH.joinPath(pdfPrefix, relPath);
+    const queriedPath = GH.fullPath(bcfg, fullRel);
+    const items = await GH.listDir(bcfg, queriedPath);
     statusEl.textContent = "";
     const dirs = items.filter((it) => it.type === "dir").sort((a, b) => a.name.localeCompare(b.name));
     const files = items
       .filter((it) => it.type === "file" && /\.pdf$/i.test(it.name))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
     if (!dirs.length && !files.length) {
-      statusEl.textContent = `Không thấy PDF nào ở đường dẫn GitHub: "${queriedPath}" (repo ${cfg.owner}/${cfg.repo}, branch ${cfg.branch || "main"}). ` +
+      statusEl.textContent = `Không thấy PDF nào ở đường dẫn GitHub: "${queriedPath}" (repo ${bcfg.owner}/${bcfg.repo}, branch ${bcfg.branch || "main"}). ` +
         `Nếu thư mục pdf/ có file thật mà vẫn báo trống, khả năng cao "Đường dẫn tới thư mục app" hoặc ` +
         `"Thư mục chứa file PDF" trong cấu hình GitHub (☁) đang sai — kiểm tra lại cho khớp cấu trúc thật trên GitHub.`;
       return;
@@ -1034,8 +1037,9 @@ async function showTocBooks() {
     return;
   }
   try {
+    const bcfg = GH.bookRepoCfg(cfg);
     const booksPath = cfg.booksPath || "data";
-    const items = await GH.listDir(cfg, GH.fullPath(cfg, booksPath));
+    const items = await GH.listDir(bcfg, GH.fullPath(bcfg, booksPath));
     const dirs = items.filter((it) => it.type === "dir");
     els.tocStatus.textContent = "";
     if (!dirs.length) {
@@ -1063,8 +1067,9 @@ async function showTocChapters(book) {
 
   const cfg = await Store.getConfig();
   try {
+    const bcfg = GH.bookRepoCfg(cfg);
     const booksPath = cfg.booksPath || "data";
-    const items = await GH.listDir(cfg, GH.fullPath(cfg, `${booksPath}/${book}`));
+    const items = await GH.listDir(bcfg, GH.fullPath(bcfg, GH.joinPath(booksPath, book)));
     const files = items
       .filter((it) => it.type === "file" && /\.json$/i.test(it.name))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
@@ -1101,8 +1106,9 @@ async function loadChapter(book, chapter, pageIdx) {
   try {
     const cfg = await Store.getConfig();
     if (cfg && cfg.owner && cfg.repo && cfg.token) {
+      const bcfg = GH.bookRepoCfg(cfg);
       const booksPath = cfg.booksPath || "data";
-      const res = await GH.getJSONObject(cfg, `${booksPath}/${book}/${chapter}.json`);
+      const res = await GH.getJSONObject(bcfg, GH.joinPath(booksPath, book, `${chapter}.json`));
       if (res && res.data) {
         data = res.data;
         Store.saveChapter(book, chapter, data).catch(() => {});
@@ -1326,7 +1332,7 @@ async function applyJsonMark(mode) {
 
 function markRelPath(cfg, book) {
   const booksPath = cfg.booksPath || "data";
-  return `${booksPath}/${book}/mark.json`;
+  return GH.joinPath(booksPath, book, "mark.json");
 }
 
 async function persistJsonMarks(book) {
@@ -1334,7 +1340,8 @@ async function persistJsonMarks(book) {
   await Store.saveMarkList(book, items).catch(() => {});
   const cfg = await Store.getConfig();
   if (cfg && cfg.owner && cfg.repo && cfg.token) {
-    await GH.putJSONArray(cfg, markRelPath(cfg, book), items, `Cập nhật highlight/gạch chân ${book}`);
+    const bcfg = GH.bookRepoCfg(cfg);
+    await GH.putJSONArray(bcfg, markRelPath(bcfg, book), items, `Cập nhật highlight/gạch chân ${book}`);
   }
 }
 
@@ -1342,8 +1349,9 @@ async function loadJsonMarksForBook(book) {
   let items = (await Store.getMarkList(book).catch(() => null)) || [];
   const cfg = await Store.getConfig();
   if (cfg && cfg.owner && cfg.repo && cfg.token) {
+    const bcfg = GH.bookRepoCfg(cfg);
     try {
-      const remote = await GH.getJSONArray(cfg, markRelPath(cfg, book));
+      const remote = await GH.getJSONArray(bcfg, markRelPath(bcfg, book));
       if (remote) {
         items = remote.items;
         Store.saveMarkList(book, items).catch(() => {});
@@ -1444,11 +1452,12 @@ async function saveJsonEdits() {
   $("#btnJsonSave").disabled = true;
   $("#btnJsonCancel").disabled = true;
   try {
+    const bcfg = GH.bookRepoCfg(cfg);
     const booksPath = cfg.booksPath || "data";
-    const relPath = `${booksPath}/${j.book}/${j.chapter}.json`;
+    const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
     const raw = j.raw || { pages: j.pages };
     raw.pages = j.pages;
-    await GH.putTextFile(cfg, relPath, JSON.stringify(raw, null, 2), `Cập nhật ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
+    await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2), `Cập nhật ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
     await Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
     statusEl.textContent = "Đã cập nhật ✓";
     setTimeout(() => {
@@ -1512,7 +1521,9 @@ async function pickFolderAndPush() {
 
   const bookName = (els.importBookName.value.trim() || dirHandle.name).trim();
   els.importBookName.value = bookName;
-  logImport(`Đang đọc thư mục "${dirHandle.name}" → sẽ đẩy lên data/${bookName}/ …`);
+  const bcfgPreview = GH.bookRepoCfg(cfg);
+  const targetPreview = GH.joinPath(cfg.booksPath || "data", bookName);
+  logImport(`Đang đọc thư mục "${dirHandle.name}" → sẽ đẩy lên "${targetPreview}/" trong repo ${bcfgPreview.owner}/${bcfgPreview.repo} …`);
 
   const jsonFiles = [];
   for await (const [name, handle] of dirHandle.entries()) {
@@ -1524,6 +1535,7 @@ async function pickFolderAndPush() {
   }
   jsonFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
+  const bcfg = GH.bookRepoCfg(cfg);
   const booksPath = cfg.booksPath || "data";
   let ok = 0, fail = 0;
   for (const jf of jsonFiles) {
@@ -1531,8 +1543,8 @@ async function pickFolderAndPush() {
       const file = await jf.handle.getFile();
       const text = await file.text();
       JSON.parse(text); // kiểm tra JSON hợp lệ trước khi đẩy lên
-      const relPath = `${booksPath}/${bookName}/${jf.name}`;
-      await GH.putTextFile(cfg, relPath, text, `Cập nhật ${bookName}/${jf.name}`);
+      const relPath = GH.joinPath(booksPath, bookName, jf.name);
+      await GH.putTextFile(bcfg, relPath, text, `Cập nhật ${bookName}/${jf.name}`);
       logImport(`✓ Đã đẩy ${jf.name}`, "ok");
       ok++;
     } catch (e) {
@@ -2185,6 +2197,13 @@ function bindGithubConfig() {
       highlightsPrefix: $("#cfgHlPath").value.trim() || "highlights",
       branch: $("#cfgBranch").value.trim() || "main",
       token: $("#cfgToken").value.trim(),
+      // Repo riêng (thường để PRIVATE) chỉ chứa PDF + data/<sách>/*.json — để trống hết
+      // 4 ô dưới nếu vẫn muốn dùng chung 1 repo như cũ (không đổi gì).
+      bookOwner: $("#cfgBookOwner").value.trim(),
+      bookRepo: $("#cfgBookRepo").value.trim(),
+      bookBranch: $("#cfgBookBranch").value.trim(),
+      bookPrefix: $("#cfgBookPrefix").value.trim(),
+      bookToken: $("#cfgBookToken").value.trim(),
     };
     if (!cfg.owner || !cfg.repo || !cfg.token) {
       alert("Cần nhập ít nhất username, tên repo và token.");
@@ -2207,6 +2226,11 @@ async function openGithubConfig() {
   $("#cfgHlPath").value = cfg.highlightsPrefix || "highlights";
   $("#cfgBranch").value = cfg.branch || "main";
   $("#cfgToken").value = cfg.token || "";
+  $("#cfgBookOwner").value = cfg.bookOwner || "";
+  $("#cfgBookRepo").value = cfg.bookRepo || "";
+  $("#cfgBookBranch").value = cfg.bookBranch || "";
+  $("#cfgBookPrefix").value = cfg.bookPrefix || "";
+  $("#cfgBookToken").value = cfg.bookToken || "";
   els.githubOverlay.classList.remove("hidden");
   els.githubConfigPanel.classList.remove("hidden");
 }

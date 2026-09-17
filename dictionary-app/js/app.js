@@ -98,6 +98,7 @@ async function syncFromGithub() {
   els.syncPanel.classList.remove("hidden");
   els.btnSync.disabled = true;
 
+  const bcfg = GH.bookRepoCfg(cfg);
   const booksPath = cfg.booksPath || "data";
   const merged = new Map(); // key -> {type, phrase, explain, sources:[]}
 
@@ -113,8 +114,8 @@ async function syncFromGithub() {
     }
     updateHiddenCount();
 
-    logSync(`Đang lấy danh sách sách trong "${booksPath}/"...`);
-    const bookItems = (await GH.listDir(cfg, booksPath)).filter((it) => it.type === "dir");
+    logSync(`Đang lấy danh sách sách trong "${booksPath}/" (repo ${bcfg.owner}/${bcfg.repo})...`);
+    const bookItems = (await GH.listDir(bcfg, booksPath)).filter((it) => it.type === "dir");
     if (!bookItems.length) {
       logSync("Không tìm thấy sách nào.", "err");
     }
@@ -122,13 +123,13 @@ async function syncFromGithub() {
     for (const bookItem of bookItems) {
       const book = bookItem.name;
       logSync(`— Sách "${book}": đang lấy danh sách chương...`);
-      const chapterItems = (await GH.listDir(cfg, `${booksPath}/${book}`))
+      const chapterItems = (await GH.listDir(bcfg, GH.joinPath(booksPath, book)))
         .filter((it) => it.type === "file" && /\.json$/i.test(it.name));
 
       for (const chFile of chapterItems) {
         const chapter = chFile.name.replace(/\.json$/i, "");
         try {
-          const res = await GH.getJSONObject(cfg, `${booksPath}/${book}/${chFile.name}`);
+          const res = await GH.getJSONObject(bcfg, GH.joinPath(booksPath, book, chFile.name));
           const data = res ? res.data : null;
           const pages = (data && Array.isArray(data.pages)) ? data.pages : [];
           let count = 0;
@@ -397,6 +398,7 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
     return false;
   }
 
+  const bcfg = GH.bookRepoCfg(cfg);
   const booksPath = cfg.booksPath || "data";
   const byChapter = new Map(); // "book/chapter" -> { book, chapter, pages:Set }
   entry.sources.forEach((s) => {
@@ -410,11 +412,11 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
   let totalChanged = 0;
 
   for (const { book, chapter, pages } of byChapter.values()) {
-    const relPath = `${booksPath}/${book}/${chapter}.json`;
+    const relPath = GH.joinPath(booksPath, book, `${chapter}.json`);
     statusEl.textContent = `Đang cập nhật ${book}/${chapter}...`;
     let res;
     try {
-      res = await GH.getJSONObject(cfg, relPath);
+      res = await GH.getJSONObject(bcfg, relPath);
     } catch (e) {
       statusEl.textContent = `Lỗi đọc ${relPath}: ${e.message}`;
       return false;
@@ -445,7 +447,7 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
       continue;
     }
     try {
-      await GH.putTextFile(cfg, relPath, JSON.stringify(data, null, 2), res.sha,
+      await GH.putTextFile(bcfg, relPath, JSON.stringify(data, null, 2), res.sha,
         `Sửa "${TYPE_LABEL[entry.type] || entry.type}" '${newPhrase}' (từ dictionary-app)`);
       totalChanged += changed;
     } catch (e) {
@@ -615,6 +617,10 @@ function openGithubConfig() {
     $("#cfgHiddenPath").value = cfg.hiddenPath || DEFAULT_HIDDEN_PATH;
     $("#cfgBranch").value = cfg.branch || "main";
     $("#cfgToken").value = cfg.token || "";
+    $("#cfgBookOwner").value = cfg.bookOwner || "";
+    $("#cfgBookRepo").value = cfg.bookRepo || "";
+    $("#cfgBookBranch").value = cfg.bookBranch || "";
+    $("#cfgBookToken").value = cfg.bookToken || "";
     els.githubOverlay.classList.remove("hidden");
     els.githubPanel.classList.remove("hidden");
   })();
@@ -637,6 +643,12 @@ function bindGithubConfig() {
       hiddenPath: $("#cfgHiddenPath").value.trim() || DEFAULT_HIDDEN_PATH,
       branch: $("#cfgBranch").value.trim() || "main",
       token: $("#cfgToken").value.trim(),
+      // Repo riêng (thường Private) chứa data/<sách>/*.json — để trống nếu vẫn tra cứu
+      // chung 1 repo với "Tên repo" ở trên như cũ (không đổi gì).
+      bookOwner: $("#cfgBookOwner").value.trim(),
+      bookRepo: $("#cfgBookRepo").value.trim(),
+      bookBranch: $("#cfgBookBranch").value.trim(),
+      bookToken: $("#cfgBookToken").value.trim(),
     };
     if (!cfg.owner || !cfg.repo || !cfg.token) {
       alert("Cần nhập ít nhất username, tên repo và token.");
