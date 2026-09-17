@@ -8,5 +8,15 @@
       "path": "pdf/IEEE_SV.pdf"
     },
     "updatedAt": "2026-09-17T13:59:01.111Z"
+  },
+  "gh:pdf/Digital_Design_RISCV/01_1_from_zero_to_one.pdf": {
+    "name": "01_1_from_zero_to_one.pdf",
+    "page": 1,
+    "numPages": 51,
+    "source": {
+      "type": "github",
+      "path": "pdf/Digital_Design_RISCV/01_1_from_zero_to_one.pdf"
+    },
+    "updatedAt": "2026-09-17T14:49:43.284Z"
   }
 }
