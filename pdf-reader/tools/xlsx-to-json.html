@@ -64,6 +64,10 @@
         (<code>vocab</code> dùng cho từ đơn lẻ khó/hiếm/chuyên ngành, không phải cụm từ). Ví dụ:<br>
         <code>idiom: kick the bucket :: nghĩa là chết (informal)</code><br>
         <code>vocab: mitigate :: làm giảm nhẹ, giảm bớt mức độ nghiêm trọng</code></td></tr>
+    <tr><td style="padding:6px;border:1px solid var(--line);"><code>audio</code></td>
+      <td style="padding:6px;border:1px solid var(--line);"><b>Tùy chọn.</b> Tên file audio của trang này, đặt sẵn trong
+        <code>audio/&lt;tên sách&gt;/</code> trên repo dữ liệu (ví dụ <code>audio/Book1/p12.mp3</code> thì chỉ
+        cần gõ <code>p12.mp3</code>). Để trống nếu trang không có audio.</td></tr>
   </table>
   <p>Trong Excel, để xuống dòng trong 1 ô: bấm <code>Alt+Enter</code> (Windows) rồi gõ dòng tiếp theo.</p>
 </div>
@@ -171,6 +175,7 @@ function sheetToChapterJson(sheet, book, chapter) {
       translation,
       grammar: parseGrammarCell(norm.grammar),
       analysis: parseAnalysisCell(norm.analysis),
+      audio: String(norm.audio == null ? "" : norm.audio).trim(),
     };
   }).filter((p) => p.page !== "" && p.page !== undefined);
   pages.sort((a, b) => (Number(a.page) || 0) - (Number(b.page) || 0));

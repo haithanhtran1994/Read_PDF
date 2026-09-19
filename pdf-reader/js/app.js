@@ -61,7 +61,15 @@ const state = {
     editing: false,
   },
   tocBook: null, // book đang chọn dở trong drawer mục lục
+  jsonAudio: {
+    cache: new Map(),   // "book/chapter/filename" -> blob URL (giữ lại trong session, khỏi tải lại)
+    currentKey: null,   // key của file audio đang gán vào thẻ <audio> hiện tại
+    rate: 1,            // tốc độ phát hiện tại
+    autoNext: false,    // tự phát audio trang kế tiếp khi trang hiện tại phát xong
+  },
 };
+
+const AUDIO_RATE_CYCLE = [1, 1.25, 1.5, 2, 0.75];
 
 const JSON_MODE_CYCLE = ["summary", "translation", "analysis", "all"];
 const JSON_MODE_LABEL = { summary: "Tóm tắt", translation: "Dịch", analysis: "Phân tích", all: "Cả ba" };
@@ -97,6 +105,12 @@ const els = {
   emptyB: $("#emptyB"),
   modeToggle: $("#modeToggle"),
   btnJsonEdit: $("#btnJsonEdit"),
+  audioBar: $("#audioBar"),
+  jsonAudioEl: $("#jsonAudioEl"),
+  btnAudioBack5: $("#btnAudioBack5"),
+  btnAudioFwd5: $("#btnAudioFwd5"),
+  btnAudioSpeed: $("#btnAudioSpeed"),
+  btnAudioAutoNext: $("#btnAudioAutoNext"),
   btnOpenToc: $("#btnOpenToc"),
   tocOverlay: $("#tocOverlay"),
   tocPanel: $("#tocPanel"),
@@ -208,6 +222,7 @@ async function init() {
   bindImportPanel();
   bindCollapsibleBars();
   bindResizer();
+  bindAudioControls();
   bindPinchZoom("A");
   bindSwipeNav($("#scrollA"), "A", false);
   bindSwipeNav($("#scrollB"), "B", true);
@@ -445,22 +460,51 @@ async function openPdfBlob(slot, blob, name, source) {
 
 // Mở PDF lấy trực tiếp từ GitHub (thư mục cfg.pdfPrefix trong repo dữ liệu sách/PDF —
 // mặc định cùng repo với app, hoặc 1 repo riêng nếu đã cấu hình "Repo dữ liệu sách/PDF").
+// Cache-first: nếu file này đã từng mở, hiện NGAY từ bản lưu trên máy, khỏi chờ mạng —
+// vì repo dữ liệu sách thường để Private nên GitHub không cache CDN được, tải chậm hơn
+// repo public. Vẫn âm thầm tải lại phía sau để cập nhật cache cho lần mở kế tiếp.
 async function openPdfFromGithub(relPath, name) {
   const cfg = await Store.getConfig();
   if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
     alert('Chưa cấu hình GitHub — mở "☁" ở góc trên để cấu hình trước.');
     return;
   }
+  const source = { type: "github", path: relPath };
+
+  const cached = await Store.getPdfBlob(relPath).catch(() => null);
+  if (cached && cached.blob && cached.blob.size) {
+    await openPdfBlob("A", cached.blob, name, source);
+    Store.savePdf("A", name, cached.blob, source).catch(() => {});
+    // Không chặn người dùng chờ — âm thầm kiểm tra bản mới nhất, chỉ cập nhật CACHE cho
+    // lần sau (không tự tải lại PDF đang đọc dở, tránh giật hình/mất trang đang xem).
+    refreshCachedPdfInBackground(relPath, name, cfg);
+    return;
+  }
+
   const bcfg = GH.bookRepoCfg(cfg);
   const file = await GH.getBinaryFile(bcfg, GH.fullPath(bcfg, relPath));
   if (!file) throw new Error("Không tìm thấy file trên GitHub.");
   const bytes = file.bytes;
   if (!bytes || !bytes.length) throw new Error("Tải file từ GitHub về nhưng rỗng — thử lại hoặc kiểm tra file trên GitHub.");
-  const source = { type: "github", path: relPath };
   await loadPdfIntoPane("A", bytes.buffer, name, source);
   // Lưu cache blob để mở lại nhanh/offline lần sau, kèm nguồn gốc github.
   const blob = new Blob([bytes], { type: "application/pdf" });
   Store.savePdf("A", name, blob, source).catch(() => {});
+  Store.savePdfBlob(relPath, name, blob).catch(() => {});
+}
+
+async function refreshCachedPdfInBackground(relPath, name, cfg) {
+  try {
+    const bcfg = GH.bookRepoCfg(cfg);
+    const file = await GH.getBinaryFile(bcfg, GH.fullPath(bcfg, relPath));
+    const bytes = file && file.bytes;
+    if (bytes && bytes.length) {
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      Store.savePdfBlob(relPath, name, blob).catch(() => {});
+    }
+  } catch (e) {
+    // Lỗi mạng lúc làm mới nền thì bỏ qua lặng lẽ — đã có bản cache hiển thị rồi.
+  }
 }
 
 function computePdfId(name, source) {
@@ -1095,39 +1139,12 @@ async function showTocChapters(book) {
 }
 
 // ---- Tải & hiển thị 1 chương ----
-async function loadChapter(book, chapter, pageIdx) {
-  state.json.editing = false;
-  els.paneBTitle.textContent = `${book} / ${chapter}`;
-  els.jsonContent.innerHTML = "";
-  els.emptyB.textContent = "Đang tải…";
-  els.emptyB.classList.remove("hidden");
-
-  let data = null;
-  try {
-    const cfg = await Store.getConfig();
-    if (cfg && cfg.owner && cfg.repo && cfg.token) {
-      const bcfg = GH.bookRepoCfg(cfg);
-      const booksPath = cfg.booksPath || "data";
-      const res = await GH.getJSONObject(bcfg, GH.joinPath(booksPath, book, `${chapter}.json`));
-      if (res && res.data) {
-        data = res.data;
-        Store.saveChapter(book, chapter, data).catch(() => {});
-      }
-    }
-  } catch (e) {
-    els.emptyB.textContent = `Lỗi tải từ GitHub: ${e.message}. Thử đọc bản đã lưu tạm trên máy…`;
-  }
-
-  if (!data) {
-    data = await Store.getChapter(book, chapter).catch(() => null);
-  }
-
-  if (!data || !Array.isArray(data.pages) || !data.pages.length) {
-    els.emptyB.textContent = "Không đọc được dữ liệu chương này (chưa có trên GitHub hoặc chưa cache trên máy).";
-    els.pageIndB.textContent = "–";
-    return;
-  }
-
+// Cache-first + âm thầm làm mới: nếu chương này đã từng mở, hiện NGAY bản lưu trên máy
+// (0 độ trễ), rồi mới âm thầm kiểm tra bản mới nhất trên GitHub — có gì khác mới cập nhật
+// lại. Nhờ vậy repo dữ liệu Private (vốn tải chậm hơn public vì GitHub không cache CDN
+// được cho request có xác thực) không còn làm cảm giác "load chậm" mỗi lần mở lại 1
+// chương/trang đã từng đọc.
+async function applyChapterData(book, chapter, data, pageIdx, opts) {
   const pages = data.pages.slice().sort((a, b) => (Number(a.page) || 0) - (Number(b.page) || 0));
   state.json.book = book;
   state.json.chapter = chapter;
@@ -1137,11 +1154,66 @@ async function loadChapter(book, chapter, pageIdx) {
   state.json.activeField = null;
   state.json.activeRange = null;
 
-  await loadJsonMarksForBook(book).catch((e) => console.warn("Tải mark lỗi:", e));
+  if (!opts || opts.loadMarks !== false) {
+    await loadJsonMarksForBook(book).catch((e) => console.warn("Tải mark lỗi:", e));
+  }
 
   els.emptyB.classList.add("hidden");
   renderJsonPage();
   persistJsonUiState();
+}
+
+async function loadChapter(book, chapter, pageIdx) {
+  state.json.editing = false;
+  els.paneBTitle.textContent = `${book} / ${chapter}`;
+
+  // 1) Cache-first: có bản đã lưu trên máy thì hiện ngay lập tức, khỏi chờ mạng.
+  const cached = await Store.getChapter(book, chapter).catch(() => null);
+  const hasCache = !!(cached && Array.isArray(cached.pages) && cached.pages.length);
+  if (hasCache) {
+    await applyChapterData(book, chapter, cached, pageIdx);
+  } else {
+    els.jsonContent.innerHTML = "";
+    els.emptyB.textContent = "Đang tải…";
+    els.emptyB.classList.remove("hidden");
+  }
+
+  // 2) Âm thầm kiểm tra bản mới nhất trên GitHub, có gì khác mới cập nhật lại UI.
+  const cfg = await Store.getConfig();
+  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
+    if (!hasCache) {
+      els.emptyB.textContent = 'Chưa cấu hình GitHub — mở "☁" ở góc trên để cấu hình trước.';
+      els.pageIndB.textContent = "–";
+    }
+    return;
+  }
+  try {
+    const bcfg = GH.bookRepoCfg(cfg);
+    const booksPath = cfg.booksPath || "data";
+    const res = await GH.getJSONObject(bcfg, GH.joinPath(booksPath, book, `${chapter}.json`));
+    const fresh = res && res.data;
+    const freshOk = !!(fresh && Array.isArray(fresh.pages) && fresh.pages.length);
+    if (freshOk) {
+      Store.saveChapter(book, chapter, fresh).catch(() => {});
+      // Người dùng có thể đã lật sang chương khác / đang sửa trong lúc chờ mạng -> bỏ qua.
+      if (state.json.book === book && state.json.chapter === chapter && !state.json.editing) {
+        const isDifferent = !hasCache || JSON.stringify(fresh) !== JSON.stringify(cached);
+        if (isDifferent) {
+          const keepIdx = hasCache ? state.json.pageIdx : pageIdx;
+          await applyChapterData(book, chapter, fresh, keepIdx, { loadMarks: !hasCache });
+        }
+      }
+    } else if (!hasCache) {
+      els.emptyB.textContent = "Không đọc được dữ liệu chương này (chưa có trên GitHub hoặc chưa cache trên máy).";
+      els.pageIndB.textContent = "–";
+    }
+  } catch (e) {
+    if (!hasCache) {
+      els.emptyB.textContent = `Lỗi tải từ GitHub: ${e.message}`;
+      els.pageIndB.textContent = "–";
+    }
+    // Đã có bản cache hiện sẵn trên màn hình rồi thì thôi, khỏi làm phiền bằng lỗi mạng.
+  }
 }
 
 function escapeHtml(s) {
@@ -1210,6 +1282,88 @@ function renderJsonPage() {
   els.jsonContent.innerHTML = html;
   bindJsonMarkClicks();
   $("#scrollB").scrollTop = 0;
+  updateAudioBar(page);
+}
+
+// ---- Audio theo trang (audio/<book>/<file> trên repo dữ liệu sách, tuỳ chọn) ----
+// page.audio = tên file (vd "p12.mp3"), do cột "audio" trong Excel sinh ra. Trang không
+// có audio thì bỏ trống -> thanh audio tự ẩn, không ảnh hưởng gì tới sách cũ chưa có audio.
+
+function updateAudioBar(page) {
+  const j = state.json;
+  const filename = (page.audio || "").trim();
+  const audioEl = els.jsonAudioEl;
+  if (!filename) {
+    audioEl.pause();
+    audioEl.removeAttribute("src");
+    audioEl.load();
+    state.jsonAudio.currentKey = null;
+    els.audioBar.hidden = true;
+    return;
+  }
+  els.audioBar.hidden = false;
+  const key = `${j.book}/${j.chapter}/${filename}`;
+  if (state.jsonAudio.currentKey === key) return; // đã đúng file rồi, khỏi nạp lại
+  state.jsonAudio.currentKey = key;
+  audioEl.pause();
+  audioEl.playbackRate = state.jsonAudio.rate;
+  const cached = state.jsonAudio.cache.get(key);
+  if (cached) {
+    audioEl.src = cached;
+    return;
+  }
+  audioEl.removeAttribute("src");
+  audioEl.load();
+  loadAudioBlob(j.book, filename, key);
+}
+
+async function loadAudioBlob(book, filename, key) {
+  const cfg = await Store.getConfig();
+  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) return;
+  try {
+    const bcfg = GH.bookRepoCfg(cfg);
+    const relPath = GH.joinPath("audio", book, filename);
+    const file = await GH.getBinaryFile(bcfg, GH.fullPath(bcfg, relPath));
+    if (!file) return; // file audio chưa tồn tại trên GitHub, im lặng bỏ qua
+    const ext = (filename.match(/\.([a-z0-9]+)$/i) || [, "mp3"])[1].toLowerCase();
+    const mime = { mp3: "audio/mpeg", m4a: "audio/mp4", aac: "audio/aac", ogg: "audio/ogg", wav: "audio/wav" }[ext] || "audio/mpeg";
+    const url = URL.createObjectURL(new Blob([file.bytes], { type: mime }));
+    state.jsonAudio.cache.set(key, url);
+    // Chỉ gán vào thẻ <audio> nếu người dùng chưa lật sang trang khác trong lúc chờ tải
+    if (state.jsonAudio.currentKey === key) {
+      els.jsonAudioEl.src = url;
+    }
+  } catch (e) {
+    console.error("Lỗi tải audio:", e);
+  }
+}
+
+function bindAudioControls() {
+  const audioEl = els.jsonAudioEl;
+  els.btnAudioBack5.addEventListener("click", () => { audioEl.currentTime = Math.max(0, audioEl.currentTime - 5); });
+  els.btnAudioFwd5.addEventListener("click", () => { audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + 5); });
+  els.btnAudioSpeed.addEventListener("click", () => {
+    const i = AUDIO_RATE_CYCLE.indexOf(state.jsonAudio.rate);
+    state.jsonAudio.rate = AUDIO_RATE_CYCLE[(i + 1) % AUDIO_RATE_CYCLE.length];
+    audioEl.playbackRate = state.jsonAudio.rate;
+    els.btnAudioSpeed.textContent = `${state.jsonAudio.rate}x`;
+  });
+  els.btnAudioAutoNext.addEventListener("click", () => {
+    state.jsonAudio.autoNext = !state.jsonAudio.autoNext;
+    els.btnAudioAutoNext.classList.toggle("active", state.jsonAudio.autoNext);
+  });
+  audioEl.addEventListener("ended", () => {
+    if (!state.jsonAudio.autoNext) return;
+    const j = state.json;
+    if (j.pageIdx < j.pages.length - 1) {
+      j.pageIdx++;
+      renderJsonPage();
+      persistJsonUiState();
+      // Trình duyệt thường vẫn cho phát tiếp không cần thao tác mới của người dùng
+      // vì đã có 1 lần bấm Play/tương tác trước đó trong audio này.
+      setTimeout(() => { els.jsonAudioEl.play().catch(() => {}); }, 150);
+    }
+  });
 }
 
 // ---- Highlight/gạch chân trong Tóm tắt & Bản dịch (không áp dụng cho Phân tích) ----
@@ -1381,6 +1535,10 @@ function renderJsonEditForm() {
   els.pageIndB.textContent = `${j.pageIdx + 1}/${j.pages.length} (tr.${page.page ?? "?"}) — đang sửa`;
 
   let html = "";
+  html += `<div class="json-section">
+    <div class="json-section-title">Audio (đang sửa)</div>
+    <input type="text" class="edit-translation" id="editAudio" placeholder="Tên file trong audio/${escapeHtml(j.book || "")}/… (để trống nếu trang này không có audio)" value="${escapeHtml(page.audio || "")}">
+  </div>`;
   if (j.mode === "summary" || j.mode === "all") {
     html += `<div class="json-section">
       <div class="json-section-title">Tóm tắt (đang sửa)</div>
@@ -1435,6 +1593,8 @@ async function saveJsonEdits() {
 
   const j = state.json;
   const page = j.pages[j.pageIdx];
+  const audioInput = $("#editAudio");
+  if (audioInput) page.audio = audioInput.value.trim();
   if (j.mode === "summary" || j.mode === "all") {
     const taSum = $("#editSummary");
     if (taSum) page.summary = taSum.value;

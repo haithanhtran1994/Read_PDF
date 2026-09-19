@@ -19,7 +19,8 @@
                      popup nhận diện Kanji — xem js/kanji.js. Quét lại khi bấm "↻ Làm mới".)
 */
 const DB_NAME = "pdf_dual_reader_db";
-const DB_VERSION = 6;
+const DB_VERSION = 7;
+const MAX_PDF_CACHE_ENTRIES = 6; // giữ tối đa 6 PDF gần nhất trong cache offline
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -40,6 +41,10 @@ function openDB() {
       if (!db.objectStoreNames.contains("progress")) db.createObjectStore("progress");
       // cache dữ liệu tra cứu (gom từ toàn bộ sách) cho popup nhận diện Kanji
       if (!db.objectStoreNames.contains("dictIndex")) db.createObjectStore("dictIndex");
+      // cache blob PDF theo đường dẫn GitHub (mở lại PDF đã từng xem là thấy ngay, khỏi
+      // chờ tải lại từ mạng) — khác với "pdfs" ở trên (chỉ nhớ ĐÚNG 1 file/pane để phục
+      // hồi khi mở lại app). Giới hạn số lượng, xem MAX_PDF_CACHE_ENTRIES bên dưới.
+      if (!db.objectStoreNames.contains("pdfCache")) db.createObjectStore("pdfCache");
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -129,4 +134,20 @@ const Store = {
 
   saveDictIndex: (data) => idbSet("dictIndex", "all", data || null),
   getDictIndex: () => idbGet("dictIndex", "all"),
+
+  // Cache blob PDF theo đường dẫn GitHub — mở lại 1 PDF đã từng xem là hiện NGAY LẬP TỨC
+  // (đọc từ máy), không phải chờ tải lại từ GitHub mỗi lần. Giới hạn MAX_PDF_CACHE_ENTRIES
+  // file, cũ nhất bị dọn khi vượt quá (tránh phình IndexedDB vì PDF thường nặng vài MB).
+  getPdfBlob: (path) => idbGet("pdfCache", path),
+  async savePdfBlob(path, name, blob) {
+    await idbSet("pdfCache", path, { path, name, blob, cachedAt: Date.now() });
+    try {
+      const all = await idbGetAll("pdfCache");
+      if (all.length > MAX_PDF_CACHE_ENTRIES) {
+        all.sort((a, b) => (a.cachedAt || 0) - (b.cachedAt || 0));
+        const stale = all.slice(0, all.length - MAX_PDF_CACHE_ENTRIES);
+        for (const it of stale) await idbDelete("pdfCache", it.path);
+      }
+    } catch (e) { /* dọn cache lỗi thì thôi, không quan trọng bằng việc lưu được file mới */ }
+  },
 };

@@ -306,6 +306,15 @@ button { font-family: inherit; cursor: pointer; }
 .mode-btn.edit-btn { flex: 0 0 34px; font-size: 14px; padding: 6px 0; }
 .json-hl-swatches { display: flex; gap: 3px; flex: 0 0 auto; }
 .json-hl-swatches .swatch { width: 18px; height: 18px; }
+/* ---- Thanh audio theo trang (audio/<sách>/<file> trên repo dữ liệu) ---- */
+.audio-bar {
+  display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: var(--paper-raised);
+  border-bottom: 1px solid var(--line); flex-shrink: 0;
+}
+.audio-bar[hidden] { display: none; }
+.audio-bar audio { flex: 1 1 auto; min-width: 0; height: 32px; }
+.audio-bar .mode-btn.hl-act-mini { width: auto; padding: 6px 8px; }
+.audio-bar .mode-btn.active { background: var(--aizome); color: #fff; border-color: var(--aizome); }
 /* Nút chọn màu đầy đủ (thay cho 4 ô màu cố định) — bấm vào mở bảng màu hệ thống của trình
    duyệt/điện thoại, chọn được bất kỳ màu nào, không chỉ 4 màu dựng sẵn. */
 .color-pick-input {
