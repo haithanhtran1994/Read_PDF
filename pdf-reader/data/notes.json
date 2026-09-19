@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": "n_1789823362165_csjbn",
+    "text": "derive",
+    "vocab": "",
+    "grammar": "",
+    "note": "Động từ",
+    "translation": "Nhận được từ, lấy được từ",
+    "source": "02_2_combinational_logic_design.pdf",
+    "slot": "A",
+    "page": 4,
+    "createdAt": "2026-09-19T13:09:22.165Z",
+    "synced": false
+  }
+]
