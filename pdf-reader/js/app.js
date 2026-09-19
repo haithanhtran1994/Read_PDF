@@ -223,6 +223,7 @@ async function init() {
   bindCollapsibleBars();
   bindResizer();
   bindAudioControls();
+  bindKeyboardPageNav();
   bindPinchZoom("A");
   bindSwipeNav($("#scrollA"), "A", false);
   bindSwipeNav($("#scrollB"), "B", true);
@@ -1055,6 +1056,27 @@ function handleJsonNav(act) {
   if (!j.pages.length) return;
   if (act === "prev" && j.pageIdx > 0) { j.pageIdx--; renderJsonPage(); persistJsonUiState(); }
   if (act === "next" && j.pageIdx < j.pages.length - 1) { j.pageIdx++; renderJsonPage(); persistJsonUiState(); }
+}
+
+// Bàn phím ← / → (dùng trên PC/Edge — không vuốt trái phải được như trên điện thoại):
+// chuyển trang ĐỒNG THỜI cả PDF (pane A) lẫn JSON (pane B), y hệt hiệu ứng vuốt trái/phải
+// trên Safari/điện thoại. Chỉ gọi lại 2 hàm điều hướng đã có sẵn, không đổi logic của
+// từng bên; bên nào đang trống/hết trang thì hàm gốc tự bỏ qua, không lỗi gì.
+function bindKeyboardPageNav() {
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return; // không đụng tổ hợp phím khác
+    const el = document.activeElement;
+    const tag = el && el.tagName;
+    // Đang gõ chữ ở đâu đó (ô tìm kiếm, ô sửa nội dung, ô nhập tên sách...) thì để phím
+    // mũi tên làm đúng việc của nó (di chuyển con trỏ chữ) — không cướp qua chuyển trang.
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el && el.isContentEditable)) return;
+    if (state.json.editing) return; // đang sửa nội dung trang thì thôi, khỏi chuyển lung tung
+    e.preventDefault();
+    const act = e.key === "ArrowLeft" ? "prev" : "next";
+    handlePaneNav("A", act);
+    handleJsonNav(act);
+  });
 }
 
 // ---- Mục lục (chọn book -> chapter) ----
