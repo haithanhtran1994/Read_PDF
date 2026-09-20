@@ -21,12 +21,12 @@
   },
   "gh:pdf/Digital_Design_RISCV/02_2_combinational_logic_design.pdf": {
     "name": "02_2_combinational_logic_design.pdf",
-    "page": 5,
+    "page": 4,
     "numPages": 53,
     "source": {
       "type": "github",
       "path": "pdf/Digital_Design_RISCV/02_2_combinational_logic_design.pdf"
     },
-    "updatedAt": "2026-09-20T01:20:39.697Z"
+    "updatedAt": "2026-09-20T01:22:36.494Z"
   }
 }
