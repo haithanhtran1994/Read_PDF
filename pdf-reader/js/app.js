@@ -66,6 +66,7 @@ const state = {
     currentKey: null,   // key của file audio đang gán vào thẻ <audio> hiện tại
     rate: 1,            // tốc độ phát hiện tại
     autoNext: false,    // tự phát audio trang kế tiếp khi trang hiện tại phát xong
+    repeat: false,      // lặp lại audio trang hiện tại (dùng thẻ <audio loop> có sẵn của trình duyệt)
   },
 };
 
@@ -110,6 +111,7 @@ const els = {
   btnAudioBack5: $("#btnAudioBack5"),
   btnAudioFwd5: $("#btnAudioFwd5"),
   btnAudioSpeed: $("#btnAudioSpeed"),
+  btnAudioRepeat: $("#btnAudioRepeat"),
   btnAudioAutoNext: $("#btnAudioAutoNext"),
   btnOpenToc: $("#btnOpenToc"),
   tocOverlay: $("#tocOverlay"),
@@ -1329,6 +1331,7 @@ function updateAudioBar(page) {
   state.jsonAudio.currentKey = key;
   audioEl.pause();
   audioEl.playbackRate = state.jsonAudio.rate;
+  audioEl.loop = state.jsonAudio.repeat; // giữ đúng trạng thái lặp đã chọn khi sang trang khác
   const cached = state.jsonAudio.cache.get(key);
   if (cached) {
     audioEl.src = cached;
@@ -1373,6 +1376,12 @@ function bindAudioControls() {
   els.btnAudioAutoNext.addEventListener("click", () => {
     state.jsonAudio.autoNext = !state.jsonAudio.autoNext;
     els.btnAudioAutoNext.classList.toggle("active", state.jsonAudio.autoNext);
+  });
+  els.btnAudioRepeat.addEventListener("click", () => {
+    state.jsonAudio.repeat = !state.jsonAudio.repeat;
+    audioEl.loop = state.jsonAudio.repeat; // dùng thuộc tính loop có sẵn của <audio>, trình
+    // duyệt tự lặp lại mượt, không cần tự bắt sự kiện "ended" rồi tua lại bằng tay.
+    els.btnAudioRepeat.classList.toggle("active", state.jsonAudio.repeat);
   });
   audioEl.addEventListener("ended", () => {
     if (!state.jsonAudio.autoNext) return;
@@ -2318,29 +2327,43 @@ async function submitAddNote() {
     return;
   }
 
-  const pane = state.panes[state.activeSlot] || {};
-  const note = {
-    id: `n_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    text: state.activeText,
-    vocab: els.addVocab.value.trim(),
-    grammar: els.addGrammar.value.trim(),
-    note: els.addNote.value.trim(),
-    translation: els.addTranslation.value.trim(),
-    source: pane.name || null,
-    slot: state.activeSlot,
-    page: state.activePage,
-    createdAt: new Date().toISOString(),
-    synced: false,
-  };
+  // Ghi thẳng vào mục "Phân tích" (analysis) của ĐÚNG trang JSON đang mở bên pane B —
+  // không lưu ra data/notes.json riêng như trước nữa, để hiện ngay lập tức bên khung
+  // JSON và dictionary-app quét được luôn (dictionary-app vốn đã đọc field "analysis").
+  const j = state.json;
+  const page = j.pages[j.pageIdx];
+  if (!j.book || !j.chapter || !page) {
+    els.addStatus.textContent = 'Chưa mở trang JSON nào bên phải — mở 1 chương trước rồi thêm.';
+    return;
+  }
 
-  await Store.saveNote(note);
+  const phrase = (state.activeText || "").trim();
+  const explainParts = [];
+  if (els.addVocab.value.trim()) explainParts.push(`Từ vựng: ${els.addVocab.value.trim()}`);
+  if (els.addGrammar.value.trim()) explainParts.push(`Ngữ pháp: ${els.addGrammar.value.trim()}`);
+  if (els.addNote.value.trim()) explainParts.push(`Chú ý: ${els.addNote.value.trim()}`);
+  if (els.addTranslation.value.trim()) explainParts.push(`Dịch nghĩa: ${els.addTranslation.value.trim()}`);
+  const explain = explainParts.join("\n");
+  // Chọn nhẹ chưa 1 từ (không dấu cách) -> coi là "vocab", nhiều từ -> coi là "phrase".
+  // Chỉ là mặc định hợp lý ban đầu — muốn đổi loại chính xác hơn thì sửa trực tiếp trong
+  // file JSON trên GitHub (app hiện chưa có ô chọn loại khi sửa mục phân tích).
+  const type = phrase && !/\s/.test(phrase) ? "vocab" : "phrase";
+  const newItem = { type, phrase, explain };
+
+  page.analysis = Array.isArray(page.analysis) ? page.analysis : [];
+  page.analysis.push(newItem);
 
   els.addStatus.textContent = "Đang đẩy lên GitHub…";
   $("#btnAddSubmit").disabled = true;
   try {
-    await GH.appendNoteToRepo(cfg, cfg.notesPath || "data/notes.json", note);
-    note.synced = true;
-    await Store.saveNote(note);
+    const bcfg = GH.bookRepoCfg(cfg);
+    const booksPath = cfg.booksPath || "data";
+    const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
+    const raw = j.raw || { pages: j.pages };
+    raw.pages = j.pages;
+    await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2),
+      `Thêm phân tích '${phrase}' vào ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1} (từ PDF)`);
+    Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
     try {
       wrapRangeNodes(state.activeRange, () => {
         const el = document.createElement("span");
@@ -2349,10 +2372,13 @@ async function submitAddNote() {
       });
     } catch (e) { /* range có thể đã đổi trang, bỏ qua phần đánh dấu trực quan */ }
     window.getSelection().removeAllRanges();
-    els.addStatus.textContent = "Đã thêm ✓";
+    // Nếu đang xem đúng chế độ có hiện "Phân tích" thì render lại luôn để thấy ngay mục vừa thêm.
+    if (!state.json.editing) renderJsonPage();
+    els.addStatus.textContent = "Đã thêm vào Phân tích ✓";
     setTimeout(closeAddPanel, 700);
   } catch (e) {
-    els.addStatus.textContent = `Lưu máy rồi nhưng đẩy GitHub lỗi: ${e.message}. Bấm "Thêm" để thử lại.`;
+    page.analysis.pop(); // đẩy lỗi thì rút lại mục vừa thêm, tránh lệch giữa hiển thị và GitHub
+    els.addStatus.textContent = `Đẩy GitHub lỗi: ${e.message}. Bấm "Thêm" để thử lại.`;
   } finally {
     $("#btnAddSubmit").disabled = false;
   }
