@@ -1189,6 +1189,13 @@ async function applyChapterData(book, chapter, data, pageIdx, opts) {
 
 async function loadChapter(book, chapter, pageIdx) {
   state.json.editing = false;
+  // Gán ngay từ đầu (kể cả khi CHƯA có cache) — để lát nữa, lúc bản mới từ GitHub tải
+  // xong, so sánh "người dùng có còn đang đứng ở đúng chương này không" mới đúng. Trước
+  // đây chỉ gán trong applyChapterData (chạy sau khi có cache) nên lần mở 1 file mới
+  // (chưa có cache) bị so sánh lệch, âm thầm huỷ không hiển thị — phải mở lại lần 2
+  // (lúc đó đã có cache từ lần 1) mới thấy.
+  state.json.book = book;
+  state.json.chapter = chapter;
   els.paneBTitle.textContent = `${book} / ${chapter}`;
 
   // 1) Cache-first: có bản đã lưu trên máy thì hiện ngay lập tức, khỏi chờ mạng.
