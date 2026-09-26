@@ -21,9 +21,25 @@
 const DB_NAME = "pdf_dual_reader_db";
 const DB_VERSION = 7;
 const MAX_PDF_CACHE_ENTRIES = 6; // giữ tối đa 6 PDF gần nhất trong cache offline
+const IDB_TIMEOUT_MS = 4000; // quá thời gian này coi như IndexedDB bị treo (bug WebKit iOS sau
+                              // khi app đứng nền lâu) — thà báo "chưa đọc được" còn hơn treo mãi
+
+// Chạy đua 1 promise với đồng hồ đếm ngược — quá hạn thì coi như lỗi (dù promise gốc
+// vẫn có thể tự "sống lại" sau đó, ta không chờ nữa, để tránh treo cả app vô thời hạn).
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label || "Thao tác"} quá lâu không phản hồi (nghi do IndexedDB bị treo sau khi app đứng nền lâu trên iOS — thử tải lại trang, hoặc tắt hẳn app trong App Switcher rồi mở lại)`));
+    }, ms);
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); }
+    );
+  });
+}
 
 function openDB() {
-  return new Promise((resolve, reject) => {
+  return withTimeout(new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -48,7 +64,7 @@ function openDB() {
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
-  });
+  }), IDB_TIMEOUT_MS, "Mở IndexedDB");
 }
 
 async function idbGet(store, key) {
@@ -102,7 +118,11 @@ async function idbGetAll(store) {
 }
 
 const Store = {
-  getConfig: () => idbGet("config", "github"),
+  // .catch(() => null): nếu IndexedDB bị treo (xem withTimeout ở trên) thì coi như
+  // "chưa đọc được cấu hình" thay vì làm hàm gọi nó bị treo/chết lặng theo — mọi nơi gọi
+  // Store.getConfig() đều đã có sẵn xử lý cho trường hợp cfg rỗng (báo "Chưa cấu hình
+  // GitHub"), nên chỉ cần sửa đúng 1 chỗ này là toàn bộ nút bấm được hưởng lợi.
+  getConfig: () => idbGet("config", "github").catch(() => null),
   saveConfig: (cfg) => idbSet("config", "github", cfg),
 
   getUiState: () => idbGet("state", "ui"),

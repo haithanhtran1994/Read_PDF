@@ -86,6 +86,95 @@ function logSync(msg, cls) {
   els.syncLog.scrollTop = els.syncLog.scrollHeight;
 }
 
+// Gộp repo sách chính (bookRepoCfg) + các repo phụ khai trong "Các repo dữ liệu sách
+// KHÁC" (mỗi dòng "username/tên-repo", có thể thêm "@branch" nếu repo đó khác branch
+// mặc định) thành 1 danh sách cfg để quét lần lượt — dùng chung branch/token/booksPath
+// của repo sách chính cho các repo phụ, trừ khi dòng đó tự khai branch riêng.
+function listAllBookRepoCfgs(cfg) {
+  const mainBcfg = GH.bookRepoCfg(cfg);
+  const extraLines = (cfg.extraBookRepos || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  const extraCfgs = extraLines.map((line) => {
+    let ownerRepo = line;
+    let branch = mainBcfg.branch;
+    const atIdx = line.indexOf("@");
+    if (atIdx !== -1) {
+      ownerRepo = line.slice(0, atIdx).trim();
+      branch = line.slice(atIdx + 1).trim() || branch;
+    }
+    const slashIdx = ownerRepo.indexOf("/");
+    const owner = slashIdx !== -1 ? ownerRepo.slice(0, slashIdx).trim() : mainBcfg.owner;
+    const repo = (slashIdx !== -1 ? ownerRepo.slice(slashIdx + 1) : ownerRepo).trim();
+    return { ...mainBcfg, owner, repo, branch };
+  }).filter((r) => r.repo);
+  return [mainBcfg, ...extraCfgs];
+}
+
+// Quét 1 repo sách (danh sách sách -> danh sách chương -> gộp grammar/analysis vào
+// "merged"). Tách riêng hàm này để gọi lặp lại cho từng repo trong danh sách.
+// oldCache: cache sha+entries của lần đồng bộ TRƯỚC (chỉ đọc, để so sánh) — newCache:
+// cache đang xây cho lần này (chỉ chứa đúng chương còn tồn tại, chương nào bị xoá trên
+// GitHub sẽ tự "rớt" khỏi cache, không tồn đọng mãi).
+async function scanBookRepo(repoCfg, booksPath, merged, oldCache, newCache) {
+  logSync(`Đang lấy danh sách sách trong "${booksPath}/" (repo ${repoCfg.owner}/${repoCfg.repo})...`);
+  let bookItems;
+  try {
+    bookItems = (await GH.listDir(repoCfg, booksPath)).filter((it) => it.type === "dir");
+  } catch (e) {
+    logSync(`Không đọc được repo ${repoCfg.owner}/${repoCfg.repo}: ${e.message}`, "err");
+    return;
+  }
+  if (!bookItems.length) {
+    logSync(`Không tìm thấy sách nào trong repo ${repoCfg.owner}/${repoCfg.repo}.`, "err");
+  }
+
+  for (const bookItem of bookItems) {
+    const book = bookItem.name;
+    logSync(`— Sách "${book}": đang lấy danh sách chương...`);
+    const chapterItems = (await GH.listDir(repoCfg, GH.joinPath(booksPath, book)))
+      .filter((it) => it.type === "file" && /\.json$/i.test(it.name) && it.name.toLowerCase() !== "mark.json");
+
+    for (const chFile of chapterItems) {
+      const chapter = chFile.name.replace(/\.json$/i, "");
+      const cacheKey = `${repoCfg.owner}/${repoCfg.repo}/${book}/${chapter}`;
+      const cached = oldCache[cacheKey];
+      let entries;
+
+      if (cached && cached.sha === chFile.sha) {
+        // sha không đổi từ lần đồng bộ trước -> chắc chắn nội dung không đổi, khỏi tải
+        // lại cho tốn thời gian/băng thông, dùng thẳng kết quả đã phân tích sẵn.
+        entries = cached.entries;
+        logSync(`   ${chapter}: không đổi (dùng cache), ${entries.length} mục`, "ok");
+      } else {
+        try {
+          const res = await GH.getJSONObject(repoCfg, GH.joinPath(booksPath, book, chFile.name));
+          const data = res ? res.data : null;
+          const pages = (data && Array.isArray(data.pages)) ? data.pages : [];
+          entries = [];
+          pages.forEach((page) => {
+            const pageNum = page.page;
+            (Array.isArray(page.grammar) ? page.grammar : []).forEach((it) => {
+              if (it && it.phrase) entries.push({ type: "grammar", phrase: it.phrase, explain: it.explain || "", page: pageNum });
+            });
+            (Array.isArray(page.analysis) ? page.analysis : []).forEach((it) => {
+              if (it && it.phrase) entries.push({ type: TYPE_LABEL[it.type] ? it.type : "phrase", phrase: it.phrase, explain: it.explain || "", page: pageNum });
+            });
+          });
+          logSync(`   ${chapter}: ${pages.length} trang, ${entries.length} mục`, "ok");
+        } catch (e) {
+          logSync(`   ${chapter}: lỗi đọc — ${e.message}`, "err");
+          // Giữ tạm bản cache cũ (nếu có) cho chương này ở lần đồng bộ kế tiếp, thay vì
+          // làm mất hẳn dữ liệu tra cứu của chương này chỉ vì 1 lần lỗi mạng thoáng qua.
+          if (cached) newCache[cacheKey] = cached;
+          continue;
+        }
+      }
+
+      newCache[cacheKey] = { sha: chFile.sha, entries };
+      entries.forEach((it) => addEntry(merged, it.type, it.phrase, it.explain, book, chapter, it.page, repoCfg));
+    }
+  }
+}
+
 async function syncFromGithub() {
   const cfg = await Store.getConfig();
   if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
@@ -98,9 +187,11 @@ async function syncFromGithub() {
   els.syncPanel.classList.remove("hidden");
   els.btnSync.disabled = true;
 
-  const bcfg = GH.bookRepoCfg(cfg);
   const booksPath = cfg.booksPath || "data";
+  const repoCfgs = listAllBookRepoCfgs(cfg);
   const merged = new Map(); // key -> {type, phrase, explain, sources:[]}
+  const oldCache = (await Store.getChapterCache().catch(() => null)) || {};
+  const newCache = {};
 
   try {
     logSync(`Đang tải danh sách mục đã ẩn (dùng chung trên GitHub)...`);
@@ -114,47 +205,13 @@ async function syncFromGithub() {
     }
     updateHiddenCount();
 
-    logSync(`Đang lấy danh sách sách trong "${booksPath}/" (repo ${bcfg.owner}/${bcfg.repo})...`);
-    const bookItems = (await GH.listDir(bcfg, booksPath)).filter((it) => it.type === "dir");
-    if (!bookItems.length) {
-      logSync("Không tìm thấy sách nào.", "err");
+    if (repoCfgs.length > 1) {
+      logSync(`Sẽ quét ${repoCfgs.length} repo dữ liệu sách.`);
     }
-
-    for (const bookItem of bookItems) {
-      const book = bookItem.name;
-      logSync(`— Sách "${book}": đang lấy danh sách chương...`);
-      const chapterItems = (await GH.listDir(bcfg, GH.joinPath(booksPath, book)))
-        .filter((it) => it.type === "file" && /\.json$/i.test(it.name));
-
-      for (const chFile of chapterItems) {
-        const chapter = chFile.name.replace(/\.json$/i, "");
-        try {
-          const res = await GH.getJSONObject(bcfg, GH.joinPath(booksPath, book, chFile.name));
-          const data = res ? res.data : null;
-          const pages = (data && Array.isArray(data.pages)) ? data.pages : [];
-          let count = 0;
-          for (const page of pages) {
-            const pageNum = page.page;
-            const grammarItems = Array.isArray(page.grammar) ? page.grammar : [];
-            const analysisItems = Array.isArray(page.analysis) ? page.analysis : [];
-            grammarItems.forEach((it) => {
-              if (!it || !it.phrase) return;
-              addEntry(merged, "grammar", it.phrase, it.explain || "", book, chapter, pageNum);
-              count++;
-            });
-            analysisItems.forEach((it) => {
-              if (!it || !it.phrase) return;
-              const type = TYPE_LABEL[it.type] ? it.type : "phrase";
-              addEntry(merged, type, it.phrase, it.explain || "", book, chapter, pageNum);
-              count++;
-            });
-          }
-          logSync(`   ${chapter}: ${pages.length} trang, ${count} mục`, "ok");
-        } catch (e) {
-          logSync(`   ${chapter}: lỗi đọc — ${e.message}`, "err");
-        }
-      }
+    for (const repoCfg of repoCfgs) {
+      await scanBookRepo(repoCfg, booksPath, merged, oldCache, newCache);
     }
+    await Store.saveChapterCache(newCache).catch(() => {});
 
     let entries = Array.from(merged.values());
     entries.forEach((e) => { e.key = makeEntryKey(e.type, e.phrase, e.explain); });
@@ -164,7 +221,10 @@ async function syncFromGithub() {
     entries = entries.filter((e) => !hiddenKeySet.has(e.key));
     const hiddenSkipped = beforeCount - entries.length;
 
-    const books = Array.from(new Set(bookItems.map((b) => b.name))).sort();
+    // "bookItems" chỉ tồn tại bên trong scanBookRepo (không lộ ra đây) — suy ra danh sách
+    // sách trực tiếp từ các "sources" còn lại sau khi lọc mục đã ẩn, để không bị lỗi
+    // "bookItems is not defined" (khiến toàn bộ đồng bộ luôn báo lỗi ở bước cuối trước đây).
+    const books = Array.from(new Set(entries.flatMap((e) => e.sources.map((s) => s.book)))).sort();
     state.entries = entries;
     state.books = books;
     state.syncedAt = new Date().toISOString();
@@ -183,15 +243,19 @@ async function syncFromGithub() {
   }
 }
 
-function addEntry(merged, type, phrase, explain, book, chapter, page) {
+function addEntry(merged, type, phrase, explain, book, chapter, page, repoCfg) {
   const key = makeEntryKey(type, phrase, explain);
   let entry = merged.get(key);
   if (!entry) {
     entry = { type, phrase: phrase.trim(), explain: (explain || "").trim(), sources: [] };
     merged.set(key, entry);
   }
-  const src = { book, chapter, page };
-  const dup = entry.sources.some((s) => s.book === book && s.chapter === chapter && s.page === page);
+  // Lưu kèm đúng repo (owner/repo/branch) mà nguồn này nằm trong đó — cần thiết khi
+  // sách chia ra nhiều repo, để lúc "Sửa" ghi ngược lại đúng repo, không ghi nhầm sang
+  // repo sách chính.
+  const src = { book, chapter, page, repoOwner: repoCfg.owner, repoName: repoCfg.repo, repoBranch: repoCfg.branch };
+  const dup = entry.sources.some((s) => s.book === book && s.chapter === chapter && s.page === page
+    && s.repoOwner === repoCfg.owner && s.repoName === repoCfg.repo);
   if (!dup) entry.sources.push(src);
 }
 
@@ -398,12 +462,20 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
     return false;
   }
 
-  const bcfg = GH.bookRepoCfg(cfg);
+  const bcfgBase = GH.bookRepoCfg(cfg); // dùng chung token/branch mặc định cho các repo
   const booksPath = cfg.booksPath || "data";
-  const byChapter = new Map(); // "book/chapter" -> { book, chapter, pages:Set }
+  const byChapter = new Map(); // "owner/repo/book/chapter" -> { repoCfg, book, chapter, pages:Set }
   entry.sources.forEach((s) => {
-    const k = `${s.book}/${s.chapter}`;
-    if (!byChapter.has(k)) byChapter.set(k, { book: s.book, chapter: s.chapter, pages: new Set() });
+    const owner = s.repoOwner || bcfgBase.owner;
+    const repo = s.repoName || bcfgBase.repo;
+    const branch = s.repoBranch || bcfgBase.branch;
+    const k = `${owner}/${repo}/${s.book}/${s.chapter}`;
+    if (!byChapter.has(k)) {
+      byChapter.set(k, {
+        repoCfg: { ...bcfgBase, owner, repo, branch },
+        book: s.book, chapter: s.chapter, pages: new Set(),
+      });
+    }
     byChapter.get(k).pages.add(s.page);
   });
 
@@ -411,18 +483,18 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
   const oldExplainNorm = normalize(entry.explain);
   let totalChanged = 0;
 
-  for (const { book, chapter, pages } of byChapter.values()) {
+  for (const { repoCfg, book, chapter, pages } of byChapter.values()) {
     const relPath = GH.joinPath(booksPath, book, `${chapter}.json`);
-    statusEl.textContent = `Đang cập nhật ${book}/${chapter}...`;
+    statusEl.textContent = `Đang cập nhật ${repoCfg.owner}/${repoCfg.repo}: ${book}/${chapter}...`;
     let res;
     try {
-      res = await GH.getJSONObject(bcfg, relPath);
+      res = await GH.getJSONObject(repoCfg, relPath);
     } catch (e) {
-      statusEl.textContent = `Lỗi đọc ${relPath}: ${e.message}`;
+      statusEl.textContent = `Lỗi đọc ${relPath} (repo ${repoCfg.owner}/${repoCfg.repo}): ${e.message}`;
       return false;
     }
     if (!res || !res.data) {
-      statusEl.textContent = `Không tìm thấy ${relPath} trên GitHub — dừng lại, chưa ghi gì thêm.`;
+      statusEl.textContent = `Không tìm thấy ${relPath} trên repo ${repoCfg.owner}/${repoCfg.repo} — dừng lại, chưa ghi gì thêm.`;
       return false;
     }
     const data = res.data;
@@ -443,15 +515,15 @@ async function saveEntryEdit(entry, newPhrase, newExplain, statusEl) {
       });
     });
     if (!changed) {
-      logSync(`Sửa: không thấy mục khớp trong ${relPath} (có thể đã đổi từ nơi khác) — bỏ qua file này.`, "err");
+      logSync(`Sửa: không thấy mục khớp trong ${relPath} (repo ${repoCfg.owner}/${repoCfg.repo}, có thể đã đổi từ nơi khác) — bỏ qua file này.`, "err");
       continue;
     }
     try {
-      await GH.putTextFile(bcfg, relPath, JSON.stringify(data, null, 2), res.sha,
+      await GH.putTextFile(repoCfg, relPath, JSON.stringify(data, null, 2), res.sha,
         `Sửa "${TYPE_LABEL[entry.type] || entry.type}" '${newPhrase}' (từ dictionary-app)`);
       totalChanged += changed;
     } catch (e) {
-      statusEl.textContent = `Ghi ${relPath} lỗi: ${e.message}`;
+      statusEl.textContent = `Ghi ${relPath} (repo ${repoCfg.owner}/${repoCfg.repo}) lỗi: ${e.message}`;
       return false;
     }
   }
@@ -621,6 +693,7 @@ function openGithubConfig() {
     $("#cfgBookRepo").value = cfg.bookRepo || "";
     $("#cfgBookBranch").value = cfg.bookBranch || "";
     $("#cfgBookToken").value = cfg.bookToken || "";
+    $("#cfgExtraBookRepos").value = cfg.extraBookRepos || "";
     els.githubOverlay.classList.remove("hidden");
     els.githubPanel.classList.remove("hidden");
   })();
@@ -649,6 +722,9 @@ function bindGithubConfig() {
       bookRepo: $("#cfgBookRepo").value.trim(),
       bookBranch: $("#cfgBookBranch").value.trim(),
       bookToken: $("#cfgBookToken").value.trim(),
+      // Danh sách repo sách KHÁC (sách chia ra nhiều repo private vì giới hạn dung
+      // lượng) — mỗi dòng "username/tên-repo", dùng chung branch/token/booksPath ở trên.
+      extraBookRepos: $("#cfgExtraBookRepos").value.trim(),
     };
     if (!cfg.owner || !cfg.repo || !cfg.token) {
       alert("Cần nhập ít nhất username, tên repo và token.");

@@ -4,7 +4,7 @@
    của danh sách "đã ẩn" là 1 file JSON dùng chung trên GitHub (xem hiddenPath trong cấu hình),
    để mở từ nhiều thiết bị đều thấy đồng bộ. */
 const DB_NAME = "dict_lookup_db";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -14,6 +14,11 @@ function openDB() {
       if (!db.objectStoreNames.contains("config")) db.createObjectStore("config");
       if (!db.objectStoreNames.contains("cache")) db.createObjectStore("cache");
       if (!db.objectStoreNames.contains("hidden")) db.createObjectStore("hidden");
+      // Cache theo từng chương ("owner/repo/book/chapter" -> {sha, entries}) để lần đồng
+      // bộ sau chỉ cần tải lại đúng những chương ĐÃ ĐỔI (so sha lấy từ danh sách thư mục,
+      // miễn phí, không tốn request riêng) — sách càng nhiều, đồng bộ càng nhanh dần thay
+      // vì càng chậm dần.
+      if (!db.objectStoreNames.contains("chapterCache")) db.createObjectStore("chapterCache");
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -50,4 +55,9 @@ const Store = {
   // list: mảng { key, type, phrase, explain } của những mục đã bị xóa trên app này
   getHidden: () => idbGet("hidden", "list"),
   saveHidden: (list) => idbSet("hidden", "list", list),
+
+  // { "owner/repo/book/chapter": { sha, entries: [...] } } — dùng để bỏ qua tải lại
+  // những chương chưa đổi sha khi đồng bộ (xem scanBookRepo trong app.js).
+  getChapterCache: () => idbGet("chapterCache", "all"),
+  saveChapterCache: (map) => idbSet("chapterCache", "all", map || {}),
 };

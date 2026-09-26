@@ -42,6 +42,7 @@
     <div class="topbar-title">PDF Dual Reader</div>
     <div class="topbar-actions">
       <button id="btnImport" class="icon-btn" aria-label="Nhập dữ liệu JSON từ máy & đẩy lên GitHub" title="Nhập & đẩy dữ liệu JSON lên GitHub">⇪</button>
+      <button id="btnOpenDict" class="icon-btn" aria-label="Tra cứu từ điển" title="Mở Từ điển (dictionary-app) dạng popup">🔤</button>
       <button id="btnLayout" class="icon-btn" aria-label="Đổi bố cục" title="Đổi bố cục chia đôi">⬓</button>
       <button id="btnSwapPanes" class="icon-btn" aria-label="Đổi 2 bên cho nhau" title="Đổi 2 bên cho nhau (đổi vị trí, không đổi bố cục)">⇄</button>
       <button id="btnGithubStatus" class="icon-btn" aria-label="Cấu hình GitHub" data-connected="false" title="Cấu hình GitHub">☁</button>
@@ -299,6 +300,17 @@
   <div id="outlineStatus" class="gh-hint"></div>
 </div>
 
+<!-- Từ điển (nhúng dictionary-app dạng popup, cùng domain nên nhúng iframe trực tiếp
+     được — dùng lại nguyên app tra cứu đã có, khỏi phải viết lại 1 bộ tra cứu riêng) -->
+<div id="dictOverlay" class="drawer-overlay hidden"></div>
+<div id="dictModal" class="gh-panel dict-modal hidden">
+  <div class="gh-panel-header">
+    <h2>Từ điển</h2>
+    <button id="btnCloseDict" class="icon-btn" aria-label="Đóng">✕</button>
+  </div>
+  <iframe id="dictFrame" class="dict-frame" title="Từ điển" loading="lazy"></iframe>
+</div>
+
 <!-- Chọn PDF từ GitHub (thư mục pdf/ trong repo) -->
 <div id="pdfPickOverlay" class="drawer-overlay hidden"></div>
 <div id="pdfPickPanel" class="gh-panel gh-panel-modal hidden">
@@ -326,6 +338,8 @@
   </p>
   <label>Tên sách sẽ lưu trên GitHub (mặc định lấy theo tên thư mục)</label>
   <input type="text" id="importBookName" placeholder="book1">
+  <label id="importRepoLabel">Đẩy vào repo nào (chỉ hiện khi có cấu hình từ 2 repo sách trở lên)</label>
+  <select id="importRepoSelect"></select>
   <div class="edit-actions">
     <button id="btnPickFolder" class="btn-save">Chọn thư mục & đẩy lên</button>
     <button id="btnCancelImport" class="btn-cancel">Đóng</button>
@@ -374,6 +388,10 @@
   <input type="text" id="cfgBookBranch" placeholder="main">
   <label>Personal Access Token riêng cho repo này (bỏ trống = dùng token ở trên, nếu token đó đã có quyền truy cập repo này)</label>
   <input type="password" id="cfgBookToken" placeholder="github_pat_...">
+  <label>Các repo dữ liệu sách KHÁC (mỗi dòng 1 repo, dạng <code>username/tên-repo</code>, thêm
+    <code>@branch</code> nếu repo đó khác branch mặc định) — dùng khi sách chia ra nhiều repo private
+    vì giới hạn dung lượng. Dùng chung branch/token/thư mục ở trên cho các repo này. Để trống nếu chỉ 1 repo sách.</label>
+  <textarea id="cfgExtraBookRepos" rows="3" placeholder="haithanhtran1994/Book_data_2&#10;haithanhtran1994/Book_data_3"></textarea>
 
   <div class="edit-actions">
     <button id="btnSaveGhConfig" class="btn-save">Lưu cấu hình</button>

@@ -99,6 +99,11 @@
   <label>Personal Access Token riêng cho repo này (bỏ trống = dùng token ở trên, nếu token đó đã có quyền truy cập repo này)</label>
   <input type="password" id="cfgBookToken" placeholder="github_pat_...">
 
+  <label>Các repo dữ liệu sách KHÁC (mỗi dòng 1 repo, dạng <code>username/tên-repo</code>) — dùng khi sách
+    chia ra nhiều repo private khác nhau vì giới hạn dung lượng. Dùng chung branch/token/đường dẫn
+    "Thư mục dữ liệu sách JSON" đã khai ở trên cho tất cả các repo này. Để trống nếu chỉ có 1 repo sách.</label>
+  <textarea id="cfgExtraBookRepos" rows="3" placeholder="haithanhtran1994/Book_data_2&#10;haithanhtran1994/Book_data_3"></textarea>
+
   <div class="edit-actions">
     <button id="btnSaveGhConfig" class="btn-save">Lưu & đồng bộ</button>
     <button id="btnCancelGhConfig" class="btn-cancel">Hủy</button>

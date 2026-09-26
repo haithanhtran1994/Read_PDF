@@ -277,6 +277,18 @@ button { font-family: inherit; cursor: pointer; }
   padding: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
 .gh-panel-modal.hidden { display: none; }
+/* ---- Popup Từ điển (nhúng dictionary-app qua iframe) — rộng hơn hẳn .gh-panel-modal
+   thường (vốn chỉ để làm form/list gọn) vì cần đủ chỗ hiển thị nguyên 1 app con. ---- */
+.dict-modal {
+  position: fixed; z-index: 90; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(720px, 96vw); height: min(88vh, 820px);
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  display: flex; flex-direction: column;
+}
+.dict-modal.hidden { display: none; }
+.dict-modal .gh-panel-header { flex-shrink: 0; margin-bottom: 8px; }
+.dict-frame { flex: 1 1 auto; width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
 .gh-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .gh-panel-header h2 { font-size: 15px; margin: 0; }
 .gh-panel label { display: block; margin-top: 8px; font-size: 11px; color: var(--ink-soft); }
