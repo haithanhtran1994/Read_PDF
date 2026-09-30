@@ -21,13 +21,13 @@
   },
   "gh:pdf/Shinkanzen_N2/Shinkanzen_part1.pdf": {
     "name": "Shinkanzen_part1.pdf",
-    "page": 16,
+    "page": 7,
     "numPages": 79,
     "source": {
       "type": "github",
       "path": "pdf/Shinkanzen_N2/Shinkanzen_part1.pdf"
     },
-    "updatedAt": "2026-09-30T03:57:50.507Z"
+    "updatedAt": "2026-09-30T03:57:58.963Z"
   },
   "gh:pdf/Shinkanzen_N2/Shinkanzen_part2.pdf": {
     "name": "Shinkanzen_part2.pdf",
