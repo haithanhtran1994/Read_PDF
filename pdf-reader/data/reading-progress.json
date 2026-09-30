@@ -28,5 +28,15 @@
       "path": "pdf/Shinkanzen_N2/Shinkanzen_part1.pdf"
     },
     "updatedAt": "2026-09-30T03:56:49.468Z"
+  },
+  "gh:pdf/Shinkanzen_N2/Shinkanzen_part2.pdf": {
+    "name": "Shinkanzen_part2.pdf",
+    "page": 1,
+    "numPages": 47,
+    "source": {
+      "type": "github",
+      "path": "pdf/Shinkanzen_N2/Shinkanzen_part2.pdf"
+    },
+    "updatedAt": "2026-09-30T03:57:00.008Z"
   }
 }
