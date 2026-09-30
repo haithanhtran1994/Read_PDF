@@ -18,5 +18,15 @@
       "path": "pdf/ug910-vivado-getting-started-en-us-2023.2.pdf"
     },
     "updatedAt": "2026-09-29T03:54:41.865Z"
+  },
+  "gh:pdf/Shinkanzen_N2/Shinkanzen_part1.pdf": {
+    "name": "Shinkanzen_part1.pdf",
+    "page": 1,
+    "numPages": 79,
+    "source": {
+      "type": "github",
+      "path": "pdf/Shinkanzen_N2/Shinkanzen_part1.pdf"
+    },
+    "updatedAt": "2026-09-30T03:56:44.822Z"
   }
 }
