@@ -223,11 +223,12 @@ async function init() {
   bindAddTextTool();
   bindGithubConfig();
   bindJsonPane();
+  bindLocalJsonOpen();
   bindImportPanel();
   bindCollapsibleBars();
   bindResizer();
   bindAudioControls();
-  bindKeyboardPageNav();
+  // Phím ←/→ (và mọi phím tắt khác) nay do js/shortcuts.js xử lý — gán được trong bảng ⌨.
   bindDictPopup();
   bindPinchZoom("A");
   bindSwipeNav($("#scrollA"), "A", false);
@@ -1317,7 +1318,58 @@ async function applyChapterData(book, chapter, data, pageIdx, opts) {
   persistJsonUiState();
 }
 
+// ---- Mở file JSON LOCAL (từ máy, giống mở PDF local bên trái) ----
+// Dùng "sách" giả "(local)" + chương = tên file. Chỉ lưu trong IndexedDB của trình duyệt
+// (không đụng GitHub: không tải, không đẩy, không ghi mark.json).
+const LOCAL_BOOK = "(local)";
+function isLocalBook(book) { return book === LOCAL_BOOK; }
+
+async function loadLocalChapter(chapter, pageIdx) {
+  state.json.editing = false;
+  state.json.book = LOCAL_BOOK;
+  state.json.chapter = chapter;
+  els.paneBTitle.textContent = `📂 ${chapter}`;
+  const data = await Store.getChapter(LOCAL_BOOK, chapter).catch(() => null);
+  if (!data || !Array.isArray(data.pages) || !data.pages.length) {
+    els.jsonContent.innerHTML = "";
+    els.emptyB.textContent = "Không tìm thấy file JSON local này trong bộ nhớ trình duyệt — hãy mở lại bằng nút JSON 📂.";
+    els.emptyB.classList.remove("hidden");
+    els.pageIndB.textContent = "–";
+    return;
+  }
+  await applyChapterData(LOCAL_BOOK, chapter, data, pageIdx);
+}
+
+async function openLocalJsonFile(file) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text.replace(/^﻿/, ""));
+    if (!data || !Array.isArray(data.pages) || !data.pages.length) {
+      alert('File JSON không đúng định dạng: cần có mảng "pages" (không rỗng).');
+      return;
+    }
+    const name = file.name.replace(/\.json$/i, "");
+    await Store.saveChapter(LOCAL_BOOK, name, data);
+    await loadChapter(LOCAL_BOOK, name, 0);
+  } catch (e) {
+    alert(`Không đọc được file JSON: ${e.message}`);
+  }
+}
+
+function bindLocalJsonOpen() {
+  const btn = $("#btnOpenJsonLocal");
+  const input = $("#fileJsonLocal");
+  if (!btn || !input) return;
+  btn.addEventListener("click", () => { if (!blockIfEditing()) input.click(); });
+  input.addEventListener("change", async () => {
+    const f = input.files && input.files[0];
+    input.value = ""; // để chọn lại đúng file đó lần nữa vẫn bắn "change"
+    if (f) await openLocalJsonFile(f);
+  });
+}
+
 async function loadChapter(book, chapter, pageIdx, repoCfg) {
+  if (isLocalBook(book)) return loadLocalChapter(chapter, pageIdx);
   state.json.editing = false;
   // Gán ngay từ đầu (kể cả khi CHƯA có cache) — để lát nữa, lúc bản mới từ GitHub tải
   // xong, so sánh "người dùng có còn đang đứng ở đúng chương này không" mới đúng. Trước
@@ -1485,7 +1537,7 @@ function updateAudioBar(page) {
   const j = state.json;
   const filename = (page.audio || "").trim();
   const audioEl = els.jsonAudioEl;
-  if (!filename) {
+  if (!filename || isLocalBook(j.book)) { // file local: không có audio trên GitHub để nạp
     audioEl.pause();
     audioEl.removeAttribute("src");
     audioEl.load();
@@ -1837,6 +1889,7 @@ function markRelPath(cfg, book) {
 async function persistJsonMarks(book) {
   const items = state.jsonMarksByBook[book] || [];
   await Store.saveMarkList(book, items).catch(() => {});
+  if (isLocalBook(book)) return; // file local: chỉ lưu trên máy, không đẩy GitHub
   const cfg = await Store.getConfig();
   if (cfg && cfg.owner && cfg.repo && cfg.token) {
     const bcfg = state.toc.bookRepoByName.get(book) || GH.bookRepoCfg(cfg);
@@ -1846,6 +1899,7 @@ async function persistJsonMarks(book) {
 
 async function loadJsonMarksForBook(book) {
   let items = (await Store.getMarkList(book).catch(() => null)) || [];
+  if (isLocalBook(book)) { state.jsonMarksByBook[book] = items; return; }
   const cfg = await Store.getConfig();
   if (cfg && cfg.owner && cfg.repo && cfg.token) {
     // Có thể bị gọi TRƯỚC khi loadChapter kịp xác định sách này ở repo nào (lúc hiện
@@ -1937,8 +1991,9 @@ function applyEditableList(page, field) {
 
 async function saveJsonEdits() {
   const statusEl = $("#jsonEditStatus");
-  const cfg = await Store.getConfig();
-  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
+  const localMode = isLocalBook(state.json.book);
+  const cfg = localMode ? null : await Store.getConfig();
+  if (!localMode && (!cfg || !cfg.owner || !cfg.repo || !cfg.token)) {
     statusEl.textContent = 'Chưa cấu hình GitHub — mở "☁" ở góc trên để cấu hình trước.';
     return;
   }
@@ -1960,18 +2015,20 @@ async function saveJsonEdits() {
     applyEditableList(page, "analysis");
   }
 
-  statusEl.textContent = "Đang cập nhật lên GitHub…";
+  statusEl.textContent = localMode ? "Đang lưu (chỉ trong trình duyệt)…" : "Đang cập nhật lên GitHub…";
   $("#btnJsonSave").disabled = true;
   $("#btnJsonCancel").disabled = true;
   try {
-    const bcfg = state.toc.bookRepoByName.get(j.book) || GH.bookRepoCfg(cfg);
-    const booksPath = cfg.booksPath || "data";
-    const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
     const raw = j.raw || { pages: j.pages };
     raw.pages = j.pages;
-    await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2), `Cập nhật ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
+    if (!localMode) {
+      const bcfg = state.toc.bookRepoByName.get(j.book) || GH.bookRepoCfg(cfg);
+      const booksPath = cfg.booksPath || "data";
+      const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
+      await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2), `Cập nhật ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
+    }
     await Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
-    statusEl.textContent = "Đã cập nhật ✓";
+    statusEl.textContent = localMode ? "Đã lưu trong trình duyệt ✓ (file gốc trên máy không bị sửa)" : "Đã cập nhật ✓";
     setTimeout(() => {
       state.json.editing = false;
       renderJsonPage();
@@ -2673,8 +2730,9 @@ function bindAddPanel() {
 }
 
 async function submitAddNote() {
-  const cfg = await GH.getConfig();
-  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
+  const localMode = isLocalBook(state.json.book);
+  const cfg = localMode ? null : await GH.getConfig();
+  if (!localMode && (!cfg || !cfg.owner || !cfg.repo || !cfg.token)) {
     els.addStatus.textContent = "Chưa cấu hình GitHub — mở ☁ ở góc trên để cấu hình trước.";
     return;
   }
@@ -2705,16 +2763,18 @@ async function submitAddNote() {
   page.analysis = Array.isArray(page.analysis) ? page.analysis : [];
   page.analysis.push(newItem);
 
-  els.addStatus.textContent = "Đang đẩy lên GitHub…";
+  els.addStatus.textContent = localMode ? "Đang lưu (chỉ trong trình duyệt)…" : "Đang đẩy lên GitHub…";
   $("#btnAddSubmit").disabled = true;
   try {
-    const bcfg = state.toc.bookRepoByName.get(j.book) || GH.bookRepoCfg(cfg);
-    const booksPath = cfg.booksPath || "data";
-    const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
     const raw = j.raw || { pages: j.pages };
     raw.pages = j.pages;
-    await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2),
-      `Thêm phân tích '${phrase}' vào ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1} (từ PDF)`);
+    if (!localMode) {
+      const bcfg = state.toc.bookRepoByName.get(j.book) || GH.bookRepoCfg(cfg);
+      const booksPath = cfg.booksPath || "data";
+      const relPath = GH.joinPath(booksPath, j.book, `${j.chapter}.json`);
+      await GH.putTextFile(bcfg, relPath, JSON.stringify(raw, null, 2),
+        `Thêm phân tích '${phrase}' vào ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1} (từ PDF)`);
+    }
     Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
     try {
       wrapRangeNodes(state.activeRange, () => {
@@ -2726,7 +2786,7 @@ async function submitAddNote() {
     window.getSelection().removeAllRanges();
     // Nếu đang xem đúng chế độ có hiện "Phân tích" thì render lại luôn để thấy ngay mục vừa thêm.
     if (!state.json.editing) renderJsonPage();
-    els.addStatus.textContent = "Đã thêm vào Phân tích ✓";
+    els.addStatus.textContent = localMode ? "Đã thêm vào Phân tích ✓ (chỉ lưu trong trình duyệt)" : "Đã thêm vào Phân tích ✓";
     setTimeout(closeAddPanel, 700);
   } catch (e) {
     page.analysis.pop(); // đẩy lỗi thì rút lại mục vừa thêm, tránh lệch giữa hiển thị và GitHub

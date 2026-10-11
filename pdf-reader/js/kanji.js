@@ -541,8 +541,9 @@ function closeVocabAddPanel() {
 
 async function submitVocabAdd() {
   const statusEl = $("#vocabAddStatus");
-  const cfg = await Store.getConfig();
-  if (!cfg || !cfg.owner || !cfg.repo || !cfg.token) {
+  const localMode = isLocalBook(state.json.book);
+  const cfg = localMode ? null : await Store.getConfig();
+  if (!localMode && (!cfg || !cfg.owner || !cfg.repo || !cfg.token)) {
     statusEl.textContent = 'Chưa cấu hình GitHub — mở "☁" ở góc trên để cấu hình trước.';
     return;
   }
@@ -560,17 +561,21 @@ async function submitVocabAdd() {
   $("#btnVocabAddSubmit").disabled = true;
   $("#btnVocabAddCancel").disabled = true;
   try {
-    const booksPath = cfg.booksPath || "data";
-    const relPath = `${booksPath}/${j.book}/${j.chapter}.json`;
     const raw = j.raw || { pages: j.pages };
     raw.pages = j.pages;
-    await GH.putTextFile(cfg, relPath, JSON.stringify(raw, null, 2),
-      `Thêm từ vựng "${phrase}" — ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
+    if (!localMode) {
+      const booksPath = cfg.booksPath || "data";
+      const relPath = `${booksPath}/${j.book}/${j.chapter}.json`;
+      await GH.putTextFile(cfg, relPath, JSON.stringify(raw, null, 2),
+        `Thêm từ vựng "${phrase}" — ${j.book}/${j.chapter} trang ${page.page ?? j.pageIdx + 1}`);
+    }
     await Store.saveChapter(j.book, j.chapter, raw).catch(() => {});
-    await addEntryToKanjiDictCache({
-      type: "vocab", phrase, explain,
-      sources: [{ book: j.book, chapter: j.chapter, page: page.page ?? j.pageIdx + 1 }],
-    });
+    if (!localMode) {
+      await addEntryToKanjiDictCache({
+        type: "vocab", phrase, explain,
+        sources: [{ book: j.book, chapter: j.chapter, page: page.page ?? j.pageIdx + 1 }],
+      });
+    }
     statusEl.textContent = "Đã thêm ✓";
     if (!state.json.editing) renderJsonPage();
     setTimeout(() => {

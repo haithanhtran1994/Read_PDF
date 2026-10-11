@@ -41,6 +41,7 @@
   <div class="topbar-content" id="topbarContent">
     <div class="topbar-title">PDF Dual Reader</div>
     <div class="topbar-actions">
+      <button id="btnShortcuts" class="icon-btn" aria-label="Bảng phím tắt" title="Bảng phím tắt (chỉ dùng trên máy tính)">⌨</button>
       <button id="btnImport" class="icon-btn" aria-label="Nhập dữ liệu JSON từ máy & đẩy lên GitHub" title="Nhập & đẩy dữ liệu JSON lên GitHub">⇪</button>
       <button id="btnOpenDict" class="icon-btn" aria-label="Tra cứu từ điển" title="Mở Từ điển (dictionary-app) dạng popup">🔤</button>
       <button id="btnLayout" class="icon-btn" aria-label="Đổi bố cục" title="Đổi bố cục chia đôi">⬓</button>
@@ -100,6 +101,9 @@
         <button class="file-open-btn" id="btnOpenToc" type="button">
           <span id="paneBTitle">Chọn sách / chương…</span>
         </button>
+        <!-- Mở file JSON từ máy (dùng trên máy tính/Edge); tự ẩn trên thiết bị cảm ứng -->
+        <button class="file-open-btn" id="btnOpenJsonLocal" type="button" title="Mở file JSON từ máy">JSON 📂</button>
+        <input type="file" id="fileJsonLocal" accept=".json,application/json" hidden>
         <div class="pane-nav">
           <button class="nav-btn small" data-act="prev">‹</button>
           <span class="page-indicator" id="pageIndB">–</span>
@@ -410,5 +414,6 @@
 <script src="js/github.js"></script>
 <script src="js/app.js"></script>
 <script src="js/kanji.js"></script>
+<script src="js/shortcuts.js"></script>
 </body>
 </html>

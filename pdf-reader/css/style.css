@@ -303,7 +303,10 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ---- Pane B: JSON reader (dịch + phân tích) ---- */
-.json-toolbar .file-open-btn { max-width: 62%; text-align: left; background: none; border: 1px dashed var(--line); }
+.json-toolbar .file-open-btn { max-width: 50%; text-align: left; background: none; border: 1px dashed var(--line); }
+.json-toolbar #btnOpenJsonLocal { flex: 0 0 auto; max-width: none; background: none; text-align: center; }
+/* Nút mở JSON local chỉ dành cho máy tính — ẩn trên điện thoại/tablet cảm ứng (iPhone không đổi gì) */
+@media (hover: none) and (pointer: coarse) { #btnOpenJsonLocal { display: none; } }
 .mode-toggle {
   display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: var(--paper-raised);
   border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap;
@@ -528,3 +531,19 @@ button { font-family: inherit; cursor: pointer; }
     linear-gradient(135deg, transparent 0 65%, var(--ink-soft) 65% 75%, transparent 75% 100%);
   opacity: .7;
 }
+
+/* ---- Bảng phím tắt (chỉ máy tính; ẩn trên màn hình cảm ứng) ---- */
+@media (hover: none) and (pointer: coarse) { #btnShortcuts { display: none; } }
+.shortcuts-panel { width: min(620px, 94vw); }
+.shortcuts-panel .sc-hint { font-size: 12px; color: var(--ink-soft); margin: 4px 0 8px; }
+.sc-rows { max-height: 56vh; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+.sc-group { position: sticky; top: 0; background: var(--paper-raised); font-size: 11px; font-weight: 600;
+  color: var(--ink-soft); padding: 5px 10px; border-bottom: 1px solid var(--line); text-transform: uppercase; }
+.sc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 4px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.sc-label { flex: 1 1 auto; min-width: 0; }
+.sc-key { flex: 0 0 168px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: transparent; color: var(--ink); font-family: ui-monospace, Consolas, monospace; font-size: 12px; text-align: center; }
+.sc-key.empty { color: var(--ink-soft); font-family: inherit; }
+.sc-key.editing { border-color: #d9822b; box-shadow: 0 0 0 2px rgba(217,130,43,.35); }
+.sc-status { font-size: 12px; color: var(--ink-soft); margin-top: 8px; min-height: 1em; }
