@@ -47,7 +47,8 @@ const state = {
   addTextMode: false,   // đang bật chế độ "chấm 1 điểm trên PDF để thêm text" hay không
   textBoxesVisible: true, // đang hiện hay đang tạm ẩn toàn bộ text đã thêm lên PDF (nút "👁")
   textFontSize: 14,     // cỡ chữ dùng lần gần nhất trong popup "Thêm text" (đơn vị PDF, không đổi theo zoom)
-  jsonMarksByBook: {}, // { [book]: [ {id, chapter, page, field, start, end, type, color} ] }
+  jsonMarksByBook: {}, // { [book]: [ {id, chapter, page, field, text, occurrenceIndex, type, color} ] }
+  jsonMarksNeedPersist: false, // true khi vừa tự dịch xong ít nhất 1 mark kiểu cũ (start/end) trong lượt render này
   dragging: null,
   json: {
     book: null,
@@ -1415,8 +1416,8 @@ function renderAnalysisList(items, cls) {
     const type = it.type ? (ANALYSIS_LABEL[it.type] || it.type) : (cls === "grammar" ? ANALYSIS_LABEL.grammar : "");
     return `<div class="an-item ${cls}">
       ${type ? `<span class="an-type" data-type="${escapeHtml(rawType)}">${escapeHtml(type)}</span>` : ""}
-      <span class="an-phrase">${escapeHtml(it.phrase)}</span>
-      ${it.explain ? `<div class="an-explain">${escapeHtml(it.explain)}</div>` : ""}
+      <span class="an-phrase">${mdInline(it.phrase)}</span>
+      ${it.explain ? `<div class="an-explain">${markdownToHtml(it.explain)}</div>` : ""}
     </div>`;
   }).join("");
 }
@@ -1431,18 +1432,16 @@ function renderJsonPage() {
   let html = "";
   if (mode === "summary" || mode === "all") {
     const hasSummary = page.summary && page.summary.trim();
-    const marks = getJsonMarksFor(j.chapter, page.page, "summary");
     html += `<div class="json-section">
       <div class="json-section-title">Tóm tắt</div>
-      <div class="translation-text summary-text" data-field="summary">${hasSummary ? buildMarkedHtml(page.summary, marks) : "(chưa có tóm tắt)"}</div>
+      <div class="translation-text summary-text" data-field="summary">${hasSummary ? "" : "(chưa có tóm tắt)"}</div>
     </div>`;
   }
   if (mode === "translation" || mode === "all") {
     const hasTranslation = page.translation && page.translation.trim();
-    const marks = getJsonMarksFor(j.chapter, page.page, "translation");
     html += `<div class="json-section">
       <div class="json-section-title">Bản dịch</div>
-      <div class="translation-text" data-field="translation">${hasTranslation ? buildMarkedHtml(page.translation, marks) : "(chưa có bản dịch)"}</div>
+      <div class="translation-text" data-field="translation">${hasTranslation ? "" : "(chưa có bản dịch)"}</div>
     </div>`;
   }
   if (mode === "analysis" || mode === "all") {
@@ -1458,9 +1457,24 @@ function renderJsonPage() {
     </div>`;
   }
   els.jsonContent.innerHTML = html;
+  // Điền nội dung Tóm tắt/Bản dịch qua renderFieldWithMarks (dựng markdown thật + đè
+  // highlight/gạch chân theo khớp text lên trên) — phải làm SAU khi els.jsonContent.innerHTML
+  // đã gán, vì cần thao tác trực tiếp trên DOM thật (Range), không thể ghép chuỗi HTML.
+  if (page.summary && page.summary.trim()) {
+    const el = els.jsonContent.querySelector('.translation-text[data-field="summary"]');
+    if (el) renderFieldWithMarks(el, page.summary, getJsonMarksFor(j.chapter, page.page, "summary", page.summary));
+  }
+  if (page.translation && page.translation.trim()) {
+    const el = els.jsonContent.querySelector('.translation-text[data-field="translation"]');
+    if (el) renderFieldWithMarks(el, page.translation, getJsonMarksFor(j.chapter, page.page, "translation", page.translation));
+  }
   bindJsonMarkClicks();
   $("#scrollB").scrollTop = 0;
   updateAudioBar(page);
+  if (state.jsonMarksNeedPersist) {
+    state.jsonMarksNeedPersist = false;
+    persistJsonMarks(j.book).catch((e) => console.warn("Lưu mark (đã dịch từ kiểu cũ) lỗi:", e));
+  }
 }
 
 // ---- Audio theo trang (audio/<book>/<file> trên repo dữ liệu sách, tuỳ chọn) ----
@@ -1554,32 +1568,172 @@ function bindAudioControls() {
 // ---- Highlight/gạch chân trong Tóm tắt & Bản dịch (không áp dụng cho Phân tích) ----
 // Lưu theo book (data/<book>/mark.json trên GitHub), dùng chung cho mọi chương của sách đó.
 
-function getJsonMarksFor(chapter, pageNum, field) {
+function getJsonMarksFor(chapter, pageNum, field, rawText) {
   const list = state.jsonMarksByBook[state.json.book] || [];
-  return list.filter((m) => m.chapter === chapter && m.page === pageNum && m.field === field);
+  const found = list.filter((m) => m.chapter === chapter && m.page === pageNum && m.field === field);
+  // Dịch mark KIỂU CŨ (start/end tính theo ký tự trong text gốc, từ trước khi hỗ trợ
+  // markdown đầy đủ) sang kiểu mới (text + lần xuất hiện thứ mấy) — làm lười ngay lúc
+  // trang này được mở (khi đó mới có rawText trong tay), 1 lần duy nhất cho mỗi mark cũ.
+  let migrated = false;
+  found.forEach((m) => {
+    if (m.text === undefined && typeof m.start === "number" && rawText) {
+      const text = rawText.slice(m.start, m.end != null ? m.end : m.start);
+      if (text && text.trim()) {
+        m.text = text;
+        m.occurrenceIndex = countOccurrencesBefore(rawText, text, m.start);
+        delete m.start;
+        delete m.end;
+        migrated = true;
+      }
+    }
+  });
+  if (migrated) state.jsonMarksNeedPersist = true;
+  return found;
 }
 
 // Dựng lại HTML từ text gốc + danh sách mark (start/end tính theo ký tự trong text gốc),
 // escape HTML đúng từng đoạn để không bị lỗi hiển thị hay lọt thẻ script.
-function buildMarkedHtml(rawText, marks) {
-  if (!marks || !marks.length) return escapeHtml(rawText);
-  const sorted = marks.slice().sort((a, b) => a.start - b.start);
-  let out = "";
-  let pos = 0;
-  sorted.forEach((m) => {
-    const start = Math.max(pos, Math.min(m.start, rawText.length));
-    const end = Math.max(start, Math.min(m.end, rawText.length));
-    if (start > pos) out += escapeHtml(rawText.slice(pos, start));
-    if (end > start) {
-      const tag = m.type === "highlight" ? "mark" : "span";
-      const cls = m.type === "highlight" ? "hl" : "ul";
-      const cssVar = m.type === "highlight" ? "--hl-color" : "--ul-color";
-      out += `<${tag} class="${cls}" style="${cssVar}:${escapeHtml(m.color || "")}" data-mark-id="${escapeHtml(m.id)}">${escapeHtml(rawText.slice(start, end))}</${tag}>`;
+// ============================================================================
+// Markdown -> HTML (dùng cho Tóm tắt/Bản dịch/Phân tích/Ngữ pháp) + highlight/gạch
+// chân theo KHỚP TEXT (không theo vị trí ký tự nữa — xem giải thích ở applyJsonMark).
+// ============================================================================
+
+// In đậm/in nghiêng/<br> literal — dùng trong 1 dòng/1 ô bảng. LUÔN nhận text CHƯA escape,
+// tự escape bên trong (an toàn với < > & thật trong nội dung).
+function mdInline(text) {
+  return escapeHtml(text)
+    .replace(/\*\*([^*\n]+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__([^_\n]+?)__/g, "<strong>$1</strong>")
+    .replace(/\*([^*\n]+?)\*/g, "<em>$1</em>")
+    .replace(/_([^_\n]+?)_/g, "<em>$1</em>")
+    .replace(/&lt;br\s*\/?&gt;/gi, "<br>");
+}
+
+function isMdTableSep(line) {
+  return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(line || "");
+}
+
+function parseMdTableRow(line) {
+  let s = line.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|")) s = s.slice(0, -1);
+  return s.split("|").map((c) => c.trim());
+}
+
+// Parser markdown gọn (không dùng thư viện ngoài, giữ app tự chứa hoàn toàn): hỗ trợ
+// bảng GFM, danh sách, heading, in đậm/nghiêng, <br>. Đủ cho nội dung Gemini hay sinh ra
+// khi OCR/dịch sách — không nhằm thay thế 1 parser markdown đầy đủ chuẩn CommonMark.
+function markdownToHtml(rawText) {
+  const lines = String(rawText == null ? "" : rawText).split("\n");
+  let html = "";
+  let i = 0;
+  let inList = null;
+  const closeList = () => { if (inList) { html += `</${inList}>`; inList = null; } };
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.includes("|") && isMdTableSep(lines[i + 1])) {
+      closeList();
+      const head = parseMdTableRow(line);
+      html += `<table class="md-table"><thead><tr>${head.map((c) => `<th>${mdInline(c)}</th>`).join("")}</tr></thead><tbody>`;
+      i += 2;
+      while (i < lines.length && lines[i].includes("|") && lines[i].trim() !== "") {
+        html += `<tr>${parseMdTableRow(lines[i]).map((c) => `<td>${mdInline(c)}</td>`).join("")}</tr>`;
+        i++;
+      }
+      html += "</tbody></table>";
+      continue;
     }
-    pos = end;
+
+    const h = /^(#{1,6})\s+(.*)$/.exec(line);
+    if (h) {
+      closeList();
+      html += `<h${h[1].length} class="md-heading">${mdInline(h[2])}</h${h[1].length}>`;
+      i++;
+      continue;
+    }
+
+    const ul = /^\s*[-*+]\s+(.*)$/.exec(line);
+    const ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+    if (ul || ol) {
+      const tag = ul ? "ul" : "ol";
+      if (inList !== tag) { closeList(); html += `<${tag} class="md-list">`; inList = tag; }
+      html += `<li>${mdInline((ul || ol)[1])}</li>`;
+      i++;
+      continue;
+    }
+    closeList();
+
+    html += mdInline(line);
+    if (i < lines.length - 1) html += "\n";
+    i++;
+  }
+  closeList();
+  return html;
+}
+
+// Tìm Range ứng với lần xuất hiện thứ "occurrenceIndex" (đếm từ 0, không chồng lấn) của
+// "text" trong nội dung ĐANG HIỂN THỊ của container — không quan tâm text đó nằm trong
+// đoạn văn thường hay trong 1 ô bảng, vì duyệt theo text node thực tế trên DOM.
+function findRangeForOccurrence(container, text, occurrenceIndex) {
+  if (!text) return null;
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let full = "";
+  let n;
+  while ((n = walker.nextNode())) {
+    nodes.push({ node: n, start: full.length });
+    full += n.nodeValue;
+  }
+  let fromIndex = 0, foundAt = -1;
+  for (let k = 0; k <= occurrenceIndex; k++) {
+    foundAt = full.indexOf(text, fromIndex);
+    if (foundAt === -1) return null;
+    fromIndex = foundAt + text.length;
+  }
+  const endAt = foundAt + text.length;
+  const locate = (pos) => {
+    for (const { node, start } of nodes) {
+      if (pos <= start + node.nodeValue.length) return { node, offset: pos - start };
+    }
+    const last = nodes[nodes.length - 1];
+    return { node: last.node, offset: last.node.nodeValue.length };
+  };
+  const s = locate(foundAt), e = locate(endAt);
+  const range = document.createRange();
+  range.setStart(s.node, s.offset);
+  range.setEnd(e.node, e.offset);
+  return range;
+}
+
+// Đếm "text" xuất hiện bao nhiêu lần (không chồng lấn) TRƯỚC vị trí "beforePos" trong
+// "fullText" — dùng cả khi tạo mark mới (đếm trên text đang hiển thị) lẫn khi dịch mark
+// cũ (đếm trên text thô cũ), miễn 2 đầu dùng cùng 1 fullText nhất quán.
+function countOccurrencesBefore(fullText, text, beforePos) {
+  let pos = 0, count = 0, found;
+  while ((found = fullText.indexOf(text, pos)) !== -1 && found < beforePos) {
+    count++;
+    pos = found + text.length;
+  }
+  return count;
+}
+
+// Vẽ nội dung markdown + đè highlight/gạch chân lên container (dùng cho Tóm tắt/Bản dịch).
+function renderFieldWithMarks(containerEl, rawText, marks) {
+  containerEl.innerHTML = markdownToHtml(rawText);
+  (marks || []).forEach((m) => {
+    if (!m.text) return; // mark rỗng/lỗi, bỏ qua
+    const range = findRangeForOccurrence(containerEl, m.text, m.occurrenceIndex || 0);
+    if (!range) { console.warn("Không tìm được vị trí cho mark:", m.id, m.text); return; }
+    wrapRangeNodes(range, () => {
+      const el = document.createElement(m.type === "highlight" ? "mark" : "span");
+      el.className = m.type === "highlight" ? "hl" : "ul";
+      el.style.setProperty(m.type === "highlight" ? "--hl-color" : "--ul-color", m.color || "");
+      el.dataset.markId = m.id;
+      return el;
+    });
   });
-  if (pos < rawText.length) out += escapeHtml(rawText.slice(pos));
-  return out;
 }
 
 function bindJsonMarkClicks() {
@@ -1636,8 +1790,14 @@ async function applyJsonMark(mode) {
   const containerEl = els.jsonContent.querySelector(`.translation-text[data-field="${field}"]`);
   if (!containerEl) return;
 
-  const { start, end } = getPlainTextOffsetsInContainer(containerEl, range);
-  if (end <= start) return;
+  // Lưu highlight/gạch chân theo KHỚP TEXT (đoạn text + lần xuất hiện thứ mấy), không
+  // theo vị trí ký tự nữa — vì vị trí ký tự sẽ lệch ngay khi nội dung có markdown/bảng
+  // (thẻ HTML không tính vào text hiển thị). Khớp text thì dù nằm trong đoạn văn thường
+  // hay trong 1 ô bảng đều tìm lại đúng chỗ được, không phụ thuộc cấu trúc HTML.
+  const text = range.toString();
+  if (!text.trim()) return;
+  const { start } = getPlainTextOffsetsInContainer(containerEl, range);
+  const occurrenceIndex = countOccurrencesBefore(containerEl.textContent, text, start);
 
   const color = state.jsonHlColor;
   const wrappers = [];
@@ -1657,7 +1817,7 @@ async function applyJsonMark(mode) {
     chapter: j.chapter,
     page: page.page,
     field,
-    start, end,
+    text, occurrenceIndex,
     type: mode,
     color,
     createdAt: new Date().toISOString(),

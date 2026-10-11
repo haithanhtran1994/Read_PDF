@@ -345,6 +345,17 @@ button { font-family: inherit; cursor: pointer; }
   letter-spacing: .03em; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px;
 }
 .translation-text { font-size: 15px; line-height: 1.8; white-space: pre-wrap; }
+/* ---- Bảng/danh sách/heading dựng từ markdown (Tóm tắt, Bản dịch, Phân tích, Ngữ pháp) ---- */
+.translation-text .md-table, .an-explain .md-table {
+  border-collapse: collapse; margin: 8px 0; font-size: 14px; white-space: normal; max-width: 100%; display: block; overflow-x: auto;
+}
+.translation-text .md-table th, .translation-text .md-table td,
+.an-explain .md-table th, .an-explain .md-table td {
+  border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top;
+}
+.translation-text .md-table th, .an-explain .md-table th { background: var(--paper-raised); font-weight: 600; }
+.translation-text .md-list, .an-explain .md-list { margin: 4px 0; padding-left: 22px; white-space: normal; }
+.translation-text .md-heading, .an-explain .md-heading { margin: 8px 0 4px; font-size: 1.05em; white-space: normal; }
 .summary-text {
   font-size: 13.5px; color: var(--ink-soft); background: var(--paper-raised);
   border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;

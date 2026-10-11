@@ -7,46 +7,6 @@
       "type": "github",
       "path": "pdf/IEEE_SV.pdf"
     },
-    "updatedAt": "2026-09-30T03:57:21.887Z"
-  },
-  "gh:pdf/ug910-vivado-getting-started-en-us-2023.2.pdf": {
-    "name": "ug910-vivado-getting-started-en-us-2023.2.pdf",
-    "page": 13,
-    "numPages": 21,
-    "source": {
-      "type": "github",
-      "path": "pdf/ug910-vivado-getting-started-en-us-2023.2.pdf"
-    },
-    "updatedAt": "2026-09-29T03:54:41.865Z"
-  },
-  "gh:pdf/Shinkanzen_N2/Shinkanzen_part1.pdf": {
-    "name": "Shinkanzen_part1.pdf",
-    "page": 7,
-    "numPages": 79,
-    "source": {
-      "type": "github",
-      "path": "pdf/Shinkanzen_N2/Shinkanzen_part1.pdf"
-    },
-    "updatedAt": "2026-09-30T03:58:40.036Z"
-  },
-  "gh:pdf/Shinkanzen_N2/Shinkanzen_part2.pdf": {
-    "name": "Shinkanzen_part2.pdf",
-    "page": 1,
-    "numPages": 47,
-    "source": {
-      "type": "github",
-      "path": "pdf/Shinkanzen_N2/Shinkanzen_part2.pdf"
-    },
-    "updatedAt": "2026-09-30T03:57:09.845Z"
-  },
-  "gh:pdf/Shinkanzen_N2/Shinkanzen_part3.pdf": {
-    "name": "Shinkanzen_part3.pdf",
-    "page": 1,
-    "numPages": 56,
-    "source": {
-      "type": "github",
-      "path": "pdf/Shinkanzen_N2/Shinkanzen_part3.pdf"
-    },
-    "updatedAt": "2026-09-30T03:57:15.909Z"
+    "updatedAt": "2026-09-11T13:24:53.870Z"
   }
 }

@@ -60,6 +60,13 @@ body { display: flex; flex-direction: column; }
 }
 .dict-btn-icon:hover { background: var(--paper); }
 .dict-explain { margin-top: 4px; font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+.dict-explain .md-table {
+  border-collapse: collapse; margin: 6px 0; font-size: 13px; max-width: 100%; display: block; overflow-x: auto;
+}
+.dict-explain .md-table th, .dict-explain .md-table td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; }
+.dict-explain .md-table th { background: var(--paper-raised); font-weight: 600; }
+.dict-explain .md-list { margin: 4px 0; padding-left: 20px; }
+.dict-explain .md-heading { margin: 6px 0 3px; font-size: 1.05em; }
 .dict-source { margin-top: 6px; font-size: 11px; color: var(--ink-soft); }
 .dict-empty { padding: 20px 0; text-align: center; color: var(--ink-soft); font-size: 13px; }
 

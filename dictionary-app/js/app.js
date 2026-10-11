@@ -63,6 +63,81 @@ function escapeHtml(s) {
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Markdown NHẸ chỉ cho in đậm/in nghiêng (**text**, *text*, __text__, _text_) — dữ liệu
+// nguồn (Gemini OCR/dịch) hay chèn kiểu này để nhấn mạnh. LUÔN gọi SAU escapeHtml().
+// In đậm/in nghiêng/<br> literal — dùng trong 1 dòng/1 ô bảng. Nhận text CHƯA escape.
+function mdInline(text) {
+  return escapeHtml(text)
+    .replace(/\*\*([^*\n]+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__([^_\n]+?)__/g, "<strong>$1</strong>")
+    .replace(/\*([^*\n]+?)\*/g, "<em>$1</em>")
+    .replace(/_([^_\n]+?)_/g, "<em>$1</em>")
+    .replace(/&lt;br\s*\/?&gt;/gi, "<br>");
+}
+
+function isMdTableSep(line) {
+  return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(line || "");
+}
+
+function parseMdTableRow(line) {
+  let s = line.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|")) s = s.slice(0, -1);
+  return s.split("|").map((c) => c.trim());
+}
+
+// Parser markdown gọn (bảng GFM, danh sách, heading, đậm/nghiêng, <br>) — y hệt bên
+// pdf-reader để 2 app hiển thị cùng 1 dữ liệu (field "explain") giống nhau.
+function markdownToHtml(rawText) {
+  const lines = String(rawText == null ? "" : rawText).split("\n");
+  let html = "";
+  let i = 0;
+  let inList = null;
+  const closeList = () => { if (inList) { html += `</${inList}>`; inList = null; } };
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.includes("|") && isMdTableSep(lines[i + 1])) {
+      closeList();
+      const head = parseMdTableRow(line);
+      html += `<table class="md-table"><thead><tr>${head.map((c) => `<th>${mdInline(c)}</th>`).join("")}</tr></thead><tbody>`;
+      i += 2;
+      while (i < lines.length && lines[i].includes("|") && lines[i].trim() !== "") {
+        html += `<tr>${parseMdTableRow(lines[i]).map((c) => `<td>${mdInline(c)}</td>`).join("")}</tr>`;
+        i++;
+      }
+      html += "</tbody></table>";
+      continue;
+    }
+
+    const h = /^(#{1,6})\s+(.*)$/.exec(line);
+    if (h) {
+      closeList();
+      html += `<h${h[1].length} class="md-heading">${mdInline(h[2])}</h${h[1].length}>`;
+      i++;
+      continue;
+    }
+
+    const ul = /^\s*[-*+]\s+(.*)$/.exec(line);
+    const ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+    if (ul || ol) {
+      const tag = ul ? "ul" : "ol";
+      if (inList !== tag) { closeList(); html += `<${tag} class="md-list">`; inList = tag; }
+      html += `<li>${mdInline((ul || ol)[1])}</li>`;
+      i++;
+      continue;
+    }
+    closeList();
+
+    html += mdInline(line);
+    if (i < lines.length - 1) html += "\n";
+    i++;
+  }
+  closeList();
+  return html;
+}
+
 // Chuẩn hoá chuỗi để so khớp khi tìm kiếm: chữ thường + bỏ dấu tiếng Việt.
 // Áp dụng chung cho cả cụm từ gốc (Anh/Nhật, không bị ảnh hưởng) lẫn phần giải thích tiếng Việt.
 function normalize(s) {
@@ -600,14 +675,14 @@ function createResultItemEl(entry) {
     wrap.innerHTML = `
       <div class="dict-head">
         <span class="dict-type" data-type="${escapeHtml(entry.type)}">${escapeHtml(TYPE_LABEL[entry.type] || entry.type)}</span>
-        <span class="dict-phrase">${escapeHtml(entry.phrase)}</span>
+        <span class="dict-phrase">${mdInline(entry.phrase)}</span>
         <span class="dict-actions">
           <button class="dict-btn-icon dict-speak" title="Đọc to">🔊</button>
           <button class="dict-btn-icon dict-edit" title="Sửa">✎</button>
           <button class="dict-btn-icon dict-delete" title="Xóa khỏi từ điển này (không xóa dữ liệu gốc)">🗑</button>
         </span>
       </div>
-      ${entry.explain ? `<div class="dict-explain">${escapeHtml(entry.explain)}</div>` : ""}
+      ${entry.explain ? `<div class="dict-explain">${markdownToHtml(entry.explain)}</div>` : ""}
       <div class="dict-source">${escapeHtml(sourcesToText(entry.sources))}</div>
     `;
     wrap.querySelector(".dict-speak").addEventListener("click", () => speakText(entry.phrase));
