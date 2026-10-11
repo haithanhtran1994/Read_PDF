@@ -18,5 +18,15 @@
       "size": 838112
     },
     "updatedAt": "2026-10-11T11:26:38.577Z"
+  },
+  "local:Traphaco01.pdf:545955": {
+    "name": "Traphaco01.pdf",
+    "page": 1,
+    "numPages": 34,
+    "source": {
+      "type": "device",
+      "size": 545955
+    },
+    "updatedAt": "2026-10-11T11:26:53.056Z"
   }
 }
