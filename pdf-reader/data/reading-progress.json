@@ -31,12 +31,12 @@
   },
   "gh:pdf/ug910-vivado-getting-started-en-us-2023.2.pdf": {
     "name": "ug910-vivado-getting-started-en-us-2023.2.pdf",
-    "page": 19,
+    "page": 21,
     "numPages": 21,
     "source": {
       "type": "github",
       "path": "pdf/ug910-vivado-getting-started-en-us-2023.2.pdf"
     },
-    "updatedAt": "2026-10-12T01:42:17.457Z"
+    "updatedAt": "2026-10-12T01:42:18.422Z"
   }
 }
