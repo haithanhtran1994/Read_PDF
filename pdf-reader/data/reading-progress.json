@@ -38,5 +38,15 @@
       "path": "pdf/ug910-vivado-getting-started-en-us-2023.2.pdf"
     },
     "updatedAt": "2026-10-12T01:42:18.422Z"
+  },
+  "local:ug888-vivado-design-flows-overview-tutorial-en-us-2023.2.pdf:30451049": {
+    "name": "ug888-vivado-design-flows-overview-tutorial-en-us-2023.2.pdf",
+    "page": 2,
+    "numPages": 47,
+    "source": {
+      "type": "device",
+      "size": 30451049
+    },
+    "updatedAt": "2026-10-12T01:48:44.878Z"
   }
 }
