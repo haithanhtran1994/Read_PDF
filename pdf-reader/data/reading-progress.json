@@ -68,5 +68,15 @@
       "size": 85723215
     },
     "updatedAt": "2026-10-19T03:31:28.094Z"
+  },
+  "local:01_systemverilog_for_verification.pdf:493976": {
+    "name": "01_systemverilog_for_verification.pdf",
+    "page": 1,
+    "numPages": 42,
+    "source": {
+      "type": "device",
+      "size": 493976
+    },
+    "updatedAt": "2026-10-19T03:31:36.735Z"
   }
 }
