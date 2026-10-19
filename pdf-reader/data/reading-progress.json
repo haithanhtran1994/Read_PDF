@@ -58,5 +58,15 @@
       "size": 85074065
     },
     "updatedAt": "2026-10-19T03:31:19.052Z"
+  },
+  "local:INSIDE READING BOOK 2.pdf:85723215": {
+    "name": "INSIDE READING BOOK 2.pdf",
+    "page": 1,
+    "numPages": 187,
+    "source": {
+      "type": "device",
+      "size": 85723215
+    },
+    "updatedAt": "2026-10-19T03:31:28.094Z"
   }
 }
